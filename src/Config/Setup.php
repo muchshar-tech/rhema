@@ -83,4 +83,5 @@ final class Setup {
 		# Uncomment the following line to see the function in action
 		# exit( var_dump( $_GET ) );
 	}
+
 }

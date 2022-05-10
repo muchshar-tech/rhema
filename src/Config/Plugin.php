@@ -56,6 +56,7 @@ final class Plugin {
 						'uri'          => 'Plugin URI',
 						'description'  => 'Description',
 						'version'      => 'Version',
+						'db-version'   => 'DB Version',
 						'author'       => 'Author',
 						'author-uri'   => 'Author URI',
 						'text-domain'  => 'Text Domain',
@@ -137,6 +138,16 @@ final class Plugin {
 	 */
 	public function version(): string {
 		return $this->data()['version'];
+	}
+
+	/**
+	 * Get the plugin version number
+	 *
+	 * @return string
+	 * @since 1.0.0
+	 */
+	public function dbVersion(): string {
+		return $this->data()['db-version'];
 	}
 
 	/**

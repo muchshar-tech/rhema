@@ -1,0 +1,24 @@
+/**
+Postcss-import feature example
+ */
+.component-1-from-example-1 {
+  padding: 1px;
+}
+.component-1-from-example-2 {
+  padding: 1px;
+}
+.component-2-from-example-2 {
+  padding: 1px;
+}
+.test {
+    color: red;
+}
+/**
+    Postcss-nested feature example
+     */
+.test__blue {
+        color: blue;
+    }
+.test__yellow {
+        color: yellow;
+    }

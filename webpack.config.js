@@ -41,7 +41,7 @@ const projectFiles = {
             backend:  projectPaths.projectJsPath + '/backend.js',
         },
         rules:    {
-            test: /\.m?js$/,
+            test: /\.m?jsx?$/,
         }
     },
     // CSS configurations for development and production

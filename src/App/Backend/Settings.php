@@ -50,8 +50,7 @@ class Settings extends Base {
 
 	public function hello() {
 		?>
-		<div class="wrap">
-		<h1><?php echo __( 'Rhema', 'rhema' ); ?></h1>
+		<div id="rhema-app" class="wrap">
 		</div>
 		<?php
 	}

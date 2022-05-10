@@ -8,17 +8,18 @@
  * @license   MIT
  * @link      https://txipartners.com
  *
- * Plugin Name:     Rhema
- * Plugin URI:      https://txipartners.com
- * Description:     Rhema
- * Version:         1.0.0
- * Author:          TXIpartners
- * Author URI:      https://txipartners.com
- * Text Domain:     rhema
- * Domain Path:     /languages
- * Requires PHP:    7.1
- * Requires WP:     5.5.0
- * Namespace:       Rhema
+ * Plugin Name:      Rhema
+ * Plugin URI:       https://txipartners.com
+ * Description:      Rhema
+ * Version:          1.0.0
+ * DataBase Version: 1.0.0
+ * Author:           TXIpartners
+ * Author URI:       https://txipartners.com
+ * Text Domain:      rhema
+ * Domain Path:      /languages
+ * Requires PHP:     7.1
+ * Requires WP:      5.5.0
+ * Namespace:        Rhema
  */
 
 declare( strict_types = 1 );

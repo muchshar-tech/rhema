@@ -29,5 +29,3 @@ phpcs.xml
 *.sass-cache
 *.lock
 cache
-
-# Wordpress Dev Tool

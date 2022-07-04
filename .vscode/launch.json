@@ -5,43 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Listen for Xdebug",
+            "name": "VVV Listen WorkspaceFolder for Xdebug",
             "type": "php",
             "request": "launch",
-            "port": 9000
-        },
-        {
-            "name": "Launch currently open script",
-            "type": "php",
-            "request": "launch",
-            "program": "${file}",
-            "cwd": "${fileDirname}",
-            "port": 0,
-            "runtimeArgs": [
-                "-dxdebug.start_with_request=yes"
-            ],
-            "env": {
-                "XDEBUG_MODE": "debug,develop",
-                "XDEBUG_CONFIG": "client_port=${port}"
+            "port": 9003,
+            "pathMappings": {
+                "/srv/www/rhema/public_html/wp-content/plugins/rhema/": "${workspaceFolder}/",
             }
         },
         {
-            "name": "Launch Built-in web server",
+            "name": "VVV Listen Wordpress for Xdebug",
             "type": "php",
             "request": "launch",
-            "runtimeArgs": [
-                "-dxdebug.mode=debug",
-                "-dxdebug.start_with_request=yes",
-                "-S",
-                "localhost:0"
-            ],
-            "program": "",
-            "cwd": "${workspaceRoot}",
             "port": 9003,
-            "serverReadyAction": {
-                "pattern": "Development Server \\(http://localhost:([0-9]+)\\) started",
-                "uriFormat": "http://localhost:%s",
-                "action": "openExternally"
+            "pathMappings": {
+                "/srv/www/rhema/public_html/": "C:\\Users\\jivec\\Projects\\rhema\\public_html\\",
             }
         }
     ]

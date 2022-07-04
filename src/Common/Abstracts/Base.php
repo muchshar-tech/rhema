@@ -24,10 +24,10 @@ use stdClass;
  */
 abstract class Base {
 	/**
-	 * @var array : will be filled with data from the plugin config class
+	 * @var Plugin : will be filled with data from the plugin config class
 	 * @see Plugin
 	 */
-	protected $plugin = [];
+	protected Plugin $plugin;
 
 	/**
 	 * Base constructor.

@@ -22,7 +22,12 @@ use Rhema\Common\Abstracts\Base;
  * @since 1.0.0
  */
 class Settings extends Base {
-
+	private $option_default = [
+		// 設定前台聖經app的入口頁面
+		'entry_route_page' => null,
+		// 已安裝的譯本
+		'installed_translations' => [],
+	];
 	/**
 	 * Initialize the class.
 	 *
@@ -38,6 +43,7 @@ class Settings extends Base {
 		 * Add plugin code here for admin settings specific functions
 		 */
 		add_action( 'admin_menu', [ $this, 'admin_menu' ], 5 );
+		add_action( 'admin_init', [ $this, 'settings_init' ] );
 	}
 	/**
 	 * Rhema admin menu
@@ -45,7 +51,8 @@ class Settings extends Base {
 	 * @return void
 	 */
 	public function admin_menu() {
-		$main_hook_suffix = add_menu_page( 'Rhema', 'Rhema', 'manage_options', 'rhema', [ $this, 'hello' ], 'dashicons-awards' );
+		$plugin_domain = $this->plugin->textDomain();
+		$main_hook_suffix = add_menu_page( 'Rhema', 'Rhema', 'manage_options', $plugin_domain, [ $this, 'hello' ], 'dashicons-awards' );
 	}
 
 	public function hello() {
@@ -53,5 +60,11 @@ class Settings extends Base {
 		<div id="rhema-app" class="wrap">
 		</div>
 		<?php
+	}
+
+	public function settings_init() {
+		$plugin_domain = $this->plugin->textDomain();
+		register_setting( 'general', $plugin_domain );
+		return;
 	}
 }

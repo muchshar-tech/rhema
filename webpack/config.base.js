@@ -4,6 +4,7 @@
  *
  * @since 1.1.0
  */
+const path = require('path')
 const magicImporter = require('node-sass-magic-importer') // Add magic import functionalities to SASS
 const MiniCssExtractPlugin = require('mini-css-extract-plugin') // Extracts the CSS files into public/css
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin') // Synchronising URLs, interactions and code changes across devices
@@ -124,6 +125,7 @@ module.exports = (projectOptions) => {
      * Resolve
      */
     const resolve = {
+        alias: { '@assets': path.resolve(__dirname, '../assets/src') },
         extensions: ['', '.js', '.jsx'],
     }
 

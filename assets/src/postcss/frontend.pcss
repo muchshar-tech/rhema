@@ -1,18 +1,19 @@
-/**
-Postcss-import feature example
- */
-@import-glob "components/*.pcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.test {
-    color: red;
-    /**
-    Postcss-nested feature example
-     */
-    &__blue {
-        color: blue;
-    }
-
-    &__yellow {
-        color: yellow;
-    }
+.line-break-auto {
+    line-break: auto;
+}
+.line-break-loose {
+    line-break: loose;
+}
+.line-break-normal {
+    line-break: normal;
+}
+.line-break-strict {
+    line-break: strict;
+}
+.line-break-anywhere {
+    line-break: anywhere;
 }

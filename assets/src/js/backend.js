@@ -15,5 +15,7 @@ import App from './backend/App'
  */
 
 const container = document.getElementById('rhema-app')
-const root = createRoot(container)
-root.render(<App />)
+if (!!container && container instanceof HTMLElement) {
+    const root = createRoot(container)
+    root.render(<App />)
+}

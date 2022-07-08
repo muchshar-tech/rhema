@@ -125,7 +125,10 @@ module.exports = (projectOptions) => {
      * Resolve
      */
     const resolve = {
-        alias: { '@assets': path.resolve(__dirname, '../assets/src') },
+        alias: {
+            '@assets': path.resolve(__dirname, '../assets/src'),
+            '@components': path.resolve(__dirname, '../assets/src/js'),
+        },
         extensions: ['', '.js', '.jsx'],
     }
 

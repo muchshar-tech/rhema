@@ -96,6 +96,7 @@
         "stylelint-scss": "^3.18.0",
         "stylelint-webpack-plugin": "^2.1.1",
         "tailwindcss": "^3.0.24",
+        "use-long-press": "^2.0.2",
         "webpack": "^5.12.3",
         "webpack-cli": "^4.3.1",
         "webpackbar": "^5.0.0-3",

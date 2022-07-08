@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import clamp from 'lodash/clamp'
 import { useSelector } from 'react-redux'
-import { motion, useMotionValue } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Swipe from 'react-easy-swipe'
-import {
-    BsChevronCompactUp,
-    BsChevronCompactDown,
-    BsChevronCompactLeft,
-    BsChevronCompactRight,
-} from 'react-icons/bs'
 
 const AppContainer = ({ children }) => {
     const fullscreen = useSelector((state) => state.general.fullscreen)
@@ -41,81 +36,79 @@ const AppContainer = ({ children }) => {
 
 const Top = ({ children }) => {
     return (
-        <div className="flex items-center justify-between text-gray-800 bg-white border-b px-12px h-52px md:h-64px text-12px md:text-14px drop-shadow-sm">
+        <div className="flex flex-wrap items-center text-gray-800 bg-white border-b text-12px md:text-14px drop-shadow-sm">
             {children}
         </div>
     )
 }
 
 const Content = ({ children }) => {
-    const [rightX, setRightX] = useState(100)
-    const [leftX, setLeftX] = useState(100)
+    const showBooksSelector = useSelector(
+        (state) => state.general.booksSelector.toggle
+    )
+    const [movePercentage, setMovePercentage] = useState(0)
+    const [pagePos, setPagePos] = useState(0)
     const onSwipeStart = (event) => {
         console.log('Start swiping...', event)
     }
 
     const onSwipeMove = (position, event) => {
-        // console.log(`Moved ${position.y} pixels vertically`, event)
-        const moveAbsNumber = Math.abs(position.x)
-        const percentage =
-            moveAbsNumber > 120 ? 100 : (moveAbsNumber / 120) * 100
-        if (position.x < 0 && percentage < 100) {
-            setRightX(100 - percentage)
-        }
-
-        if (position.x > 0) {
-            setLeftX(100 - percentage)
-        }
+        const movePercentage = Number(
+            ((position.x / Number(screen.width)) * 100).toFixed(1)
+        )
+        console.log(`Moved ${position.x} pixels horizontally`, event)
+        console.log(`Moved ${movePercentage} percentage horizontally`, event)
+        setMovePercentage(clamp(movePercentage, -100, 100))
     }
 
     const onSwipeEnd = (event) => {
-        console.log('End swiping...', event)
-        setRightX(100)
-        setLeftX(100)
+        console.log('End swiping...', event, movePercentage)
+        const moveAbsPercentage = Math.abs(movePercentage)
+        if (moveAbsPercentage > 30) {
+            setPagePos(movePercentage < 0 ? pagePos - 100 : pagePos + 100)
+        }
+        setMovePercentage(0)
     }
-    useEffect(() => {
 
-        if (leftX <= 3) {
-            console.log('chnage prev page')
-        }
-    }, [leftX])
-
-    useEffect(() => {
-        if (rightX <= 3) {
-            console.log('chnage next page')
-        }
-    }, [rightX])
+    const classNames = [
+        ...(!showBooksSelector ? ['flex'] : ['hidden']),
+        'relative',
+        'flex',
+        'flex-auto',
+        'py-10',
+        'bg-white',
+        'overflow-y-auto',
+        'overflow-x-hidden',
+    ].join(' ')
 
     return (
         <Swipe
             onSwipeStart={onSwipeStart}
             onSwipeMove={onSwipeMove}
             onSwipeEnd={onSwipeEnd}
-            className="relative flex-auto p-10 bg-white"
+            className={classNames}
         >
-            <motion.div
-                animate={{
-                    x: `${rightX}%`,
-                    y: '-50%',
-                }}
-                initial={false}
-                className="absolute right-0 top-1/2"
-            >
-                <BsChevronCompactRight className="h-100px w-60px text-neutral-600" />
-            </motion.div>
-            <motion.div
-                animate={{
-                    x: `-${leftX}%`,
-                    y: '-50%',
-                }}
-                initial={false}
-                className="absolute left-0 top-1/2"
-            >
-                <BsChevronCompactLeft className="h-100px w-60px text-neutral-600" />
-            </motion.div>
-            {children}
+            {children.map((child, idx) => {
+                return (
+                    <motion.div
+                        key={idx}
+                        animate={{
+                            x: `${pagePos + movePercentage}%`,
+                        }}
+                        transition={{ ease: 'easeOut' }}
+                        initial={false}
+                        className="min-w-full px-10"
+                    >
+                        {child}
+                    </motion.div>
+                )
+            })}
         </Swipe>
     )
+}
+
+const Page = ({ children }) => {
+    return <>{children}</>
 }
 
 Top.LeftSide = ({ children }) => {
@@ -126,4 +119,15 @@ Top.RightSide = ({ children }) => {
     return <div className="flex items-center space-x-12px">{children}</div>
 }
 
-export { AppContainer, Top, Content }
+Top.Row = ({ className: extraClassName = '', children }) => {
+    const classNames = [
+        'flex',
+        'items-center',
+        'px-12px',
+        'w-full',
+        ...extraClassName.split(' '),
+    ].join(' ')
+    return <div className={classNames}>{children}</div>
+}
+
+export { AppContainer, Page, Top, Content }

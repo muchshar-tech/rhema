@@ -1,7 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-    fullscreen: 0,
+    fullscreen: false,
+    booksSelector: {
+        toggle: false,
+        books: true,
+        chapters: false,
+        verses: false,
+    },
 }
 
 export const generalSlice = createSlice({
@@ -9,11 +15,25 @@ export const generalSlice = createSlice({
     initialState,
     reducers: {
         toggleScreen: (state) => {
-            // Redux Toolkit allows us to write "mutating" logic in reducers. It
-            // doesn't actually mutate the state because it uses the Immer library,
-            // which detects changes to a "draft state" and produces a brand new
-            // immutable state based off those changes
             state.fullscreen = !state.fullscreen
+        },
+        booksSelectorToggle: (state) => {
+            state.booksSelector.toggle = !state.booksSelector.toggle
+        },
+        booksSelectorBooks: (state) => {
+            state.booksSelector.chapters = false
+            state.booksSelector.verses = false
+            state.booksSelector.books = !state.booksSelector.books
+        },
+        booksSelectorChapters: (state) => {
+            state.booksSelector.chapters = !state.booksSelector.chapters
+            state.booksSelector.verses = false
+            state.booksSelector.books = false
+        },
+        booksSelectorVerses: (state) => {
+            state.booksSelector.chapters = false
+            state.booksSelector.verses = !state.booksSelector.verses
+            state.booksSelector.books = false
         },
         incrementByAmount: (state, action) => {
             state.value += action.payload
@@ -22,6 +42,13 @@ export const generalSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { toggleScreen, incrementByAmount } = generalSlice.actions
+export const {
+    toggleScreen,
+    booksSelectorToggle,
+    booksSelectorBooks,
+    booksSelectorChapters,
+    booksSelectorVerses,
+    incrementByAmount,
+} = generalSlice.actions
 
 export default generalSlice.reducer

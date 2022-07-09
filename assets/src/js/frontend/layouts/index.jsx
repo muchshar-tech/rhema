@@ -44,7 +44,7 @@ const Top = ({ children }) => {
 
 const Content = ({ children }) => {
     const showBooksSelector = useSelector(
-        (state) => state.general.booksSelector.toggle
+        (state) => state.general.headersSwitch.books
     )
     const [movePercentage, setMovePercentage] = useState(0)
     const [pagePos, setPagePos] = useState(0)
@@ -123,7 +123,6 @@ Top.Row = ({ className: extraClassName = '', children }) => {
     const classNames = [
         'flex',
         'items-center',
-        'px-12px',
         'w-full',
         ...extraClassName.split(' '),
     ].join(' ')

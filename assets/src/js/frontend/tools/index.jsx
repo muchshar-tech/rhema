@@ -1,9 +1,8 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import map from 'lodash/map'
 import {
     toggleScreen,
-    booksSelectorToggle,
+    switchHeadersBooks,
 } from '@assets/js/frontend/states/generalSlice'
 import { SearchIcon } from '@heroicons/react/solid'
 import { AiOutlineExpand, AiOutlineCompress } from 'react-icons/ai'
@@ -69,7 +68,7 @@ const BooksSelectorButton = ({ range = [] }) => {
     return (
         <div
             className="flex items-center overflow-hidden bg-white border border-gray-300 rounded-sm cursor-pointer"
-            onClick={() => dispatch(booksSelectorToggle())}
+            onClick={() => dispatch(switchHeadersBooks())}
         >
             <div className="text-center leading-18px md:leading-22px w-96px md:w-144px py-5px md:py-8px">
                 <span>{range.shift()}</span>

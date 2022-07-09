@@ -94,7 +94,7 @@ const Container = ({ className: extraClassname = '', toggle, children }) => {
 
 const List = () => {
     const showBooksSelector = useSelector(
-        (state) => state.general.booksSelector.toggle
+        (state) => state.general.headersSwitch.books
     )
     const classNames = [
         ...(showBooksSelector ? ['flex'] : ['hidden']),
@@ -178,6 +178,7 @@ const List = () => {
         <div className={classNames}>
             <Books {...{ booksName }} />
             <Chapters />
+            <Verses />
         </div>
     )
 }
@@ -232,6 +233,33 @@ const Chapters = ({}) => {
         <Container className="w-full" toggle={toggleChapters}>
             <BlockWrap className="items-start content-start">
                 {chapters.map((number, idx) => {
+                    return (
+                        <Block
+                            className="text-center"
+                            size="small"
+                            key={idx}
+                            {...{ title: number.toString() }}
+                        />
+                    )
+                })}
+            </BlockWrap>
+        </Container>
+    )
+}
+
+const Verses = () => {
+    const toggleVerses = useSelector(
+        (state) => state.general.booksSelector.verses
+    )
+    const verses = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+        39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+    ]
+    return (
+        <Container className="w-full" toggle={toggleVerses}>
+            <BlockWrap className="items-start content-start">
+                {verses.map((number, idx) => {
                     return (
                         <Block
                             className="text-center"

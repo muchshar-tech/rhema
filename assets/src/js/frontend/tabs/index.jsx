@@ -25,7 +25,7 @@ const Tab = ({ isActive, onClick, children }) => {
         'px-12px',
         'py-8px',
         ...(isActive ? underlineClassNames : []),
-        'cursor-pointer'
+        'cursor-pointer',
     ].join(' ')
     return (
         <div className={classNames} onClick={onClick}>
@@ -34,10 +34,7 @@ const Tab = ({ isActive, onClick, children }) => {
     )
 }
 
-const BookTab = () => {
-    const showBooksSelector = useSelector(
-        (state) => state.general.booksSelector.toggle
-    )
+const BookTab = ({ classname: extraClassName = '' }) => {
     const triggerTabs = useSelector((state) => ({
         books: state.general.booksSelector.books,
         chapters: state.general.booksSelector.chapters,
@@ -45,8 +42,8 @@ const BookTab = () => {
     }))
     const classNames = [
         'border-t',
-        ...(showBooksSelector ? ['flex'] : ['hidden']),
         'justify-around',
+        ...extraClassName.split(' '),
     ].join(' ')
 
     const dispatch = useDispatch()

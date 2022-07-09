@@ -1,44 +1,27 @@
 import React from 'react'
-import { BiFontSize } from 'react-icons/bi'
 
 import * as Layout from './layouts'
+import * as Headers from './headers'
 import P, * as Paragraph from './paragraph'
-import * as Tools from './tools'
 import * as Books from './books'
-import * as Tabs from './tabs'
 
 const App = () => {
     const style = `:host, :root {display:block;margin: 24px auto; font-size: 16px;}`
-
+    const pluginFrontendCssUrl =
+        LOCALIZE_SCRIPT_VARIABLES.PLUGIN_FRONTEND_CSS_URL
     return (
         <>
             <style>{style}</style>
-            <style>
-                @import
-                "/wp-content/plugins/rhema/assets/public/css/frontend.css"
-            </style>
+            <style>@import "{pluginFrontendCssUrl}"</style>
             <style>
                 @import
                 url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
             </style>
             <Layout.AppContainer>
                 <Layout.Top>
-                    <Layout.Top.Row className="py-11px md:py-10px justify-between">
-                        <Layout.Top.LeftSide>
-                            <Tools.BooksSelectorButton
-                                range={['出埃及记 3', '出埃及记 3']}
-                            />
-                            <Tools.Bordered>和合本</Tools.Bordered>
-                        </Layout.Top.LeftSide>
-                        <Layout.Top.RightSide>
-                            <Tools.SearchBar />
-                            <Tools.FullScreenToggle />
-                            <Tools.Borderless>
-                                <BiFontSize className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
-                            </Tools.Borderless>
-                        </Layout.Top.RightSide>
-                    </Layout.Top.Row>
-                    <Tabs.BookTab />
+                    <Headers.Main />
+                    <Headers.Books />
+                    <Headers.Selection />
                 </Layout.Top>
                 <Books.List />
                 <Layout.Content>

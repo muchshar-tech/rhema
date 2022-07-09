@@ -77,10 +77,11 @@ class Enqueue extends Base {
 		global $wp_query;
 
 		// localize script and send variables
-		wp_localize_script( 'plugin-test-frontend-js', 'plugin_frontend_script',
+		wp_localize_script( 'plugin-test-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
-				'plugin_frontend_url'  => admin_url( 'admin-ajax.php' ),
-				'plugin_wp_query_vars' => $wp_query->query_vars,
+				'PLUGIN_FRONTEND_CSS_URL'  => plugins_url( '/assets/public/css/frontend.css', RHEMA_PLUGIN_FILE ),
+				'PLUGIN_FRONTEND_URL'  => admin_url( 'admin-ajax.php' ),
+				'PLUGIN_WP_QUERY_VARS' => $wp_query->query_vars,
 			]
 		);
 	}

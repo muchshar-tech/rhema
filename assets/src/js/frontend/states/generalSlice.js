@@ -2,8 +2,12 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     fullscreen: false,
+    headersSwitch: {
+        main: true,
+        books: false,
+        selection: false,
+    },
     booksSelector: {
-        toggle: false,
         books: true,
         chapters: false,
         verses: false,
@@ -17,8 +21,23 @@ export const generalSlice = createSlice({
         toggleScreen: (state) => {
             state.fullscreen = !state.fullscreen
         },
+        switchHeadersMain: (state) => {
+            state.headersSwitch.main = true
+            state.headersSwitch.books = false
+            state.headersSwitch.selection = false
+        },
+        switchHeadersBooks: (state) => {
+            state.headersSwitch.main = false
+            state.headersSwitch.books = true
+            state.headersSwitch.selection = false
+        },
+        switchHeadersSelection: (state) => {
+            state.headersSwitch.main = false
+            state.headersSwitch.books = false
+            state.headersSwitch.selection = true
+        },
         booksSelectorToggle: (state) => {
-            state.booksSelector.toggle = !state.booksSelector.toggle
+            state.headersSwitch.books = !state.headersSwitch.books
         },
         booksSelectorBooks: (state) => {
             state.booksSelector.chapters = false
@@ -44,7 +63,9 @@ export const generalSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
     toggleScreen,
-    booksSelectorToggle,
+    switchHeadersMain,
+    switchHeadersBooks,
+    switchHeadersSelection,
     booksSelectorBooks,
     booksSelectorChapters,
     booksSelectorVerses,

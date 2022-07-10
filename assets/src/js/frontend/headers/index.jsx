@@ -69,9 +69,18 @@ const Selection = () => {
         'items-center',
         'flex-wrap',
     ].join(' ')
+    const dispatch = useDispatch()
     return (
         <div className={classNames}>
-            <Layout.Top.Row className="items-center w-full py-11px px-12px md:py-10px justify-between">123</Layout.Top.Row>
+            <Layout.Top.Row className="items-center w-full py-11px px-12px md:py-10px justify-between">
+                <Layout.Top.LeftSide>
+                    <Tools.Borderless
+                        onClick={() => dispatch(switchHeadersMain())}
+                    >
+                        <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
+                    </Tools.Borderless>
+                </Layout.Top.LeftSide>
+            </Layout.Top.Row>
         </div>
     )
 }

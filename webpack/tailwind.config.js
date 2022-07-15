@@ -74,6 +74,10 @@ module.exports = {
                 start: 1,
                 stop: 900,
             },
+            maxWidth: {
+                start: 1,
+                stop: 900,
+            },
             width: {
                 start: 1,
                 stop: 900,
@@ -83,6 +87,10 @@ module.exports = {
                 stop: 900,
             },
             minHeight: {
+                start: 1,
+                stop: 900,
+            },
+            maxHeight: {
                 start: 1,
                 stop: 900,
             },

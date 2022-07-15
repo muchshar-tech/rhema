@@ -17,7 +17,7 @@
  */
 get_header();
 ?>
-<div id="bible-app"></div>
+<bible-app id="bible-app"></bible-app>
 </main>
 <?php
 get_footer();

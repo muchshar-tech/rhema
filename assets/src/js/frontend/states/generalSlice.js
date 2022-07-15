@@ -12,6 +12,7 @@ const initialState = {
         chapters: false,
         verses: false,
     },
+    drawer: {},
 }
 
 export const generalSlice = createSlice({
@@ -20,6 +21,16 @@ export const generalSlice = createSlice({
     reducers: {
         toggleScreen: (state) => {
             state.fullscreen = !state.fullscreen
+        },
+        toggleDrawer: (state, action) => {
+            const { name: drawerName } = action.payload
+            if (!drawerName) {
+                return
+            }
+            state.drawer = {
+                ...state.drawer,
+                [drawerName]: !state.drawer[drawerName],
+            }
         },
         switchHeadersMain: (state) => {
             state.headersSwitch.main = true
@@ -63,6 +74,7 @@ export const generalSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
     toggleScreen,
+    toggleDrawer,
     switchHeadersMain,
     switchHeadersBooks,
     switchHeadersSelection,

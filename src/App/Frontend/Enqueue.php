@@ -46,30 +46,30 @@ class Enqueue extends Base {
 	 * @since 1.0.0
 	 */
 	public function enqueueScripts() {
-		// Enqueue CSS
-		foreach (
+		$enqueue_styles = [
+			// [
+			// 	'deps'    => [],
+			// 	'handle'  => 'plugin-name-frontend-css',
+			// 	'media'   => 'all',
+			// 	'source'  => plugins_url( '/assets/public/css/frontend.css', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
+			// 	'version' => $this->plugin->version(),
+			// ],
+		];
+		$enqueue_scripts = [
 			[
-				[
-					'deps'    => [],
-					'handle'  => 'plugin-name-frontend-css',
-					'media'   => 'all',
-					'source'  => plugins_url( '/assets/public/css/frontend.css', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
-					'version' => $this->plugin->version(),
-				],
-			] as $css ) {
+				'deps'      => [],
+				'handle'    => 'plugin-test-frontend-js',
+				'in_footer' => true,
+				'source'    => plugins_url( '/assets/public/js/frontend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
+				'version'   => $this->plugin->version(),
+			],
+		];
+		// Enqueue CSS
+		foreach ( $enqueue_styles as $css ) {
 			wp_enqueue_style( $css['handle'], $css['source'], $css['deps'], $css['version'], $css['media'] );
 		}
 		// Enqueue JS
-		foreach (
-			[
-				[
-					'deps'      => [],
-					'handle'    => 'plugin-test-frontend-js',
-					'in_footer' => true,
-					'source'    => plugins_url( '/assets/public/js/frontend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
-					'version'   => $this->plugin->version(),
-				],
-			] as $js ) {
+		foreach ( $enqueue_scripts as $js ) {
 			wp_enqueue_script( $js['handle'], $js['source'], $js['deps'], $js['version'], $js['in_footer'] );
 		}
 
@@ -79,7 +79,7 @@ class Enqueue extends Base {
 		// localize script and send variables
 		wp_localize_script( 'plugin-test-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
-				'PLUGIN_FRONTEND_CSS_URL'  => plugins_url( '/assets/public/css/frontend.css', RHEMA_PLUGIN_FILE ),
+				'PLUGIN_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
 				'PLUGIN_FRONTEND_URL'  => admin_url( 'admin-ajax.php' ),
 				'PLUGIN_WP_QUERY_VARS' => $wp_query->query_vars,
 			]

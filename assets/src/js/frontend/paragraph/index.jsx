@@ -4,8 +4,21 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { switchHeadersSelection } from '@assets/js/frontend/states/generalSlice'
 
-const Paragraph = ({ children }) => {
-    return <p className="line-break-anywhere leading-12">{children}</p>
+const RelateContent = ({}) => {
+    return (
+        <div className="flex relative justify-center my-10px overflow-hidden space-x-4">
+            <div className="w-11/12 max-w-360px max-h-180px aspect-video bg-sky-300 rounded-xl"></div>
+            <div className="absolute w-11/12 max-w-360px max-h-180px aspect-video bg-sky-300 rounded-xl translate-x-full"></div>
+        </div>
+    )
+}
+
+const Title = ({ children }) => {
+    return <h3 className="mb-10px text-sm font-bold">{ children }</h3>
+}
+
+const Block = ({ children }) => {
+    return <p className="line-break-anywhere leading-12 mb-10px last:mb-0px">{children}</p>
 }
 
 const Line = ({ verseNum, children }) => {
@@ -28,7 +41,7 @@ const Line = ({ verseNum, children }) => {
         }
     )
     const onClickVerse = (e) => {
-        console.log(isSelectionMode)
+        console.log('ClickVerse', isSelectionMode)
         e.preventDefault()
         if (!isSelectionMode) {
             return
@@ -69,6 +82,4 @@ const Line = ({ verseNum, children }) => {
         </span>
     )
 }
-
-export default Paragraph
-export { Line }
+export { Title, Block, Line, RelateContent }

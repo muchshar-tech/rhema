@@ -1,8 +1,12 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { BiChevronLeft, BiFontSize } from 'react-icons/bi'
+import { BsLayoutTextSidebarReverse } from 'react-icons/bs'
 
-import { switchHeadersMain } from '@assets/js/frontend/states/generalSlice'
+import {
+    switchHeadersMain,
+    toggleDrawer,
+} from '@assets/js/frontend/states/generalSlice'
 import * as Layout from '@components/frontend/layouts'
 import * as Tools from '@components/frontend/tools'
 import * as Tabs from '@components/frontend/tabs'
@@ -54,6 +58,12 @@ const Books = () => {
                         <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>
+                <Layout.Top.MiddleSide className="text-16px">
+                    聖經目錄
+                </Layout.Top.MiddleSide>
+                <Layout.Top.RightSide>
+                    <Tools.Bordered>和合本</Tools.Bordered>
+                </Layout.Top.RightSide>
             </Layout.Top.Row>
             <Tabs.BookTab />
         </div>
@@ -80,6 +90,20 @@ const Selection = () => {
                         <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>
+                <Layout.Top.MiddleSide>
+                    <Tools.BooksSelectorButton
+                        range={['出埃及记 3:12', '出埃及记 3:20']}
+                    />
+                </Layout.Top.MiddleSide>
+                <Layout.Top.RightSide>
+                    <Tools.Borderless
+                        onClick={() =>
+                            dispatch(toggleDrawer({ name: 'relative-posts' }))
+                        }
+                    >
+                        <BsLayoutTextSidebarReverse className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
+                    </Tools.Borderless>
+                </Layout.Top.RightSide>
             </Layout.Top.Row>
         </div>
     )

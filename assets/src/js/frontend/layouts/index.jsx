@@ -4,8 +4,23 @@ import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import Swipe from 'react-easy-swipe'
 
+import * as Tools from '@components/frontend/tools'
+
 const AppContainer = ({ children }) => {
+    const showSelection = useSelector(
+        (state) => state.general.headersSwitch.selection
+    )
+    const showSomeDrawer = useSelector((state) => {
+        const someDrawerOpend = Object.keys(state.general.drawer).some(
+            (key) => {
+                return state.general.drawer[key] === true
+            }
+        )
+        return someDrawerOpend
+    })
+
     const fullscreen = useSelector((state) => state.general.fullscreen)
+
     const fullscreenStyle = fullscreen
         ? [
               'fixed',
@@ -30,6 +45,7 @@ const AppContainer = ({ children }) => {
             ].join(' ')}
         >
             {children}
+            <Tools.AddNewPostButton showOn={showSelection && !showSomeDrawer} />
         </div>
     )
 }
@@ -42,10 +58,27 @@ const Top = ({ children }) => {
     )
 }
 
+const Body = ({ children }) => {
+    const showScroll = useSelector((state) => {
+        const someDrawerOpend = Object.keys(state.general.drawer).some(
+            (key) => {
+                return state.general.drawer[key] === true
+            }
+        )
+        return !someDrawerOpend
+    })
+    const classnames = [
+        'relative',
+        'flex-auto',
+        'overflow-x-hidden',
+        'bg-white',
+        ...(showScroll ? ['overflow-y-auto'] : ['overflow-y-hidden']),
+    ].join(' ')
+    return <div className={classnames}>{children}</div>
+}
+
 const Content = ({ children }) => {
-    const showBooksSelector = useSelector(
-        (state) => state.general.headersSwitch.books
-    )
+    const showBooks = useSelector((state) => state.general.headersSwitch.books)
     const [movePercentage, setMovePercentage] = useState(0)
     const [pagePos, setPagePos] = useState(0)
     const onSwipeStart = (event) => {
@@ -53,12 +86,17 @@ const Content = ({ children }) => {
     }
 
     const onSwipeMove = (position, event) => {
-        const movePercentage = Number(
+        const movePercentageX = Number(
             ((position.x / Number(screen.width)) * 100).toFixed(1)
         )
-        console.log(`Moved ${position.x} pixels horizontally`, event)
-        console.log(`Moved ${movePercentage} percentage horizontally`, event)
-        setMovePercentage(clamp(movePercentage, -100, 100))
+        const movePercentageY = Number(
+            ((position.y / Number(screen.width)) * 100).toFixed(1)
+        )
+        // console.log(`Moved ${position.x} pixels horizontally`, event)
+        // console.log(`Moved ${movePercentageX} percentage horizontally`, event)
+        console.log(`Moved ${position.y} pixels vertically`, event);
+        console.log(`Moved ${movePercentageY} percentage vertically`, event)
+        setMovePercentage(clamp(movePercentageX, -100, 100))
     }
 
     const onSwipeEnd = (event) => {
@@ -71,14 +109,11 @@ const Content = ({ children }) => {
     }
 
     const classNames = [
-        ...(!showBooksSelector ? ['flex'] : ['hidden']),
+        ...(!showBooks ? ['flex'] : ['hidden']),
         'relative',
         'flex',
-        'flex-auto',
+        'min-h-full',
         'py-10',
-        'bg-white',
-        'overflow-y-auto',
-        'overflow-x-hidden',
     ].join(' ')
 
     return (
@@ -111,16 +146,80 @@ const Page = ({ children }) => {
     return <>{children}</>
 }
 
-Top.LeftSide = ({ children }) => {
-    return <div className="flex items-center space-x-4">{children}</div>
+const Drawer = ({ name, className: extraClassName = '', children }) => {
+    const showDrawer = useSelector((state) => state.general.drawer[name])
+
+    const classNames = [
+        'hidden',
+        'sticky',
+        'right-0',
+        'left-0',
+        'bottom-0',
+        'top-0',
+        'min-h-full',
+        'flex-auto',
+        'bg-white/[.9]',
+        'backdrop-blur-sm',
+        'overflow-y-auto',
+        'overflow-x-hidden',
+        ...extraClassName.split(' '),
+    ].join(' ')
+    return (
+        <motion.div
+            animate={{
+                x: showDrawer ? '0%' : '100%',
+                display: 'flex',
+                transitionEnd: {
+                    ...(!showDrawer ? { display: 'none' } : {}),
+                },
+            }}
+            transition={{ ease: 'easeOut' }}
+            initial={false}
+            className={classNames}
+        >
+            {children}
+        </motion.div>
+    )
 }
 
-Top.RightSide = ({ children }) => {
-    return <div className="flex items-center space-x-12px">{children}</div>
+Top.LeftSide = ({ className: extraClassName = '', children }) => {
+    const classNames = [
+        'flex',
+        'items-center',
+        'space-x-4',
+        ...extraClassName.split(' '),
+    ].join(' ')
+    return <div className={classNames}>{children}</div>
+}
+
+Top.MiddleSide = ({ className: extraClassName = '', children }) => {
+    const classNames = [
+        'flex',
+        'items-center',
+        'absolute',
+        'top-1/2',
+        'left-1/2',
+        'transform',
+        '-translate-x-1/2',
+        '-translate-y-1/2',
+        ...extraClassName.split(' '),
+    ].join(' ')
+    return <div className={classNames}>{children}</div>
+}
+
+Top.RightSide = ({ className: extraClassName = '', children }) => {
+    const classNames = [
+        'flex',
+        'items-center',
+        'space-x-4',
+        ...extraClassName.split(' '),
+    ].join(' ')
+    return <div className={classNames}>{children}</div>
 }
 
 Top.Row = ({ className: extraClassName = '', children }) => {
     const classNames = [
+        'relative',
         'flex',
         'items-center',
         'w-full',
@@ -129,4 +228,4 @@ Top.Row = ({ className: extraClassName = '', children }) => {
     return <div className={classNames}>{children}</div>
 }
 
-export { AppContainer, Page, Top, Content }
+export { AppContainer, Body, Content, Drawer, Page, Top }

@@ -8,10 +8,11 @@ import '../postcss/frontend.pcss'
  */
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './frontend/App'
-import { store } from './frontend/store'
 import { Provider } from 'react-redux'
 import ReactShadowRoot from 'react-shadow-root'
+
+import App from './frontend/App'
+import { store } from './frontend/store'
 
 /**
  * Add here your JavasScript code

@@ -42,4 +42,15 @@ class Functions extends Base {
 	public function templates(): Templates {
 		return new Templates();
 	}
+
+	public function getBible(): array {
+		if ( ! empty( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) ) ) {
+			return json_decode( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) );
+		}
+		$bible_from = preg_replace( '/\//', '', get_query_var( 'bible_from' ) );
+		$bible_to = preg_replace( '/\//', '', get_query_var( 'bible_to' ) );
+		$rhema_res = wp_remote_get( "http://10.0.2.2:7000/bible/cuv?range=$bible_from&range=$bible_to" );
+		wp_cache_add( 'fetched_bible', $rhema_res['body'], rhema()->plugin->name() );
+		return json_decode( $rhema_res['body'] );
+	}
 }

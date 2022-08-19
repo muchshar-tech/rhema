@@ -42,18 +42,11 @@ class UrlRewrite extends Base {
 		}, 0 );
 
 		add_filter( 'template_include', function( $template ) {
-			$bible_from = get_query_var( 'bible_from' );
-			$bible_to = get_query_var( 'bible_to' );
+			if ( preg_match( '/404\.php$/', $template ) ) {
+				return $template;
+			}
 
-			return rhema()->templates()->get( 'entry-template', 'bible-reader',
-				[
-					'bible_query'  => [
-						'from' => $bible_from,
-						'to' => $bible_to,
-					],
-				],
-				false
-			);
+			return rhema()->templates()->get( 'entry-template', null, null, false );
 		}, 0 );
 	}
 }

@@ -58,7 +58,7 @@ class Enqueue extends Base {
 		$enqueue_scripts = [
 			[
 				'deps'      => [],
-				'handle'    => 'plugin-test-frontend-js',
+				'handle'    => 'rhema-frontend-js',
 				'in_footer' => true,
 				'source'    => plugins_url( '/assets/public/js/frontend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
 				'version'   => $this->plugin->version(),
@@ -77,11 +77,12 @@ class Enqueue extends Base {
 		global $wp_query;
 
 		// localize script and send variables
-		wp_localize_script( 'plugin-test-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
+		wp_localize_script( 'rhema-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
-				'PLUGIN_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
-				'PLUGIN_FRONTEND_URL'  => admin_url( 'admin-ajax.php' ),
-				'PLUGIN_WP_QUERY_VARS' => $wp_query->query_vars,
+				'RHEMA_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
+				'RHEMA_FRONTEND_URL'  => admin_url( 'admin-ajax.php' ),
+				'RHEMA_WP_QUERY_VARS' => $wp_query->query_vars,
+				'RHEMA_BIBLE' => rhema()->getBible(),
 			]
 		);
 	}

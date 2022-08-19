@@ -92,6 +92,7 @@
         "react-multi-select-component": "^4.2.9",
         "react-redux": "^8.0.2",
         "react-ripples": "^2.2.1",
+        "react-router-dom": "6",
         "react-shadow-root": "^6.2.0",
         "redux": "^4.2.0",
         "sass": "^1.32.2",

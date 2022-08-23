@@ -132,6 +132,13 @@ module.exports = (projectOptions) => {
         extensions: ['', '.js', '.jsx'],
     }
 
+    /**
+     * Externals
+     */
+    const externals = {
+        'RHEMA_LOCALIZE': 'LOCALIZE_SCRIPT_VARIABLES',
+    }
+
     return {
         cssRules: cssRules,
         jsRules: jsRules,
@@ -139,5 +146,6 @@ module.exports = (projectOptions) => {
         optimizations: optimizations,
         plugins: plugins,
         resolve,
+        externals,
     }
 }

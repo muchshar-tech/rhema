@@ -25,6 +25,7 @@ module.exports = {
     globals: {
         wp: true,
         jQuery: true,
+        RHEMA_LOCALIZE: true,
     },
     ignorePatterns: [
         'tests/**/*.js',

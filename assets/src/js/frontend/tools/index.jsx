@@ -85,7 +85,7 @@ const BooksSelectorButton = ({ range = [] }) => {
             className="flex items-center overflow-hidden bg-white border border-dashed border-gray-300 rounded-sm cursor-pointer"
             onClick={() => dispatch(switchHeadersBooks())}
         >
-            <div className="text-center leading-18px md:leading-22px w-96px md:w-144px py-5px md:py-8px">
+            <div className="text-center leading-18px md:leading-22px min-w-96px md:min-w-144px p-5px md:p-8px">
                 <span>{range.shift()}</span>
             </div>
             {toggleRange}

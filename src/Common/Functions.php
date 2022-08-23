@@ -15,6 +15,7 @@ namespace Rhema\Common;
 
 use Rhema\App\Frontend\Templates;
 use Rhema\Common\Abstracts\Base;
+use Rhema\Common\Bible;
 
 /**
  * Main function class for external uses
@@ -43,14 +44,26 @@ class Functions extends Base {
 		return new Templates();
 	}
 
-	public function getBible(): array {
-		if ( ! empty( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) ) ) {
-			return json_decode( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) );
-		}
+	public function bible(): Bible {
+		return new Bible();
+	}
+
+	public function getQueryVar(): array {
 		$bible_from = preg_replace( '/\//', '', get_query_var( 'bible_from' ) );
 		$bible_to = preg_replace( '/\//', '', get_query_var( 'bible_to' ) );
-		$rhema_res = wp_remote_get( "http://10.0.2.2:7000/bible/cuv?range=$bible_from&range=$bible_to" );
-		wp_cache_add( 'fetched_bible', $rhema_res['body'], rhema()->plugin->name() );
-		return json_decode( $rhema_res['body'] );
+		if ( empty( $bible_from ) ) {
+			return [];
+		}
+		$query_array = [ $bible_from ];
+		if ( ! empty( $bible_to ) ) {
+			$query_array[] = $bible_to;
+		}
+		return $query_array;
+	}
+
+	public function ui(): array {
+		return [
+			'bible.catalog' => __( 'Catalog', 'rhema' )
+		];
 	}
 }

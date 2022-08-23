@@ -25,7 +25,7 @@ const Main = () => {
     return (
         <Layout.Top.Row className={classNames}>
             <Layout.Top.LeftSide>
-                <Tools.BooksSelectorButton range={['出埃及记 3']} />
+                <Tools.BooksSelectorButton range={['出埃及记 3:1-4:22']} />
             </Layout.Top.LeftSide>
             <Layout.Top.RightSide>
                 <Tools.SearchBar />

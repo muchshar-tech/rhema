@@ -96,6 +96,9 @@ const List = () => {
     const showBooksSelector = useSelector(
         (state) => state.general.headersSwitch.books
     )
+    const booksNameSelector = useSelector(
+        (state) => state.data.books
+    )
     const classNames = [
         ...(showBooksSelector ? ['flex'] : ['hidden']),
         'flex-auto',
@@ -176,7 +179,7 @@ const List = () => {
     }
     return (
         <div className={classNames}>
-            <Books {...{ booksName }} />
+            <Books {...{ booksName: booksNameSelector }} />
             <Chapters />
             <Verses />
         </div>

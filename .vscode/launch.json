@@ -21,6 +21,12 @@
             "pathMappings": {
                 "/srv/www/rhema/public_html/": "C:\\Users\\jivec\\Projects\\rhema\\public_html\\",
             }
-        }
+        },
+        {
+            "name": "Jive NoteBook Listen Wordpress for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+        },
     ]
 }

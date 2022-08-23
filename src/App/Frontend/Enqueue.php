@@ -79,10 +79,16 @@ class Enqueue extends Base {
 		// localize script and send variables
 		wp_localize_script( 'rhema-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
+				'RHEMA_SITE_ROOT'  => get_site_url( null, '', 'relative' ),
 				'RHEMA_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
 				'RHEMA_FRONTEND_URL'  => admin_url( 'admin-ajax.php' ),
 				'RHEMA_WP_QUERY_VARS' => $wp_query->query_vars,
-				'RHEMA_BIBLE' => rhema()->getBible(),
+				// Send initail data to window, raw, title, comment...etc.
+				'RHEMA_INITAIL_DATA' => [
+					'UI' => rhema()->ui(),
+					'RAW' => rhema()->bible()->getRaw(),
+					'BOOKS' => rhema()->bible()->getBooks(),
+				],
 			]
 		);
 	}

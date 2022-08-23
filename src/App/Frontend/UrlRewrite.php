@@ -36,9 +36,9 @@ class UrlRewrite extends Base {
 		}, 0 );
 
 		add_filter( 'query_vars', function ( $query_vars ) {
-				$query_vars[] = 'bible_from';
-				$query_vars[] = 'bible_to';
-				return $query_vars;
+			$query_vars[] = 'bible_from';
+			$query_vars[] = 'bible_to';
+			return $query_vars;
 		}, 0 );
 
 		add_filter( 'template_include', function( $template ) {

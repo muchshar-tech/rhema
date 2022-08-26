@@ -3,7 +3,8 @@ import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const initialState = {
     raws: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.RAW || [],
-    books: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.BOOKS || []
+    books: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.BOOKS || [],
+    queryString: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.QUERYS,
 }
 
 export const dataSlice = createSlice({
@@ -13,6 +14,10 @@ export const dataSlice = createSlice({
         insertRaw: (state, action) => {
             const { payload } = action
             state.raws.push(payload)
+        },
+        updateQueryString: (state, action) => {
+            const { payload } = action
+            state.queryString = payload
         },
     },
 })

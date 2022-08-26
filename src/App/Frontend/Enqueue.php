@@ -88,6 +88,7 @@ class Enqueue extends Base {
 					'UI' => rhema()->ui(),
 					'RAW' => rhema()->bible()->getRaw(),
 					'BOOKS' => rhema()->bible()->getBooks(),
+					'QUERYS' => rhema()->bible()->getQuerySchema( true ),
 				],
 			]
 		);

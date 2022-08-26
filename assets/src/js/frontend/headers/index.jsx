@@ -15,6 +15,7 @@ const Main = () => {
     const showMainHeader = useSelector(
         (state) => state.general.headersSwitch.main
     )
+    const queryString = useSelector((state) => state.data.queryString)
     const classNames = [
         ...(showMainHeader ? ['flex'] : ['hidden']),
         'py-11px',
@@ -22,10 +23,27 @@ const Main = () => {
         'md:py-10px',
         'justify-between',
     ].join(' ')
+    const queryStringModifier = (queryString) => {
+        const rangeFrom = queryString[0]
+        const rangeTo = queryString[1] ? queryString[1] : queryString[0]
+        const isSameBook = rangeFrom.book.name === rangeTo.book.name
+        const isSameChapter = rangeFrom.chapter === rangeTo.chapter
+        let returnQueryString = [
+            `${rangeFrom.book.name} ${rangeFrom.chapter}:${rangeFrom.verse}`,
+        ]
+        if (!!rangeTo && !!rangeTo.book && rangeTo.chapter && rangeTo.verse) {
+            returnQueryString[0] += `-${isSameBook ? '' : rangeTo.book.name} ${
+                isSameChapter ? '' : rangeTo.chapter + ':'
+            }${rangeTo.verse}`
+        }
+        return returnQueryString
+    }
     return (
         <Layout.Top.Row className={classNames}>
             <Layout.Top.LeftSide>
-                <Tools.BooksSelectorButton range={['出埃及记 3:1-4:22']} />
+                <Tools.BooksSelectorButton
+                    range={queryStringModifier(queryString)}
+                />
             </Layout.Top.LeftSide>
             <Layout.Top.RightSide>
                 <Tools.SearchBar />

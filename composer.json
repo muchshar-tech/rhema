@@ -25,7 +25,8 @@
     },
     "require": {
         "php": ">=7.1",
-        "micropackage/requirements": "^1.0"
+        "micropackage/requirements": "^1.0",
+        "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",

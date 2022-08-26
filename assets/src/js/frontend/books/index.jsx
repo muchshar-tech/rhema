@@ -28,7 +28,6 @@ const Block = ({
     const classNames = [
         'border',
         'bg-white',
-
         'flex',
         'flex-wrap',
         'items-center',
@@ -96,87 +95,13 @@ const List = () => {
     const showBooksSelector = useSelector(
         (state) => state.general.headersSwitch.books
     )
-    const booksNameSelector = useSelector(
-        (state) => state.data.books
-    )
+    const booksNameSelector = useSelector((state) => state.data.books)
     const classNames = [
         ...(showBooksSelector ? ['flex'] : ['hidden']),
         'flex-auto',
         'bg-white',
         'overflow-y-auto',
     ].join(' ')
-    const booksName = {
-        old: [
-            { abbr: '創', name: '創世記' },
-            { abbr: '出', name: '出埃及記' },
-            { abbr: '利', name: '利未記' },
-            { abbr: '民', name: '民數記' },
-            { abbr: '申', name: '申命記' },
-            { abbr: '書', name: '約書亞記' },
-            { abbr: '士', name: '士師記' },
-            { abbr: '得', name: '路得記' },
-            { abbr: '撒上 1', name: '撒母耳記上' },
-            { abbr: '撒下 2', name: '撒母耳記下' },
-            { abbr: '王上', name: '列王紀上' },
-            { abbr: '王下', name: '列王紀下' },
-            { abbr: '代上 1', name: '歷代志上' },
-            { abbr: '代下 2', name: '歷代志下' },
-            { abbr: '拉', name: '以斯拉記' },
-            { abbr: '尼', name: '尼希米記' },
-            { abbr: '斯', name: '以斯帖記' },
-            { abbr: '伯', name: '約伯記' },
-            { abbr: '詩', name: '詩篇' },
-            { abbr: '箴', name: '箴言' },
-            { abbr: '傳', name: '傳道書' },
-            { abbr: '歌', name: '雅歌' },
-            { abbr: '賽', name: '以賽亞書' },
-            { abbr: '耶', name: '耶利米書' },
-            { abbr: '哀', name: '耶利米哀歌' },
-            { abbr: '結', name: '以西結書' },
-            { abbr: '但', name: '但以理書' },
-            { abbr: '何', name: '何西阿書' },
-            { abbr: '珥', name: '約珥書' },
-            { abbr: '摩', name: '阿摩司書' },
-            { abbr: '俄', name: '俄巴底亞書' },
-            { abbr: '拿', name: '約拿書' },
-            { abbr: '彌', name: '彌迦書' },
-            { abbr: '鴻', name: '那鴻書' },
-            { abbr: '哈', name: '哈巴谷書' },
-            { abbr: '番', name: '西番雅書' },
-            { abbr: '該', name: '哈該書' },
-            { abbr: '亞', name: '撒迦利亞書' },
-            { abbr: '瑪', name: '瑪拉基書' },
-        ],
-        new: [
-            { abbr: '太', name: '馬太福音' },
-            { abbr: '可', name: '馬可福音' },
-            { abbr: '路', name: '路加福音' },
-            { abbr: '約', name: '約翰福音' },
-            { abbr: '徒', name: '使徒行傳' },
-            { abbr: '羅', name: '羅馬書' },
-            { abbr: '林前1', name: '哥林多前書' },
-            { abbr: '林後2', name: '哥林多後書' },
-            { abbr: '加', name: '加拉太書' },
-            { abbr: '弗', name: '以弗所書' },
-            { abbr: '腓', name: '腓立比書' },
-            { abbr: '西', name: '歌羅西書' },
-            { abbr: '帖前1', name: '帖撒羅尼迦前書' },
-            { abbr: '帖後2', name: '帖撒羅尼迦後書' },
-            { abbr: '提前1', name: '提摩太前書' },
-            { abbr: '提後2', name: '提摩太後書' },
-            { abbr: '多', name: '提多書' },
-            { abbr: '門', name: '腓利門書' },
-            { abbr: '來', name: '希伯來書' },
-            { abbr: '雅', name: '雅各書' },
-            { abbr: '彼前1', name: '彼得前書' },
-            { abbr: '彼後2', name: '彼得後書' },
-            { abbr: '約一1', name: '約翰壹書' },
-            { abbr: '約二2', name: '約翰貳書' },
-            { abbr: '約三3', name: '約翰參書' },
-            { abbr: '猶', name: '猶大書' },
-            { abbr: '啟', name: '啟示錄' },
-        ],
-    }
     return (
         <div className={classNames}>
             <Books {...{ booksName: booksNameSelector }} />
@@ -190,6 +115,7 @@ const Books = ({ booksName }) => {
     const toggleBooks = useSelector(
         (state) => state.general.booksSelector.books
     )
+    const currentQueryString = useSelector((state) => state.data.queryString)
     return (
         <Container toggle={toggleBooks}>
             <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
@@ -197,8 +123,14 @@ const Books = ({ booksName }) => {
             </div>
             <BlockWrap className="bg-gray-200">
                 {booksName.old.map(({ abbr, name }, idx) => {
+                    const isSomeInCurrentQuery = currentQueryString.filter(
+                        (query) => query.book.name === name
+                    )[0]
                     return (
                         <Block
+                            className={
+                                isSomeInCurrentQuery ? 'bg-gray-100' : ''
+                            }
                             onClick={() => {}}
                             key={idx}
                             {...{ title: abbr, desc: name }}
@@ -228,6 +160,8 @@ const Chapters = ({}) => {
     const toggleChapters = useSelector(
         (state) => state.general.booksSelector.chapters
     )
+    const currentQueryString = useSelector((state) => state.data.queryString)
+    const booksSelector = useSelector((state) => state.data.books)
     const chapters = [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
         21, 22, 23, 24, 25, 26, 27,
@@ -236,9 +170,16 @@ const Chapters = ({}) => {
         <Container className="w-full" toggle={toggleChapters}>
             <BlockWrap className="items-start content-start">
                 {chapters.map((number, idx) => {
+                    const isSomeInCurrentQuery = currentQueryString.filter(
+                        (query) => Number(query.chapter) === number
+                    )[0]
+                    const classNames = ['text-center']
+                    if (isSomeInCurrentQuery) {
+                        classNames.push('bg-gray-100')
+                    }
                     return (
                         <Block
-                            className="text-center"
+                            className={classNames.join(' ')}
                             size="small"
                             key={idx}
                             {...{ title: number.toString() }}
@@ -254,6 +195,7 @@ const Verses = () => {
     const toggleVerses = useSelector(
         (state) => state.general.booksSelector.verses
     )
+    const currentQueryString = useSelector((state) => state.data.queryString)
     const verses = [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
@@ -263,9 +205,17 @@ const Verses = () => {
         <Container className="w-full" toggle={toggleVerses}>
             <BlockWrap className="items-start content-start">
                 {verses.map((number, idx) => {
+                    const isSomeInCurrentQuery = currentQueryString.every(
+                        (query) => Number(query.verse) >= number && Number(query.verse) <= number
+                    )
+
+                    const classNames = ['text-center']
+                    if (isSomeInCurrentQuery) {
+                        classNames.push('bg-gray-100')
+                    }
                     return (
                         <Block
-                            className="text-center"
+                            className={classNames.join(' ')}
                             size="small"
                             key={idx}
                             {...{ title: number.toString() }}

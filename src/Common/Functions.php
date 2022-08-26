@@ -13,9 +13,10 @@ declare( strict_types = 1 );
 
 namespace Rhema\Common;
 
+use Rhema\App\General\Constants;
+use Rhema\App\General\Bible;
 use Rhema\App\Frontend\Templates;
 use Rhema\Common\Abstracts\Base;
-use Rhema\Common\Bible;
 
 /**
  * Main function class for external uses
@@ -24,6 +25,34 @@ use Rhema\Common\Bible;
  * @package Rhema\Common
  */
 class Functions extends Base {
+	/**
+	 * Get the template instantiated class using rhema()->templates()
+	 *
+	 * @return Constants
+	 * @since 1.0.0
+	 */
+	public function constants(): Constants {
+		return Constants::init();
+	}
+	/**
+	 * Get the template instantiated class using rhema()->templates()
+	 *
+	 * @return Templates
+	 * @since 1.0.0
+	 */
+	public function templates(): Templates {
+		return new Templates();
+	}
+	/**
+	 * Get the bible instantiated class using rhema()->bible()
+	 *
+	 * @return Bible
+	 * @since 1.0.0
+	 */
+	public function bible(): Bible {
+		return Bible::init();
+	}
+
 	/**
 	 * Get plugin data by using rhema()->getData()
 	 *
@@ -35,35 +64,14 @@ class Functions extends Base {
 	}
 
 	/**
-	 * Get the template instantiated class using rhema()->templates()
+	 * Get translation of ui text
 	 *
-	 * @return Templates
-	 * @since 1.0.0
+	 * @return array
 	 */
-	public function templates(): Templates {
-		return new Templates();
-	}
-
-	public function bible(): Bible {
-		return new Bible();
-	}
-
-	public function getQueryVar(): array {
-		$bible_from = preg_replace( '/\//', '', get_query_var( 'bible_from' ) );
-		$bible_to = preg_replace( '/\//', '', get_query_var( 'bible_to' ) );
-		if ( empty( $bible_from ) ) {
-			return [];
-		}
-		$query_array = [ $bible_from ];
-		if ( ! empty( $bible_to ) ) {
-			$query_array[] = $bible_to;
-		}
-		return $query_array;
-	}
-
 	public function ui(): array {
 		return [
-			'bible.catalog' => __( 'Catalog', 'rhema' )
+			'bible.catalog' => __( 'Catalog', 'rhema' ),
 		];
 	}
+
 }

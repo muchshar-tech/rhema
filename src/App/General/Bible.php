@@ -40,6 +40,9 @@ final class Bible extends Base {
 	}
 
 	public function isQueryWholeChapter( $query_schema ): bool {
+		if (!isset($query_schema[0])) {
+			return false;
+		}
 		$range_from = $query_schema[0];
 		$range_to = isset( $query_schema[1] ) ? $query_schema[1] : null;
 
@@ -99,6 +102,9 @@ final class Bible extends Base {
 	 */
 	public function getQuerySchema( $book_slug_to_trans = false ): array {
 		$query_var = $this->getQueryParam();
+		if (empty($query_var)) {
+			return [];
+		}
 		$query_schema = array_map( function( int $index, string $query ) use ( $query_var, $book_slug_to_trans ) {
 			$current_matches = [];
 			$current_matched = preg_match( $this->constants->range_query_regex, $query, $current_matches );

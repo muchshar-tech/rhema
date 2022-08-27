@@ -31,17 +31,22 @@ class UrlRewrite extends Base {
 		do_action( 'qm/debug', 'Run UrlRewrite init' );
 
 		add_action( 'init', function() {
-			add_rewrite_rule( 'bible\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?', 'index.php?bible_from=$matches[1]&bible_to=$matches[6]', 'top' );
+			add_rewrite_rule( '(bible)\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?', 'index.php?is_bible=1&bible_from=$matches[2]&bible_to=$matches[7]', 'top' );
 			flush_rewrite_rules();
 		}, 0 );
 
 		add_filter( 'query_vars', function ( $query_vars ) {
+			$query_vars[] = 'is_bible';
 			$query_vars[] = 'bible_from';
 			$query_vars[] = 'bible_to';
 			return $query_vars;
 		}, 0 );
 
 		add_filter( 'template_include', function( $template ) {
+			$is_bible = boolval(get_query_var( 'is_bible' ));
+			if (! $is_bible) {
+				return $template;
+			}
 			if ( preg_match( '/404\.php$/', $template ) ) {
 				return $template;
 			}

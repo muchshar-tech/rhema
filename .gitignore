@@ -29,3 +29,6 @@ phpcs.xml
 *.sass-cache
 *.lock
 cache
+
+#ENV
+.env

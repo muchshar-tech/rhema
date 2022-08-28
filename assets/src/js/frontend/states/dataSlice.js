@@ -5,6 +5,10 @@ const initialState = {
     raws: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.RAW || [],
     books: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.BOOKS || [],
     queryString: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.QUERYS,
+    translation: {
+        abbr: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.TRANSLATION.ABBR,
+        info: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.TRANSLATION.INFO,
+    }
 }
 
 export const dataSlice = createSlice({

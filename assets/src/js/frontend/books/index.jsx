@@ -171,9 +171,9 @@ const Chapters = () => {
     return (
         <Container className="w-full" toggle={toggleChapters}>
             {currentQueryBooks.map((book, idx) => {
-                const chapters = new Array(book.chapters).fill(0).map(
-                    (ele, index) => index + 1
-                )
+                const chapters = new Array(book.chapters)
+                    .fill(0)
+                    .map((ele, index) => index + 1)
                 return (
                     <BlockWrap key={idx} className="items-start content-start">
                         {chapters.map((number, idx) => {
@@ -206,35 +206,60 @@ const Verses = () => {
         (state) => state.general.booksSelector.verses
     )
     const currentQueryString = useSelector((state) => state.data.queryString)
-    const verses = [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
-        39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-    ]
+    const chapterVerseInfo = useSelector(
+        (state) => state.data.translation.info.chapterVerseInfo
+    )
+    const isSameBookChapter = currentQueryString.every((query, index, arr) =>
+        arr.every(
+            (arrQuery) =>
+                arrQuery.book.index === query.book.index &&
+                arrQuery.chapter === query.chapter
+        )
+    )
+    const currentQueryChapterVerseInfo = isSameBookChapter
+        ? [
+              chapterVerseInfo[currentQueryString[0].book.index + 1][
+                  currentQueryString[0].chapter
+              ],
+          ]
+        : currentQueryString.map((query) => {
+              const currentQueryBook = currentQueryString[0].book
+              const chapterMaxVerse =
+                  chapterVerseInfo[currentQueryBook.index + 1][query.chapter]
+              return chapterMaxVerse
+          })
     return (
         <Container className="w-full" toggle={toggleVerses}>
-            <BlockWrap className="items-start content-start">
-                {verses.map((number, idx) => {
-                    const isSomeInCurrentQuery = currentQueryString.every(
-                        (query) =>
-                            Number(query.verse) >= number &&
-                            Number(query.verse) <= number
-                    )
-
-                    const classNames = ['text-center']
-                    if (isSomeInCurrentQuery) {
-                        classNames.push('bg-gray-100')
-                    }
-                    return (
-                        <Block
-                            className={classNames.join(' ')}
-                            size="small"
-                            key={idx}
-                            {...{ title: number.toString() }}
-                        />
-                    )
-                })}
-            </BlockWrap>
+            {currentQueryChapterVerseInfo.map((maxVerse, index) => {
+                const verses = new Array(maxVerse)
+                    .fill(0)
+                    .map((ele, index) => index + 1)
+                return (
+                    <BlockWrap
+                        key={index}
+                        className="items-start content-start"
+                    >
+                        {verses.map((number, idx) => {
+                            const isSomeInCurrentQuery =
+                                number >= currentQueryString[0].verse &&
+                                number <= currentQueryString[1].verse
+                            const classNames = ['text-center']
+                            if (isSomeInCurrentQuery) {
+                                classNames.push('bg-gray-100')
+                            }
+                            console.log(isSomeInCurrentQuery)
+                            return (
+                                <Block
+                                    className={classNames.join(' ')}
+                                    size="small"
+                                    key={idx}
+                                    {...{ title: number.toString() }}
+                                />
+                            )
+                        })}
+                    </BlockWrap>
+                )
+            })}
         </Container>
     )
 }

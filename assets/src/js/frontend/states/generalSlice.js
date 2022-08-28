@@ -12,6 +12,11 @@ const initialState = {
         chapters: false,
         verses: false,
     },
+    currentSelection: {
+        books: '',
+        chapters: '',
+        verse: '',
+    },
     drawer: {},
 }
 
@@ -64,6 +69,10 @@ export const generalSlice = createSlice({
             state.booksSelector.chapters = false
             state.booksSelector.verses = !state.booksSelector.verses
             state.booksSelector.books = false
+        },
+        currentSelection: (state, action) => {
+            const { payload } = action
+            state.currentSelection = payload
         },
         incrementByAmount: (state, action) => {
             state.value += action.payload

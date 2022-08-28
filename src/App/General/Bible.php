@@ -40,7 +40,7 @@ final class Bible extends Base {
 	}
 
 	public function isQueryWholeChapter( $query_schema ): bool {
-		if (!isset($query_schema[0])) {
+		if ( ! isset( $query_schema[0] ) ) {
 			return false;
 		}
 		$range_from = $query_schema[0];
@@ -102,7 +102,7 @@ final class Bible extends Base {
 	 */
 	public function getQuerySchema( $book_slug_to_trans = false ): array {
 		$query_var = $this->getQueryParam();
-		if (empty($query_var)) {
+		if ( empty( $query_var ) ) {
 			return [];
 		}
 		$query_schema = array_map( function( int $index, string $query ) use ( $query_var, $book_slug_to_trans ) {
@@ -190,5 +190,18 @@ final class Bible extends Base {
 			'old' => array_slice( $this->constants->books, 0, 39 ),
 			'new' => array_slice( $this->constants->books, 39, 27 ),
 		];
+	}
+
+	public function getTranslationInfo( $translate_abbr = 'kjv' ): array {
+		$bible_remote = $this->remote();
+		$translate_res = wp_remote_get( "$bible_remote/$translate_abbr" );
+		if ( $translate_res instanceof WP_Error ) {
+			return $translate_res;
+		}
+		if ( empty( $translate_res['body'] ) ) {
+			return [];
+		}
+		set_transient( "rhema_bible_translate_$translate_abbr", $translate_res['body'], MONTH_IN_SECONDS );
+		return json_decode( $translate_res['body'], true );
 	}
 }

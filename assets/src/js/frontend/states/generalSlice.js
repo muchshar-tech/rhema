@@ -72,7 +72,27 @@ export const generalSlice = createSlice({
         },
         currentSelection: (state, action) => {
             const { payload } = action
-            state.currentSelection = payload
+            const payloadKeys = Object.keys(payload)
+            const currentClickBookChapterVerses = payloadKeys.indexOf('verses') !== -1 ? 'verses' : payloadKeys.indexOf('chapters') !== -1 ? 'chapters' : payloadKeys.indexOf('books') !== -1 ? 'books' : false
+            if (typeof currentClickBookChapterVerses === 'string') {
+                switch (currentClickBookChapterVerses) {
+                    case 'books':
+                        console.log(this)
+                        state.booksSelector.chapters = !state.booksSelector.chapters
+                        state.booksSelector.verses = false
+                        state.booksSelector.books = false
+                        break;
+                    case 'chapters':
+                        state.booksSelector.chapters = false
+                        state.booksSelector.verses = !state.booksSelector.verses
+                        state.booksSelector.books = false
+                        break;
+                    case 'verses':
+                        console.log('selected verses!')
+                        break;
+                }
+            }
+            state.currentSelection = { ...state.currentSelection, ...payload }
         },
         incrementByAmount: (state, action) => {
             state.value += action.payload
@@ -90,6 +110,7 @@ export const {
     booksSelectorBooks,
     booksSelectorChapters,
     booksSelectorVerses,
+    currentSelection,
     incrementByAmount,
 } = generalSlice.actions
 

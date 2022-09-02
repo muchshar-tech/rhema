@@ -88,7 +88,7 @@ class Enqueue extends Base {
 					'UI' => rhema()->ui(),
 					'RAW' => rhema()->bible()->getRaw(),
 					'TRANSLATION' => [
-						'ABBR'=> rhema()->getData()->settings,
+						'ABBR'=> rhema()->getData()['settings'],
 						'INFO' => rhema()->bible()->getTranslationInfo('cuv')
 					],
 					'BOOKS' => rhema()->bible()->getBooks(),

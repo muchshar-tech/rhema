@@ -1,10 +1,14 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+
+import { currentSelection } from '@assets/js/frontend/states/generalSlice'
 
 const Block = ({
+    onClick,
     className: extraClassName = '',
     title,
     desc,
+    selected,
     size = 'medium',
 }) => {
     const hasTitle = !!title && typeof title === 'string' && title.length > 0
@@ -16,12 +20,20 @@ const Block = ({
         throw new Error('Component `Block` size of param are invaild.')
     }
     const Title = hasTitle ? (
-        <span className="block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600">
+        <span
+            className={`block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600 ${
+                selected ? 'text-rose-600' : ''
+            }`}
+        >
             {title}
         </span>
     ) : null
     const Desc = hasDesc ? (
-        <small className="px-3 text-gray-600 group-hover:text-rose-600">
+        <small
+            className={`px-3 text-gray-600 group-hover:text-rose-600 group-selected:text-rose-600 ${
+                selected ? 'text-rose-600' : ''
+            }`}
+        >
             {desc}
         </small>
     ) : null
@@ -64,10 +76,11 @@ const Block = ({
         'group',
         'hover:bg-gray-100',
         'cursor-pointer',
+        selected ? 'bg-gray-100' : '',
         ...extraClassName.split(' '),
     ].join(' ')
     return (
-        <li className={classNames}>
+        <li className={classNames} onClick={onClick}>
             {Title}
             {Desc}
         </li>
@@ -95,7 +108,7 @@ const List = () => {
     const showBooksSelector = useSelector(
         (state) => state.general.headersSwitch.books
     )
-    const booksNameSelector = useSelector((state) => state.data.books)
+    const booksDataSelector = useSelector((state) => state.data.books)
     const classNames = [
         ...(showBooksSelector ? ['flex'] : ['hidden']),
         'flex-auto',
@@ -104,36 +117,61 @@ const List = () => {
     ].join(' ')
     return (
         <div className={classNames}>
-            <Books {...{ booksName: booksNameSelector }} />
+            <Books {...{ booksData: booksDataSelector }} />
             <Chapters />
             <Verses />
         </div>
     )
 }
 
-const Books = ({ booksName }) => {
+const Books = ({ booksData }) => {
+    const dispatch = useDispatch()
     const toggleBooks = useSelector(
         (state) => state.general.booksSelector.books
     )
+    const booksDataSelector = useSelector((state) => [
+        ...state.data.books.old,
+        ...state.data.books.new,
+    ])
     const currentQueryString = useSelector((state) => state.data.queryString)
+    const currentSelectionSelector = useSelector(
+        (state) => state.general.currentSelection
+    )
+    const onClickBlock = function (bookIndex, e) {
+        console.log(this, bookIndex)
+        dispatch(
+            currentSelection({
+                books: booksDataSelector.filter((book) => {
+                    return book.index === bookIndex
+                })[0],
+            })
+        )
+    }
     return (
         <Container toggle={toggleBooks}>
             <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
                 舊約
             </div>
             <BlockWrap className="bg-gray-200">
-                {booksName.old.map(({ abbr, name }, idx) => {
+                {booksData.old.map(({ abbr, name, index }, idx) => {
                     const isSomeInCurrentQuery = currentQueryString.filter(
                         (query) => query.book.name === name
                     )[0]
+                    const isCurrentSelection =
+                        currentSelectionSelector.books.index === index
+                    const classNames = [
+                        isSomeInCurrentQuery ? 'bg-gray-100' : '',
+                    ]
                     return (
                         <Block
-                            className={
-                                isSomeInCurrentQuery ? 'bg-gray-100' : ''
-                            }
-                            onClick={() => {}}
+                            className={classNames.join(' ')}
+                            onClick={onClickBlock.bind(this, index)}
                             key={idx}
-                            {...{ title: abbr, desc: name }}
+                            {...{
+                                title: abbr,
+                                desc: name,
+                                selected: isCurrentSelection,
+                            }}
                         />
                     )
                 })}
@@ -142,12 +180,25 @@ const Books = ({ booksName }) => {
                 新約
             </div>
             <BlockWrap className="bg-gray-200">
-                {booksName.new.map(({ abbr, name }, idx) => {
+                {booksData.new.map(({ abbr, name, index }, idx) => {
+                    const isSomeInCurrentQuery = currentQueryString.filter(
+                        (query) => query.book.name === name
+                    )[0]
+                    const isCurrentSelection =
+                        currentSelectionSelector.books.index === index
+                    const classNames = [
+                        isSomeInCurrentQuery ? 'bg-gray-100' : '',
+                    ]
                     return (
                         <Block
-                            onClick={() => {}}
+                            className={classNames.join(' ')}
+                            onClick={onClickBlock.bind(this, index)}
                             key={idx}
-                            {...{ title: abbr, desc: name }}
+                            {...{
+                                title: abbr,
+                                desc: name,
+                                selected: isCurrentSelection,
+                            }}
                         />
                     )
                 })}
@@ -157,6 +208,7 @@ const Books = ({ booksName }) => {
 }
 
 const Chapters = () => {
+    const dispatch = useDispatch()
     const toggleChapters = useSelector(
         (state) => state.general.booksSelector.chapters
     )
@@ -165,9 +217,20 @@ const Chapters = () => {
         ...state.data.books.old,
         ...state.data.books.new,
     ])
+    const currentSelectionChapterSelector = useSelector(
+        (state) => state.general.currentSelection.chapters
+    )
     const currentQueryBooks = booksSelector.filter((book) =>
         currentQueryString.some((query) => query.book.name === book.name)
     )
+    const onClickBlock = function (number, e) {
+        console.log(this, number)
+        dispatch(
+            currentSelection({
+                chapters: number,
+            })
+        )
+    }
     return (
         <Container className="w-full" toggle={toggleChapters}>
             {currentQueryBooks.map((book, idx) => {
@@ -181,16 +244,18 @@ const Chapters = () => {
                                 currentQueryString.filter(
                                     (query) => Number(query.chapter) === number
                                 )[0]
+                            const isCurrentSelection = currentSelectionChapterSelector === number
                             const classNames = ['text-center']
                             if (isSomeInCurrentQuery) {
                                 classNames.push('bg-gray-100')
                             }
                             return (
                                 <Block
+                                    onClick={onClickBlock.bind(this, number)}
                                     className={classNames.join(' ')}
                                     size="small"
                                     key={idx}
-                                    {...{ title: number.toString() }}
+                                    {...{ title: number.toString(), selected: isCurrentSelection, }}
                                 />
                             )
                         })}
@@ -217,47 +282,67 @@ const Verses = () => {
         )
     )
     const currentQueryChapterVerseInfo = isSameBookChapter
-        ? [
-              chapterVerseInfo[currentQueryString[0].book.index + 1][
-                  currentQueryString[0].chapter
-              ],
-          ]
-        : currentQueryString.map((query) => {
-              const currentQueryBook = currentQueryString[0].book
-              const chapterMaxVerse =
-                  chapterVerseInfo[currentQueryBook.index + 1][query.chapter]
-              return chapterMaxVerse
-          })
+        ? {
+              [currentQueryString[0].chapter]:
+                  chapterVerseInfo[currentQueryString[0].book.index + 1][
+                      currentQueryString[0].chapter
+                  ],
+          }
+        : currentQueryString.reduce(
+              (accumulator, query, currentIndex, currentArray) => {
+                  const currentQueryBook = currentArray[0].book
+                  const currentQueryChapter = query.chapter
+                  const chapterMaxVerse =
+                      chapterVerseInfo[currentQueryBook.index + 1][
+                          query.chapter
+                      ]
+                  accumulator[currentQueryChapter] = chapterMaxVerse
+                  return accumulator
+              },
+              {}
+          )
     return (
         <Container className="w-full" toggle={toggleVerses}>
-            {currentQueryChapterVerseInfo.map((maxVerse, index) => {
+            {Object.keys(currentQueryChapterVerseInfo).map((chapter, index) => {
+                const maxVerse = currentQueryChapterVerseInfo[chapter]
                 const verses = new Array(maxVerse)
                     .fill(0)
                     .map((ele, index) => index + 1)
                 return (
-                    <BlockWrap
-                        key={index}
-                        className="items-start content-start"
-                    >
-                        {verses.map((number, idx) => {
-                            const isSomeInCurrentQuery =
-                                number >= currentQueryString[0].verse &&
-                                number <= currentQueryString[1].verse
-                            const classNames = ['text-center']
-                            if (isSomeInCurrentQuery) {
-                                classNames.push('bg-gray-100')
-                            }
-                            console.log(isSomeInCurrentQuery)
-                            return (
-                                <Block
-                                    className={classNames.join(' ')}
-                                    size="small"
-                                    key={idx}
-                                    {...{ title: number.toString() }}
-                                />
-                            )
-                        })}
-                    </BlockWrap>
+                    <div key={index}>
+                        <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
+                            {chapter}
+                        </div>
+                        <BlockWrap className="items-start content-start">
+                            {verses.map((number, idx) => {
+                                const literalIntegral =
+                                    Number(chapter) * 100 + number
+                                const fromIntegral =
+                                    Number(currentQueryString[0].chapter) *
+                                        100 +
+                                    Number(currentQueryString[0].verse)
+                                const toIntegral =
+                                    Number(currentQueryString[1].chapter) *
+                                        100 +
+                                    Number(currentQueryString[1].verse)
+                                const isSomeInCurrentQuery =
+                                    literalIntegral >= fromIntegral &&
+                                    literalIntegral <= toIntegral
+                                const classNames = ['text-center']
+                                if (isSomeInCurrentQuery) {
+                                    classNames.push('bg-gray-100')
+                                }
+                                return (
+                                    <Block
+                                        className={classNames.join(' ')}
+                                        size="small"
+                                        key={idx}
+                                        {...{ title: number.toString() }}
+                                    />
+                                )
+                            })}
+                        </BlockWrap>
+                    </div>
                 )
             })}
         </Container>

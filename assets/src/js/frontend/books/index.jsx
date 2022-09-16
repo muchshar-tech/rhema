@@ -138,7 +138,7 @@ const Books = ({ booksData }) => {
         (state) => state.general.currentSelection
     )
     const onClickBlock = function (bookIndex, e) {
-        console.log(this, bookIndex)
+        console.log(bookIndex)
         dispatch(
             currentSelection({
                 books: booksDataSelector.filter((book) => {
@@ -213,38 +213,57 @@ const Chapters = () => {
         (state) => state.general.booksSelector.chapters
     )
     const currentQueryString = useSelector((state) => state.data.queryString)
-    const booksSelector = useSelector((state) => [
-        ...state.data.books.old,
-        ...state.data.books.new,
-    ])
-    const currentSelectionChapterSelector = useSelector(
+    const chapterVerseInfo = useSelector(
+        (state) => state.data.translation.info.chapterVerseInfo
+    )
+    const currentSelectionBookIndex = useSelector(
+        (state) => state.general.currentSelection.books.index
+    )
+    const currentSelectionChapter = useSelector(
         (state) => state.general.currentSelection.chapters
     )
-    const currentQueryBooks = booksSelector.filter((book) =>
-        currentQueryString.some((query) => query.book.name === book.name)
+    const currentQueryBookIndexs = Object.keys(chapterVerseInfo).filter(
+        (bookIndex) =>
+            currentQueryString.some(
+                (query) => query.book.index === Number(bookIndex)
+            )
     )
+    const currentQueryChapters = currentQueryBookIndexs.map((bookIndex) =>
+        Object.keys(chapterVerseInfo[bookIndex])
+    )
+    const currentSelectionChapters = !!currentSelectionBookIndex
+        ? [Object.keys(chapterVerseInfo[currentSelectionBookIndex])]
+        : null
+    const displayChapters = !!currentSelectionChapters
+        ? currentSelectionChapters
+        : currentQueryChapters
     const onClickBlock = function (number, e) {
-        console.log(this, number)
         dispatch(
             currentSelection({
-                chapters: number,
+                chapters: Number(number),
             })
         )
     }
     return (
         <Container className="w-full" toggle={toggleChapters}>
-            {currentQueryBooks.map((book, idx) => {
-                const chapters = new Array(book.chapters)
-                    .fill(0)
-                    .map((ele, index) => index + 1)
+            {displayChapters.map((chapterNumber, idx) => {
                 return (
                     <BlockWrap key={idx} className="items-start content-start">
-                        {chapters.map((number, idx) => {
+                        {chapterNumber.map((number, idx) => {
                             const isSomeInCurrentQuery =
-                                currentQueryString.filter(
-                                    (query) => Number(query.chapter) === number
+                                currentQueryString.filter((query) =>
+                                    !!currentSelectionBookIndex
+                                        ? Number(query.book.index) ===
+                                              Number(
+                                                  currentSelectionBookIndex
+                                              ) &&
+                                          Number(query.chapter) ===
+                                              Number(number)
+                                        : Number(query.chapter) ===
+                                          Number(number)
                                 )[0]
-                            const isCurrentSelection = currentSelectionChapterSelector === number
+                            const isCurrentSelection =
+                                currentSelectionChapter === Number(number)
                             const classNames = ['text-center']
                             if (isSomeInCurrentQuery) {
                                 classNames.push('bg-gray-100')
@@ -255,7 +274,10 @@ const Chapters = () => {
                                     className={classNames.join(' ')}
                                     size="small"
                                     key={idx}
-                                    {...{ title: number.toString(), selected: isCurrentSelection, }}
+                                    {...{
+                                        title: number.toString(),
+                                        selected: isCurrentSelection,
+                                    }}
                                 />
                             )
                         })}
@@ -274,17 +296,24 @@ const Verses = () => {
     const chapterVerseInfo = useSelector(
         (state) => state.data.translation.info.chapterVerseInfo
     )
-    const isSameBookChapter = currentQueryString.every((query, index, arr) =>
-        arr.every(
-            (arrQuery) =>
-                arrQuery.book.index === query.book.index &&
-                arrQuery.chapter === query.chapter
-        )
+    const currentSelectionBookIndex = useSelector(
+        (state) => state.general.currentSelection.books.index
     )
-    const currentQueryChapterVerseInfo = isSameBookChapter
+    const currentSelectionChapter = useSelector(
+        (state) => state.general.currentSelection.chapters
+    )
+    const isSameQueryBookChapter = currentQueryString.every(
+        (query, index, arr) =>
+            arr.every(
+                (arrQuery) =>
+                    arrQuery.book.index === query.book.index &&
+                    arrQuery.chapter === query.chapter
+            )
+    )
+    const currentQueryChapterVerseInfo = isSameQueryBookChapter
         ? {
               [currentQueryString[0].chapter]:
-                  chapterVerseInfo[currentQueryString[0].book.index + 1][
+                  chapterVerseInfo[currentQueryString[0].book.index][
                       currentQueryString[0].chapter
                   ],
           }
@@ -293,58 +322,79 @@ const Verses = () => {
                   const currentQueryBook = currentArray[0].book
                   const currentQueryChapter = query.chapter
                   const chapterMaxVerse =
-                      chapterVerseInfo[currentQueryBook.index + 1][
-                          query.chapter
-                      ]
+                      chapterVerseInfo[currentQueryBook.index][query.chapter]
                   accumulator[currentQueryChapter] = chapterMaxVerse
                   return accumulator
               },
               {}
           )
+    const displayBooksIndex = !!currentSelectionBookIndex
+        ? currentSelectionBookIndex
+        : currentQueryString[0].book.index
+    const displayChapterVerseInfo = !!currentSelectionChapter
+        ? {
+              [currentSelectionChapter]:
+                  chapterVerseInfo[currentSelectionBookIndex][
+                      currentSelectionChapter
+                  ],
+          }
+        : currentQueryChapterVerseInfo
+    const isQueryAndSelectionSame = currentQueryString.some(
+        (query) =>
+            query.book.index === currentSelectionBookIndex &&
+            Number(query.chapter) === currentSelectionChapter
+    )
+    console.log(isQueryAndSelectionSame, displayChapterVerseInfo)
     return (
         <Container className="w-full" toggle={toggleVerses}>
-            {Object.keys(currentQueryChapterVerseInfo).map((chapter, index) => {
-                const maxVerse = currentQueryChapterVerseInfo[chapter]
-                const verses = new Array(maxVerse)
-                    .fill(0)
-                    .map((ele, index) => index + 1)
-                return (
-                    <div key={index}>
-                        <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
-                            {chapter}
+            {Object.keys(displayChapterVerseInfo).map(
+                (chapter, index, arrData) => {
+                    const maxVerse =
+                        chapterVerseInfo[displayBooksIndex][chapter]
+                    const verses = new Array(maxVerse)
+                        .fill(0)
+                        .map((ele, index) => index + 1)
+                    return (
+                        <div key={index}>
+                            {arrData.length > 1 ? (
+                                <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
+                                    {chapter}
+                                </div>
+                            ) : null}
+                            <BlockWrap className="items-start content-start">
+                                {verses.map((number, idx) => {
+                                    const literalIntegral =
+                                        Number(chapter) * 100 + number
+                                    const fromIntegral =
+                                        Number(currentQueryString[0].chapter) *
+                                            100 +
+                                        Number(currentQueryString[0].verse)
+                                    const toIntegral =
+                                        Number(currentQueryString[1].chapter) *
+                                            100 +
+                                        Number(currentQueryString[1].verse)
+                                    const isSomeInCurrentQuery =
+                                        isQueryAndSelectionSame &&
+                                        literalIntegral >= fromIntegral &&
+                                        literalIntegral <= toIntegral
+                                    const classNames = ['text-center']
+                                    if (isSomeInCurrentQuery) {
+                                        classNames.push('bg-gray-100')
+                                    }
+                                    return (
+                                        <Block
+                                            className={classNames.join(' ')}
+                                            size="small"
+                                            key={idx}
+                                            {...{ title: number.toString() }}
+                                        />
+                                    )
+                                })}
+                            </BlockWrap>
                         </div>
-                        <BlockWrap className="items-start content-start">
-                            {verses.map((number, idx) => {
-                                const literalIntegral =
-                                    Number(chapter) * 100 + number
-                                const fromIntegral =
-                                    Number(currentQueryString[0].chapter) *
-                                        100 +
-                                    Number(currentQueryString[0].verse)
-                                const toIntegral =
-                                    Number(currentQueryString[1].chapter) *
-                                        100 +
-                                    Number(currentQueryString[1].verse)
-                                const isSomeInCurrentQuery =
-                                    literalIntegral >= fromIntegral &&
-                                    literalIntegral <= toIntegral
-                                const classNames = ['text-center']
-                                if (isSomeInCurrentQuery) {
-                                    classNames.push('bg-gray-100')
-                                }
-                                return (
-                                    <Block
-                                        className={classNames.join(' ')}
-                                        size="small"
-                                        key={idx}
-                                        {...{ title: number.toString() }}
-                                    />
-                                )
-                            })}
-                        </BlockWrap>
-                    </div>
-                )
-            })}
+                    )
+                }
+            )}
         </Container>
     )
 }

@@ -77,7 +77,6 @@ export const generalSlice = createSlice({
             if (typeof currentClickBookChapterVerses === 'string') {
                 switch (currentClickBookChapterVerses) {
                     case 'books':
-                        console.log(this)
                         state.booksSelector.chapters = !state.booksSelector.chapters
                         state.booksSelector.verses = false
                         state.booksSelector.books = false

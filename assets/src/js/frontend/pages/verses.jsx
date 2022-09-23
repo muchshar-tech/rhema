@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
 
 import * as Layout from '@components/frontend/layouts'
 import * as Headers from '@components/frontend/headers'
@@ -9,6 +10,8 @@ import * as Forms from '@components/frontend/forms'
 
 export const Verses = () => {
     const { raws } = useSelector((state) => state.data)
+    const params = useParams()
+    console.log(params)
     return (
         <Layout.AppContainer>
             <Layout.Top>
@@ -22,7 +25,10 @@ export const Verses = () => {
                     <Layout.Page>
                         <Paragraph.Block>
                             {raws.map((raw) => (
-                                <Paragraph.Line key={raw.id} verseNum={raw.verse}>
+                                <Paragraph.Line
+                                    key={raw.id}
+                                    verseNum={raw.verse}
+                                >
                                     {raw.text}
                                 </Paragraph.Line>
                             ))}

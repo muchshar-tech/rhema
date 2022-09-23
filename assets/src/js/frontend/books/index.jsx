@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { currentSelection } from '@assets/js/frontend/states/generalSlice'
@@ -10,6 +11,7 @@ const Block = ({
     desc,
     selected,
     size = 'medium',
+    children,
 }) => {
     const hasTitle = !!title && typeof title === 'string' && title.length > 0
     const hasDesc = !!desc && typeof desc === 'string' && desc.length > 0
@@ -81,8 +83,8 @@ const Block = ({
     ].join(' ')
     return (
         <li className={classNames} onClick={onClick}>
-            {Title}
-            {Desc}
+            {children ? children : Title}
+            {children ? null : Desc}
         </li>
     )
 }
@@ -289,6 +291,7 @@ const Chapters = () => {
 }
 
 const Verses = () => {
+    const dispatch = useDispatch()
     const toggleVerses = useSelector(
         (state) => state.general.booksSelector.verses
     )
@@ -334,9 +337,11 @@ const Verses = () => {
     const displayChapterVerseInfo = !!currentSelectionChapter
         ? {
               [currentSelectionChapter]:
-                  chapterVerseInfo[currentSelectionBookIndex][
-                      currentSelectionChapter
-                  ],
+                  chapterVerseInfo[
+                      currentSelectionBookIndex
+                          ? currentSelectionBookIndex
+                          : currentQueryString[0].book.index
+                  ][currentSelectionChapter],
           }
         : currentQueryChapterVerseInfo
     const isQueryAndSelectionSame = currentQueryString.some(
@@ -344,6 +349,13 @@ const Verses = () => {
             query.book.index === currentSelectionBookIndex &&
             Number(query.chapter) === currentSelectionChapter
     )
+    const onClickBlock = function (number, e) {
+        dispatch(
+            currentSelection({
+                verse: Number(number),
+            })
+        )
+    }
     console.log(isQueryAndSelectionSame, displayChapterVerseInfo)
     return (
         <Container className="w-full" toggle={toggleVerses}>
@@ -355,7 +367,7 @@ const Verses = () => {
                         .fill(0)
                         .map((ele, index) => index + 1)
                     return (
-                        <div key={index}>
+                        <div key={index} className="w-full">
                             {arrData.length > 1 ? (
                                 <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
                                     {chapter}
@@ -383,11 +395,19 @@ const Verses = () => {
                                     }
                                     return (
                                         <Block
+                                            onClick={onClickBlock.bind(
+                                                this,
+                                                number
+                                            )}
                                             className={classNames.join(' ')}
                                             size="small"
                                             key={idx}
                                             {...{ title: number.toString() }}
-                                        />
+                                        >
+                                            <Link className={`block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600`} to="/bible">
+                                                {number.toString()}
+                                            </Link>
+                                        </Block>
                                     )
                                 })}
                             </BlockWrap>

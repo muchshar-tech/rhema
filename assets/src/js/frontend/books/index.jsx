@@ -1,7 +1,8 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { LinkVerse } from '@assets/js/frontend/components'
 import { currentSelection } from '@assets/js/frontend/states/generalSlice'
 
 const Block = ({
@@ -89,12 +90,30 @@ const Block = ({
     )
 }
 
+Block.propTypes = {
+    onClick: PropTypes.func,
+    className: PropTypes.string,
+    title: PropTypes.string,
+    desc: PropTypes.string,
+    selected: PropTypes.bool,
+    size: PropTypes.string,
+    children: PropTypes.element,
+}
+
 const BlockWrap = ({ className: extraClassname = '', children }) => {
     return (
         <ul className={['flex flex-auto flex-wrap', extraClassname].join(' ')}>
             {children}
         </ul>
     )
+}
+
+BlockWrap.propTypes = {
+    className: PropTypes.string,
+    children: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.arrayOf(PropTypes.element),
+    ]),
 }
 
 const Container = ({ className: extraClassname = '', toggle, children }) => {
@@ -104,6 +123,15 @@ const Container = ({ className: extraClassname = '', toggle, children }) => {
         ...extraClassname.split(' '),
     ].join(' ')
     return <div className={classNames}>{children}</div>
+}
+
+Container.propTypes = {
+    className: PropTypes.string,
+    toggle: PropTypes.bool,
+    children: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.arrayOf(PropTypes.element),
+    ]),
 }
 
 const List = () => {
@@ -139,7 +167,7 @@ const Books = ({ booksData }) => {
     const currentSelectionSelector = useSelector(
         (state) => state.general.currentSelection
     )
-    const onClickBlock = function (bookIndex, e) {
+    const onClickBlock = function (bookIndex) {
         console.log(bookIndex)
         dispatch(
             currentSelection({
@@ -209,6 +237,10 @@ const Books = ({ booksData }) => {
     )
 }
 
+Books.propTypes = {
+    booksData: PropTypes.object,
+}
+
 const Chapters = () => {
     const dispatch = useDispatch()
     const toggleChapters = useSelector(
@@ -233,13 +265,13 @@ const Chapters = () => {
     const currentQueryChapters = currentQueryBookIndexs.map((bookIndex) =>
         Object.keys(chapterVerseInfo[bookIndex])
     )
-    const currentSelectionChapters = !!currentSelectionBookIndex
+    const currentSelectionChapters = currentSelectionBookIndex
         ? [Object.keys(chapterVerseInfo[currentSelectionBookIndex])]
         : null
-    const displayChapters = !!currentSelectionChapters
+    const displayChapters = currentSelectionChapters
         ? currentSelectionChapters
         : currentQueryChapters
-    const onClickBlock = function (number, e) {
+    const onClickBlock = function (number) {
         dispatch(
             currentSelection({
                 chapters: Number(number),
@@ -254,7 +286,7 @@ const Chapters = () => {
                         {chapterNumber.map((number, idx) => {
                             const isSomeInCurrentQuery =
                                 currentQueryString.filter((query) =>
-                                    !!currentSelectionBookIndex
+                                    currentSelectionBookIndex
                                         ? Number(query.book.index) ===
                                               Number(
                                                   currentSelectionBookIndex
@@ -331,10 +363,10 @@ const Verses = () => {
               },
               {}
           )
-    const displayBooksIndex = !!currentSelectionBookIndex
+    const displayBooksIndex = currentSelectionBookIndex
         ? currentSelectionBookIndex
         : currentQueryString[0].book.index
-    const displayChapterVerseInfo = !!currentSelectionChapter
+    const displayChapterVerseInfo = currentSelectionChapter
         ? {
               [currentSelectionChapter]:
                   chapterVerseInfo[
@@ -349,7 +381,7 @@ const Verses = () => {
             query.book.index === currentSelectionBookIndex &&
             Number(query.chapter) === currentSelectionChapter
     )
-    const onClickBlock = function (number, e) {
+    const onClickBlock = function (number) {
         dispatch(
             currentSelection({
                 verse: Number(number),
@@ -386,7 +418,6 @@ const Verses = () => {
                                             100 +
                                         Number(currentQueryString[1].verse)
                                     const isSomeInCurrentQuery =
-                                        isQueryAndSelectionSame &&
                                         literalIntegral >= fromIntegral &&
                                         literalIntegral <= toIntegral
                                     const classNames = ['text-center']
@@ -404,9 +435,11 @@ const Verses = () => {
                                             key={idx}
                                             {...{ title: number.toString() }}
                                         >
-                                            <Link className={`block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600`} to="/bible">
-                                                {number.toString()}
-                                            </Link>
+                                            <LinkVerse
+                                                book={displayBooksIndex}
+                                                chapter={Number(chapter)}
+                                                number={number}
+                                            />
                                         </Block>
                                     )
                                 })}

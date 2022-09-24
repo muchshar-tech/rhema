@@ -40,21 +40,20 @@ final class Bible extends Base {
 	}
 
 	public function isQueryWholeChapter( $query_schema ): bool {
+		if ( empty( $query_schema ) ) {
+			return false;
+		}
 		if ( ! isset( $query_schema[0] ) ) {
 			return false;
 		}
 		$range_from = $query_schema[0];
 		$range_to = isset( $query_schema[1] ) ? $query_schema[1] : null;
 
-		if ( count( $query_schema ) > 0 && ! $range_from && ! empty( $range_from['verse'] ) ) {
+		if ( ! empty( $range_from ) && ! empty( $range_from['verse'] ) && $range_from['verse'] > 1 && ! empty( $range_to ) ) {
 			return false;
 		}
 
-		if ( ! empty( $range_from ) && ! empty( $range_from['verse'] ) ) {
-			return false;
-		}
-
-		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) ) {
+		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] )  ) {
 			return false;
 		}
 
@@ -69,11 +68,15 @@ final class Bible extends Base {
 		return ! empty( $_ENV['BIBLE_REMOTE'] ) ? $_ENV['BIBLE_REMOTE'] : 'https://logos.api/bible';
 	}
 
-	public function getBookTransBySlug( string $slug ): array {
+	public function getBookIndexBySlug( string $slug ): int {
 		$slug_in_regexes = array_filter( $this->constants->abbr_regex_index, function( $abbr_regex_index ) use ( $slug ) {
 			return preg_match( $abbr_regex_index, $slug );
 		} );
-		$book_index = array_keys( $slug_in_regexes )[0];
+		return (int) array_keys( $slug_in_regexes )[0];
+	}
+
+	public function getBookTransBySlug( string $slug ): array {
+		$book_index = $this->getBookIndexBySlug( $slug );
 		return $this->constants->books[ $book_index ];
 	}
 	/**
@@ -138,19 +141,18 @@ final class Bible extends Base {
 		}, array_keys( $query_var ), array_values( $query_var ) );
 		$query_schema_count = count( $query_schema );
 		$is_whole_chapter = $this->isQueryWholeChapter( $query_schema );
-		$query_raws = $this->getRaw();
-		$query_raws_count = count( $query_raws );
-		$query_raws_last = $query_raws[ $query_raws_count - 1 ];
+		$chapter_verse_info = rhema()->bible()->getTranslationInfo('cuv')['chapterVerseInfo'];
+		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug($query_schema[0]['book']) + 1;
 		if ( $is_whole_chapter && ! empty( $query_schema[0] ) ) {
 			$query_schema[0]['verse'] = '1';
 			$query_schema[] = [
 				'book' => $query_schema[0]['book'],
 				'chapter' => $query_schema[0]['chapter'],
-				'verse' => (int) $query_raws_last->verse,
+				'verse' => (int) $chapter_verse_info[$book_index][$query_schema[0]['chapter']],
 			];
 		}
 		if ( 1 < $query_schema_count ) {
-			$query_schema[ $query_schema_count - 1 ]['verse'] = (int) $query_raws_last->verse;
+			$query_schema[ $query_schema_count - 1 ]['verse'] = (int) $chapter_verse_info[$book_index][$query_schema[0]['chapter']];
 		}
 		return $query_schema;
 	}
@@ -165,13 +167,20 @@ final class Bible extends Base {
 			return json_decode( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) );
 		}
 		$query_var = $this->getQueryParam();
-		if ( empty( $query_var ) ) {
+		$query_schema = $this->getQuerySchema();
+		if ( empty( $query_schema ) ) {
 			return [];
 		}
-		$param_from = "range={$query_var[0]}";
+		$query_from_book = $query_schema[0]['book'];
+		$query_from_chapter = $query_schema[0]['chapter'];
+		$query_from_verse = $query_schema[0]['verse'];
+		$query_to_book = $query_schema[1]['book'];
+		$query_to_chapter = $query_schema[1]['chapter'];
+		$query_to_verse = $query_schema[1]['verse'];
+		$param_from = "range={$query_from_book}{$query_from_chapter}:{$query_from_verse}";
 		$param_to = '';
-		if ( isset( $query_var[1] ) ) {
-			$param_to = "&range={$query_var[1]}";
+		if ( isset( $query_schema[1] ) ) {
+			$param_to = "&range={$query_to_book}{$query_to_chapter}:{$query_to_verse}";
 		}
 		$bible_remote = $this->remote();
 		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$param_from}{$param_to}" );

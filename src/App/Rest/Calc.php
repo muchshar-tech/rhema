@@ -21,7 +21,7 @@ use Rhema\Common\Abstracts\Base;
  * @package Rhema\App\Rest
  * @since 1.0.0
  */
-class Example extends Base {
+class Calc extends Base {
 
 	/**
 	 * Initialize the class.
@@ -140,7 +140,7 @@ class Example extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function sum( array $data ): array {
+	public function sum( $data ): array {
 		return [ 'result' => $data['first'] + $data['second'] ];
 	}
 }

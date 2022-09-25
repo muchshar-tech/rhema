@@ -31,9 +31,9 @@ final class Classes {
 		return [
 			[ 'init' => 'Integrations' ],
 			[ 'init' => 'App\\General' ],
+			[ 'init' => 'App\\Rest'],
 			[ 'init' => 'App\\Frontend', 'on_request' => 'frontend' ],
 			[ 'init' => 'App\\Backend', 'on_request' => 'backend' ],
-			[ 'init' => 'App\\Rest', 'on_request' => 'rest' ],
 			[ 'init' => 'App\\Cli', 'on_request' => 'cli' ],
 			[ 'init' => 'App\\Cron', 'on_request' => 'cron' ],
 			[ 'init' => 'Compatibility' ],

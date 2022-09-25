@@ -43,8 +43,8 @@ class UrlRewrite extends Base {
 		}, 0 );
 
 		add_filter( 'template_include', function( $template ) {
-			$is_bible = boolval(get_query_var( 'is_bible' ));
-			if (! $is_bible) {
+			$is_bible = boolval( get_query_var( 'is_bible' ) );
+			if ( ! $is_bible ) {
 				return $template;
 			}
 			if ( preg_match( '/404\.php$/', $template ) ) {

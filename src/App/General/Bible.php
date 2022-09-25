@@ -103,8 +103,8 @@ final class Bible extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getQuerySchema( $book_slug_to_trans = false ): array {
-		$query_var = $this->getQueryParam();
+	public function getQuerySchema( $book_slug_to_trans = false, $query = [] ): array {
+		$query_var = empty($query) ? $this->getQueryParam() : $query;
 		if ( empty( $query_var ) ) {
 			return [];
 		}
@@ -166,7 +166,6 @@ final class Bible extends Base {
 		if ( ! empty( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) ) ) {
 			return json_decode( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) );
 		}
-		$query_var = $this->getQueryParam();
 		$query_schema = $this->getQuerySchema();
 		if ( empty( $query_schema ) ) {
 			return [];

@@ -94,7 +94,7 @@ const Content = ({ children }) => {
         )
         // console.log(`Moved ${position.x} pixels horizontally`, event)
         // console.log(`Moved ${movePercentageX} percentage horizontally`, event)
-        console.log(`Moved ${position.y} pixels vertically`, event);
+        console.log(`Moved ${position.y} pixels vertically`, event)
         console.log(`Moved ${movePercentageY} percentage vertically`, event)
         setMovePercentage(clamp(movePercentageX, -100, 100))
     }
@@ -148,12 +148,14 @@ const Page = ({ children }) => {
 
 const Drawer = ({ name, className: extraClassName = '', children }) => {
     const showDrawer = useSelector((state) => state.general.drawer[name])
-
+    const fullscreen = useSelector((state) => state.general.fullscreen)
     const classNames = [
         'hidden',
-        'sticky',
+        ...(fullscreen ? ['sticky'] : ['absolute']),
+        ...(fullscreen ? [] : ['drop-shadow-lg border-l']),
         'right-0',
         'left-0',
+        'md:left-1/2',
         'bottom-0',
         'top-0',
         'min-h-full',

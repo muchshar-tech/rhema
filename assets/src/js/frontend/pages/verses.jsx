@@ -1,5 +1,5 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 
 import * as Layout from '@components/frontend/layouts'
@@ -7,11 +7,13 @@ import * as Headers from '@components/frontend/headers'
 import * as Paragraph from '@components/frontend/paragraph'
 import * as Books from '@components/frontend/books'
 import * as Forms from '@components/frontend/forms'
+import { DrawerTitle } from '@components/frontend/components'
+import { useGetBibleRawQuery } from '@components/frontend/services'
+import { generateRestRangeParam } from '@assets/js/frontend/utilities'
+import { loadRaws } from '@assets/js/frontend/states/dataSlice'
 
-export const Verses = () => {
-    const { raws } = useSelector((state) => state.data)
-    const params = useParams()
-    console.log(params)
+const Container = ({ raws, isLoading }) => {
+    console.log('Run Memo', raws, isLoading)
     return (
         <Layout.AppContainer>
             <Layout.Top>
@@ -34,35 +36,48 @@ export const Verses = () => {
                             ))}
                         </Paragraph.Block>
                     </Layout.Page>
-                    <Layout.Page>
-                        <Paragraph.Title>　神呼召摩西</Paragraph.Title>
-                        <Paragraph.Block>
-                            <Paragraph.Line verseNum="1">
-                                摩西牧养他岳父米甸祭司叶忒罗的羊群；一日领羊群往野外去，到了　神的山，就是何烈山。
-                            </Paragraph.Line>
-                            <Paragraph.Line verseNum="2">
-                                耶和华的使者从荆棘里火焰中向摩西显现。摩西观看，不料，荆棘被火烧着，却没有烧毁。
-                            </Paragraph.Line>
-                            <Paragraph.Line verseNum="3">
-                                摩西说：“我要过去看这大异象，这荆棘为何没有烧坏呢？”
-                            </Paragraph.Line>
-                            <Paragraph.Line verseNum="4">
-                                耶和华　神见他过去要看，就从荆棘里呼叫说：“摩西！摩西！”他说：“我在这里。”
-                            </Paragraph.Line>
-                            <Paragraph.Line verseNum="5">
-                                　神说：“不要近前来。当把你脚上的鞋脱下来，因为你所站之地是圣地”；
-                            </Paragraph.Line>
-                            <Paragraph.Line verseNum="6">
-                                又说：“我是你父亲的　神，是亚伯拉罕的　神，以撒的　神，雅各的　神。”摩西蒙上脸，因为怕看　神。
-                            </Paragraph.Line>
-                        </Paragraph.Block>
-                    </Layout.Page>
+                    <Layout.Page></Layout.Page>
                 </Layout.Content>
                 <Layout.Drawer name="new-post">
                     <Forms.Posts />
                 </Layout.Drawer>
-                <Layout.Drawer name="relative-posts">123</Layout.Drawer>
+                <Layout.Drawer className="p-2" name="relative-posts">
+                    <DrawerTitle>此段聖經相關文章</DrawerTitle>
+                </Layout.Drawer>
             </Layout.Body>
         </Layout.AppContainer>
     )
+}
+
+const MemoContainer = React.memo(Container, (prev, next) => {
+    if (prev.raws.length !== next.raws.length) {
+        return false
+    }
+    if (
+        next.raws.some((raw, index) => {
+            return raw.id !== prev.raws[index].id
+        })
+    ) {
+        return false
+    }
+    return true
+})
+
+export const Verses = () => {
+    const dispatch = useDispatch()
+    const params = useParams()
+    const rangeParams = generateRestRangeParam(params)
+    const { current } = useSelector((state) => state.data.raws)
+    const { data, error, isLoading } = useGetBibleRawQuery({
+        ranges: rangeParams,
+        withPrevChapter: true,
+        withNextChapter: true,
+    })
+
+    useEffect(() => {
+        if (data && Object.keys(data).length > 0) {
+            dispatch(loadRaws(data))
+        }
+    }, [data])
+    return <MemoContainer raws={current} isLoading={isLoading} error={error} />
 }

@@ -77,7 +77,7 @@ const projectFiles = {
     projectSourceMaps: {
         // Sourcemaps are nice for debugging but takes lots of time to compile,
         // so we disable this by default and can be enabled when necessary
-        enable: false,
+        enable: true,
         env: 'dev', // dev | dev-prod | prod
         // ^ Enabled only for development on default, use "prod" to enable only for production
         // or "dev-prod" to enable it for both production and development

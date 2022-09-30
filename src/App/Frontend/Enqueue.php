@@ -81,7 +81,7 @@ class Enqueue extends Base {
 			[
 				'RHEMA_SITE_ROOT'  => get_site_url( null, '', 'relative' ),
 				'RHEMA_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
-				'RHEMA_FRONTEND_URL'  => admin_url( 'admin-ajax.php' ),
+				'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
 				'RHEMA_WP_QUERY_VARS' => $wp_query->query_vars,
 				// Send initail data to window, raw, title, comment...etc.
 				'RHEMA_INITAIL_DATA' => [

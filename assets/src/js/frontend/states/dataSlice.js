@@ -2,19 +2,27 @@ import { createSlice } from '@reduxjs/toolkit'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const initialState = {
-    raws: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.RAW || [],
+    raws: {
+        prev: [],
+        current: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.RAW || [],
+        next: [],
+    },
     books: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.BOOKS || [],
     queryString: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.QUERYS,
     translation: {
         abbr: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.TRANSLATION.ABBR,
         info: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.TRANSLATION.INFO,
-    }
+    },
 }
 
 export const dataSlice = createSlice({
     name: 'data',
     initialState,
     reducers: {
+        loadRaws: (state, action) => {
+            const { payload } = action
+            state.raws = payload
+        },
         insertRaw: (state, action) => {
             const { payload } = action
             state.raws.push(payload)
@@ -27,6 +35,6 @@ export const dataSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { insertRaw } = dataSlice.actions
+export const { loadRaws, insertRaw } = dataSlice.actions
 
 export default dataSlice.reducer

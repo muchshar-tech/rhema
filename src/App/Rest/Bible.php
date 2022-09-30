@@ -65,6 +65,12 @@ class Bible extends Base {
 					'range'  => [
 						'default' => 'gen1:1',
 					],
+					'with_prev_chapter'  => [
+						'default' => false,
+					],
+					'with_next_chapter'  => [
+						'default' => false,
+					],
 				],
 			]
 		);
@@ -79,20 +85,19 @@ class Bible extends Base {
 	 */
 	public function getRaw( $request ): array {
 		$param = $request->get_param( 'range' );
-		$query_schema = rhema()->bible()->getQuerySchema( false, $param );
-		$query_from_book = $query_schema[0]['book'];
-		$query_from_chapter = $query_schema[0]['chapter'];
-		$query_from_verse = $query_schema[0]['verse'];
-		$query_to_book = $query_schema[1]['book'];
-		$query_to_chapter = $query_schema[1]['chapter'];
-		$query_to_verse = $query_schema[1]['verse'];
-		$param_from = "range={$query_from_book}{$query_from_chapter}:{$query_from_verse}";
-		$param_to = '';
-		if ( isset( $query_schema[1] ) ) {
-			$param_to = "&range={$query_to_book}{$query_to_chapter}:{$query_to_verse}";
+		$with_prev_chapter = $request->get_param( 'with_prev_chapter' );
+		$with_next_chapter = $request->get_param( 'with_next_chapter' );
+		if ( is_string( $param ) ) {
+			$param = [ $param ];
 		}
+		$query_schema = rhema()->bible()->getQuerySchema( false, $param, [
+			'with_prev_chapter' => (bool) $with_prev_chapter,
+			'with_next_chapter' => (bool) $with_prev_chapter,
+		] );
+		$raw_params = rhema()->bible()->generateGetRawParam( $query_schema );
+		$query_string = rhema()->bible()->generateQueryString( $raw_params );
 		$bible_remote = rhema()->bible()->remote();
-		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$param_from}{$param_to}" );
+		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
 		if ( $rhema_res instanceof WP_Error ) {
 			return $rhema_res;
 		}

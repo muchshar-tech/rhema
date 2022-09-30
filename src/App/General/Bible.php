@@ -53,7 +53,7 @@ final class Bible extends Base {
 			return false;
 		}
 
-		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] )  ) {
+		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) ) {
 			return false;
 		}
 
@@ -66,6 +66,26 @@ final class Bible extends Base {
 	 */
 	public function remote(): string {
 		return ! empty( $_ENV['BIBLE_REMOTE'] ) ? $_ENV['BIBLE_REMOTE'] : 'https://logos.api/bible';
+	}
+	/**
+	 * Get bible rest namespace by using rhema()->bible()->restNamespace()
+	 *
+	 * @return string
+	 */
+	public function restNamespace(): string {
+		return ! empty( $_ENV['RHEMA_REST_NAMESPACE'] ) ? $_ENV['RHEMA_REST_NAMESPACE'] : 'rhema/v1';
+	}
+	/**
+	 * Get bible rest endpoint url by using rhema()->bible()->restEndpoint()
+	 *
+	 * @return string
+	 */
+	public function restEndpoints(): array {
+		$rest_url = rest_url();
+		return [
+			'base' => "{$rest_url}{$this->restNamespace()}",
+			'bible' => "{$rest_url}{$this->restNamespace()}/bible",
+		];
 	}
 
 	public function getBookIndexBySlug( string $slug ): int {
@@ -103,8 +123,8 @@ final class Bible extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getQuerySchema( $book_slug_to_trans = false, $query = [] ): array {
-		$query_var = empty($query) ? $this->getQueryParam() : $query;
+	public function getQuerySchema( $book_slug_to_trans = false, $query = [], $options = [] ): array {
+		$query_var = empty( $query ) ? $this->getQueryParam() : $query;
 		if ( empty( $query_var ) ) {
 			return [];
 		}
@@ -139,20 +159,32 @@ final class Bible extends Base {
 				'verse' => $current_matches[3],
 			];
 		}, array_keys( $query_var ), array_values( $query_var ) );
-		$query_schema_count = count( $query_schema );
+		
 		$is_whole_chapter = $this->isQueryWholeChapter( $query_schema );
-		$chapter_verse_info = rhema()->bible()->getTranslationInfo('cuv')['chapterVerseInfo'];
-		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug($query_schema[0]['book']) + 1;
-		if ( $is_whole_chapter && ! empty( $query_schema[0] ) ) {
+		if ( ! $is_whole_chapter ) {
+			return $query_schema;
+		}
+		$chapter_verse_info = rhema()->bible()->getTranslationInfo( 'cuv' )['chapterVerseInfo'];
+		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
+		if ( ! empty( $query_schema[0] ) ) {
 			$query_schema[0]['verse'] = '1';
 			$query_schema[] = [
 				'book' => $query_schema[0]['book'],
 				'chapter' => $query_schema[0]['chapter'],
-				'verse' => (int) $chapter_verse_info[$book_index][$query_schema[0]['chapter']],
+				'verse' => (int) $chapter_verse_info[ $book_index ][ $query_schema[0]['chapter'] ],
 			];
 		}
-		if ( 1 < $query_schema_count ) {
-			$query_schema[ $query_schema_count - 1 ]['verse'] = (int) $chapter_verse_info[$book_index][$query_schema[0]['chapter']];
+		if ( isset( $options['with_prev_chapter'] ) && $options['with_prev_chapter'] ) {
+			$prev_chapter_number = max( 0, (int) $query_schema[0]['chapter'] - 1 );
+			$query_schema[0]['chapter'] = $prev_chapter_number;
+		}
+
+		if ( isset( $options['with_next_chapter'] ) && $options['with_next_chapter'] ) {
+			$query_schema_count = count( $query_schema );
+			$query_schema_last_index = max( 0, $query_schema_count - 1 );
+			$next_chapter_number = max( 0, (int) $query_schema[ $query_schema_last_index ]['chapter'] + 1 );
+			$query_schema[ $query_schema_last_index ]['chapter'] = $next_chapter_number;
+			$query_schema[ $query_schema_last_index ]['verse'] = (int) $chapter_verse_info[ $book_index ][ $next_chapter_number ];
 		}
 		return $query_schema;
 	}
@@ -170,19 +202,10 @@ final class Bible extends Base {
 		if ( empty( $query_schema ) ) {
 			return [];
 		}
-		$query_from_book = $query_schema[0]['book'];
-		$query_from_chapter = $query_schema[0]['chapter'];
-		$query_from_verse = $query_schema[0]['verse'];
-		$query_to_book = $query_schema[1]['book'];
-		$query_to_chapter = $query_schema[1]['chapter'];
-		$query_to_verse = $query_schema[1]['verse'];
-		$param_from = "range={$query_from_book}{$query_from_chapter}:{$query_from_verse}";
-		$param_to = '';
-		if ( isset( $query_schema[1] ) ) {
-			$param_to = "&range={$query_to_book}{$query_to_chapter}:{$query_to_verse}";
-		}
+		$raw_params = $this->generateGetRawParam( $query_schema );
+		$query_string = $this->generateQueryString( $raw_params );
 		$bible_remote = $this->remote();
-		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$param_from}{$param_to}" );
+		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
 		if ( $rhema_res instanceof WP_Error ) {
 			return $rhema_res;
 		}
@@ -191,6 +214,26 @@ final class Bible extends Base {
 		}
 		wp_cache_add( 'fetched_bible', $rhema_res['body'], rhema()->plugin->name() );
 		return json_decode( $rhema_res['body'] );
+	}
+
+	public function generateQueryString( $raw_params ): string {
+		$param_from = "range={$raw_params['query_from_book']}{$raw_params['query_from_chapter']}:{$raw_params['query_from_verse']}";
+		$param_to = '';
+		if ( isset( $raw_params['query_to_book'] ) && isset( $raw_params['query_to_chapter'] ) && isset( $raw_params['query_to_verse'] ) ) {
+			$param_to = "&range={$raw_params['query_to_book']}{$raw_params['query_to_chapter']}:{$raw_params['query_to_verse']}";
+		}
+		return "{$param_from}{$param_to}";
+	}
+
+	public function generateGetRawParam( $query_schema ): array {
+		return [
+			'query_from_book' => $query_schema[0]['book'],
+			'query_from_chapter' => $query_schema[0]['chapter'],
+			'query_from_verse' => $query_schema[0]['verse'],
+			'query_to_book' => $query_schema[1]['book'],
+			'query_to_chapter' => $query_schema[1]['chapter'],
+			'query_to_verse' => $query_schema[1]['verse'],
+		];
 	}
 
 	public function getBooks(): array {
@@ -202,7 +245,7 @@ final class Bible extends Base {
 
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array {
 		$bible_remote = $this->remote();
-		$translate_res = wp_remote_get( "$bible_remote/$translate_abbr" );
+		$translate_res = wp_remote_get( "{$bible_remote}/{$translate_abbr}" );
 		if ( $translate_res instanceof WP_Error ) {
 			return $translate_res;
 		}

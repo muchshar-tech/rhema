@@ -96,7 +96,8 @@ export const generalSlice = createSlice({
                         state.booksSelector.books = false
                         break
                     case 'verses':
-                        console.log('selected verses!')
+                        state.headersSwitch.main = true
+                        state.headersSwitch.books = false
                         break
                 }
             }

@@ -16,8 +16,8 @@ const App = () => {
             </style>
             <Routes>
                 <Route path="/bible">
-                    <Route path=":books">
-                        <Route path=":verse" element={<Pages.Verses />} />
+                    <Route path=":books1">
+                        <Route path=":verse1" element={<Pages.Verses />} />
                         <Route
                             path=":verse1/-/:books2/:verse2"
                             element={<Pages.Verses />}

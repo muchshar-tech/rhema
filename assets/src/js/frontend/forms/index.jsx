@@ -37,7 +37,6 @@ const CategorySelector = ({ options }) => {
     const getFilteredItems = (items) =>
         items.filter((item) => selectedItems.indexOf(item) < 0)
 
-    console.log('Before return:', isOpen, selectedItems)
     return (
         <div>
             <div

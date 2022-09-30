@@ -5,7 +5,11 @@ import { useSelector } from 'react-redux'
 
 import { generateVerseUrl } from '@assets/js/frontend/utilities'
 
-const LinkVerse = ({ book, chapter, number }) => {
+export const DrawerTitle = ({ children }) => {
+    return <h3>{children}</h3>
+}
+
+export const LinkVerse = ({ book, chapter, number }) => {
     const booksData = useSelector((state) => [
         ...state.data.books.old,
         ...state.data.books.new,
@@ -26,5 +30,3 @@ LinkVerse.propTypes = {
     chapter: PropTypes.number,
     number: PropTypes.number,
 }
-
-export { LinkVerse }

@@ -50,7 +50,7 @@ const Line = ({ verseNum, children }) => {
     }
     const classNames = [
         'before:text-12px',
-        'before:w-14px',
+        'before:w-18px',
         'before:inline-flex',
         'before:items-center',
         'before:justify-center',

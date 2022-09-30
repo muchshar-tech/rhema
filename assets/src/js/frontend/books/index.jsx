@@ -384,11 +384,10 @@ const Verses = () => {
     const onClickBlock = function (number) {
         dispatch(
             currentSelection({
-                verse: Number(number),
+                verses: Number(number),
             })
         )
     }
-    console.log(isQueryAndSelectionSame, displayChapterVerseInfo)
     return (
         <Container className="w-full" toggle={toggleVerses}>
             {Object.keys(displayChapterVerseInfo).map(

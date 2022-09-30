@@ -17,7 +17,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tab */ "./assets/src/js/backend/tab/index.jsx");
 /* harmony import */ var _form_table__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./form-table */ "./assets/src/js/backend/form-table/index.jsx");
 /* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
-function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
 
@@ -33690,7 +33690,7 @@ const useFormContext = () => react__WEBPACK_IMPORTED_MODULE_0__.useContext(HookF
  */
 const FormProvider = (props) => {
     const { children, ...data } = props;
-    return (react__WEBPACK_IMPORTED_MODULE_0__.createElement(HookFormContext.Provider, { value: data }, children));
+    return (react__WEBPACK_IMPORTED_MODULE_0__.createElement(HookFormContext.Provider, { value: data }, props.children));
 };
 
 var getProxyFormState = (formState, _proxyFormState, localProxyFormState, isRoot = true) => {
@@ -33975,7 +33975,6 @@ function useController(props) {
                 if (elm && field && elm.focus) {
                     field._f.ref = {
                         focus: () => elm.focus(),
-                        select: () => elm.select(),
                         setCustomValidity: (message) => elm.setCustomValidity(message),
                         reportValidity: () => elm.reportValidity(),
                     };
@@ -34289,7 +34288,7 @@ function useFieldArray(props) {
     _name.current = name;
     _fieldIds.current = fields;
     control._names.array.add(name);
-    const callback = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(({ values, name: fieldArrayName, }) => {
+    const callback = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(({ values, name: fieldArrayName }) => {
         if (fieldArrayName === _name.current || !fieldArrayName) {
             const fieldValues = get(values, _name.current, []);
             setFields(fieldValues);
@@ -35660,8 +35659,7 @@ function createFormControl(props = {}) {
     const setFocus = (name, options = {}) => {
         const field = get(_fields, name)._f;
         const fieldRef = field.refs ? field.refs[0] : field.ref;
-        fieldRef.focus();
-        options.shouldSelect && fieldRef.select();
+        options.shouldSelect ? fieldRef.select() : fieldRef.focus();
     };
     return {
         control: {
@@ -35934,3 +35932,4 @@ if (!!container && container instanceof HTMLElement) {
 
 /******/ })()
 ;
+//# sourceMappingURL=backend.js.map

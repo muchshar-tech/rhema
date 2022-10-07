@@ -21,7 +21,7 @@ module.exports = (projectOptions) => {
             projectOptions.projectCss.use === 'sass'
                 ? projectOptions.projectCss.rules.sass.test
                 : projectOptions.projectCss.rules.postcss.test,
-        exclude: /(node_modules|bower_components|vendor)/,
+        exclude: /(bower_components|vendor)/,
         use: [
             MiniCssExtractPlugin.loader, // Creates `style` nodes from JS strings
             'css-loader', // Translates CSS into CommonJS
@@ -136,7 +136,7 @@ module.exports = (projectOptions) => {
      * Externals
      */
     const externals = {
-        'RHEMA_LOCALIZE': 'LOCALIZE_SCRIPT_VARIABLES',
+        RHEMA_LOCALIZE: 'LOCALIZE_SCRIPT_VARIABLES',
     }
 
     return {

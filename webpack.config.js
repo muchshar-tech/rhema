@@ -58,7 +58,7 @@ const projectFiles = {
                 test: /\.s[ac]ss$/i,
             },
             postcss: {
-                test: /\.pcss$/i,
+                test: /\.(p?css|css)$/i,
             },
         },
         purgeCss: {

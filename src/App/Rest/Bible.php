@@ -92,7 +92,7 @@ class Bible extends Base {
 		}
 		$query_schema = rhema()->bible()->getQuerySchema( false, $param, [
 			'with_prev_chapter' => (bool) $with_prev_chapter,
-			'with_next_chapter' => (bool) $with_prev_chapter,
+			'with_next_chapter' => (bool) $with_next_chapter,
 		] );
 		$raw_params = rhema()->bible()->generateGetRawParam( $query_schema );
 		$query_string = rhema()->bible()->generateQueryString( $raw_params );

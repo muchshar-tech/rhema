@@ -65,7 +65,8 @@ const Line = ({ active = false, block = false, id, verseNum, children }) => {
         const selectedRawIndex = selectedRaws.findIndex((raw) => raw.id === id)
         const isSelectedRaw = selectedRawIndex !== -1
         if (isSelectedRaw) {
-            dispatch(delRaw({...selectedRaws[selectedRawIndex]}))
+            dispatch(delRaw(selectedRaws[selectedRawIndex]))
+            return
         }
         if (active) {
             dispatch(delRaw(currentChapterRaws[rawIndex]))

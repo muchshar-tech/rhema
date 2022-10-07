@@ -2,6 +2,8 @@
  * SASS
  */
 import '../postcss/frontend.pcss'
+import 'react-loading-skeleton/dist/skeleton.css'
+
 
 /**
  * JavaScript

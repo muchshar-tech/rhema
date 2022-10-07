@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import clamp from 'lodash/clamp'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
+import { FiMinusSquare } from 'react-icons/fi'
 import Swipe from 'react-easy-swipe'
 
 import * as Paragraph from '@components/frontend/paragraph'
@@ -236,9 +237,12 @@ Drawer.SelectedRaw = ({}) => {
     return (
         <div className="w-full">
             {selectedRaws.map((raw) => (
-                <Paragraph.Line block={true} id={raw.id} key={raw.id} verseNum={raw.verse}>
-                    {raw.text}
-                </Paragraph.Line>
+                <div key={raw.id}>
+                    <FiMinusSquare className="text-neutral-600 h-15px w-15px inline-block" />
+                    <Paragraph.Line id={raw.id} verseNum={raw.verse}>
+                        {raw.text}
+                    </Paragraph.Line>
+                </div>
             ))}
         </div>
     )

@@ -3,6 +3,7 @@ import { useLongPress } from 'use-long-press'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { switchHeadersSelection } from '@assets/js/frontend/states/generalSlice'
+import { putRaw, delRaw } from '@assets/js/frontend/states/selectedSlice'
 
 const RelateContent = ({}) => {
     return (
@@ -14,25 +15,38 @@ const RelateContent = ({}) => {
 }
 
 const Title = ({ children }) => {
-    return <h3 className="mb-10px text-sm font-bold">{ children }</h3>
+    return <h3 className="mb-10px text-sm font-bold">{children}</h3>
 }
 
 const Block = ({ children }) => {
-    return <p className="line-break-anywhere leading-12 mb-10px last:mb-0px">{children}</p>
+    return (
+        <p className="line-break-anywhere leading-12 mb-10px last:mb-0px">
+            {children}
+        </p>
+    )
 }
 
-const Line = ({ verseNum, children }) => {
+const Line = ({ active = false, block = false, id, verseNum, children }) => {
     const isSelectionMode = useSelector(
         (state) => state.general.headersSwitch.selection
     )
-    const [active, setActive] = useState(false)
     const dispatch = useDispatch()
+    const { current: currentChapterRaws } = useSelector(
+        (state) => state.data.raws
+    )
+    const selectedRaws = useSelector((state) => state.selected.raws)
     const bind = useLongPress(
         !isSelectionMode
             ? () => {
                   console.log('Long pressed!')
-                  setActive(!active)
                   dispatch(switchHeadersSelection())
+                  if (active) {
+                      return
+                  }
+                  const rawIndex = currentChapterRaws.findIndex(
+                      (raw) => raw.id === id
+                  )
+                  dispatch(putRaw(currentChapterRaws[rawIndex]))
               }
             : null,
         {
@@ -40,13 +54,24 @@ const Line = ({ verseNum, children }) => {
             cancelOnMovement: true,
         }
     )
-    const onClickVerse = (e) => {
-        console.log('ClickVerse', isSelectionMode)
+
+    const onClickVerse = (id, e) => {
+        console.log('onClickVerse')
         e.preventDefault()
         if (!isSelectionMode) {
             return
         }
-        setActive(!active)
+        const rawIndex = currentChapterRaws.findIndex((raw) => raw.id === id)
+        const selectedRawIndex = selectedRaws.findIndex((raw) => raw.id === id)
+        const isSelectedRaw = selectedRawIndex !== -1
+        if (isSelectedRaw) {
+            dispatch(delRaw({...selectedRaws[selectedRawIndex]}))
+        }
+        if (active) {
+            dispatch(delRaw(currentChapterRaws[rawIndex]))
+            return
+        }
+        dispatch(putRaw(currentChapterRaws[rawIndex]))
     }
     const classNames = [
         'before:text-12px',
@@ -67,6 +92,7 @@ const Line = ({ verseNum, children }) => {
                   'underline-offset-4',
               ]
             : []),
+        ...(block ? ['block'] : []),
         'before:leading-none',
         'before:decoration-sky-500',
         'cursor-pointer',
@@ -76,7 +102,7 @@ const Line = ({ verseNum, children }) => {
             data-verse-num={verseNum}
             className={classNames}
             {...bind()}
-            onClick={onClickVerse}
+            onClick={onClickVerse.bind(this, id)}
         >
             {children}
         </span>

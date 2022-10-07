@@ -12,8 +12,8 @@ import { useGetBibleRawQuery } from '@components/frontend/services'
 import { generateRestRangeParam } from '@assets/js/frontend/utilities'
 import { loadRaws } from '@assets/js/frontend/states/dataSlice'
 
-const Container = ({ raws, isLoading }) => {
-    console.log('Run Memo', raws, isLoading)
+const Container = ({ raws, selected, isLoading }) => {
+    // console.log('Run Memo', raws, isLoading)
     return (
         <Layout.AppContainer>
             <Layout.Top>
@@ -28,6 +28,11 @@ const Container = ({ raws, isLoading }) => {
                         <Paragraph.Block>
                             {raws.map((raw) => (
                                 <Paragraph.Line
+                                    active={selected.some(
+                                        (selectedRaw) =>
+                                            selectedRaw.id === raw.id
+                                    )}
+                                    id={raw.id}
                                     key={raw.id}
                                     verseNum={raw.verse}
                                 >
@@ -43,6 +48,10 @@ const Container = ({ raws, isLoading }) => {
                 </Layout.Drawer>
                 <Layout.Drawer className="p-2" name="relative-posts">
                     <DrawerTitle>此段聖經相關文章</DrawerTitle>
+                </Layout.Drawer>
+                <Layout.Drawer className="p-2 content-start flex-wrap" name="selected-raws">
+                    <DrawerTitle>已選擇的經文</DrawerTitle>
+                    <Layout.Drawer.SelectedRaw />
                 </Layout.Drawer>
             </Layout.Body>
         </Layout.AppContainer>
@@ -60,16 +69,20 @@ const MemoContainer = React.memo(Container, (prev, next) => {
     ) {
         return false
     }
+    if (prev.selected.length !== next.selected.length) {
+        return false
+    }
     return true
 })
 
 export const Verses = () => {
     const dispatch = useDispatch()
     const params = useParams()
-    const rangeParams = generateRestRangeParam(params)
+    const urlParams = generateRestRangeParam(params)
     const { current } = useSelector((state) => state.data.raws)
+    const selected = useSelector((state) => state.selected.raws)
     const { data, error, isLoading } = useGetBibleRawQuery({
-        ranges: rangeParams,
+        ranges: urlParams,
         withPrevChapter: true,
         withNextChapter: true,
     })
@@ -79,5 +92,12 @@ export const Verses = () => {
             dispatch(loadRaws(data))
         }
     }, [data])
-    return <MemoContainer raws={current} isLoading={isLoading} error={error} />
+    return (
+        <MemoContainer
+            raws={current}
+            selected={selected}
+            isLoading={isLoading}
+            error={error}
+        />
+    )
 }

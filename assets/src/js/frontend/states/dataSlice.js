@@ -35,6 +35,6 @@ export const dataSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { loadRaws, insertRaw } = dataSlice.actions
+export const { loadRaws, insertRaw, updateQueryString } = dataSlice.actions
 
 export default dataSlice.reducer

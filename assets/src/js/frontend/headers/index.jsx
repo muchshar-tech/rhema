@@ -103,9 +103,7 @@ const Selection = () => {
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>
                 <Layout.Top.MiddleSide>
-                    <Tools.BooksSelectorButton
-                        range={['出埃及记 3:12', '出埃及记 3:20']}
-                    />
+                    <Tools.CurrentRawsSelected />
                 </Layout.Top.MiddleSide>
                 <Layout.Top.RightSide></Layout.Top.RightSide>
             </Layout.Top.Row>

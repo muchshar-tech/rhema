@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import Swipe from 'react-easy-swipe'
 
+import * as Paragraph from '@components/frontend/paragraph'
 import * as Tools from '@components/frontend/tools'
 
 const AppContainer = ({ children }) => {
@@ -228,6 +229,19 @@ Top.Row = ({ className: extraClassName = '', children }) => {
         ...extraClassName.split(' '),
     ].join(' ')
     return <div className={classNames}>{children}</div>
+}
+
+Drawer.SelectedRaw = ({}) => {
+    const selectedRaws = useSelector((state) => state.selected.raws)
+    return (
+        <div className="w-full">
+            {selectedRaws.map((raw) => (
+                <Paragraph.Line block={true} id={raw.id} key={raw.id} verseNum={raw.verse}>
+                    {raw.text}
+                </Paragraph.Line>
+            ))}
+        </div>
+    )
 }
 
 export { AppContainer, Body, Content, Drawer, Page, Top }

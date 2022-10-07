@@ -14,11 +14,11 @@ export const LinkVerse = ({ book, chapter, number }) => {
         ...state.data.books.old,
         ...state.data.books.new,
     ])
-    const bookAbbr = booksData[book - 1].abbr.replace('.', '').toLowerCase()
+    const slug = booksData[book - 1].slug
     return (
         <Link
             className={`block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600`}
-            to={generateVerseUrl(bookAbbr, chapter, number)}
+            to={generateVerseUrl(slug, chapter, number)}
         >
             {number.toString()}
         </Link>

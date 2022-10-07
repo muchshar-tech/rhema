@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { LinkVerse } from '@assets/js/frontend/components'
 import { currentSelection } from '@assets/js/frontend/states/generalSlice'
+import { updateQueryString } from '@assets/js/frontend/states/dataSlice'
 
 const Block = ({
     onClick,
@@ -331,9 +332,10 @@ const Verses = () => {
     const chapterVerseInfo = useSelector(
         (state) => state.data.translation.info.chapterVerseInfo
     )
-    const currentSelectionBookIndex = useSelector(
-        (state) => state.general.currentSelection.books.index
+    const currentSelectionBooks = useSelector(
+        (state) => state.general.currentSelection.books
     )
+    const currentSelectionBookIndex = currentSelectionBooks.index
     const currentSelectionChapter = useSelector(
         (state) => state.general.currentSelection.chapters
     )
@@ -381,12 +383,18 @@ const Verses = () => {
             query.book.index === currentSelectionBookIndex &&
             Number(query.chapter) === currentSelectionChapter
     )
-    const onClickBlock = function (number) {
-        dispatch(
+    const onClickBlock = async function ({ book, chapter, verse }) {
+        const maxVerseNumber = chapterVerseInfo[displayBooksIndex][chapter]
+        const prepareQueryString = [
+            { book, chapter, verse: 1 },
+            { book, chapter, verse: maxVerseNumber },
+        ]
+        await dispatch(
             currentSelection({
-                verses: Number(number),
+                verses: Number(verse),
             })
         )
+        await dispatch(updateQueryString(prepareQueryString))
     }
     return (
         <Container className="w-full" toggle={toggleVerses}>
@@ -417,6 +425,7 @@ const Verses = () => {
                                             100 +
                                         Number(currentQueryString[1].verse)
                                     const isSomeInCurrentQuery =
+                                        isQueryAndSelectionSame &&
                                         literalIntegral >= fromIntegral &&
                                         literalIntegral <= toIntegral
                                     const classNames = ['text-center']
@@ -425,10 +434,12 @@ const Verses = () => {
                                     }
                                     return (
                                         <Block
-                                            onClick={onClickBlock.bind(
-                                                this,
-                                                number
-                                            )}
+                                            onClick={onClickBlock.bind(this, {
+                                                book: currentSelectionBooks,
+                                                chapter:
+                                                    currentSelectionChapter,
+                                                verse: number,
+                                            })}
                                             className={classNames.join(' ')}
                                             size="small"
                                             key={idx}

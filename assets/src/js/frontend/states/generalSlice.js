@@ -15,7 +15,7 @@ const initialState = {
     currentSelection: {
         books: '',
         chapters: '',
-        verse: '',
+        verses: '',
     },
     drawer: {},
 }
@@ -98,6 +98,9 @@ export const generalSlice = createSlice({
                     case 'verses':
                         state.headersSwitch.main = true
                         state.headersSwitch.books = false
+                        state.booksSelector.chapters = false
+                        state.booksSelector.verses = false
+                        state.booksSelector.books = true
                         break
                 }
             }

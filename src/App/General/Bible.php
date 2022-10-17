@@ -159,12 +159,13 @@ final class Bible extends Base {
 				'verse' => $current_matches[3],
 			];
 		}, array_keys( $query_var ), array_values( $query_var ) );
-		
+
 		$is_whole_chapter = $this->isQueryWholeChapter( $query_schema );
 		if ( ! $is_whole_chapter ) {
 			return $query_schema;
 		}
-		$chapter_verse_info = rhema()->bible()->getTranslationInfo( 'cuv' )['chapterVerseInfo'];
+		$translation_info = rhema()->bible()->getTranslationInfo( 'cuv' );
+		$chapter_verse_info = $translation_info['chapterVerseInfo'];
 		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
 		if ( ! empty( $query_schema[0] ) ) {
 			$query_schema[0]['verse'] = '1';
@@ -243,16 +244,33 @@ final class Bible extends Base {
 		];
 	}
 
-	public function getTranslationInfo( $translate_abbr = 'kjv' ): array {
+	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$bible_remote = $this->remote();
-		$translate_res = wp_remote_get( "{$bible_remote}/{$translate_abbr}" );
+		$remote_query_string = "{$bible_remote}/{$translate_abbr}";
+		$transient_translate_res = $this->get_transient( 'rhema.bible.translate.info', $remote_query_string );
+		if ( ! empty( $transient_translate_res ) ) {
+			return json_decode( $transient_translate_res, true );
+		}
+		$translate_res = wp_remote_get( $remote_query_string );
 		if ( $translate_res instanceof WP_Error ) {
 			return $translate_res;
 		}
 		if ( empty( $translate_res['body'] ) ) {
 			return [];
 		}
-		set_transient( "rhema_bible_translate_$translate_abbr", $translate_res['body'], MONTH_IN_SECONDS );
+		$this->set_transient( 'rhema.bible.translate.info', $remote_query_string, $translate_res['body'], MONTH_IN_SECONDS );
 		return json_decode( $translate_res['body'], true );
+	}
+
+	public function get_transient( $prefix, $query_string ): mixed {
+		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
+		$transient_label = "$prefix.$remote_query_string_base64";
+		return get_transient( $transient_label );
+	}
+
+	public function set_transient( $prefix, $query_string, $value, $expiration = 0 ): bool {
+		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
+		$transient_label = "$prefix.$remote_query_string_base64";
+		return set_transient( $transient_label, $value, $expiration );
 	}
 }

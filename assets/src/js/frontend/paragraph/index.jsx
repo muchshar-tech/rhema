@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import { useLongPress } from 'use-long-press'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -18,6 +19,10 @@ const Title = ({ children }) => {
     return <h3 className="mb-10px text-sm font-bold">{children}</h3>
 }
 
+Title.propTypes = {
+    children: PropTypes.element,
+}
+
 const Block = ({ children }) => {
     return (
         <p className="line-break-anywhere leading-12 mb-10px last:mb-0px">
@@ -26,7 +31,19 @@ const Block = ({ children }) => {
     )
 }
 
-const Line = ({ active = false, block = false, id, verseNum, children }) => {
+Block.propTypes = {
+    children: PropTypes.element,
+}
+
+const Line = ({
+    active = false,
+    block = false,
+    id = '0000000',
+    bookAbbr = '',
+    chapterNum = '',
+    verseNum = '',
+    children,
+}) => {
     const isSelectionMode = useSelector(
         (state) => state.general.headersSwitch.selection
     )
@@ -74,14 +91,21 @@ const Line = ({ active = false, block = false, id, verseNum, children }) => {
         }
         dispatch(putRaw(currentChapterRaws[rawIndex]))
     }
+    const generateBeforeContentClassName = (bookAbbr, chapterNum) => {
+        if (bookAbbr && chapterNum) {
+            return 'before:content-[attr(data-book-abbr)_"_"attr(data-chapter-num)":"_attr(data-verse-num)]'
+        }
+        return `before:content-[attr(data-verse-num)]`
+    }
+    const beforeIsWider = !!bookAbbr && !!chapterNum
     const classNames = [
         'before:text-12px',
-        'before:w-18px',
+        ...(!beforeIsWider ? ['before:w-18px'] : ['before:px-3px']),
         'before:inline-flex',
         'before:items-center',
         'before:justify-center',
         'before:text-center',
-        'before:content-[attr(data-verse-num)]',
+        generateBeforeContentClassName(bookAbbr, chapterNum),
         'before:align-text-top',
         'before:mt-5px',
         'before:text-gray-400',
@@ -100,7 +124,21 @@ const Line = ({ active = false, block = false, id, verseNum, children }) => {
     ].join(' ')
     return (
         <span
-            data-verse-num={verseNum}
+            {...(bookAbbr
+                ? {
+                      'data-book-abbr': bookAbbr,
+                  }
+                : {})}
+            {...(chapterNum
+                ? {
+                      'data-chapter-num': chapterNum,
+                  }
+                : {})}
+            {...(verseNum
+                ? {
+                      'data-verse-num': verseNum,
+                  }
+                : {})}
             className={classNames}
             {...bind()}
             onClick={onClickVerse.bind(this, id)}
@@ -109,4 +147,15 @@ const Line = ({ active = false, block = false, id, verseNum, children }) => {
         </span>
     )
 }
+
+Line.propTypes = {
+    active: PropTypes.bool,
+    block: PropTypes.bool,
+    id: PropTypes.string,
+    bookAbbr: PropTypes.string,
+    chapterNum: PropTypes.string,
+    verseNum: PropTypes.string,
+    children: PropTypes.element,
+}
+
 export { Title, Block, Line, RelateContent }

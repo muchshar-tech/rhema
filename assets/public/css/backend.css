@@ -1106,6 +1106,11 @@ video {
   content: var(--tw-content);
   justify-content: center;
 }
+.before\:px-3px::before {
+  content: var(--tw-content);
+  padding-left: 3px;;
+  padding-right: 3px;;
+}
 .before\:text-center::before {
   content: var(--tw-content);
   text-align: center;
@@ -1131,6 +1136,10 @@ video {
   content: var(--tw-content);
   -webkit-text-decoration-color: #0ea5e9;
           text-decoration-color: #0ea5e9;
+}
+.before\:content-\[attr\(data-book-abbr\)_\"_\"attr\(data-chapter-num\)\"\:\"_attr\(data-verse-num\)\]::before {
+  --tw-content: attr(data-book-abbr) " "attr(data-chapter-num)":" attr(data-verse-num);
+  content: var(--tw-content);
 }
 .before\:content-\[attr\(data-verse-num\)\]::before {
   --tw-content: attr(data-verse-num);

@@ -186,7 +186,7 @@ const Drawer = ({ name, className: extraClassName = '', children }) => {
     )
 }
 
-Top.LeftSide = ({ className: extraClassName = '', children }) => {
+Top.LeftSide = function LeftSide({ className: extraClassName = '', children }) {
     const classNames = [
         'flex',
         'items-center',
@@ -196,7 +196,10 @@ Top.LeftSide = ({ className: extraClassName = '', children }) => {
     return <div className={classNames}>{children}</div>
 }
 
-Top.MiddleSide = ({ className: extraClassName = '', children }) => {
+Top.MiddleSide = function MiddleSide({
+    className: extraClassName = '',
+    children,
+}) {
     const classNames = [
         'flex',
         'items-center',
@@ -211,7 +214,10 @@ Top.MiddleSide = ({ className: extraClassName = '', children }) => {
     return <div className={classNames}>{children}</div>
 }
 
-Top.RightSide = ({ className: extraClassName = '', children }) => {
+Top.RightSide = function RightSide({
+    className: extraClassName = '',
+    children,
+}) {
     const classNames = [
         'flex',
         'items-center',
@@ -221,7 +227,7 @@ Top.RightSide = ({ className: extraClassName = '', children }) => {
     return <div className={classNames}>{children}</div>
 }
 
-Top.Row = ({ className: extraClassName = '', children }) => {
+Top.Row = function Row({ className: extraClassName = '', children }) {
     const classNames = [
         'relative',
         'flex',
@@ -232,18 +238,31 @@ Top.Row = ({ className: extraClassName = '', children }) => {
     return <div className={classNames}>{children}</div>
 }
 
-Drawer.SelectedRaw = ({}) => {
+Drawer.SelectedRaw = function SelectedRaw() {
     const selectedRaws = useSelector((state) => state.selected.raws)
+    const booksDataSelector = useSelector((state) => [
+        ...state.data.books.old,
+        ...state.data.books.new,
+    ])
     return (
         <div className="w-full">
-            {selectedRaws.map((raw) => (
-                <div key={raw.id}>
-                    <FiMinusSquare className="text-neutral-600 h-15px w-15px inline-block" />
-                    <Paragraph.Line id={raw.id} verseNum={raw.verse}>
-                        {raw.text}
-                    </Paragraph.Line>
-                </div>
-            ))}
+            {selectedRaws.map((raw) => {
+                const bookData = booksDataSelector[raw.book + 1]
+                const bookAbbr = bookData.abbr
+                return (
+                    <div key={raw.id}>
+                        <FiMinusSquare className="text-neutral-600 h-15px w-15px inline-block" />
+                        <Paragraph.Line
+                            id={raw.id}
+                            bookAbbr={bookAbbr}
+                            chapterNum={raw.chapter}
+                            verseNum={raw.verse}
+                        >
+                            {raw.text}
+                        </Paragraph.Line>
+                    </div>
+                )
+            })}
         </div>
     )
 }

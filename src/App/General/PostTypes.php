@@ -24,6 +24,17 @@ use Rhema\Common\Abstracts\Base;
 class PostTypes extends Base {
 
 	/**
+	 * Bible question type data
+	 */
+	public const BIBLE_QUESTION_TYPE = [
+		'id'       => 'bible-questions',
+		'archive'  => 'bible-questions',
+		'title'    => 'Bible Questions',
+		'singular' => 'Bible Question',
+		'icon'     => 'dashicons-book-alt',
+	];
+
+	/**
 	 * Post type data
 	 */
 	public const POST_TYPE = [
@@ -47,7 +58,7 @@ class PostTypes extends Base {
 		 *
 		 * Add plugin code here
 		 */
-		// add_action( 'init', [ $this, 'register' ] );
+		add_action( 'init', [ $this, 'register' ] );
 	}
 
 	/**
@@ -56,34 +67,35 @@ class PostTypes extends Base {
 	 * @since 1.0.0
 	 */
 	public function register() {
-		register_post_type( $this::POST_TYPE['id'],
+		$plugin_domain = $this->plugin->textDomain();
+		register_post_type( $this::BIBLE_QUESTION_TYPE['id'],
 			[
 				'labels'             => [
-					'name'           => $this::POST_TYPE['title'],
-					'singular_name'  => $this::POST_TYPE['singular'],
-					'menu_name'      => $this::POST_TYPE['title'],
-					'name_admin_bar' => $this::POST_TYPE['singular'],
-					'add_new'        => sprintf( /* translators: %s: post type singular title */ __( 'New %s', 'rhema' ), $this::POST_TYPE['singular'] ),
-					'add_new_item'   => sprintf( /* translators: %s: post type singular title */ __( 'Add New %s', 'rhema' ), $this::POST_TYPE['singular'] ),
-					'new_item'       => sprintf( /* translators: %s: post type singular title */ __( 'New %s', 'rhema' ), $this::POST_TYPE['singular'] ),
-					'edit_item'      => sprintf( /* translators: %s: post type singular title */ __( 'Edit %s', 'rhema' ), $this::POST_TYPE['singular'] ),
-					'view_item'      => sprintf( /* translators: %s: post type singular title */ __( 'View %s', 'rhema' ), $this::POST_TYPE['singular'] ),
-					'all_items'      => sprintf( /* translators: %s: post type title */ __( 'All %s', 'rhema' ), $this::POST_TYPE['title'] ),
-					'search_items'   => sprintf( /* translators: %s: post type title */ __( 'Search %s', 'rhema' ), $this::POST_TYPE['title'] ),
+					'name'           => $this::BIBLE_QUESTION_TYPE['title'],
+					'singular_name'  => $this::BIBLE_QUESTION_TYPE['singular'],
+					'menu_name'      => $this::BIBLE_QUESTION_TYPE['title'],
+					'name_admin_bar' => $this::BIBLE_QUESTION_TYPE['singular'],
+					'add_new'        => sprintf( /* translators: %s: post type singular title */ __( 'New %s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['singular'] ),
+					'add_new_item'   => sprintf( /* translators: %s: post type singular title */ __( 'Add New %s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['singular'] ),
+					'new_item'       => sprintf( /* translators: %s: post type singular title */ __( 'New %s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['singular'] ),
+					'edit_item'      => sprintf( /* translators: %s: post type singular title */ __( 'Edit %s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['singular'] ),
+					'view_item'      => sprintf( /* translators: %s: post type singular title */ __( 'View %s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['singular'] ),
+					'all_items'      => sprintf( /* translators: %s: post type title */ __( '%s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['title'] ),
+					'search_items'   => sprintf( /* translators: %s: post type title */ __( 'Search %s', 'rhema' ), $this::BIBLE_QUESTION_TYPE['title'] ),
 				],
 				'public'             => true,
 				'publicly_queryable' => true,
-				'has_archive'        => $this::POST_TYPE['archive'],
+				'has_archive'        => $this::BIBLE_QUESTION_TYPE['archive'],
 				'show_ui'            => true,
 				'rewrite'            => [
-					'slug'       => $this::POST_TYPE['archive'],
+					'slug'       => $this::BIBLE_QUESTION_TYPE['archive'],
 					'with_front' => true,
 				],
-				'show_in_menu'       => true,
+				'show_in_menu'       => $plugin_domain,
 				'query_var'          => true,
 				'capability_type'    => 'post',
-				'menu_icon'          => $this::POST_TYPE['icon'],
-				'supports'           => [ 'title', 'editor', 'thumbnail' ],
+				'menu_icon'          => $this::BIBLE_QUESTION_TYPE['icon'],
+				'supports'           => [ 'title', 'editor' ],
 			]
 		);
 	}

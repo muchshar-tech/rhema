@@ -28,7 +28,7 @@ trait Singleton {
 	final private function __clone() {
 	}
 
-	final private function __wakeup() {
+	final public function __wakeup() {
 	}
 
 	/**

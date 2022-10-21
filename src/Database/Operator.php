@@ -13,7 +13,7 @@ declare( strict_types = 1 );
 
 namespace Rhema\Database;
 
-use Rhema\Config\Plugin;
+use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Utils\Errors;
 
 /**
@@ -22,15 +22,22 @@ use Rhema\Common\Utils\Errors;
  * @package Rhema\Config
  * @since 1.0.0
  */
-final class Operator {
-
+final class Operator extends Base {
 	/**
-	 * Sets up a new HTML widget instance.
+	 * Initialize the class.
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct() {
-
+	public function init() {
+		/**
+		 * This backend class is only being instantiated in the backend as requested in the Bootstrap class
+		 *
+		 * @see Requester::isAdminBackend()
+		 * @see Bootstrap::__construct
+		 *
+		 * Add plugin code here
+		 */
+		// add_action( 'admin_enqueue_scripts', [ $this, 'enqueueScripts' ] );
 	}
 
 	public function createTransVersionTable( string $translate_name ) {

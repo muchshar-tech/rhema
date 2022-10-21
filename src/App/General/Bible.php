@@ -165,6 +165,9 @@ final class Bible extends Base {
 			return $query_schema;
 		}
 		$translation_info = rhema()->bible()->getTranslationInfo( 'cuv' );
+		if ( is_wp_error( $translation_info ) ) {
+			return $translation_info;
+		}
 		$chapter_verse_info = $translation_info['chapterVerseInfo'];
 		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
 		if ( ! empty( $query_schema[0] ) ) {

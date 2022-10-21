@@ -56,7 +56,7 @@ final class Plugin {
 						'uri'          => 'Plugin URI',
 						'description'  => 'Description',
 						'version'      => 'Version',
-						'db-version'   => 'DB Version',
+						'db-version'   => 'DataBase Version',
 						'author'       => 'Author',
 						'author-uri'   => 'Author URI',
 						'text-domain'  => 'Text Domain',

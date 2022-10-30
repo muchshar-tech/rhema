@@ -6,7 +6,7 @@ const TabWrap = ({ children }) => {
 
 const Tab = ({ children }) => {
     return (
-        <a className="nav-tab nav-tab-active" href="#">
+        <a className="nav-tab" href="#">
             {children}
         </a>
     )

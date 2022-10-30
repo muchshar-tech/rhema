@@ -52,7 +52,8 @@ class Settings extends Base {
 	 */
 	public function admin_menu() {
 		$plugin_domain = $this->plugin->textDomain();
-		$main_hook_suffix = add_menu_page( 'Rhema', 'Rhema', 'manage_options', $plugin_domain, [ $this, 'hello' ], 'dashicons-awards' );
+		$main_hook_suffix = add_menu_page( 'Rhema', 'Rhema', 'manage_options', $plugin_domain, [ $this, 'hello' ], 'dashicons-book' );
+		$questions_hook_suffix = add_submenu_page( $plugin_domain, 'Questions', 'Questions', 'manage_options', "admin.php?page=rhema#/questions" );
 	}
 
 	public function hello() {

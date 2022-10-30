@@ -62,9 +62,9 @@ add_action(
 		 * @see \Rhema\Bootstrap
 		 */
 		try {
-			new \Rhema\Bootstrap( $rhema_autoloader );
-			$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
 			$dotenv->load();
+			new \Rhema\Bootstrap( $rhema_autoloader );
 		} catch ( Exception $e ) {
 			wp_die( __( 'Rhema is unable to run the Bootstrap class.', 'rhema' ) );
 		}

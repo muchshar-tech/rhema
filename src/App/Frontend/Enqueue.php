@@ -86,7 +86,7 @@ class Enqueue extends Base {
 				// Send initail data to window, raw, title, comment...etc.
 				'RHEMA_INITAIL_DATA' => [
 					'UI' => rhema()->ui(),
-					'RAW' => rhema()->bible()->getRaw(),
+					'RAW' => rhema()->bible()->getInitialRaw(),
 					'TRANSLATION' => [
 						'ABBR' => rhema()->getData()['settings'],
 						'INFO' => rhema()->bible()->getTranslationInfo( 'cuv' ),

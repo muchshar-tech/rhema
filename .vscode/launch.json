@@ -10,7 +10,7 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                "/srv/www/rhema/public_html/wp-content/plugins/rhema/": "${workspaceFolder}/",
+                "/srv/www/rhema/public_html/wp-content/plugins/rhema/": "${workspaceFolder}/"
             }
         },
         {
@@ -19,14 +19,14 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                "/srv/www/rhema/public_html/": "C:\\Users\\jivec\\Projects\\rhema\\public_html\\",
+                "/srv/www/rhema/public_html/": "C:\\Users\\jivec\\Projects\\rhema\\public_html\\"
             }
         },
         {
             "name": "Jive NoteBook Listen Wordpress for Xdebug",
             "type": "php",
             "request": "launch",
-            "port": 9003,
+            "port": 9003
         },
     ]
 }

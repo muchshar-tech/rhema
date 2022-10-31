@@ -13,7 +13,7 @@ declare( strict_types = 1 );
 
 namespace Rhema\Common;
 
-use Rhema\App\General\Constants;
+use Rhema\App\Common\Constants;
 use Rhema\App\General\Bible;
 use Rhema\App\Frontend\Templates;
 use Rhema\Common\Abstracts\Base;

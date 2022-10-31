@@ -15,7 +15,8 @@ namespace Rhema\App\General;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
-use Rhema\App\General\Constants;
+use Rhema\App\Common\Constants;
+use WP_CLI\Iterators\Exception;
 use WP_Error;
 
 /**
@@ -36,10 +37,24 @@ final class Bible extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->constants = Constants::init();
 	}
-
-	public function isQueryWholeChapter( $query_schema ): bool {
+	public function init() {
+		/**
+		 * This general class is always being instantiated as requested in the Bootstrap class
+		 *
+		 * @see Bootstrap::__construct
+		 *
+		 * Add plugin code here
+		 */
+		// self::init();
+	}
+	/**
+	 * Check url query should fetch whole chapter verse.
+	 *
+	 * @param array $query_schema
+	 * @return boolean
+	 */
+	public function isQueryWholeChapter( array $query_schema ): bool {
 		if ( empty( $query_schema ) ) {
 			return false;
 		}
@@ -87,9 +102,14 @@ final class Bible extends Base {
 			'bible' => "{$rest_url}{$this->restNamespace()}/bible",
 		];
 	}
-
+	/**
+	 * Get book index by slug.
+	 *
+	 * @param string $slug
+	 * @return integer
+	 */
 	public function getBookIndexBySlug( string $slug ): int {
-		$slug_in_regexes = array_filter( $this->constants->abbr_regex_index, function( $abbr_regex_index ) use ( $slug ) {
+		$slug_in_regexes = array_filter( Constants::ABBR_REGEX_INDEX, function( $abbr_regex_index ) use ( $slug ) {
 			return preg_match( $abbr_regex_index, $slug );
 		} );
 		return (int) array_keys( $slug_in_regexes )[0];
@@ -97,7 +117,7 @@ final class Bible extends Base {
 
 	public function getBookTransBySlug( string $slug ): array {
 		$book_index = $this->getBookIndexBySlug( $slug );
-		return $this->constants->books[ $book_index ];
+		return Constants::BOOKS[ $book_index ];
 	}
 	/**
 	 * Get bible url query by using rhema()->bible()->getQueryParam()
@@ -130,9 +150,9 @@ final class Bible extends Base {
 		}
 		$query_schema = array_map( function( int $index, string $query ) use ( $query_var, $book_slug_to_trans ) {
 			$current_matches = [];
-			$current_matched = preg_match( $this->constants->range_query_regex, $query, $current_matches );
+			$current_matched = preg_match( Constants::RANGE_QUERY_REGEX, $query, $current_matches );
 			$prev_matches = [];
-			$prev_matched = preg_match( $this->constants->range_query_regex, $index > 0 ? $query_var[ $index - 1 ] : $query, $prev_matches );
+			$prev_matched = preg_match( Constants::RANGE_QUERY_REGEX, $index > 0 ? $query_var[ $index - 1 ] : $query, $prev_matches );
 			if ( ! $current_matched && 0 === $index ) {
 				return [
 					'book' => $book_slug_to_trans ? $this->getBookTransBySlug( 'gen' ) : 'gen',
@@ -164,9 +184,9 @@ final class Bible extends Base {
 		if ( ! $is_whole_chapter ) {
 			return $query_schema;
 		}
-		$translation_info = rhema()->bible()->getTranslationInfo( 'cuv' );
+		$translation_info = $this->getTranslationInfo( 'cuv' );
 		if ( is_wp_error( $translation_info ) ) {
-			return $translation_info;
+			throw new Exception( $translation_info->get_error_message() );
 		}
 		$chapter_verse_info = $translation_info['chapterVerseInfo'];
 		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
@@ -193,14 +213,14 @@ final class Bible extends Base {
 		return $query_schema;
 	}
 	/**
-	 * Get raw data by using rhema()->bible()->getRaw()
+	 * Get raw data by using rhema()->bible()->getInitialRaw()
 	 *
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getRaw(): array {
-		if ( ! empty( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) ) ) {
-			return json_decode( wp_cache_get( 'fetched_bible', rhema()->plugin->name() ) );
+	public function getInitialRaw(): array {
+		if ( ! empty( wp_cache_get( 'fetched_bible', $this->plugin->name() ) ) ) {
+			return json_decode( wp_cache_get( 'fetched_bible', $this->plugin->name() ) );
 		}
 		$query_schema = $this->getQuerySchema();
 		if ( empty( $query_schema ) ) {
@@ -216,7 +236,8 @@ final class Bible extends Base {
 		if ( empty( $rhema_res['body'] ) ) {
 			return [];
 		}
-		wp_cache_add( 'fetched_bible', $rhema_res['body'], rhema()->plugin->name() );
+		var_dump($this->plugin->bootstrap);
+		wp_cache_add( 'fetched_bible', $rhema_res['body'], $this->plugin->name() );
 		return json_decode( $rhema_res['body'] );
 	}
 
@@ -242,8 +263,8 @@ final class Bible extends Base {
 
 	public function getBooks(): array {
 		return [
-			'old' => array_slice( $this->constants->books, 0, 39 ),
-			'new' => array_slice( $this->constants->books, 39, 27 ),
+			'old' => array_slice( Constants::BOOKS, 0, 39 ),
+			'new' => array_slice( Constants::BOOKS, 39, 27 ),
 		];
 	}
 
@@ -256,6 +277,7 @@ final class Bible extends Base {
 		}
 		$translate_res = wp_remote_get( $remote_query_string );
 		if ( $translate_res instanceof WP_Error ) {
+			//TODO: 如果是 WP_Error，要進行例外處理，要顯示錯誤訊息
 			return $translate_res;
 		}
 		if ( empty( $translate_res['body'] ) ) {

@@ -14,7 +14,7 @@ declare( strict_types = 1 );
 namespace Rhema\App\General;
 
 use Rhema\Common\Abstracts\Base;
-use Rhema\App\General\PostTypes;
+use Rhema\Common\Traits\Singleton;
 
 /**
  * Class Queries
@@ -23,7 +23,14 @@ use Rhema\App\General\PostTypes;
  * @since 1.0.0
  */
 class Queries extends Base {
-
+	/**
+	 * Base constructor.
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct() {
+		parent::__construct();
+	}
 	/**
 	 * Initialize the class.
 	 *
@@ -44,17 +51,17 @@ class Queries extends Base {
 	 * @param string $orderby
 	 * @return \WP_Query
 	 */
-	public function getPosts( $posts_count, $orderby = 'date' ): \WP_Query {
-		return new \WP_Query(
-			[
-				'post_type'      => PostTypes::POST_TYPE['id'],
-				'post_status'    => 'publish',
-				'order'          => 'DESC',
-				'posts_per_page' => $posts_count,
-				'orderby'        => $orderby,
-			]
-		);
-	}
+	// public function getPosts( $posts_count, $orderby = 'date' ): \WP_Query {
+	// 	return new \WP_Query(
+	// 		[
+	// 			'post_type'      => PostTypes::POST_TYPE['id'],
+	// 			'post_status'    => 'publish',
+	// 			'order'          => 'DESC',
+	// 			'posts_per_page' => $posts_count,
+	// 			'orderby'        => $orderby,
+	// 		]
+	// 	);
+	// }
 
 	/**
 	 * Example
@@ -62,6 +69,24 @@ class Queries extends Base {
 	 * @return array
 	 */
 	public function getPostIds(): array {
+		global $wpdb;
+		return $wpdb->get_col( "select ID from {$wpdb->posts} LIMIT 3" );
+	}
+	/**
+	 * Example
+	 *
+	 * @return array
+	 */
+	public function getQuestions(): array {
+		global $wpdb;
+		return $wpdb->get_col( "select ID from {$wpdb->posts} LIMIT 3" );
+	}
+	/**
+	 * Example
+	 *
+	 * @return array
+	 */
+	public function getRelations(): array {
 		global $wpdb;
 		return $wpdb->get_col( "select ID from {$wpdb->posts} LIMIT 3" );
 	}

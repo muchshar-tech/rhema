@@ -14,6 +14,7 @@ declare( strict_types = 1 );
 namespace Rhema\Config;
 
 use Rhema\Common\Traits\Singleton;
+use Rhema\Database\Operator;
 
 /**
  * Plugin setup hooks (activation, deactivation, uninstall)
@@ -39,6 +40,8 @@ final class Setup {
 		/**
 		 * Use this to add a database table after the plugin is activated for example
 		 */
+		$db_operator = Operator::init();
+		$db_operator->installDB();
 
 		// Clear the permalinks
 		flush_rewrite_rules();

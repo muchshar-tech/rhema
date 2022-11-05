@@ -10,6 +10,7 @@ export const selectedSlice = createSlice({
     reducers: {
         putRaw: (state, action) => {
             const { payload } = action
+            console.log(payload)
             state.raws.push(payload)
             state.raws.sort((a, b) => {
                 if (a.id < b.id) {

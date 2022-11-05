@@ -4,9 +4,13 @@ const TabWrap = ({ children }) => {
     return <h2 className="nav-tab-wrapper">{children}</h2>
 }
 
-const Tab = ({ children }) => {
+const Tab = ({ isActive, children }) => {
+    const classNames = [
+        'nav-tab',
+        ...(isActive ? ['nav-tab-active'] : [])
+    ]
     return (
-        <a className="nav-tab" href="#">
+        <a className={classNames.join(' ')} href="#">
             {children}
         </a>
     )

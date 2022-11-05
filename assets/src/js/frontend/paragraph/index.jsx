@@ -151,7 +151,7 @@ const Line = ({
 Line.propTypes = {
     active: PropTypes.bool,
     block: PropTypes.bool,
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     bookAbbr: PropTypes.string,
     chapterNum: PropTypes.string,
     verseNum: PropTypes.string,

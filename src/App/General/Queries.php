@@ -15,6 +15,7 @@ namespace Rhema\App\General;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
+use Rhema\Common\Constants;
 
 /**
  * Class Queries
@@ -23,6 +24,10 @@ use Rhema\Common\Traits\Singleton;
  * @since 1.0.0
  */
 class Queries extends Base {
+	/**
+	 * Singleton trait
+	 */
+	use Singleton;
 	/**
 	 * Base constructor.
 	 *
@@ -51,17 +56,17 @@ class Queries extends Base {
 	 * @param string $orderby
 	 * @return \WP_Query
 	 */
-	// public function getPosts( $posts_count, $orderby = 'date' ): \WP_Query {
-	// 	return new \WP_Query(
-	// 		[
-	// 			'post_type'      => PostTypes::POST_TYPE['id'],
-	// 			'post_status'    => 'publish',
-	// 			'order'          => 'DESC',
-	// 			'posts_per_page' => $posts_count,
-	// 			'orderby'        => $orderby,
-	// 		]
-	// 	);
-	// }
+	public function getPosts( $posts_count, $orderby = 'date' ): \WP_Query {
+		return new \WP_Query(
+			[
+				'post_type'      => Constants::BIBLE_QUESTION_TYPE['id'],
+				'post_status'    => 'publish',
+				'order'          => 'DESC',
+				'posts_per_page' => $posts_count,
+				'orderby'        => $orderby,
+			]
+		);
+	}
 
 	/**
 	 * Example
@@ -87,6 +92,15 @@ class Queries extends Base {
 	 * @return array
 	 */
 	public function getRelations(): array {
+		global $wpdb;
+		return $wpdb->get_col( "select ID from {$wpdb->posts} LIMIT 3" );
+	}
+	/**
+	 * Example
+	 *
+	 * @return array
+	 */
+	public function insertRelations(): array {
 		global $wpdb;
 		return $wpdb->get_col( "select ID from {$wpdb->posts} LIMIT 3" );
 	}

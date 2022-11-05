@@ -42,18 +42,29 @@ class Settings extends Base {
 		 *
 		 * Add plugin code here for admin settings specific functions
 		 */
-		add_action( 'admin_menu', [ $this, 'admin_menu' ], 5 );
-		add_action( 'admin_init', [ $this, 'settings_init' ] );
+		add_action( 'admin_menu', [ $this, 'adminMenu' ], 5 );
+		add_action( 'admin_init', [ $this, 'settingsInit' ] );
 	}
 	/**
 	 * Rhema admin menu
 	 *
 	 * @return void
 	 */
-	public function admin_menu() {
+	public function adminMenu() {
 		$plugin_domain = $this->plugin->textDomain();
-		$main_hook_suffix = add_menu_page( 'Rhema', 'Rhema', 'manage_options', $plugin_domain, [ $this, 'hello' ], 'dashicons-book' );
-		$questions_hook_suffix = add_submenu_page( $plugin_domain, 'Questions', 'Questions', 'manage_options', "admin.php?page=rhema#/questions" );
+		add_menu_page( 'Rhema', 'Rhema', 'manage_options', $plugin_domain, [ $this, 'hello' ], 'dashicons-book' );
+		add_submenu_page( $plugin_domain, 'Question Category', 'Question Categories', 'manage_options', 'edit-tags.php?taxonomy=bible-question-category' );
+		add_action( 'parent_file', [ $this, 'adminQuestionCategoryMenuModifier' ] );
+	}
+	public function adminQuestionCategoryMenuModifier( string $parent_file ) {
+		global $current_screen;
+		$plugin_domain = $this->plugin->textDomain();
+
+		if ( $current_screen->taxonomy === 'bible-question-category' ) {
+			return $plugin_domain;
+		}
+
+		return $parent_file;
 	}
 
 	public function hello() {
@@ -63,7 +74,7 @@ class Settings extends Base {
 		<?php
 	}
 
-	public function settings_init() {
+	public function settingsInit() {
 		$plugin_domain = $this->plugin->textDomain();
 		register_setting( 'general', $plugin_domain );
 		return;

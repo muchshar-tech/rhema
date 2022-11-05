@@ -15,7 +15,7 @@ namespace Rhema\App\General;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
-use Rhema\App\Common\Constants;
+use Rhema\Common\Constants;
 use WP_CLI\Iterators\Exception;
 use WP_Error;
 
@@ -37,16 +37,6 @@ final class Bible extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
-	}
-	public function init() {
-		/**
-		 * This general class is always being instantiated as requested in the Bootstrap class
-		 *
-		 * @see Bootstrap::__construct
-		 *
-		 * Add plugin code here
-		 */
-		// self::init();
 	}
 	/**
 	 * Check url query should fetch whole chapter verse.
@@ -117,7 +107,8 @@ final class Bible extends Base {
 
 	public function getBookTransBySlug( string $slug ): array {
 		$book_index = $this->getBookIndexBySlug( $slug );
-		return Constants::BOOKS[ $book_index ];
+		$books = Constants::init()->books[ $book_index ];
+		return $books;
 	}
 	/**
 	 * Get bible url query by using rhema()->bible()->getQueryParam()
@@ -236,7 +227,6 @@ final class Bible extends Base {
 		if ( empty( $rhema_res['body'] ) ) {
 			return [];
 		}
-		var_dump($this->plugin->bootstrap);
 		wp_cache_add( 'fetched_bible', $rhema_res['body'], $this->plugin->name() );
 		return json_decode( $rhema_res['body'] );
 	}
@@ -262,9 +252,10 @@ final class Bible extends Base {
 	}
 
 	public function getBooks(): array {
+		$books = Constants::init()->books;
 		return [
-			'old' => array_slice( Constants::BOOKS, 0, 39 ),
-			'new' => array_slice( Constants::BOOKS, 39, 27 ),
+			'old' => array_slice( $books, 0, 39 ),
+			'new' => array_slice( $books, 39, 27 ),
 		];
 	}
 

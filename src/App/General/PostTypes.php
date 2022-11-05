@@ -14,7 +14,7 @@ declare( strict_types = 1 );
 namespace Rhema\App\General;
 
 use Rhema\Common\Abstracts\Base;
-use Rhema\App\Common\Constants;
+use Rhema\Common\Constants;
 
 /**
  * Class PostTypes
@@ -73,6 +73,7 @@ class PostTypes extends Base {
 				'capability_type'    => 'post',
 				'menu_icon'          => Constants::BIBLE_QUESTION_TYPE['icon'],
 				'supports'           => [ 'title', 'editor' ],
+				'taxonomies'         => [ 'post_tag' ],
 			]
 		);
 	}

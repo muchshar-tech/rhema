@@ -32,7 +32,10 @@ const Block = ({ children }) => {
 }
 
 Block.propTypes = {
-    children: PropTypes.element,
+    children: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.arrayOf(PropTypes.element),
+    ]),
 }
 
 const Line = ({
@@ -152,10 +155,14 @@ Line.propTypes = {
     active: PropTypes.bool,
     block: PropTypes.bool,
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    bookAbbr: PropTypes.string,
-    chapterNum: PropTypes.string,
-    verseNum: PropTypes.string,
-    children: PropTypes.element,
+    bookAbbr: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    chapterNum: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    verseNum: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    children: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.element,
+        PropTypes.arrayOf(PropTypes.element),
+    ]),
 }
 
 export { Title, Block, Line, RelateContent }

@@ -30,6 +30,7 @@ final class Classes {
 		// ignore for readable array values one a single line
 		return [
 			[ 'init' => 'Integrations' ],
+			[ 'init' => 'Database' ],
 			[ 'init' => 'App\\General' ],
 			[ 'init' => 'App\\Rest'],
 			[ 'init' => 'App\\Frontend', 'on_request' => 'frontend' ],

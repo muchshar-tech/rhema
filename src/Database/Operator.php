@@ -35,6 +35,9 @@ final class Operator extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+		if ( $this->needUpdateVersion() ) {
+			do_action( 'qm/debug', 'needUpdateVersion' );
+		}
 	}
 	/**
 	 * Install database
@@ -43,8 +46,6 @@ final class Operator extends Base {
 	 */
 	public function installDB() {
 		try {
-			$this->createVerseRelationTable();
-			$this->createVerseRelationRelationshipsTable();
 			$this->updateVersion();
 		} catch ( \Throwable $err ) {
 			Errors::pluginDie(
@@ -115,7 +116,24 @@ final class Operator extends Base {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		return dbDelta( $sql );
 	}
+	/***
+	 * Check
+	 */
+	public function needUpdateVersion() {
+		$plugin_name = $this->plugin->name();
+		$db_version_option_key = "{$plugin_name}_db_version";
+		$db_version_from_db = get_option( $db_version_option_key );
+		$db_version_current = $this->plugin->dbVersion();
 
+		if ( false === $db_version_from_db ) {
+			return true;
+		}
+
+		if ( version_compare( $db_version_from_db, $db_version_current ) < 0 ) {
+			return true;
+		}
+		return false;
+	}
 	/**
 	 * Add or Update database version string
 	 *
@@ -129,10 +147,12 @@ final class Operator extends Base {
 		$update_success = null;
 
 		if ( empty( $db_version_from_db ) ) {
+			$this->createVerseRelationTable();
+			$this->createVerseRelationRelationshipsTable();
 			$update_success = add_option( $db_version_option_key, $db_version_current );
 		}
 
-		if ( version_compare( $db_version_from_db, $db_version_current ) < 0 ) {
+		if ( $this->needUpdateVersion() ) {
 			$update_success = update_option( $db_version_option_key, $db_version_current );
 		}
 

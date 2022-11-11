@@ -98,7 +98,10 @@ Block.propTypes = {
     desc: PropTypes.string,
     selected: PropTypes.bool,
     size: PropTypes.string,
-    children: PropTypes.element,
+    children: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.arrayOf(PropTypes.element),
+    ]),
 }
 
 const BlockWrap = ({ className: extraClassname = '', children }) => {

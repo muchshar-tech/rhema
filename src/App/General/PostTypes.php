@@ -73,7 +73,6 @@ class PostTypes extends Base {
 				'capability_type'    => 'post',
 				'menu_icon'          => Constants::BIBLE_QUESTION_TYPE['icon'],
 				'supports'           => [ 'title', 'editor' ],
-				'taxonomies'         => [ 'post_tag' ],
 			]
 		);
 	}

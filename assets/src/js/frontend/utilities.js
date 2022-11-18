@@ -40,6 +40,6 @@ export const generateRestRangeParam = ({ books1, verse1, books2, verse2 }) => {
 }
 
 export const retrieveChapterByParamString = (paramString) => {
-    const matched = paramString.match(/[0-9]?[a-z]+(\d{0,3}):(\d{0,3})/i)
+    const matched = paramString.match(/[0-9]?[a-z]+(\d{0,3}):?(\d{0,3})/i)
     return Number(matched[1])
 }

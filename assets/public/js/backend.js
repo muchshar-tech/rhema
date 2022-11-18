@@ -5625,6 +5625,64 @@ function sprintf(format) {
 
 /***/ }),
 
+/***/ "./assets/src/js/backend/AnwsersMetaBox.jsx":
+/*!**************************************************!*\
+  !*** ./assets/src/js/backend/AnwsersMetaBox.jsx ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tab */ "./assets/src/js/backend/tab/index.jsx");
+/* harmony import */ var _form_table__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./form-table */ "./assets/src/js/backend/form-table/index.jsx");
+
+
+
+
+
+
+var AnwsersMetaBox = function AnwsersMetaBox() {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("section", {
+    className: "group flex"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    class: "dashicons dashicons-saved"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    class: "dashicons dashicons-sticky"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "border-b pb-3 group-last:border-none"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "\u529B\u7684\u958B\u9EBB\u7169\u8A87\u5F35\uFF0C\u9053\u70BA\u4EC0\uFF0C\u5DF1\u7684\u6709\u4E00\u500B\u81EA\u5BB6\u662F\u958B\u6211\u5C31\u662F\u6709\uFF0C\u90FD\u4E8B\u52D9\u6240\u6642\u8D85\u559C\u9084\u5F88\uFF0C\u8981\u662F\u53EF\u611B\u5594\u559C\u6B61\u6211\uFF0C\u597D\u518D\u9EBB\u7169\u6B61\u9019\u500B\u4E0D\u4E00\u6A23\u6211\u4E4B\u524D\u3002\u77E5\u4E00\u6A23\u53EF\u662F\u4ED6\uFF0C\u80FD\u600E\u9EBC\u9019\uFF0C\u50CF\u662F\u53EF\u4EE5\u4E00\u6A23\u9EBC\u770B\u4E86\u662F\u9019\u6A23\u5217\uFF0C\u5F88\u591A\u4F3C\u7684\u4E00\u4E0B\u3002 \u5F97\u5F88\u90FD\u662F\u7684\u4E0D\u662F\u61C9\u8A72\u540D\u5B57\u500B\u5929\u771F\u7684\uFF0C\u91D1\u984D\u600E\u9EBC\u884C\u52D5\uFF0C\u770B\u8D77\u662F\u6211\u525B\u525B\u9EBC\u610F\u7684\u4E00\u500B\uFF0C\u4E3B\u4E0D\u7D50\u5C40\u80A9\u8180\u5C31\u4F86\u4E86\u89BA\u77E5\u3002\u6BD4\u8F03\u6709\u56E0\u65B9\u7562\u7ADF\u662F\u73FE\u5728\u6709\uFF0C\u5E7E\u4E4E\u662F\u907A\u5931\u7269\uFF0C\u5728\u610F\u7684\u90E8\u4E0A\u662F\u53EA\u662F\u771F\u5230\u662F\u6C92\uFF0C\u4E86\u55CE\u80FD\u5920\u5EC1\u6240\uFF0C\u6700\u5F8C\u9084\u8EAB\u771F\u8056\u51FA\u4F86\u66F8\u662F\u4EC0\u8D85\u597D\uFF0C\u4E0D\u89BA\u5F97\u3002\u679C\u4E0D\u6211\u5011\u4E0A\u5C31\u662F\u56E0\uFF0C\u4E00\u81C9\u958B\u59CB\u4E00\u767E\u90A3\u6A23\u6211\u53EF\u4EE5\u6EAB\u67D4\u7684\u22EF\u7684\u670B\u53CB\u4F86\u662F\uFF0C\u597D\u50CF\u89BA\u5F97\u597D\u4E5F\u89BA\u81F3\u5C11\u5019\u90FD\uFF0C\u539F\u6211\u5011\u6709\u592A\u6A5F\u8ECA\u5011\u5169\u524D\u5E7E\u5929\uFF0C\u55DA\u55DA\u55DA\u3002"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "flex flex-wrap justify-end"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "text-xs"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "block"
+  }, "answered Apr 30, 2009 at 7:22"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "flex"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
+    alt: "",
+    src: "https://secure.gravatar.com/avatar/d7a973c7dab26985da5f961be7b74480?s=64&d=mm&r=g",
+    className: "float-left w-11"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "block font-medium whitespace-nowrap"
+  }, "A WordPress Commenter"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "block whitespace-nowrap"
+  }, "https://wordpress.org/"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "block whitespace-nowrap"
+  }, "wapuu@wordpress.example"))))))));
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (AnwsersMetaBox);
+
+/***/ }),
+
 /***/ "./assets/src/js/backend/App.jsx":
 /*!***************************************!*\
   !*** ./assets/src/js/backend/App.jsx ***!
@@ -5639,11 +5697,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
-/* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
-/* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tab */ "./assets/src/js/backend/tab/index.jsx");
-/* harmony import */ var _form_table__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./form-table */ "./assets/src/js/backend/form-table/index.jsx");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tab */ "./assets/src/js/backend/tab/index.jsx");
+/* harmony import */ var _form_table__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./form-table */ "./assets/src/js/backend/form-table/index.jsx");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
@@ -5653,23 +5713,21 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 
 
+
 var App = function App() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_4__.HashRouter, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Route, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.HashRouter, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
     path: "/*",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Main, null)
   })));
 };
 
 var Main = function Main() {
-  var _useForm = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_6__.useForm)({
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_7__.useForm)({
     defaultValues: {
       bible_entry: 'bible'
     }
-  }),
-      register = _useForm.register,
-      handleSubmit = _useForm.handleSubmit,
-      watch = _useForm.watch,
-      errors = _useForm.formState.errors;
+  });
+  var handleSubmit = formMethods.handleSubmit;
 
   var onSubmit = function onSubmit(data) {
     return console.log(data);
@@ -5677,49 +5735,59 @@ var Main = function Main() {
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", {
     className: ""
-  }, "Rhema"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_2__.TabWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_2__.Tab, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_4__.Link, {
+  }, "Rhema"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.TabWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.NavLink, {
+    className: function className(_ref) {
+      var isActive = _ref.isActive;
+      return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
+    },
     to: "/settings"
-  }, "Settings")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_2__.Tab, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_4__.Link, {
+  }, "Settings"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.NavLink, {
+    className: function className(_ref2) {
+      var isActive = _ref2.isActive;
+      return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
+    },
     to: "/addons"
-  }, "Addons"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
+  }, "Addons"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.NavLink, {
+    className: function className(_ref3) {
+      var isActive = _ref3.isActive;
+      return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
+    },
+    to: "/about"
+  }, "About")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_hook_form__WEBPACK_IMPORTED_MODULE_7__.FormProvider, formMethods, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
     onSubmit: handleSubmit(onSubmit)
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_2__.ContentsWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_2__.ContentWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Route, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.ContentsWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.ContentWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
     path: "/settings",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Settings, null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Route, {
-    path: "/addon",
-    element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Addon, null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_5__.Route, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
+    path: "/addons",
+    element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Addons, null)
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_6__.Route, {
     index: true,
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Settings, null)
   })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     type: "submit",
     className: "button button-primary"
-  }, "Save Settings")));
+  }, "Save Settings"))));
 };
 
 var Settings = function Settings() {
-  var _useForm2 = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_6__.useForm)({
-    defaultValues: {
-      bible_entry: 'bible'
-    }
-  }),
-      register = _useForm2.register,
-      handleSubmit = _useForm2.handleSubmit,
-      watch = _useForm2.watch,
-      errors = _useForm2.formState.errors;
-
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.Table, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.Row, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.Label, {
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_7__.useFormContext)();
+  var register = formMethods.register,
+      errors = formMethods.formState.errors;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Table, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Row, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Label, {
     htmlFor: "bible_entry"
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Bible Entry Path', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.FieldWrap, null, "/", ' ', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Bible Entry Path', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.FieldWrap, null, (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_SITE_ROOT) + '/', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "text",
-    id: "bible_entry"
+    id: "bible_entry",
+    className: "ml-2px"
   }, register('bible_entry'), {
     title: "Route Namespace",
     placeholder: "Setup your bible reader route namespace"
-  })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.Row, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.Label, {
-    htmlFor: "bible_entry"
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default Translation', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_3__.FieldWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("select", register('bible_default_translation'), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
+  })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Row, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Label, {
+    htmlFor: "bible_default_translation"
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default Translation', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.FieldWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("select", _extends({
+    id: "bible_default_translation"
+  }, register('bible_default_translation')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: ""
   }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: "cuv"
@@ -5728,8 +5796,8 @@ var Settings = function Settings() {
   }, "King James Version")))));
 };
 
-var Addon = function Addon() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Addon");
+var Addons = function Addons() {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Addons");
 };
 
 var Questions = function Questions() {
@@ -5860,23 +5928,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ContentWrap": () => (/* binding */ ContentWrap),
 /* harmony export */   "ContentsWrap": () => (/* binding */ ContentsWrap),
-/* harmony export */   "Tab": () => (/* binding */ Tab),
 /* harmony export */   "TabWrap": () => (/* binding */ TabWrap)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 
 
 var TabWrap = function TabWrap(_ref) {
@@ -5886,25 +5941,15 @@ var TabWrap = function TabWrap(_ref) {
   }, children);
 };
 
-var Tab = function Tab(_ref2) {
-  var isActive = _ref2.isActive,
-      children = _ref2.children;
-  var classNames = ['nav-tab'].concat(_toConsumableArray(isActive ? ['nav-tab-active'] : []));
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
-    className: classNames.join(' '),
-    href: "#"
-  }, children);
-};
-
-var ContentsWrap = function ContentsWrap(_ref3) {
-  var children = _ref3.children;
+var ContentsWrap = function ContentsWrap(_ref2) {
+  var children = _ref2.children;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "section-panel-list"
+    className: "section-panel-list tailwind"
   }, children);
 };
 
-var ContentWrap = function ContentWrap(_ref4) {
-  var children = _ref4.children;
+var ContentWrap = function ContentWrap(_ref3) {
+  var children = _ref3.children;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "p-3"
   }, children);
@@ -45907,6 +45952,17 @@ if (false) {} else {
 
 /***/ }),
 
+/***/ "RHEMA_LOCALIZE":
+/*!********************************************!*\
+  !*** external "LOCALIZE_SCRIPT_VARIABLES" ***!
+  \********************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = LOCALIZE_SCRIPT_VARIABLES;
+
+/***/ }),
+
 /***/ "./node_modules/history/node_modules/@babel/runtime/helpers/esm/extends.js":
 /*!*********************************************************************************!*\
   !*** ./node_modules/history/node_modules/@babel/runtime/helpers/esm/extends.js ***!
@@ -48470,7 +48526,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var _backend_App__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./backend/App */ "./assets/src/js/backend/App.jsx");
-/* harmony import */ var _backend_store__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./backend/store */ "./assets/src/js/backend/store.js");
+/* harmony import */ var _backend_AnwsersMetaBox__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./backend/AnwsersMetaBox */ "./assets/src/js/backend/AnwsersMetaBox.jsx");
+/* harmony import */ var _backend_store__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./backend/store */ "./assets/src/js/backend/store.js");
 /**
  * SASS
  */
@@ -48478,6 +48535,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * JavaScript
  */
+
 
 
 
@@ -48493,8 +48551,16 @@ var container = document.getElementById('rhema-app');
 if (!!container && container instanceof HTMLElement) {
   var root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)(container);
   root.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(react_redux__WEBPACK_IMPORTED_MODULE_3__.Provider, {
-    store: _backend_store__WEBPACK_IMPORTED_MODULE_5__.store
+    store: _backend_store__WEBPACK_IMPORTED_MODULE_6__.store
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(_backend_App__WEBPACK_IMPORTED_MODULE_4__["default"], null)));
+}
+
+var bibleQuestionAnwserMetaBoxContainer = document.getElementById('bible-question-anwser-meta-box');
+
+if (!!bibleQuestionAnwserMetaBoxContainer && bibleQuestionAnwserMetaBoxContainer instanceof HTMLElement) {
+  var _root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)(bibleQuestionAnwserMetaBoxContainer);
+
+  _root.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default().createElement(_backend_AnwsersMetaBox__WEBPACK_IMPORTED_MODULE_5__["default"], null));
 }
 })();
 

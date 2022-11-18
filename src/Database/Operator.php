@@ -64,7 +64,7 @@ final class Operator extends Base {
 	 */
 	public function generateTableName( string $table_name ): string {
 		global $wpdb;
-		return sprintf( "%s%s_$table_name", $wpdb->prefix, $this->plugin->name() );
+		return sprintf( "%s%s_$table_name", $wpdb->prefix, $this->plugin->textDomain() );
 	}
 	/**
 	 * Create verse relation table

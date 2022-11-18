@@ -1,7 +1,8 @@
 import React from 'react'
 import { __ } from '@wordpress/i18n'
-import { HashRouter, Routes, Route, Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
+import { useForm, FormProvider, useFormContext } from 'react-hook-form'
+import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 import * as Tab from './tab'
 import * as FormTable from './form-table'
@@ -17,57 +18,77 @@ const App = () => {
 }
 
 const Main = () => {
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors },
-    } = useForm({
+    const formMethods = useForm({
         defaultValues: {
-            bible_entry: 'bible',
-        },
+            bible_entry: 'bible'
+        }
     })
+    const { handleSubmit } = formMethods
     const onSubmit = (data) => console.log(data)
     return (
         <>
             <h1 className="">Rhema</h1>
             <Tab.TabWrap>
-                <Tab.Tab>
-                    <Link to="/settings">Settings</Link>
-                </Tab.Tab>
-                <Tab.Tab>
-                    <Link to="/addons">Addons</Link>
-                </Tab.Tab>
+                <NavLink
+                    className={({ isActive }) =>
+                        isActive
+                            ? ['nav-tab', 'nav-tab-active'].join(' ')
+                            : 'nav-tab'
+                    }
+                    to="/settings"
+                >
+                    Settings
+                </NavLink>
+                <NavLink
+                    className={({ isActive }) =>
+                        isActive
+                            ? ['nav-tab', 'nav-tab-active'].join(' ')
+                            : 'nav-tab'
+                    }
+                    to="/addons"
+                >
+                    Addons
+                </NavLink>
+                <NavLink
+                    className={({ isActive }) =>
+                        isActive
+                            ? ['nav-tab', 'nav-tab-active'].join(' ')
+                            : 'nav-tab'
+                    }
+                    to="/about"
+                >
+                    About
+                </NavLink>
             </Tab.TabWrap>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <Tab.ContentsWrap>
-                    <Tab.ContentWrap>
-                        <Routes>
-                            <Route path={`/settings`} element={<Settings />} />
-                            <Route path={`/addon`} element={<Addon />} />
-                            <Route index element={<Settings />} />
-                        </Routes>
-                    </Tab.ContentWrap>
-                </Tab.ContentsWrap>
-                <button type="submit" className="button button-primary">
-                    Save Settings
-                </button>
-            </form>
+            <FormProvider {...formMethods}>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <Tab.ContentsWrap>
+                        <Tab.ContentWrap>
+                            <Routes>
+                                <Route
+                                    path={`/settings`}
+                                    element={<Settings />}
+                                />
+                                <Route path={`/addons`} element={<Addons />} />
+                                <Route index element={<Settings />} />
+                            </Routes>
+                        </Tab.ContentWrap>
+                    </Tab.ContentsWrap>
+                    <button type="submit" className="button button-primary">
+                        Save Settings
+                    </button>
+                </form>
+            </FormProvider>
         </>
     )
 }
 
 const Settings = () => {
+    const formMethods = useFormContext()
     const {
         register,
-        handleSubmit,
-        watch,
         formState: { errors },
-    } = useForm({
-        defaultValues: {
-            bible_entry: 'bible',
-        },
-    })
+    } = formMethods
     return (
         <FormTable.Table>
             <FormTable.Row>
@@ -75,10 +96,11 @@ const Settings = () => {
                     {__('Bible Entry Path', 'myguten')}
                 </FormTable.Label>
                 <FormTable.FieldWrap>
-                    /{' '}
+                    {RHEMA_LOCALIZE.RHEMA_SITE_ROOT + '/'}
                     <input
                         type="text"
                         id="bible_entry"
+                        className="ml-2px"
                         {...register('bible_entry')}
                         title="Route Namespace"
                         placeholder="Setup your bible reader route namespace"
@@ -86,11 +108,14 @@ const Settings = () => {
                 </FormTable.FieldWrap>
             </FormTable.Row>
             <FormTable.Row>
-                <FormTable.Label htmlFor="bible_entry">
+                <FormTable.Label htmlFor="bible_default_translation">
                     {__('Default Translation', 'myguten')}
                 </FormTable.Label>
                 <FormTable.FieldWrap>
-                    <select {...register('bible_default_translation')}>
+                    <select
+                        id="bible_default_translation"
+                        {...register('bible_default_translation')}
+                    >
                         <option value="">{__('Default', 'myguten')}</option>
                         <option value="cuv">和合本</option>
                         <option value="kjv">King James Version</option>
@@ -101,8 +126,8 @@ const Settings = () => {
     )
 }
 
-const Addon = () => {
-    return <div>Addon</div>
+const Addons = () => {
+    return <div>Addons</div>
 }
 
 const Questions = () => {

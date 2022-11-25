@@ -80,7 +80,10 @@ class Enqueue extends Base {
 		wp_localize_script( 'rhema-backend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
 				'RHEMA_SITE_ROOT'  => get_site_url( null, '', ),
+				'WP_REST_ENDPOINTS'  => rest_url( 'v2' ),
+				'RHEMA_ADMIN_ROOT'  => admin_url(),
 				'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
+				'RHEMA_DOMAIN_TEXT' => $this->plugin->textDomain(),
 				'RHEMA_BACKEND' => [],
 			]
 		);

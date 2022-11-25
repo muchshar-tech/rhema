@@ -5730,7 +5730,18 @@ var Main = function Main() {
   var handleSubmit = formMethods.handleSubmit;
 
   var onSubmit = function onSubmit(data) {
-    return console.log(data);
+    fetch("".concat((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_REST_ENDPOINTS.options)), {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams(data).toString()
+    }).then(function (res) {
+      return res.json;
+    }).then(function (resData) {
+      console.log(resData);
+    });
+    console.log(data);
   };
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", {
@@ -5776,7 +5787,7 @@ var Settings = function Settings() {
       errors = formMethods.formState.errors;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Table, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Row, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Label, {
     htmlFor: "bible_entry"
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Bible Entry Path', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.FieldWrap, null, (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_SITE_ROOT) + '/', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Bible Entry Path', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.FieldWrap, null, (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_SITE_ROOT) + '/', /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "text",
     id: "bible_entry",
     className: "ml-2px"
@@ -5785,11 +5796,11 @@ var Settings = function Settings() {
     placeholder: "Setup your bible reader route namespace"
   })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Row, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.Label, {
     htmlFor: "bible_default_translation"
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default Translation', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.FieldWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("select", _extends({
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default Translation', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_4__.FieldWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("select", _extends({
     id: "bible_default_translation"
   }, register('bible_default_translation')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: ""
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default', 'myguten')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: "cuv"
   }, "\u548C\u5408\u672C"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: "kjv"

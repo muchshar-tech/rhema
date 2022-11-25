@@ -24,7 +24,20 @@ const Main = () => {
         }
     })
     const { handleSubmit } = formMethods
-    const onSubmit = (data) => console.log(data)
+    const onSubmit = (data) => {
+        fetch(`${RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.options}`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams(data).toString()
+        })
+        .then(res => res.json)
+        .then(resData => {
+            console.log(resData)
+        })
+        console.log(data)
+    }
     return (
         <>
             <h1 className="">Rhema</h1>
@@ -93,7 +106,7 @@ const Settings = () => {
         <FormTable.Table>
             <FormTable.Row>
                 <FormTable.Label htmlFor="bible_entry">
-                    {__('Bible Entry Path', 'myguten')}
+                    {__('Bible Entry Path', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
                 </FormTable.Label>
                 <FormTable.FieldWrap>
                     {RHEMA_LOCALIZE.RHEMA_SITE_ROOT + '/'}
@@ -109,14 +122,14 @@ const Settings = () => {
             </FormTable.Row>
             <FormTable.Row>
                 <FormTable.Label htmlFor="bible_default_translation">
-                    {__('Default Translation', 'myguten')}
+                    {__('Default Translation', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
                 </FormTable.Label>
                 <FormTable.FieldWrap>
                     <select
                         id="bible_default_translation"
                         {...register('bible_default_translation')}
                     >
-                        <option value="">{__('Default', 'myguten')}</option>
+                        <option value="">{__('Default', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}</option>
                         <option value="cuv">和合本</option>
                         <option value="kjv">King James Version</option>
                     </select>

@@ -22,12 +22,7 @@ use Rhema\Common\Abstracts\Base;
  * @since 1.0.0
  */
 class Settings extends Base {
-	private $option_default = [
-		// 設定前台聖經app的入口頁面
-		'entry_route_page' => null,
-		// 已安裝的譯本
-		'installed_translations' => [],
-	];
+
 	/**
 	 * Initialize the class.
 	 *

@@ -90,6 +90,7 @@ final class Bible extends Base {
 		return [
 			'base' => "{$rest_url}{$this->restNamespace()}",
 			'bible' => "{$rest_url}{$this->restNamespace()}/bible",
+			'options' => "{$rest_url}{$this->restNamespace()}/options",
 		];
 	}
 	/**

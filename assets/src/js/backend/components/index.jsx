@@ -17,24 +17,26 @@ export const SwitchToggle = () => {
 export const ScreenOverlay = () => {
     return (
         <div className="fixed top-0 right-0 bottom-0 left-0 bg-black/[.35]">
-            <div className="absolute top-1/2 left-1/2 bg-white -translate-x-1/2 -translate-y-1/2 rotate-0 skew-x-0 skew-y-0 scale-100">
-                <div className="flex">
-                    <div className="flex-grow"></div>
+            <div className="absolute top-1/2 left-1/2 bg-white shadow-xl rounded-sm -translate-x-1/2 -translate-y-1/2 rotate-0 skew-x-0 skew-y-0 scale-100">
+                <div className="flex items-center">
+                    <div className="flex-grow px-3"><h4 className="my-0">Apply to activate Rhema</h4></div>
                     <div>
                         <button className="border-0 bg-transparent m-0 p-1">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg>
                         </button>
                     </div>
                 </div>
-                <div className="p-2">
-                    content
-                    <div>
-                        <div>Email</div>
+                <div className="p-3">
+                    <div className="flex items-center mb-2">
+                        <div className="flex-grow mr-2">Email</div>
                         <div><input type="text" /></div>
                     </div>
+                    <div className="flex items-center mb-2">
+                        <div className="flex-grow mr-2">Domain</div>
+                        <div><input type="text" value={location.hostname} readOnly/></div>
+                    </div>
                     <div>
-                        <div>Domain</div>
-                        <div><input type="text" readOnly/></div>
+                        <button className="button button-primary">Confirm</button>
                     </div>
                 </div>
             </div>

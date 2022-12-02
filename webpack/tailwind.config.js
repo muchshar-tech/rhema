@@ -52,6 +52,9 @@ module.exports = {
             zIndex: {
                 99999: '99999',
             },
+            transitionProperty: {
+                left: 'left',
+            },
         },
     },
     plugins: [
@@ -62,6 +65,10 @@ module.exports = {
             addVariant('every-12', '&:nth-child(12n)')
         }),
         require('proto-tailwindcss-pixels')({
+            border: {
+                start: 1,
+                stop: 10,
+            },
             fontSize: {
                 start: 1,
                 stop: 36,

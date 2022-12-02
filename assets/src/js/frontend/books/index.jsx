@@ -437,18 +437,18 @@ const Verses = () => {
                                     }
                                     return (
                                         <Block
-                                            onClick={onClickBlock.bind(this, {
-                                                book: currentSelectionBooks,
-                                                chapter:
-                                                    currentSelectionChapter,
-                                                verse: number,
-                                            })}
                                             className={classNames.join(' ')}
                                             size="small"
                                             key={idx}
                                             {...{ title: number.toString() }}
                                         >
                                             <LinkVerse
+                                                onClick={onClickBlock.bind(this, {
+                                                    book: currentSelectionBooks,
+                                                    chapter:
+                                                        currentSelectionChapter,
+                                                    verse: number,
+                                                })}
                                                 book={displayBooksIndex}
                                                 chapter={Number(chapter)}
                                                 number={number}

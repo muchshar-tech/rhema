@@ -6,6 +6,7 @@ import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 import * as Tab from './tab'
 import * as FormTable from './form-table'
+import * as Components from '@components/backend/components'
 
 const App = () => {
     return (
@@ -20,22 +21,22 @@ const App = () => {
 const Main = () => {
     const formMethods = useForm({
         defaultValues: {
-            bible_entry: 'bible'
-        }
+            bible_entry: 'bible',
+        },
     })
     const { handleSubmit } = formMethods
     const onSubmit = (data) => {
         fetch(`${RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.options}`, {
             method: 'POST',
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams(data).toString()
+            body: new URLSearchParams(data).toString(),
         })
-        .then(res => res.json)
-        .then(resData => {
-            console.log(resData)
-        })
+            .then((res) => res.json)
+            .then((resData) => {
+                console.log(resData)
+            })
         console.log(data)
     }
     return (
@@ -58,9 +59,9 @@ const Main = () => {
                             ? ['nav-tab', 'nav-tab-active'].join(' ')
                             : 'nav-tab'
                     }
-                    to="/addons"
+                    to="/features"
                 >
-                    Addons
+                    Features
                 </NavLink>
                 <NavLink
                     className={({ isActive }) =>
@@ -82,7 +83,14 @@ const Main = () => {
                                     path={`/settings`}
                                     element={<Settings />}
                                 />
-                                <Route path={`/addons`} element={<Addons />} />
+                                <Route
+                                    path={`/features`}
+                                    element={<Features />}
+                                />
+                                <Route
+                                    path={`/about`}
+                                    element={<About />}
+                                />
                                 <Route index element={<Settings />} />
                             </Routes>
                         </Tab.ContentWrap>
@@ -122,14 +130,19 @@ const Settings = () => {
             </FormTable.Row>
             <FormTable.Row>
                 <FormTable.Label htmlFor="bible_default_translation">
-                    {__('Default Translation', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                    {__(
+                        'Default Translation',
+                        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+                    )}
                 </FormTable.Label>
                 <FormTable.FieldWrap>
                     <select
                         id="bible_default_translation"
                         {...register('bible_default_translation')}
                     >
-                        <option value="">{__('Default', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}</option>
+                        <option value="">
+                            {__('Default', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                        </option>
                         <option value="cuv">和合本</option>
                         <option value="kjv">King James Version</option>
                     </select>
@@ -139,11 +152,59 @@ const Settings = () => {
     )
 }
 
-const Addons = () => {
-    return <div>Addons</div>
+const Features = () => {
+    return (
+        <div>
+            Features
+            <div className="flex flex-wrap -mx-2">
+                <FeatureCard title="Core" onClick={() => {
+
+                }}>
+                    Rhema 核心功能：閱讀、查詢全本聖經
+                </FeatureCard>
+                <FeatureCard title="Relation" commingSoon={true}>
+                    自動關連經文相關文章、經文插入工具
+                </FeatureCard>
+                <FeatureCard title="Q&A" commingSoon={true}>
+                    聖經經文問與答功能
+                </FeatureCard>
+                <FeatureCard title="Offline Reading" commingSoon={true}>
+                    支援 PWA 技術，讓網站的聖經可以在手機上離線閱讀
+                </FeatureCard>
+            </div>
+            <Components.ScreenOverlay />
+        </div>
+    )
 }
 
-const Questions = () => {
-    return <div>Question</div>
+const FeatureCard = ({ title, version = '0.0.0', commingSoon, children }) => {
+    return (
+        <div className="px-2 py-2 w-80">
+            <div className="postbox mb-0 min-w-0">
+                <div className="postbox-header px-2">
+                    <h2 className="text-14px py-3 m-0">{title}</h2>
+                    <div className="flex items-center hide-if-no-js">
+                        <span className="text-gray-400 mr-1">Status:</span>
+                        <Components.SwitchToggle />
+                    </div>
+                </div>
+                <div className="inside">{children}</div>
+                <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
+                    {commingSoon ? (
+                        <button className="button" disabled>
+                            Comming Soon...
+                        </button>
+                    ) : (
+                        <button className="button">Active</button>
+                    )}
+                    <span className="text-gray-500">{version}</span>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const About = () => {
+    return <div>About</div>
 }
 export default App

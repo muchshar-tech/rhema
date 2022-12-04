@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { __ } from '@wordpress/i18n'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import { useForm, FormProvider, useFormContext } from 'react-hook-form'
@@ -87,17 +87,11 @@ const Main = () => {
                                     path={`/features`}
                                     element={<Features />}
                                 />
-                                <Route
-                                    path={`/about`}
-                                    element={<About />}
-                                />
+                                <Route path={`/about`} element={<About />} />
                                 <Route index element={<Settings />} />
                             </Routes>
                         </Tab.ContentWrap>
                     </Tab.ContentsWrap>
-                    <button type="submit" className="button button-primary">
-                        Save Settings
-                    </button>
                 </form>
             </FormProvider>
         </>
@@ -111,55 +105,72 @@ const Settings = () => {
         formState: { errors },
     } = formMethods
     return (
-        <FormTable.Table>
-            <FormTable.Row>
-                <FormTable.Label htmlFor="bible_entry">
-                    {__('Bible Entry Path', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
-                </FormTable.Label>
-                <FormTable.FieldWrap>
-                    {RHEMA_LOCALIZE.RHEMA_SITE_ROOT + '/'}
-                    <input
-                        type="text"
-                        id="bible_entry"
-                        className="ml-2px"
-                        {...register('bible_entry')}
-                        title="Route Namespace"
-                        placeholder="Setup your bible reader route namespace"
-                    />
-                </FormTable.FieldWrap>
-            </FormTable.Row>
-            <FormTable.Row>
-                <FormTable.Label htmlFor="bible_default_translation">
-                    {__(
-                        'Default Translation',
-                        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                    )}
-                </FormTable.Label>
-                <FormTable.FieldWrap>
-                    <select
-                        id="bible_default_translation"
-                        {...register('bible_default_translation')}
-                    >
-                        <option value="">
-                            {__('Default', RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
-                        </option>
-                        <option value="cuv">和合本</option>
-                        <option value="kjv">King James Version</option>
-                    </select>
-                </FormTable.FieldWrap>
-            </FormTable.Row>
-        </FormTable.Table>
+        <>
+            <FormTable.Table>
+                <FormTable.Row>
+                    <FormTable.Label htmlFor="bible_entry">
+                        {__(
+                            'Bible Entry Path',
+                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+                        )}
+                    </FormTable.Label>
+                    <FormTable.FieldWrap>
+                        {RHEMA_LOCALIZE.RHEMA_SITE_ROOT + '/'}
+                        <input
+                            type="text"
+                            id="bible_entry"
+                            className="ml-2px"
+                            {...register('bible_entry')}
+                            title="Route Namespace"
+                            placeholder="Setup your bible reader route namespace"
+                        />
+                    </FormTable.FieldWrap>
+                </FormTable.Row>
+                <FormTable.Row>
+                    <FormTable.Label htmlFor="bible_default_translation">
+                        {__(
+                            'Default Translation',
+                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+                        )}
+                    </FormTable.Label>
+                    <FormTable.FieldWrap>
+                        <select
+                            id="bible_default_translation"
+                            {...register('bible_default_translation')}
+                        >
+                            <option value="">
+                                {__(
+                                    'Default',
+                                    RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+                                )}
+                            </option>
+                            <option value="cuv">和合本</option>
+                            <option value="kjv">King James Version</option>
+                        </select>
+                    </FormTable.FieldWrap>
+                </FormTable.Row>
+            </FormTable.Table>
+            <button type="submit" className="button button-primary">
+                Save Settings
+            </button>
+        </>
     )
 }
 
 const Features = () => {
+    const [displayActiveCoreModal, setDisplayActiveCoreModal] = useState(false)
     return (
         <div>
             Features
             <div className="flex flex-wrap -mx-2">
-                <FeatureCard title="Core" onClick={() => {
-
-                }}>
+                <FeatureCard
+                    title="Core"
+                    onClickActive={(e) => {
+                        console.log('click Active')
+                        e.preventDefault()
+                        setDisplayActiveCoreModal(true)
+                    }}
+                >
                     Rhema 核心功能：閱讀、查詢全本聖經
                 </FeatureCard>
                 <FeatureCard title="Relation" commingSoon={true}>
@@ -172,12 +183,41 @@ const Features = () => {
                     支援 PWA 技術，讓網站的聖經可以在手機上離線閱讀
                 </FeatureCard>
             </div>
-            <Components.ScreenOverlay />
+            <Components.ScreenOverlay
+                show={displayActiveCoreModal}
+                title="Apply to activate Rhema"
+                onClickClose={(e) => {
+                    e.preventDefault()
+                    setDisplayActiveCoreModal(false)
+                }}
+            >
+                <div className="flex items-center mb-2">
+                    <div className="flex-grow mr-2">Email</div>
+                    <div>
+                        <input type="text" />
+                    </div>
+                </div>
+                <div className="flex items-center mb-2">
+                    <div className="flex-grow mr-2">Domain</div>
+                    <div>
+                        <input type="text" value={location.hostname} readOnly />
+                    </div>
+                </div>
+                <div>
+                    <button className="button button-primary">Confirm</button>
+                </div>
+            </Components.ScreenOverlay>
         </div>
     )
 }
 
-const FeatureCard = ({ title, version = '0.0.0', commingSoon, children }) => {
+const FeatureCard = ({
+    title,
+    version = '0.0.0',
+    commingSoon,
+    onClickActive,
+    children,
+}) => {
     return (
         <div className="px-2 py-2 w-80">
             <div className="postbox mb-0 min-w-0">
@@ -195,7 +235,9 @@ const FeatureCard = ({ title, version = '0.0.0', commingSoon, children }) => {
                             Comming Soon...
                         </button>
                     ) : (
-                        <button className="button">Active</button>
+                        <button className="button" onClick={onClickActive}>
+                            Active
+                        </button>
                     )}
                     <span className="text-gray-500">{version}</span>
                 </div>

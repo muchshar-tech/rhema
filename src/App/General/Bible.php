@@ -268,6 +268,11 @@ final class Bible extends Base {
 			return json_decode( $transient_translate_res, true );
 		}
 		$translate_res = wp_remote_get( $remote_query_string );
+		$response = $translate_res['response'];
+		$status_code = $response['code'];
+		if ( 200 !== $status_code ) {
+			return [];
+		}
 		if ( $translate_res instanceof WP_Error ) {
 			//TODO: 如果是 WP_Error，要進行例外處理，要顯示錯誤訊息
 			return $translate_res;

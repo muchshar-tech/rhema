@@ -15,6 +15,7 @@ namespace Rhema\Common;
 
 use Rhema\Common\Constants;
 use Rhema\App\General\Bible;
+use Rhema\App\General\Options;
 use Rhema\App\Frontend\Templates;
 use Rhema\Common\Abstracts\Base;
 
@@ -52,7 +53,15 @@ class Functions extends Base {
 	public function bible(): Bible {
 		return Bible::init();
 	}
-
+	/**
+	 * Get the bible instantiated class using rhema()->bible()
+	 *
+	 * @return Bible
+	 * @since 1.0.0
+	 */
+	public function options(): Options {
+		return Options::init();
+	}
 	/**
 	 * Get plugin data by using rhema()->getData()
 	 *
@@ -62,7 +71,6 @@ class Functions extends Base {
 	public function getData(): array {
 		return $this->plugin->data();
 	}
-
 	/**
 	 * Get translation of ui text
 	 *

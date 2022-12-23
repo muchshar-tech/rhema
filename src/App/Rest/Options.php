@@ -58,6 +58,14 @@ class Options extends Base {
 			'rhema/v1',
 			'/options',
 			[
+				'methods'  => \WP_REST_Server::READABLE,
+				'callback' => [ $this, 'getOptions' ],
+			]
+		);
+		register_rest_route(
+			'rhema/v1',
+			'/options',
+			[
 				'methods'  => \WP_REST_Server::CREATABLE,
 				'callback' => [ $this, 'updateOptions' ],
 				'args'     => [
@@ -75,18 +83,28 @@ class Options extends Base {
 			]
 		);
 	}
-
 	/**
-	 * Examples
+	 * Get options
+	 *
+	 * @param WP_REST_Request $request Values.
+	 * @return array
+	 * @since 1.0.0
+	 */
+	public function getOptions( $request ) {
+		// TODO: 加入 nonce 驗證 check_ajax_referer( 'get_options' );;
+		$plugin_domain = $this->plugin->textDomain();
+		$options = get_option( $plugin_domain );
+		return $options;
+	}
+	/**
+	 * Update options
 	 *
 	 * @param WP_REST_Request $request Values.
 	 * @return array
 	 * @since 1.0.0
 	 */
 	public function updateOptions( $request ) {
-		$bible_entry_params = $request->get_param( 'bible_entry' );
-		$bible_default_translation_params = $request->get_param( 'bible_default_translation' );
-		$attributes = $request->get_attributes();
+		// TODO: 加入 nonce 驗證 check_ajax_referer( 'update_options' );
 		$params = $request->get_body_params();
 		$plugin_domain = $this->plugin->textDomain();
 		update_option( $plugin_domain, json_encode( [
@@ -94,21 +112,24 @@ class Options extends Base {
 		] ) );
 		return true;
 	}
-
 	/**
-	 * Examples
+	 * Option bible entry sanitize
 	 *
 	 * @param WP_REST_Request $request Values.
 	 * @return array
 	 * @since 1.0.0
 	 */
 	public function bibleEntrySanitize( $value, $request, $param ) {
-
 		return $value;
 	}
-
+	/**
+	 * Option bible default translation sanitize
+	 *
+	 * @param WP_REST_Request $request Values.
+	 * @return array
+	 * @since 1.0.0
+	 */
 	public function bibleDefaultTranslationSanitize( $value, $request, $param ) {
-
 		return $value;
 	}
 }

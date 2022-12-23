@@ -84,7 +84,9 @@ class Enqueue extends Base {
 				'RHEMA_ADMIN_ROOT'  => admin_url(),
 				'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
 				'RHEMA_DOMAIN_TEXT' => $this->plugin->textDomain(),
-				'RHEMA_BACKEND' => [],
+				'RHEMA_BACKEND' => [
+					'OPTIONS' => json_decode( rhema()->options()->get() ),
+				],
 			]
 		);
 	}

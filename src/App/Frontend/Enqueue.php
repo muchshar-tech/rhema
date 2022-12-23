@@ -13,6 +13,7 @@ declare( strict_types = 1 );
 
 namespace Rhema\App\Frontend;
 
+use Exception;
 use Rhema\Common\Abstracts\Base;
 
 /**
@@ -77,6 +78,34 @@ class Enqueue extends Base {
 		global $wp_query;
 
 		// localize script and send variables
+
+		try {
+			$initial_raw = rhema()->bible()->getInitialRaw();
+			$translation_info = rhema()->bible()->getTranslationInfo( 'cuv' );
+			if ( is_wp_error( $initial_raw ) ) {
+				/** @var WP_Error $initial_raw */
+				throw new Exception( $initial_raw->get_error_message() );
+			}
+			if ( is_wp_error( $translation_info ) ) {
+				/** @var WP_Error $initial_raw */
+				throw new Exception( $translation_info->get_error_message() );
+			}
+
+			$initial_data = [
+				'UI' => rhema()->ui(),
+				'RAW' => $initial_raw,
+				'TRANSLATION' => [
+					'ABBR' => rhema()->getData()['settings'],
+					'INFO' => $translation_info,
+				],
+				'BOOKS' => rhema()->bible()->getBooks(),
+				'QUERYS' => rhema()->bible()->getQuerySchema( true ),
+			];
+		} catch ( Exception $e ) {
+			$initial_data = [
+				'ERROR' => $e->getMessage(),
+			];
+		}
 		wp_localize_script( 'rhema-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
 				'RHEMA_SITE_ROOT'  => get_site_url( null, '', 'relative' ),
@@ -84,16 +113,7 @@ class Enqueue extends Base {
 				'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
 				'RHEMA_WP_QUERY_VARS' => $wp_query->query_vars,
 				// Send initail data to window, raw, title, comment...etc.
-				'RHEMA_INITAIL_DATA' => [
-					'UI' => rhema()->ui(),
-					'RAW' => rhema()->bible()->getInitialRaw(),
-					'TRANSLATION' => [
-						'ABBR' => rhema()->getData()['settings'],
-						'INFO' => rhema()->bible()->getTranslationInfo( 'cuv' ),
-					],
-					'BOOKS' => rhema()->bible()->getBooks(),
-					'QUERYS' => rhema()->bible()->getQuerySchema( true ),
-				],
+				'RHEMA_INITAIL_DATA' => $initial_data,
 			]
 		);
 	}

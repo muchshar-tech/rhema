@@ -168,17 +168,17 @@
     .tailwind .ml-2px {
     margin-left: 2px;
 }
-    .tailwind .mb-0 {
-    margin-bottom: 0px
-}
-    .tailwind .mr-1 {
-    margin-right: 0.25rem
-}
     .tailwind .mb-2 {
     margin-bottom: 0.5rem
 }
     .tailwind .mr-2 {
     margin-right: 0.5rem
+}
+    .tailwind .mb-0 {
+    margin-bottom: 0px
+}
+    .tailwind .mr-1 {
+    margin-right: 0.25rem
 }
     .tailwind .mr-5px {
     margin-right: 5px;

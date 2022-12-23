@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, redirect } from 'react-router-dom'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 import * as Pages from './pages'
@@ -7,6 +7,9 @@ import * as Pages from './pages'
 const App = () => {
     const style = `:host, :root {display:block;margin: 24px auto; font-size: 16px;}`
     const pluginFrontendCssUrl = RHEMA_LOCALIZE.RHEMA_FRONTEND_CSS_URL
+    if (RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.hasOwnProperty('ERROR')) {
+        throw new Error(RHEMA_LOCALIZE.RHEMA_INITAIL_DATA.ERROR)
+    }
     return (
         <BrowserRouter basename={RHEMA_LOCALIZE.RHEMA_SITE_ROOT}>
             <style>
@@ -24,6 +27,7 @@ const App = () => {
                         />
                         <Route index element={<Pages.Chapters />} />
                     </Route>
+                    <Route path="error" element={<Pages.Error />} />
                     <Route index element={<Pages.Home />} />
                 </Route>
             </Routes>

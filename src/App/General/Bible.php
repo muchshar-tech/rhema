@@ -210,7 +210,7 @@ final class Bible extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getInitialRaw(): array {
+	public function getInitialRaw(): array | WP_Error {
 		if ( ! empty( wp_cache_get( 'fetched_bible', $this->plugin->name() ) ) ) {
 			return json_decode( wp_cache_get( 'fetched_bible', $this->plugin->name() ) );
 		}
@@ -224,6 +224,12 @@ final class Bible extends Base {
 		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
 		if ( $rhema_res instanceof WP_Error ) {
 			return $rhema_res;
+		}
+		if ( 401 === $rhema_res['response']['code'] ) {
+			return new WP_Error( 401, 'Please activate Rehema.' );
+		}
+		if ( 200 !== $rhema_res['response']['code'] ) {
+			return new WP_Error( 404, 'Can\'t get verse.' );
 		}
 		if ( empty( $rhema_res['body'] ) ) {
 			return [];

@@ -87,6 +87,9 @@ const MemoContainer = React.memo(Container, (prev, next) => {
     if (prev.selected.length !== next.selected.length) {
         return false
     }
+    if (next.error) {
+        return false
+    }
     return true
 })
 

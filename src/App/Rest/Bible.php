@@ -14,6 +14,7 @@ declare( strict_types = 1 );
 namespace Rhema\App\Rest;
 
 use Rhema\Common\Abstracts\Base;
+use Rhema\Integrations\Logos;
 
 /**
  * Class Example

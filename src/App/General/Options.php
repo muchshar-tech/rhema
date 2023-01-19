@@ -44,6 +44,7 @@ final class Options extends Base {
 	 */
 	public function get() {
 		$plugin_domain = $this->plugin->textDomain();
+		// TODO: 拿到 option 後要做一次 valid，要跟前台的 schema validator 一致
 		return get_option( $plugin_domain );
 	}
 	/**

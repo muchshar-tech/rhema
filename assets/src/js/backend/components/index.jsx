@@ -25,8 +25,13 @@ export const ScreenOverlay = ({ show, title, onClickClose, children }) => {
     ]
 
     return (
-        <div className={classNames.join(' ')}>
-            <div className="absolute top-1/2 left-1/2 bg-white shadow-xl rounded-sm -translate-x-1/2 -translate-y-1/2 rotate-0 skew-x-0 skew-y-0 scale-100">
+        <div className={classNames.join(' ')} onClick={onClickClose}>
+            <div
+                className="absolute top-1/2 left-1/2 bg-white shadow-xl rounded-sm -translate-x-1/2 -translate-y-1/2 rotate-0 skew-x-0 skew-y-0 scale-100"
+                onClick={(e) => {
+                    e.stopPropagation()
+                }}
+            >
                 <div className="flex items-center">
                     <div className="flex-grow px-3">
                         <h4 className="my-0">{title}</h4>
@@ -34,7 +39,10 @@ export const ScreenOverlay = ({ show, title, onClickClose, children }) => {
                     <div>
                         <button
                             className="border-0 bg-transparent m-0 p-1"
-                            onClick={onClickClose}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onClickClose(e)
+                            }}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -59,6 +67,7 @@ ScreenOverlay.propTypes = {
     show: PropTypes.bool,
     title: PropTypes.string,
     children: PropTypes.oneOfType([
+        PropTypes.string,
         PropTypes.element,
         PropTypes.arrayOf(PropTypes.element),
     ]),

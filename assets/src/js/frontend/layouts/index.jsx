@@ -125,21 +125,23 @@ const Content = ({ children }) => {
             onSwipeEnd={onSwipeEnd}
             className={classNames}
         >
-            {children.map((child, idx) => {
-                return (
-                    <motion.div
-                        key={idx}
-                        animate={{
-                            x: `${pagePos + movePercentage}%`,
-                        }}
-                        transition={{ ease: 'easeOut' }}
-                        initial={false}
-                        className="min-w-full px-10"
-                    >
-                        {child}
-                    </motion.div>
-                )
-            })}
+            {(Array.isArray(children) ? children : [children]).map(
+                (child, idx) => {
+                    return (
+                        <motion.div
+                            key={idx}
+                            animate={{
+                                x: `${pagePos + movePercentage}%`,
+                            }}
+                            transition={{ ease: 'easeOut' }}
+                            initial={false}
+                            className="min-w-full px-10"
+                        >
+                            {child}
+                        </motion.div>
+                    )
+                }
+            )}
         </Swipe>
     )
 }

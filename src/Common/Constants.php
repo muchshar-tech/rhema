@@ -589,5 +589,11 @@ final class Constants extends Base {
 				'index' => 66,
 			],
 		];
+		$this->error_message = [
+			'should_activate' => __( 'Please activate plugin `Rehema`.', 'rhema' ),
+			'should_input_register_info' => __( 'Please activate plugin `Rehema`.', 'rhema' ),
+			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
+			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
+		];
 	}
 }

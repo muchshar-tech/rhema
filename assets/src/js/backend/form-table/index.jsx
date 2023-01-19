@@ -24,4 +24,20 @@ const FieldWrap = ({ children }) => {
     return <td>{children}</td>
 }
 
-export { Table, Row, Label, FieldWrap }
+const ModalForm = ({ onSubmit, children }) => {
+    const formProps = {
+        onSubmit
+    }
+    return <form {...formProps}>{children}</form>
+}
+
+ModalForm.FieldRow = ({ label, children }) => {
+    return (
+        <div className="flex items-center mb-2">
+            <div className="flex-grow self-start mr-2 mt-1 min-w-100px">{label}</div>
+            <div>{children}</div>
+        </div>
+    )
+}
+
+export { Table, Row, Label, FieldWrap, ModalForm }

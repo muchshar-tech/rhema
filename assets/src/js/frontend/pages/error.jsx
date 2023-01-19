@@ -13,8 +13,13 @@ export const Error = ({ error, resetErrorBoundary }) => {
                 url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
                 {style}
             </style>
-            Error
-            <pre>{error.message}</pre>
+            <Layout.Body>
+                <Layout.Content>
+                    <Layout.Page>
+                        <pre>{error.message}</pre>
+                    </Layout.Page>
+                </Layout.Content>
+            </Layout.Body>
         </Layout.AppContainer>
     )
 }

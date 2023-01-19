@@ -16,6 +16,7 @@ namespace Rhema\App\General;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 use Rhema\Common\Constants;
+use Rhema\Integrations\Logos\Api;
 use WP_CLI\Iterators\Exception;
 use WP_Error;
 
@@ -180,6 +181,9 @@ final class Bible extends Base {
 		if ( is_wp_error( $translation_info ) ) {
 			throw new Exception( $translation_info->get_error_message() );
 		}
+		if ( empty( $translation_info ) ) {
+			throw new Exception( 'No Found.' );
+		}
 		$chapter_verse_info = $translation_info['chapterVerseInfo'];
 		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
 		if ( ! empty( $query_schema[0] ) ) {
@@ -214,19 +218,25 @@ final class Bible extends Base {
 		if ( ! empty( wp_cache_get( 'fetched_bible', $this->plugin->name() ) ) ) {
 			return json_decode( wp_cache_get( 'fetched_bible', $this->plugin->name() ) );
 		}
-		$query_schema = $this->getQuerySchema();
-		if ( empty( $query_schema ) ) {
-			return [];
+
+		try {
+			$query_schema = $this->getQuerySchema();
+			if ( empty( $query_schema ) ) {
+				return [];
+			}
+			$raw_params = $this->generateGetRawParam( $query_schema );
+			$query_string = $this->generateQueryString( $raw_params );
+			$bible_remote = $this->remote();
+			$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
+		} catch ( Exception $e ) {
+			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
 		}
-		$raw_params = $this->generateGetRawParam( $query_schema );
-		$query_string = $this->generateQueryString( $raw_params );
-		$bible_remote = $this->remote();
-		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
+
 		if ( $rhema_res instanceof WP_Error ) {
 			return $rhema_res;
 		}
 		if ( 401 === $rhema_res['response']['code'] ) {
-			return new WP_Error( 401, 'Please activate Rehema.' );
+			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
 		}
 		if ( 200 !== $rhema_res['response']['code'] ) {
 			return new WP_Error( 404, 'Can\'t get verse.' );
@@ -273,15 +283,15 @@ final class Bible extends Base {
 		if ( ! empty( $transient_translate_res ) ) {
 			return json_decode( $transient_translate_res, true );
 		}
-		$translate_res = wp_remote_get( $remote_query_string );
+		$translate_res = Api::init()->getTranslationInfo( $translate_abbr );
+		if ( is_wp_error( $translate_res ) ) {
+			return $translate_res;
+		}
+
 		$response = $translate_res['response'];
 		$status_code = $response['code'];
 		if ( 200 !== $status_code ) {
 			return [];
-		}
-		if ( $translate_res instanceof WP_Error ) {
-			//TODO: 如果是 WP_Error，要進行例外處理，要顯示錯誤訊息
-			return $translate_res;
 		}
 		if ( empty( $translate_res['body'] ) ) {
 			return [];

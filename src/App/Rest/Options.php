@@ -60,6 +60,7 @@ class Options extends Base {
 			[
 				'methods'  => \WP_REST_Server::READABLE,
 				'callback' => [ $this, 'getOptions' ],
+				'permission_callback' => '__return_true',
 			]
 		);
 		register_rest_route(
@@ -80,6 +81,9 @@ class Options extends Base {
 						'sanitize_callback' => [ $this, 'bibleDefaultTranslationSanitize' ],
 					],
 				],
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
 			]
 		);
 	}

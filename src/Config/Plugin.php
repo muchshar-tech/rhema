@@ -249,4 +249,21 @@ final class Plugin {
 	public function namespace(): string {
 		return $this->data()['namespace'];
 	}
+
+	/**
+	 * Get the default username (hostname)
+	 *
+	 * @return string
+	 * @since 1.0.0
+	 */
+	public function hostname(): string {
+		$site_url = get_site_url();
+		$parsed_url = parse_url( $site_url );
+		$host_name = isset( $_SERVER['SERVER_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_NAME'] ) ) : preg_replace( '/^(https?:\/\/)?/', '', $parsed_url['host'] );
+		return $host_name;
+	}
+
+	public function createNonce() :string {
+		return wp_create_nonce( 'wp_rest' );
+	}
 }

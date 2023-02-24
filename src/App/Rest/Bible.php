@@ -13,9 +13,11 @@ declare( strict_types = 1 );
 
 namespace Rhema\App\Rest;
 
+use WP_REST_Request;
+use WP_Error;
+
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
-
 /**
  * Class Example
  *
@@ -61,7 +63,7 @@ class Bible extends Base {
 			'/bible',
 			[
 				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => [ $this, 'getRaw' ],
+				'callback' => [ $this, 'getRaws' ],
 				'args'     => [
 					'range'  => [
 						'default' => 'gen1:1',
@@ -73,18 +75,20 @@ class Bible extends Base {
 						'default' => false,
 					],
 				],
+				'permission_callback' => '__return_true',
 			]
 		);
 	}
-
 	/**
-	 * Examples
+	 * getRaws
 	 *
 	 * @param WP_REST_Request $request Values.
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getRaw( $request ): array {
+	public function getRaws( WP_REST_Request $request ): array {
+		/** @var Logos\Api */
+		$integration_logos_api = Logos\Api::init();
 		$param = $request->get_param( 'range' );
 		$with_prev_chapter = $request->get_param( 'with_prev_chapter' );
 		$with_next_chapter = $request->get_param( 'with_next_chapter' );
@@ -97,15 +101,14 @@ class Bible extends Base {
 		] );
 		$raw_params = rhema()->bible()->generateGetRawParam( $query_schema );
 		$query_string = rhema()->bible()->generateQueryString( $raw_params );
-		$bible_remote = rhema()->bible()->remote();
-		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
+		$rhema_res = $integration_logos_api->getRaws( $query_string );
+
 		if ( $rhema_res instanceof WP_Error ) {
 			return $rhema_res;
 		}
-		if ( empty( $rhema_res['body'] ) ) {
+		if ( empty( $rhema_res ) ) {
 			return [];
 		}
-		wp_cache_add( 'fetched_bible', $rhema_res['body'], rhema()->plugin->name() );
-		return json_decode( $rhema_res['body'] );
+		return $rhema_res;
 	}
 }

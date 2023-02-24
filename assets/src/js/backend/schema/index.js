@@ -1,17 +1,44 @@
 import Joi from 'joi'
 
-export const activateRhemeaFields = Joi.object({
-    active: Joi.object({
-        email: Joi.string()
-            .email({
-                minDomainSegments: 2,
-                tlds: { allow: ['com', 'net'] },
-            })
-            .required(),
-        identity_type: Joi.string().required(),
-        product_slug: Joi.string().required(),
-        username: Joi.string().alphanum().min(3).max(30).required(),
-        password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
-        confirm_password: Joi.ref('password'),
+import { IDENTITY_TYPE } from '@components/constants'
+
+const fields = {
+    email: Joi.string().email({
+        minDomainSegments: 2,
+        tlds: { allow: ['com', 'net', 'tw', 'org', 'io', 'app'] },
     }),
-}).with('password', 'repeat_password')
+    identity_type: Joi.string().valid(IDENTITY_TYPE),
+    product_slug: Joi.string().valid(
+        'donate-for-txipartners',
+        'wp-rehema-core-feature',
+        'wp-rehema-rlation-feature',
+        'wp-rehema-q-and-a-feature',
+        'wp-rehema-offline-reading'
+    ),
+    username: Joi.string().min(5).max(30),
+    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9!@#$%]{3,30}$')),
+    license: Joi.string(),
+}
+
+export const signinLogosFields = Joi.object({
+    identity_type: fields.identity_type.required(),
+    username: fields.username.required(),
+    password: fields.password.required(),
+})
+
+export const activateRhemeaFields = Joi.object({
+    email: fields.email.required(),
+    identity_type: fields.identity_type.required(),
+    product_slug: fields.product_slug.required(),
+    username: fields.username.required(),
+    password: fields.password.required(),
+    confirm_password: Joi.ref('password'),
+})
+
+export const activateRhemeaByLicense = Joi.object({
+    email: fields.email.required(),
+    identity_type: fields.identity_type.required(),
+    product_slug: fields.product_slug.required(),
+    username: fields.username.required(),
+    license: fields.license.required(),
+})

@@ -592,8 +592,12 @@ final class Constants extends Base {
 		$this->error_message = [
 			'should_activate' => __( 'Please activate plugin `Rehema`.', 'rhema' ),
 			'should_input_register_info' => __( 'Please activate plugin `Rehema`.', 'rhema' ),
+			'logos_authorization_failed' => __( 'Logos service authorization failed', 'rhema' ),
+			'unknown_error' => __( 'Unknown error.', 'rhema' ),
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
 			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
+			'system/app/rest/bible/response_wrong' => __( 'Response wrong.', 'rhema' ),
+			'system/app/rest/permission_denied' => __( 'Permission denied.', 'rhema' ),
 		];
 	}
 }

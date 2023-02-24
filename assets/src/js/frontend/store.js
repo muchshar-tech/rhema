@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 
-import { bibleApi } from './services'
+import { bibleApi } from '../services'
 import generalReducer from './states/generalSlice'
 import dataReducer from './states/dataSlice'
 import selectedReducer from './states/selectedSlice'

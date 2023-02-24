@@ -13,6 +13,7 @@ declare( strict_types = 1 );
 
 namespace Rhema\App\Backend;
 
+use Exception;
 use Rhema\Common\Abstracts\Base;
 
 /**
@@ -73,9 +74,30 @@ class Enqueue extends Base {
 			wp_enqueue_script( $js['handle'], $js['source'], $js['deps'], $js['version'], $js['in_footer'] );
 		}
 
-		// Send variables to JS
-		global $wp_query;
+		/** @var Options */
+		$functions_options = rhema()->options();
 
+		try {
+			$options = json_decode( $functions_options->get() );
+			$core_license_data = rhema()->bible()->getLicenseData();
+			if ( is_wp_error( $core_license_data ) ) {
+				/** @var WP_Error $core_license_data */
+				throw new Exception( $core_license_data->get_error_message() );
+			}
+
+			$licenses_data = [
+				'bible' => $core_license_data,
+			];
+			$backend = [
+				'NONCE' => $this->plugin->createNonce(),
+				'OPTIONS' => $options,
+				'LICENSES' => $licenses_data,
+			];
+		} catch ( Exception $e ) {
+			$licenses_data = [
+				'ERROR' => $e->getMessage(),
+			];
+		}
 		// localize script and send variables
 		wp_localize_script( 'rhema-backend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
@@ -85,12 +107,11 @@ class Enqueue extends Base {
 				'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
 				'RHEMA_DOMAIN_TEXT' => $this->plugin->textDomain(),
 				'WP_OPTIONS' => [
-					'admin_email' => get_option( 'admin_email' ),
-					'host_domain' => $_SERVER['SERVER_NAME'],
+					'ADMIN_EMAIL' => get_option( 'admin_email' ),
+					'HOST_DOMAIN' => $_SERVER['SERVER_NAME'],
+					'TIME_ZONE' => wp_timezone_string(),
 				],
-				'RHEMA_BACKEND' => [
-					'options' => json_decode( rhema()->options()->get() ),
-				],
+				'RHEMA_BACKEND' => $backend,
 			]
 		);
 	}

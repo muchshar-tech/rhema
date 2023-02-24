@@ -16,7 +16,7 @@ namespace Rhema\App\General;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 use Rhema\Common\Constants;
-use Rhema\Integrations\Logos\Api;
+use Rhema\Integrations\Logos;
 use WP_CLI\Iterators\Exception;
 use WP_Error;
 
@@ -92,6 +92,9 @@ final class Bible extends Base {
 			'base' => "{$rest_url}{$this->restNamespace()}",
 			'bible' => "{$rest_url}{$this->restNamespace()}/bible",
 			'options' => "{$rest_url}{$this->restNamespace()}/options",
+			'activate' => "{$rest_url}{$this->restNamespace()}/activate",
+			'deactivate' => "{$rest_url}{$this->restNamespace()}/deactivate",
+			'account' => "{$rest_url}{$this->restNamespace()}/account",
 		];
 	}
 	/**
@@ -215,10 +218,6 @@ final class Bible extends Base {
 	 * @since 1.0.0
 	 */
 	public function getInitialRaw(): array | WP_Error {
-		if ( ! empty( wp_cache_get( 'fetched_bible', $this->plugin->name() ) ) ) {
-			return json_decode( wp_cache_get( 'fetched_bible', $this->plugin->name() ) );
-		}
-
 		try {
 			$query_schema = $this->getQuerySchema();
 			if ( empty( $query_schema ) ) {
@@ -226,8 +225,7 @@ final class Bible extends Base {
 			}
 			$raw_params = $this->generateGetRawParam( $query_schema );
 			$query_string = $this->generateQueryString( $raw_params );
-			$bible_remote = $this->remote();
-			$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}" );
+			$rhema_res = Logos\Api::init()->getRaws( $query_string );
 		} catch ( Exception $e ) {
 			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
 		}
@@ -235,20 +233,18 @@ final class Bible extends Base {
 		if ( $rhema_res instanceof WP_Error ) {
 			return $rhema_res;
 		}
-		if ( 401 === $rhema_res['response']['code'] ) {
-			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
-		}
-		if ( 200 !== $rhema_res['response']['code'] ) {
-			return new WP_Error( 404, 'Can\'t get verse.' );
-		}
-		if ( empty( $rhema_res['body'] ) ) {
+		if ( empty( $rhema_res ) ) {
 			return [];
 		}
-		wp_cache_add( 'fetched_bible', $rhema_res['body'], $this->plugin->name() );
-		return json_decode( $rhema_res['body'] );
+		return $rhema_res;
 	}
-
-	public function generateQueryString( $raw_params ): string {
+	/**
+	 * Generate query string function
+	 *
+	 * @param array $raw_params
+	 * @return string
+	 */
+	public function generateQueryString( array $raw_params ): string {
 		$param_from = "range={$raw_params['query_from_book']}{$raw_params['query_from_chapter']}:{$raw_params['query_from_verse']}";
 		$param_to = '';
 		if ( isset( $raw_params['query_to_book'] ) && isset( $raw_params['query_to_chapter'] ) && isset( $raw_params['query_to_verse'] ) ) {
@@ -256,8 +252,13 @@ final class Bible extends Base {
 		}
 		return "{$param_from}{$param_to}";
 	}
-
-	public function generateGetRawParam( $query_schema ): array {
+	/**
+	 * Generate raw param function.
+	 *
+	 * @param array $query_schema
+	 * @return array
+	 */
+	public function generateGetRawParam( array $query_schema ): array {
 		return [
 			'query_from_book' => $query_schema[0]['book'],
 			'query_from_chapter' => $query_schema[0]['chapter'],
@@ -267,7 +268,11 @@ final class Bible extends Base {
 			'query_to_verse' => $query_schema[1]['verse'],
 		];
 	}
-
+	/**
+	 * Get books data group by old/new
+	 *
+	 * @return array
+	 */
 	public function getBooks(): array {
 		$books = Constants::init()->books;
 		return [
@@ -275,38 +280,58 @@ final class Bible extends Base {
 			'new' => array_slice( $books, 39, 27 ),
 		];
 	}
-
+	/**
+	 * Get translations info data
+	 *
+	 * @param string $translate_abbr
+	 * @return array|WP_Error
+	 */
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$bible_remote = $this->remote();
 		$remote_query_string = "{$bible_remote}/{$translate_abbr}";
 		$transient_translate_res = $this->get_transient( 'rhema.bible.translate.info', $remote_query_string );
 		if ( ! empty( $transient_translate_res ) ) {
-			return json_decode( $transient_translate_res, true );
+			return $transient_translate_res;
 		}
-		$translate_res = Api::init()->getTranslationInfo( $translate_abbr );
+		$translate_res = Logos\Api::init()->getTranslationInfo( $translate_abbr );
 		if ( is_wp_error( $translate_res ) ) {
 			return $translate_res;
 		}
-
-		$response = $translate_res['response'];
-		$status_code = $response['code'];
-		if ( 200 !== $status_code ) {
-			return [];
-		}
-		if ( empty( $translate_res['body'] ) ) {
-			return [];
-		}
-		$this->set_transient( 'rhema.bible.translate.info', $remote_query_string, $translate_res['body'], MONTH_IN_SECONDS );
-		return json_decode( $translate_res['body'], true );
+		$this->set_transient( 'rhema.bible.translate.info', $remote_query_string, $translate_res, MONTH_IN_SECONDS );
+		return $translate_res;
 	}
-
-	public function get_transient( $prefix, $query_string ): mixed {
+	/**
+	 * Get license data function
+	 *
+	 * @return array
+	 */
+	public function getLicenseData(): array {
+		/** @var Logos\Api */
+		$integration_logos_api = Logos\Api::init();
+		return $integration_logos_api->getSavedData();
+	}
+	/**
+	 * Get transient data
+	 *
+	 * @param string $prefix
+	 * @param string $query_string
+	 * @return mixed
+	 */
+	public function get_transient( string $prefix, string $query_string ): mixed {
 		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
 		$transient_label = "$prefix.$remote_query_string_base64";
 		return get_transient( $transient_label );
 	}
-
-	public function set_transient( $prefix, $query_string, $value, $expiration = 0 ): bool {
+	/**
+	 * Set transient data
+	 *
+	 * @param string $prefix
+	 * @param string $query_string
+	 * @param mixed $value
+	 * @param integer $expiration
+	 * @return boolean
+	 */
+	public function set_transient( string $prefix, string $query_string, mixed $value, $expiration = 0 ): bool {
 		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
 		$transient_label = "$prefix.$remote_query_string_base64";
 		return set_transient( $transient_label, $value, $expiration );

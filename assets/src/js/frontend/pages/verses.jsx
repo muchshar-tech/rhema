@@ -9,7 +9,7 @@ import * as Paragraph from '@components/frontend/paragraph'
 import * as Books from '@components/frontend/books'
 import * as Forms from '@components/frontend/forms'
 import { DrawerTitle } from '@components/frontend/components'
-import { useGetBibleRawQuery } from '@components/frontend/services'
+import { useGetBibleRawQuery } from '@components/services'
 import { generateRestRangeParam } from '@assets/js/frontend/utilities'
 import { loadRaws } from '@assets/js/frontend/states/dataSlice'
 

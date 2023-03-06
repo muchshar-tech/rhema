@@ -42,10 +42,14 @@ final class Options extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function get() {
+	public function get(): array {
 		$plugin_domain = $this->plugin->textDomain();
 		// TODO: 拿到 option 後要做一次 valid，要跟前台的 schema validator 一致
-		return get_option( $plugin_domain );
+		$options = get_option( $plugin_domain );
+		if ( empty( $options ) || ! $options ) {
+			$options = '{}';
+		}
+		return json_decode( $options, true );
 	}
 	/**
 	 * Update options
@@ -59,5 +63,20 @@ final class Options extends Base {
 		return update_option( $plugin_domain, json_encode( [
 			'general' => $params,
 		] ) );
+	}
+
+	public function checkRewriteIsEmpty( string $bible_entry_path ): bool {
+		global $wp_rewrite;
+
+		$permastruct = $wp_rewrite->get_extra_permastruct( 'post' );
+		$rewrite_rules = get_option( 'rewrite_rules' );
+
+		// 檢查新的 rewrite rule 是否已經存在
+		foreach ( $new_rule as $pattern => $query ) {
+			if ( array_key_exists( $pattern, $rewrite_rules ) ) {
+				return false;
+			}
+		}
+		return false;
 	}
 }

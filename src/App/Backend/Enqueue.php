@@ -15,6 +15,7 @@ namespace Rhema\App\Backend;
 
 use Exception;
 use Rhema\Common\Abstracts\Base;
+use Rhema\Integrations\Logos;
 
 /**
  * Class Enqueue
@@ -74,11 +75,13 @@ class Enqueue extends Base {
 			wp_enqueue_script( $js['handle'], $js['source'], $js['deps'], $js['version'], $js['in_footer'] );
 		}
 
-		/** @var Options */
+		/** @var Logos\Api */
+		$integration_logos_api = Logos\Api::init();
+
 		$functions_options = rhema()->options();
 
 		try {
-			$options = json_decode( $functions_options->get() );
+			$options = $functions_options->get();
 			$core_license_data = rhema()->bible()->getLicenseData();
 			if ( is_wp_error( $core_license_data ) ) {
 				/** @var WP_Error $core_license_data */
@@ -92,6 +95,9 @@ class Enqueue extends Base {
 				'NONCE' => $this->plugin->createNonce(),
 				'OPTIONS' => $options,
 				'LICENSES' => $licenses_data,
+				'DATA' => [
+					'AVAILABLE_TRANSLATIONS' => $integration_logos_api->getTranslationList(),
+				]
 			];
 		} catch ( Exception $e ) {
 			$licenses_data = [
@@ -108,7 +114,7 @@ class Enqueue extends Base {
 				'RHEMA_DOMAIN_TEXT' => $this->plugin->textDomain(),
 				'WP_OPTIONS' => [
 					'ADMIN_EMAIL' => get_option( 'admin_email' ),
-					'HOST_DOMAIN' => $_SERVER['SERVER_NAME'],
+					'HOST_DOMAIN' => $this->plugin->hostname(),
 					'TIME_ZONE' => wp_timezone_string(),
 				],
 				'RHEMA_BACKEND' => $backend,

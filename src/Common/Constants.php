@@ -596,6 +596,7 @@ final class Constants extends Base {
 			'unknown_error' => __( 'Unknown error.', 'rhema' ),
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
 			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
+			'system/app/rest/options/field_is_wrong' => __( 'Your request field is wrong.', 'rhema' ),
 			'system/app/rest/bible/response_wrong' => __( 'Response wrong.', 'rhema' ),
 			'system/app/rest/permission_denied' => __( 'Permission denied.', 'rhema' ),
 		];

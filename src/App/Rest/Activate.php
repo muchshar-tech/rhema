@@ -14,7 +14,7 @@ declare( strict_types = 1 );
 namespace Rhema\App\Rest;
 
 use Respect\Validation\Validator as v;
-use Respect\Validation\Exceptions\NestedValidationException;
+use Respect\Validation\Exceptions\ValidationException;
 use WP_REST_Request;
 use WP_Error;
 use Exception;
@@ -131,7 +131,7 @@ class Activate extends Base {
 				->key( 'identity_type', v::stringType() )
 				->key( 'product_slug', v::stringType() )
 				->key( 'username', v::stringType() )
-				->validate( $body );
+				->assert( $body );
 			$license_key = $body['license'];
 			$license_data = [
 				'email' => $body['email'],
@@ -145,7 +145,7 @@ class Activate extends Base {
 			if ( is_wp_error( $token ) ) {
 				return $token;
 			}
-		} catch ( NestedValidationException $exception ) {
+		} catch ( ValidationException $exception ) {
 			return new WP_Error( 500, $exception->getFullMessage() );
 		} catch ( Exception $exception ) {
 			return new WP_Error( 500, $exception->getMessage() );

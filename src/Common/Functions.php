@@ -56,7 +56,7 @@ class Functions extends Base {
 	/**
 	 * Get the bible instantiated class using rhema()->bible()
 	 *
-	 * @return Bible
+	 * @return Options
 	 * @since 1.0.0
 	 */
 	public function options(): Options {

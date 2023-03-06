@@ -19,9 +19,12 @@ import {
     useActivateByLicenseMutation,
     useDeactivateMutation,
 } from '@components/services'
-import { addLicense, deleteLicense } from '@components/backend/states/generalSlice'
+import {
+    addLicense,
+    deleteLicense,
+} from '@components/backend/states/generalSlice'
 
-export const Core = memo(({ show, onClickClose }) => {
+export const Core = memo(function Core({ show, onClickClose }) {
     console.log('Run Core')
     const dispatch = useDispatch()
     const coreActiveFormMethods = useForm({
@@ -197,12 +200,12 @@ export const Core = memo(({ show, onClickClose }) => {
                     >
                         {isSubmitting || isActivatingCore ? (
                             <>
-                                <span className="spinner is-active m-0 mr-1 float-none inline-block"></span>
+                                <Components.ButtonSpinner className="mr-1" />
                                 Applying...
                             </>
                         ) : showActivatingFeature ? (
                             <>
-                                <span className="spinner is-active m-0 mr-1 float-none inline-block"></span>
+                                <Components.ButtonSpinner className="mr-1" />
                                 Activating...
                                 <Countdown
                                     date={
@@ -363,7 +366,15 @@ export const License = ({ show, onClickClose }) => {
             const payload = await activate(data)
         } else {
             const payload = await deactivate(data)
-            dispatch(deleteLicense({ bible: { key: payload.data.body, renew_date: null, data: null } }))
+            dispatch(
+                deleteLicense({
+                    bible: {
+                        key: payload.data.body,
+                        renew_date: null,
+                        data: null,
+                    },
+                })
+            )
         }
     }
 
@@ -497,12 +508,12 @@ export const License = ({ show, onClickClose }) => {
                         >
                             {isSubmitting || isActivating ? (
                                 <>
-                                    <span className="spinner is-active m-0 mr-1 float-none inline-block"></span>
+                                    <Components.ButtonSpinner className="mr-1" />
                                     Verifying...
                                 </>
                             ) : showActivating ? (
                                 <>
-                                    <span className="spinner is-active m-0 mr-1 float-none inline-block"></span>
+                                    <Components.ButtonSpinner className="mr-1" />
                                     Activating...
                                     <Countdown
                                         date={

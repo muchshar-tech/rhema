@@ -13,7 +13,14 @@ declare( strict_types = 1 );
 
 namespace Rhema\App\Rest;
 
+use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\ValidationException;
+use WP_REST_Request;
+use WP_Error;
+use Exception;
+
 use Rhema\Common\Abstracts\Base;
+use Rhema\Common\Constants;
 
 /**
  * Class Example
@@ -94,7 +101,7 @@ class Options extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getOptions( $request ) {
+	public function getOptions( WP_REST_Request $request ) {
 		// TODO: 加入 nonce 驗證 check_ajax_referer( 'get_options' );;
 		$plugin_domain = $this->plugin->textDomain();
 		$options = get_option( $plugin_domain );
@@ -107,14 +114,29 @@ class Options extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function updateOptions( $request ) {
-		// TODO: 加入 nonce 驗證 check_ajax_referer( 'update_options' );
-		$params = $request->get_body_params();
+	public function updateOptions( WP_REST_Request $request ) {
+		$functions_options = rhema()->options();
+		$isempty = $functions_options->checkRewriteIsEmpty( 'bible' );
+		$json = $request->get_json_params();
+		if ( empty( $json ) ) {
+			$error = new WP_Error( 400, Constants::init()->error_message['system/app/rest/options/field_is_wrong'] );
+		}
+		try {
+			v::key( 'bible_entry', v::stringType() )
+				->key( 'bible_default_translation', v::stringType() )
+				->assert( $json );
+		} catch ( ValidationException $exception ) {
+			$error = new WP_Error( 500, $exception->getFullMessage() );
+		} catch ( Exception $exception ) {
+			$error = new WP_Error( 500, $exception->getMessage() );
+		}
+		if ( is_wp_error( $error ) ) {
+			wp_send_json_error( [ 'message' => $error->get_error_message() ], $error->get_error_code() );
+		}
 		$plugin_domain = $this->plugin->textDomain();
 		update_option( $plugin_domain, json_encode( [
-			'general' => $params,
+			'general' => $json,
 		] ) );
-		return true;
 	}
 	/**
 	 * Option bible entry sanitize

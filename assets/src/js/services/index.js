@@ -17,6 +17,34 @@ const prepareHeaders = (headers) => {
     return headers
 }
 
+export const optionsApi = createApi({
+    reducerPath: 'api.options',
+    baseQuery: fetchBaseQuery({
+        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.options,
+        prepareHeaders,
+    }),
+    endpoints: (builder) => ({
+        updateOptions: builder.mutation({
+            query: (body) => {
+                return {
+                    method: 'POST',
+                    body,
+                }
+            },
+            transformResponse: (response, meta, arg) => {
+                console.log(meta, arg)
+                return response
+            },
+            transformErrorResponse: (response, meta, arg) => {
+                console.log(meta, arg)
+                return response
+            },
+        }),
+    }),
+})
+
+export const { useUpdateOptionsMutation } = optionsApi
+
 export const bibleApi = createApi({
     reducerPath: 'api.bible',
     baseQuery: fetchBaseQuery({

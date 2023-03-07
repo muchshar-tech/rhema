@@ -5,6 +5,17 @@ import { __ } from '@wordpress/i18n'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 import * as Components from '@components/backend/components'
 
+export const ButtonSpinner = ({ className }) => {
+    return (
+        <span
+            className={`spinner is-active m-0 float-none inline-block ${className}`}
+        ></span>
+    )
+}
+ButtonSpinner.propTypes = {
+    className: PropTypes.string,
+}
+
 export const SwitchToggle = ({ isActive, onSwitchOn, onSwitchOff }) => {
     const classNames = {
         input: [

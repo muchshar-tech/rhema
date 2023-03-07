@@ -7,8 +7,10 @@ import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 import * as Tab from './tab'
 import * as TabContents from './tab/contents'
 import * as FormTable from './form-table'
+import * as Components from '@components/backend/components'
 import * as Activates from '@components/backend/activates'
 import * as FeatureCards from '@components/backend/feature-cards'
+import { useUpdateOptionsMutation } from '@components/services'
 
 const App = () => {
     return (
@@ -96,19 +98,41 @@ const Settings = () => {
     })
     const { register, handleSubmit, formState } = formMethods
     const { isSubmitting } = formState
-    const onSubmit = (data) => {
+
+    const [
+        updateOptions,
+        {
+            data: updateOptionsResponse,
+            error: updateOptionsError,
+            isLoading: isRTKMutation,
+        },
+    ] = useUpdateOptionsMutation()
+
+    const isUpdating = isRTKMutation || isSubmitting
+
+    const showExceptionMessage =
+        (!!updateOptionsResponse &&
+            !/2[0-9][0-9]/.test(updateOptionsResponse?.response?.code)) ||
+        !!updateOptionsError
+    console.log(updateOptionsError, updateOptionsResponse)
+    const exceptionMessage = {
+        code: updateOptionsError?.status,
+        label: '',
+        message:
+            updateOptionsError?.data?.data?.message ||
+            'There has been a critical error.',
+    }
+    const successMessage = {
+        code: updateOptionsResponse?.response?.code || 200,
+        label: '',
+        message:
+            updateOptionsError?.data?.data?.message || 'Update Successfully.',
+    }
+
+    const onSubmit = async (data) => {
         console.log(data)
-        return fetch(`${RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.OPTIONS}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(data).toString(),
-        })
-            .then((res) => res.json)
-            .then((resData) => {
-                console.log(resData)
-            })
+        const payload = await updateOptions(data)
+        console.log(payload)
     }
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -150,23 +174,44 @@ const Settings = () => {
                                     RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                                 )}
                             </option>
-                            <option value="cuv">和合本</option>
-                            <option value="kjv">King James Version</option>
+                            {RHEMA_LOCALIZE.RHEMA_BACKEND.DATA.AVAILABLE_TRANSLATIONS.map(
+                                (translation) => {
+                                    return (
+                                        <option
+                                            value={translation.abbr.toLowerCase()}
+                                            key={translation.id}
+                                        >
+                                            {translation.name}
+                                        </option>
+                                    )
+                                }
+                            )}
                         </select>
                     </FormTable.FieldWrap>
                 </FormTable.Row>
             </FormTable.Table>
-            <button
-                type="submit"
-                className="button button-primary"
-                {...(isSubmitting && { disabled: true })}
-            >
-                {isSubmitting ? (
-                    <span className="spinner is-active"></span>
-                ) : (
-                    'Save Settings'
+            <div className="flex">
+                <button
+                    type="submit"
+                    className="button button-primary m-0"
+                    {...(isUpdating && { disabled: true })}
+                >
+                    {isUpdating ? (
+                        <Components.ButtonSpinner />
+                    ) : (
+                        'Save Settings'
+                    )}
+                </button>
+                {showExceptionMessage && (
+                    <FormTable.ResponseErrorMsg
+                        code={exceptionMessage.code}
+                        label={exceptionMessage.label}
+                    >
+                        {exceptionMessage.message ||
+                            'There has been a critical error.'}
+                    </FormTable.ResponseErrorMsg>
                 )}
-            </button>
+            </div>
         </form>
     )
 }

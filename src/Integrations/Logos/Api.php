@@ -211,10 +211,32 @@ final class Api extends Base {
 		return $remote_url;
 	}
 	/**
+	 * Get translation list.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function getTranslationList(): array | WP_Error {
+		$remote_query = $this->remote( "bible/translates" );
+		$translation_list_res = wp_remote_get( $remote_query );
+		if ( is_wp_error( $translation_list_res ) ) {
+			return $translation_list_res;
+		}
+		$response = $translation_list_res['response'];
+		$status_code = $response['code'];
+		if ( 200 !== $status_code ) {
+			return new WP_Error( $status_code, $response['message'] );
+		}
+		
+		if ( empty( $translation_list_res['body'] ) ) {
+			return [];
+		}
+		return json_decode( $translation_list_res['body'], true );
+	}
+	/**
 	 * Get translation info.
 	 *
 	 * @param string $translate_abbr
-	 * @return void
+	 * @return array|WP_Error
 	 */
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$is_valid = $this->authenticated();
@@ -318,7 +340,7 @@ final class Api extends Base {
 		return $response;
 	}
 	/**
-	 * Get transient
+	 * Get core transient
 	 *
 	 * @param string $attr_name
 	 * @param string $prefix
@@ -329,7 +351,7 @@ final class Api extends Base {
 		return get_transient( $transient_label );
 	}
 	/**
-	 * Set transient
+	 * Set core transient
 	 *
 	 * @param string $attr_name
 	 * @param mixed $value
@@ -344,9 +366,9 @@ final class Api extends Base {
 		return $transient_seted;
 	}
 	/**
-	 * Undocumented function
+	 * Delete core transient
 	 *
-	 * @param [type] $attr_name
+	 * @param string $attr_name
 	 * @param string $prefix
 	 * @return boolean
 	 */

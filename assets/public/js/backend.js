@@ -4185,3493 +4185,6 @@ function createListenerMiddleware(middlewareOptions) {
 
 /***/ }),
 
-/***/ "./node_modules/@remix-run/router/dist/router.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/@remix-run/router/dist/router.js ***!
-  \*******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AbortedDeferredError": () => (/* binding */ AbortedDeferredError),
-/* harmony export */   "Action": () => (/* binding */ Action),
-/* harmony export */   "ErrorResponse": () => (/* binding */ ErrorResponse),
-/* harmony export */   "IDLE_FETCHER": () => (/* binding */ IDLE_FETCHER),
-/* harmony export */   "IDLE_NAVIGATION": () => (/* binding */ IDLE_NAVIGATION),
-/* harmony export */   "UNSAFE_convertRoutesToDataRoutes": () => (/* binding */ convertRoutesToDataRoutes),
-/* harmony export */   "UNSAFE_getPathContributingMatches": () => (/* binding */ getPathContributingMatches),
-/* harmony export */   "createBrowserHistory": () => (/* binding */ createBrowserHistory),
-/* harmony export */   "createHashHistory": () => (/* binding */ createHashHistory),
-/* harmony export */   "createMemoryHistory": () => (/* binding */ createMemoryHistory),
-/* harmony export */   "createPath": () => (/* binding */ createPath),
-/* harmony export */   "createRouter": () => (/* binding */ createRouter),
-/* harmony export */   "defer": () => (/* binding */ defer),
-/* harmony export */   "generatePath": () => (/* binding */ generatePath),
-/* harmony export */   "getStaticContextFromError": () => (/* binding */ getStaticContextFromError),
-/* harmony export */   "getToPathname": () => (/* binding */ getToPathname),
-/* harmony export */   "invariant": () => (/* binding */ invariant),
-/* harmony export */   "isRouteErrorResponse": () => (/* binding */ isRouteErrorResponse),
-/* harmony export */   "joinPaths": () => (/* binding */ joinPaths),
-/* harmony export */   "json": () => (/* binding */ json),
-/* harmony export */   "matchPath": () => (/* binding */ matchPath),
-/* harmony export */   "matchRoutes": () => (/* binding */ matchRoutes),
-/* harmony export */   "normalizePathname": () => (/* binding */ normalizePathname),
-/* harmony export */   "parsePath": () => (/* binding */ parsePath),
-/* harmony export */   "redirect": () => (/* binding */ redirect),
-/* harmony export */   "resolvePath": () => (/* binding */ resolvePath),
-/* harmony export */   "resolveTo": () => (/* binding */ resolveTo),
-/* harmony export */   "stripBasename": () => (/* binding */ stripBasename),
-/* harmony export */   "unstable_createStaticHandler": () => (/* binding */ unstable_createStaticHandler),
-/* harmony export */   "warning": () => (/* binding */ warning)
-/* harmony export */ });
-/**
- * @remix-run/router v1.0.4
- *
- * Copyright (c) Remix Software Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.md file in the root directory of this source tree.
- *
- * @license MIT
- */
-function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-  return _extends.apply(this, arguments);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//#region Types and Constants
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Actions represent the type of change to a location value.
- */
-var Action;
-
-(function (Action) {
-  /**
-   * A POP indicates a change to an arbitrary index in the history stack, such
-   * as a back or forward navigation. It does not describe the direction of the
-   * navigation, only that the current index changed.
-   *
-   * Note: This is the default action for newly created history objects.
-   */
-  Action["Pop"] = "POP";
-  /**
-   * A PUSH indicates a new entry being added to the history stack, such as when
-   * a link is clicked and a new page loads. When this happens, all subsequent
-   * entries in the stack are lost.
-   */
-
-  Action["Push"] = "PUSH";
-  /**
-   * A REPLACE indicates the entry at the current index in the history stack
-   * being replaced by a new one.
-   */
-
-  Action["Replace"] = "REPLACE";
-})(Action || (Action = {}));
-
-const PopStateEventType = "popstate";
-/**
- * Memory history stores the current location in memory. It is designed for use
- * in stateful non-browser environments like tests and React Native.
- */
-
-function createMemoryHistory(options) {
-  if (options === void 0) {
-    options = {};
-  }
-
-  let {
-    initialEntries = ["/"],
-    initialIndex,
-    v5Compat = false
-  } = options;
-  let entries; // Declare so we can access from createMemoryLocation
-
-  entries = initialEntries.map((entry, index) => createMemoryLocation(entry, typeof entry === "string" ? null : entry.state, index === 0 ? "default" : undefined));
-  let index = clampIndex(initialIndex == null ? entries.length - 1 : initialIndex);
-  let action = Action.Pop;
-  let listener = null;
-
-  function clampIndex(n) {
-    return Math.min(Math.max(n, 0), entries.length - 1);
-  }
-
-  function getCurrentLocation() {
-    return entries[index];
-  }
-
-  function createMemoryLocation(to, state, key) {
-    if (state === void 0) {
-      state = null;
-    }
-
-    let location = createLocation(entries ? getCurrentLocation().pathname : "/", to, state, key);
-    warning$1(location.pathname.charAt(0) === "/", "relative pathnames are not supported in memory history: " + JSON.stringify(to));
-    return location;
-  }
-
-  let history = {
-    get index() {
-      return index;
-    },
-
-    get action() {
-      return action;
-    },
-
-    get location() {
-      return getCurrentLocation();
-    },
-
-    createHref(to) {
-      return typeof to === "string" ? to : createPath(to);
-    },
-
-    encodeLocation(to) {
-      let path = typeof to === "string" ? parsePath(to) : to;
-      return {
-        pathname: path.pathname || "",
-        search: path.search || "",
-        hash: path.hash || ""
-      };
-    },
-
-    push(to, state) {
-      action = Action.Push;
-      let nextLocation = createMemoryLocation(to, state);
-      index += 1;
-      entries.splice(index, entries.length, nextLocation);
-
-      if (v5Compat && listener) {
-        listener({
-          action,
-          location: nextLocation
-        });
-      }
-    },
-
-    replace(to, state) {
-      action = Action.Replace;
-      let nextLocation = createMemoryLocation(to, state);
-      entries[index] = nextLocation;
-
-      if (v5Compat && listener) {
-        listener({
-          action,
-          location: nextLocation
-        });
-      }
-    },
-
-    go(delta) {
-      action = Action.Pop;
-      index = clampIndex(index + delta);
-
-      if (listener) {
-        listener({
-          action,
-          location: getCurrentLocation()
-        });
-      }
-    },
-
-    listen(fn) {
-      listener = fn;
-      return () => {
-        listener = null;
-      };
-    }
-
-  };
-  return history;
-}
-/**
- * Browser history stores the location in regular URLs. This is the standard for
- * most web apps, but it requires some configuration on the server to ensure you
- * serve the same app at multiple URLs.
- *
- * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createbrowserhistory
- */
-
-function createBrowserHistory(options) {
-  if (options === void 0) {
-    options = {};
-  }
-
-  function createBrowserLocation(window, globalHistory) {
-    let {
-      pathname,
-      search,
-      hash
-    } = window.location;
-    return createLocation("", {
-      pathname,
-      search,
-      hash
-    }, // state defaults to `null` because `window.history.state` does
-    globalHistory.state && globalHistory.state.usr || null, globalHistory.state && globalHistory.state.key || "default");
-  }
-
-  function createBrowserHref(window, to) {
-    return typeof to === "string" ? to : createPath(to);
-  }
-
-  return getUrlBasedHistory(createBrowserLocation, createBrowserHref, null, options);
-}
-/**
- * Hash history stores the location in window.location.hash. This makes it ideal
- * for situations where you don't want to send the location to the server for
- * some reason, either because you do cannot configure it or the URL space is
- * reserved for something else.
- *
- * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createhashhistory
- */
-
-function createHashHistory(options) {
-  if (options === void 0) {
-    options = {};
-  }
-
-  function createHashLocation(window, globalHistory) {
-    let {
-      pathname = "/",
-      search = "",
-      hash = ""
-    } = parsePath(window.location.hash.substr(1));
-    return createLocation("", {
-      pathname,
-      search,
-      hash
-    }, // state defaults to `null` because `window.history.state` does
-    globalHistory.state && globalHistory.state.usr || null, globalHistory.state && globalHistory.state.key || "default");
-  }
-
-  function createHashHref(window, to) {
-    let base = window.document.querySelector("base");
-    let href = "";
-
-    if (base && base.getAttribute("href")) {
-      let url = window.location.href;
-      let hashIndex = url.indexOf("#");
-      href = hashIndex === -1 ? url : url.slice(0, hashIndex);
-    }
-
-    return href + "#" + (typeof to === "string" ? to : createPath(to));
-  }
-
-  function validateHashLocation(location, to) {
-    warning$1(location.pathname.charAt(0) === "/", "relative pathnames are not supported in hash history.push(" + JSON.stringify(to) + ")");
-  }
-
-  return getUrlBasedHistory(createHashLocation, createHashHref, validateHashLocation, options);
-} //#endregion
-////////////////////////////////////////////////////////////////////////////////
-//#region UTILS
-////////////////////////////////////////////////////////////////////////////////
-
-function warning$1(cond, message) {
-  if (!cond) {
-    // eslint-disable-next-line no-console
-    if (typeof console !== "undefined") console.warn(message);
-
-    try {
-      // Welcome to debugging history!
-      //
-      // This error is thrown as a convenience so you can more easily
-      // find the source for a warning that appears in the console by
-      // enabling "pause on exceptions" in your JavaScript debugger.
-      throw new Error(message); // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-}
-
-function createKey() {
-  return Math.random().toString(36).substr(2, 8);
-}
-/**
- * For browser-based histories, we combine the state and key into an object
- */
-
-
-function getHistoryState(location) {
-  return {
-    usr: location.state,
-    key: location.key
-  };
-}
-/**
- * Creates a Location object with a unique key from the given Path
- */
-
-
-function createLocation(current, to, state, key) {
-  if (state === void 0) {
-    state = null;
-  }
-
-  let location = _extends({
-    pathname: typeof current === "string" ? current : current.pathname,
-    search: "",
-    hash: ""
-  }, typeof to === "string" ? parsePath(to) : to, {
-    state,
-    // TODO: This could be cleaned up.  push/replace should probably just take
-    // full Locations now and avoid the need to run through this flow at all
-    // But that's a pretty big refactor to the current test suite so going to
-    // keep as is for the time being and just let any incoming keys take precedence
-    key: to && to.key || key || createKey()
-  });
-
-  return location;
-}
-/**
- * Creates a string URL path from the given pathname, search, and hash components.
- */
-
-function createPath(_ref) {
-  let {
-    pathname = "/",
-    search = "",
-    hash = ""
-  } = _ref;
-  if (search && search !== "?") pathname += search.charAt(0) === "?" ? search : "?" + search;
-  if (hash && hash !== "#") pathname += hash.charAt(0) === "#" ? hash : "#" + hash;
-  return pathname;
-}
-/**
- * Parses a string URL path into its separate pathname, search, and hash components.
- */
-
-function parsePath(path) {
-  let parsedPath = {};
-
-  if (path) {
-    let hashIndex = path.indexOf("#");
-
-    if (hashIndex >= 0) {
-      parsedPath.hash = path.substr(hashIndex);
-      path = path.substr(0, hashIndex);
-    }
-
-    let searchIndex = path.indexOf("?");
-
-    if (searchIndex >= 0) {
-      parsedPath.search = path.substr(searchIndex);
-      path = path.substr(0, searchIndex);
-    }
-
-    if (path) {
-      parsedPath.pathname = path;
-    }
-  }
-
-  return parsedPath;
-}
-function createURL(location) {
-  // window.location.origin is "null" (the literal string value) in Firefox
-  // under certain conditions, notably when serving from a local HTML file
-  // See https://bugzilla.mozilla.org/show_bug.cgi?id=878297
-  let base = typeof window !== "undefined" && typeof window.location !== "undefined" && window.location.origin !== "null" ? window.location.origin : "unknown://unknown";
-  let href = typeof location === "string" ? location : createPath(location);
-  return new URL(href, base);
-}
-
-function getUrlBasedHistory(getLocation, createHref, validateLocation, options) {
-  if (options === void 0) {
-    options = {};
-  }
-
-  let {
-    window = document.defaultView,
-    v5Compat = false
-  } = options;
-  let globalHistory = window.history;
-  let action = Action.Pop;
-  let listener = null;
-
-  function handlePop() {
-    action = Action.Pop;
-
-    if (listener) {
-      listener({
-        action,
-        location: history.location
-      });
-    }
-  }
-
-  function push(to, state) {
-    action = Action.Push;
-    let location = createLocation(history.location, to, state);
-    if (validateLocation) validateLocation(location, to);
-    let historyState = getHistoryState(location);
-    let url = history.createHref(location); // try...catch because iOS limits us to 100 pushState calls :/
-
-    try {
-      globalHistory.pushState(historyState, "", url);
-    } catch (error) {
-      // They are going to lose state here, but there is no real
-      // way to warn them about it since the page will refresh...
-      window.location.assign(url);
-    }
-
-    if (v5Compat && listener) {
-      listener({
-        action,
-        location: history.location
-      });
-    }
-  }
-
-  function replace(to, state) {
-    action = Action.Replace;
-    let location = createLocation(history.location, to, state);
-    if (validateLocation) validateLocation(location, to);
-    let historyState = getHistoryState(location);
-    let url = history.createHref(location);
-    globalHistory.replaceState(historyState, "", url);
-
-    if (v5Compat && listener) {
-      listener({
-        action,
-        location: history.location
-      });
-    }
-  }
-
-  let history = {
-    get action() {
-      return action;
-    },
-
-    get location() {
-      return getLocation(window, globalHistory);
-    },
-
-    listen(fn) {
-      if (listener) {
-        throw new Error("A history only accepts one active listener");
-      }
-
-      window.addEventListener(PopStateEventType, handlePop);
-      listener = fn;
-      return () => {
-        window.removeEventListener(PopStateEventType, handlePop);
-        listener = null;
-      };
-    },
-
-    createHref(to) {
-      return createHref(window, to);
-    },
-
-    encodeLocation(to) {
-      // Encode a Location the same way window.location would
-      let url = createURL(typeof to === "string" ? to : createPath(to));
-      return {
-        pathname: url.pathname,
-        search: url.search,
-        hash: url.hash
-      };
-    },
-
-    push,
-    replace,
-
-    go(n) {
-      return globalHistory.go(n);
-    }
-
-  };
-  return history;
-} //#endregion
-
-var ResultType;
-
-(function (ResultType) {
-  ResultType["data"] = "data";
-  ResultType["deferred"] = "deferred";
-  ResultType["redirect"] = "redirect";
-  ResultType["error"] = "error";
-})(ResultType || (ResultType = {}));
-
-function isIndexRoute(route) {
-  return route.index === true;
-} // Walk the route tree generating unique IDs where necessary so we are working
-// solely with AgnosticDataRouteObject's within the Router
-
-
-function convertRoutesToDataRoutes(routes, parentPath, allIds) {
-  if (parentPath === void 0) {
-    parentPath = [];
-  }
-
-  if (allIds === void 0) {
-    allIds = new Set();
-  }
-
-  return routes.map((route, index) => {
-    let treePath = [...parentPath, index];
-    let id = typeof route.id === "string" ? route.id : treePath.join("-");
-    invariant(route.index !== true || !route.children, "Cannot specify children on an index route");
-    invariant(!allIds.has(id), "Found a route id collision on id \"" + id + "\".  Route " + "id's must be globally unique within Data Router usages");
-    allIds.add(id);
-
-    if (isIndexRoute(route)) {
-      let indexRoute = _extends({}, route, {
-        id
-      });
-
-      return indexRoute;
-    } else {
-      let pathOrLayoutRoute = _extends({}, route, {
-        id,
-        children: route.children ? convertRoutesToDataRoutes(route.children, treePath, allIds) : undefined
-      });
-
-      return pathOrLayoutRoute;
-    }
-  });
-}
-/**
- * Matches the given routes to a location and returns the match data.
- *
- * @see https://reactrouter.com/docs/en/v6/utils/match-routes
- */
-
-function matchRoutes(routes, locationArg, basename) {
-  if (basename === void 0) {
-    basename = "/";
-  }
-
-  let location = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
-  let pathname = stripBasename(location.pathname || "/", basename);
-
-  if (pathname == null) {
-    return null;
-  }
-
-  let branches = flattenRoutes(routes);
-  rankRouteBranches(branches);
-  let matches = null;
-
-  for (let i = 0; matches == null && i < branches.length; ++i) {
-    matches = matchRouteBranch(branches[i], // Incoming pathnames are generally encoded from either window.location
-    // or from router.navigate, but we want to match against the unencoded
-    // paths in the route definitions.  Memory router locations won't be
-    // encoded here but there also shouldn't be anything to decode so this
-    // should be a safe operation.  This avoids needing matchRoutes to be
-    // history-aware.
-    safelyDecodeURI(pathname));
-  }
-
-  return matches;
-}
-
-function flattenRoutes(routes, branches, parentsMeta, parentPath) {
-  if (branches === void 0) {
-    branches = [];
-  }
-
-  if (parentsMeta === void 0) {
-    parentsMeta = [];
-  }
-
-  if (parentPath === void 0) {
-    parentPath = "";
-  }
-
-  routes.forEach((route, index) => {
-    let meta = {
-      relativePath: route.path || "",
-      caseSensitive: route.caseSensitive === true,
-      childrenIndex: index,
-      route
-    };
-
-    if (meta.relativePath.startsWith("/")) {
-      invariant(meta.relativePath.startsWith(parentPath), "Absolute route path \"" + meta.relativePath + "\" nested under path " + ("\"" + parentPath + "\" is not valid. An absolute child route path ") + "must start with the combined path of all its parent routes.");
-      meta.relativePath = meta.relativePath.slice(parentPath.length);
-    }
-
-    let path = joinPaths([parentPath, meta.relativePath]);
-    let routesMeta = parentsMeta.concat(meta); // Add the children before adding this route to the array so we traverse the
-    // route tree depth-first and child routes appear before their parents in
-    // the "flattened" version.
-
-    if (route.children && route.children.length > 0) {
-      invariant( // Our types know better, but runtime JS may not!
-      // @ts-expect-error
-      route.index !== true, "Index routes must not have child routes. Please remove " + ("all child routes from route path \"" + path + "\"."));
-      flattenRoutes(route.children, branches, routesMeta, path);
-    } // Routes without a path shouldn't ever match by themselves unless they are
-    // index routes, so don't add them to the list of possible branches.
-
-
-    if (route.path == null && !route.index) {
-      return;
-    }
-
-    branches.push({
-      path,
-      score: computeScore(path, route.index),
-      routesMeta
-    });
-  });
-  return branches;
-}
-
-function rankRouteBranches(branches) {
-  branches.sort((a, b) => a.score !== b.score ? b.score - a.score // Higher score first
-  : compareIndexes(a.routesMeta.map(meta => meta.childrenIndex), b.routesMeta.map(meta => meta.childrenIndex)));
-}
-
-const paramRe = /^:\w+$/;
-const dynamicSegmentValue = 3;
-const indexRouteValue = 2;
-const emptySegmentValue = 1;
-const staticSegmentValue = 10;
-const splatPenalty = -2;
-
-const isSplat = s => s === "*";
-
-function computeScore(path, index) {
-  let segments = path.split("/");
-  let initialScore = segments.length;
-
-  if (segments.some(isSplat)) {
-    initialScore += splatPenalty;
-  }
-
-  if (index) {
-    initialScore += indexRouteValue;
-  }
-
-  return segments.filter(s => !isSplat(s)).reduce((score, segment) => score + (paramRe.test(segment) ? dynamicSegmentValue : segment === "" ? emptySegmentValue : staticSegmentValue), initialScore);
-}
-
-function compareIndexes(a, b) {
-  let siblings = a.length === b.length && a.slice(0, -1).every((n, i) => n === b[i]);
-  return siblings ? // If two routes are siblings, we should try to match the earlier sibling
-  // first. This allows people to have fine-grained control over the matching
-  // behavior by simply putting routes with identical paths in the order they
-  // want them tried.
-  a[a.length - 1] - b[b.length - 1] : // Otherwise, it doesn't really make sense to rank non-siblings by index,
-  // so they sort equally.
-  0;
-}
-
-function matchRouteBranch(branch, pathname) {
-  let {
-    routesMeta
-  } = branch;
-  let matchedParams = {};
-  let matchedPathname = "/";
-  let matches = [];
-
-  for (let i = 0; i < routesMeta.length; ++i) {
-    let meta = routesMeta[i];
-    let end = i === routesMeta.length - 1;
-    let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
-    let match = matchPath({
-      path: meta.relativePath,
-      caseSensitive: meta.caseSensitive,
-      end
-    }, remainingPathname);
-    if (!match) return null;
-    Object.assign(matchedParams, match.params);
-    let route = meta.route;
-    matches.push({
-      // TODO: Can this as be avoided?
-      params: matchedParams,
-      pathname: joinPaths([matchedPathname, match.pathname]),
-      pathnameBase: normalizePathname(joinPaths([matchedPathname, match.pathnameBase])),
-      route
-    });
-
-    if (match.pathnameBase !== "/") {
-      matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
-    }
-  }
-
-  return matches;
-}
-/**
- * Returns a path with params interpolated.
- *
- * @see https://reactrouter.com/docs/en/v6/utils/generate-path
- */
-
-
-function generatePath(path, params) {
-  if (params === void 0) {
-    params = {};
-  }
-
-  return path.replace(/:(\w+)/g, (_, key) => {
-    invariant(params[key] != null, "Missing \":" + key + "\" param");
-    return params[key];
-  }).replace(/(\/?)\*/, (_, prefix, __, str) => {
-    const star = "*";
-
-    if (params[star] == null) {
-      // If no splat was provided, trim the trailing slash _unless_ it's
-      // the entire path
-      return str === "/*" ? "/" : "";
-    } // Apply the splat
-
-
-    return "" + prefix + params[star];
-  });
-}
-/**
- * Performs pattern matching on a URL pathname and returns information about
- * the match.
- *
- * @see https://reactrouter.com/docs/en/v6/utils/match-path
- */
-
-function matchPath(pattern, pathname) {
-  if (typeof pattern === "string") {
-    pattern = {
-      path: pattern,
-      caseSensitive: false,
-      end: true
-    };
-  }
-
-  let [matcher, paramNames] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
-  let match = pathname.match(matcher);
-  if (!match) return null;
-  let matchedPathname = match[0];
-  let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
-  let captureGroups = match.slice(1);
-  let params = paramNames.reduce((memo, paramName, index) => {
-    // We need to compute the pathnameBase here using the raw splat value
-    // instead of using params["*"] later because it will be decoded then
-    if (paramName === "*") {
-      let splatValue = captureGroups[index] || "";
-      pathnameBase = matchedPathname.slice(0, matchedPathname.length - splatValue.length).replace(/(.)\/+$/, "$1");
-    }
-
-    memo[paramName] = safelyDecodeURIComponent(captureGroups[index] || "", paramName);
-    return memo;
-  }, {});
-  return {
-    params,
-    pathname: matchedPathname,
-    pathnameBase,
-    pattern
-  };
-}
-
-function compilePath(path, caseSensitive, end) {
-  if (caseSensitive === void 0) {
-    caseSensitive = false;
-  }
-
-  if (end === void 0) {
-    end = true;
-  }
-
-  warning(path === "*" || !path.endsWith("*") || path.endsWith("/*"), "Route path \"" + path + "\" will be treated as if it were " + ("\"" + path.replace(/\*$/, "/*") + "\" because the `*` character must ") + "always follow a `/` in the pattern. To get rid of this warning, " + ("please change the route path to \"" + path.replace(/\*$/, "/*") + "\"."));
-  let paramNames = [];
-  let regexpSource = "^" + path.replace(/\/*\*?$/, "") // Ignore trailing / and /*, we'll handle it below
-  .replace(/^\/*/, "/") // Make sure it has a leading /
-  .replace(/[\\.*+^$?{}|()[\]]/g, "\\$&") // Escape special regex chars
-  .replace(/:(\w+)/g, (_, paramName) => {
-    paramNames.push(paramName);
-    return "([^\\/]+)";
-  });
-
-  if (path.endsWith("*")) {
-    paramNames.push("*");
-    regexpSource += path === "*" || path === "/*" ? "(.*)$" // Already matched the initial /, just match the rest
-    : "(?:\\/(.+)|\\/*)$"; // Don't include the / in params["*"]
-  } else if (end) {
-    // When matching to the end, ignore trailing slashes
-    regexpSource += "\\/*$";
-  } else if (path !== "" && path !== "/") {
-    // If our path is non-empty and contains anything beyond an initial slash,
-    // then we have _some_ form of path in our regex so we should expect to
-    // match only if we find the end of this path segment.  Look for an optional
-    // non-captured trailing slash (to match a portion of the URL) or the end
-    // of the path (if we've matched to the end).  We used to do this with a
-    // word boundary but that gives false positives on routes like
-    // /user-preferences since `-` counts as a word boundary.
-    regexpSource += "(?:(?=\\/|$))";
-  } else ;
-
-  let matcher = new RegExp(regexpSource, caseSensitive ? undefined : "i");
-  return [matcher, paramNames];
-}
-
-function safelyDecodeURI(value) {
-  try {
-    return decodeURI(value);
-  } catch (error) {
-    warning(false, "The URL path \"" + value + "\" could not be decoded because it is is a " + "malformed URL segment. This is probably due to a bad percent " + ("encoding (" + error + ")."));
-    return value;
-  }
-}
-
-function safelyDecodeURIComponent(value, paramName) {
-  try {
-    return decodeURIComponent(value);
-  } catch (error) {
-    warning(false, "The value for the URL param \"" + paramName + "\" will not be decoded because" + (" the string \"" + value + "\" is a malformed URL segment. This is probably") + (" due to a bad percent encoding (" + error + ")."));
-    return value;
-  }
-}
-/**
- * @private
- */
-
-
-function stripBasename(pathname, basename) {
-  if (basename === "/") return pathname;
-
-  if (!pathname.toLowerCase().startsWith(basename.toLowerCase())) {
-    return null;
-  } // We want to leave trailing slash behavior in the user's control, so if they
-  // specify a basename with a trailing slash, we should support it
-
-
-  let startIndex = basename.endsWith("/") ? basename.length - 1 : basename.length;
-  let nextChar = pathname.charAt(startIndex);
-
-  if (nextChar && nextChar !== "/") {
-    // pathname does not start with basename/
-    return null;
-  }
-
-  return pathname.slice(startIndex) || "/";
-}
-function invariant(value, message) {
-  if (value === false || value === null || typeof value === "undefined") {
-    throw new Error(message);
-  }
-}
-/**
- * @private
- */
-
-function warning(cond, message) {
-  if (!cond) {
-    // eslint-disable-next-line no-console
-    if (typeof console !== "undefined") console.warn(message);
-
-    try {
-      // Welcome to debugging React Router!
-      //
-      // This error is thrown as a convenience so you can more easily
-      // find the source for a warning that appears in the console by
-      // enabling "pause on exceptions" in your JavaScript debugger.
-      throw new Error(message); // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-}
-/**
- * Returns a resolved path object relative to the given pathname.
- *
- * @see https://reactrouter.com/docs/en/v6/utils/resolve-path
- */
-
-function resolvePath(to, fromPathname) {
-  if (fromPathname === void 0) {
-    fromPathname = "/";
-  }
-
-  let {
-    pathname: toPathname,
-    search = "",
-    hash = ""
-  } = typeof to === "string" ? parsePath(to) : to;
-  let pathname = toPathname ? toPathname.startsWith("/") ? toPathname : resolvePathname(toPathname, fromPathname) : fromPathname;
-  return {
-    pathname,
-    search: normalizeSearch(search),
-    hash: normalizeHash(hash)
-  };
-}
-
-function resolvePathname(relativePath, fromPathname) {
-  let segments = fromPathname.replace(/\/+$/, "").split("/");
-  let relativeSegments = relativePath.split("/");
-  relativeSegments.forEach(segment => {
-    if (segment === "..") {
-      // Keep the root "" segment so the pathname starts at /
-      if (segments.length > 1) segments.pop();
-    } else if (segment !== ".") {
-      segments.push(segment);
-    }
-  });
-  return segments.length > 1 ? segments.join("/") : "/";
-}
-
-function getInvalidPathError(char, field, dest, path) {
-  return "Cannot include a '" + char + "' character in a manually specified " + ("`to." + field + "` field [" + JSON.stringify(path) + "].  Please separate it out to the ") + ("`to." + dest + "` field. Alternatively you may provide the full path as ") + "a string in <Link to=\"...\"> and the router will parse it for you.";
-}
-/**
- * @private
- *
- * When processing relative navigation we want to ignore ancestor routes that
- * do not contribute to the path, such that index/pathless layout routes don't
- * interfere.
- *
- * For example, when moving a route element into an index route and/or a
- * pathless layout route, relative link behavior contained within should stay
- * the same.  Both of the following examples should link back to the root:
- *
- *   <Route path="/">
- *     <Route path="accounts" element={<Link to=".."}>
- *   </Route>
- *
- *   <Route path="/">
- *     <Route path="accounts">
- *       <Route element={<AccountsLayout />}>       // <-- Does not contribute
- *         <Route index element={<Link to=".."} />  // <-- Does not contribute
- *       </Route
- *     </Route>
- *   </Route>
- */
-
-
-function getPathContributingMatches(matches) {
-  return matches.filter((match, index) => index === 0 || match.route.path && match.route.path.length > 0);
-}
-/**
- * @private
- */
-
-function resolveTo(toArg, routePathnames, locationPathname, isPathRelative) {
-  if (isPathRelative === void 0) {
-    isPathRelative = false;
-  }
-
-  let to;
-
-  if (typeof toArg === "string") {
-    to = parsePath(toArg);
-  } else {
-    to = _extends({}, toArg);
-    invariant(!to.pathname || !to.pathname.includes("?"), getInvalidPathError("?", "pathname", "search", to));
-    invariant(!to.pathname || !to.pathname.includes("#"), getInvalidPathError("#", "pathname", "hash", to));
-    invariant(!to.search || !to.search.includes("#"), getInvalidPathError("#", "search", "hash", to));
-  }
-
-  let isEmptyPath = toArg === "" || to.pathname === "";
-  let toPathname = isEmptyPath ? "/" : to.pathname;
-  let from; // Routing is relative to the current pathname if explicitly requested.
-  //
-  // If a pathname is explicitly provided in `to`, it should be relative to the
-  // route context. This is explained in `Note on `<Link to>` values` in our
-  // migration guide from v5 as a means of disambiguation between `to` values
-  // that begin with `/` and those that do not. However, this is problematic for
-  // `to` values that do not provide a pathname. `to` can simply be a search or
-  // hash string, in which case we should assume that the navigation is relative
-  // to the current location's pathname and *not* the route pathname.
-
-  if (isPathRelative || toPathname == null) {
-    from = locationPathname;
-  } else {
-    let routePathnameIndex = routePathnames.length - 1;
-
-    if (toPathname.startsWith("..")) {
-      let toSegments = toPathname.split("/"); // Each leading .. segment means "go up one route" instead of "go up one
-      // URL segment".  This is a key difference from how <a href> works and a
-      // major reason we call this a "to" value instead of a "href".
-
-      while (toSegments[0] === "..") {
-        toSegments.shift();
-        routePathnameIndex -= 1;
-      }
-
-      to.pathname = toSegments.join("/");
-    } // If there are more ".." segments than parent routes, resolve relative to
-    // the root / URL.
-
-
-    from = routePathnameIndex >= 0 ? routePathnames[routePathnameIndex] : "/";
-  }
-
-  let path = resolvePath(to, from); // Ensure the pathname has a trailing slash if the original "to" had one
-
-  let hasExplicitTrailingSlash = toPathname && toPathname !== "/" && toPathname.endsWith("/"); // Or if this was a link to the current path which has a trailing slash
-
-  let hasCurrentTrailingSlash = (isEmptyPath || toPathname === ".") && locationPathname.endsWith("/");
-
-  if (!path.pathname.endsWith("/") && (hasExplicitTrailingSlash || hasCurrentTrailingSlash)) {
-    path.pathname += "/";
-  }
-
-  return path;
-}
-/**
- * @private
- */
-
-function getToPathname(to) {
-  // Empty strings should be treated the same as / paths
-  return to === "" || to.pathname === "" ? "/" : typeof to === "string" ? parsePath(to).pathname : to.pathname;
-}
-/**
- * @private
- */
-
-const joinPaths = paths => paths.join("/").replace(/\/\/+/g, "/");
-/**
- * @private
- */
-
-const normalizePathname = pathname => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
-/**
- * @private
- */
-
-const normalizeSearch = search => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
-/**
- * @private
- */
-
-const normalizeHash = hash => !hash || hash === "#" ? "" : hash.startsWith("#") ? hash : "#" + hash;
-/**
- * This is a shortcut for creating `application/json` responses. Converts `data`
- * to JSON and sets the `Content-Type` header.
- */
-
-const json = function json(data, init) {
-  if (init === void 0) {
-    init = {};
-  }
-
-  let responseInit = typeof init === "number" ? {
-    status: init
-  } : init;
-  let headers = new Headers(responseInit.headers);
-
-  if (!headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json; charset=utf-8");
-  }
-
-  return new Response(JSON.stringify(data), _extends({}, responseInit, {
-    headers
-  }));
-};
-class AbortedDeferredError extends Error {}
-class DeferredData {
-  constructor(data) {
-    this.pendingKeys = new Set();
-    this.subscriber = undefined;
-    invariant(data && typeof data === "object" && !Array.isArray(data), "defer() only accepts plain objects"); // Set up an AbortController + Promise we can race against to exit early
-    // cancellation
-
-    let reject;
-    this.abortPromise = new Promise((_, r) => reject = r);
-    this.controller = new AbortController();
-
-    let onAbort = () => reject(new AbortedDeferredError("Deferred data aborted"));
-
-    this.unlistenAbortSignal = () => this.controller.signal.removeEventListener("abort", onAbort);
-
-    this.controller.signal.addEventListener("abort", onAbort);
-    this.data = Object.entries(data).reduce((acc, _ref) => {
-      let [key, value] = _ref;
-      return Object.assign(acc, {
-        [key]: this.trackPromise(key, value)
-      });
-    }, {});
-  }
-
-  trackPromise(key, value) {
-    if (!(value instanceof Promise)) {
-      return value;
-    }
-
-    this.pendingKeys.add(key); // We store a little wrapper promise that will be extended with
-    // _data/_error props upon resolve/reject
-
-    let promise = Promise.race([value, this.abortPromise]).then(data => this.onSettle(promise, key, null, data), error => this.onSettle(promise, key, error)); // Register rejection listeners to avoid uncaught promise rejections on
-    // errors or aborted deferred values
-
-    promise.catch(() => {});
-    Object.defineProperty(promise, "_tracked", {
-      get: () => true
-    });
-    return promise;
-  }
-
-  onSettle(promise, key, error, data) {
-    if (this.controller.signal.aborted && error instanceof AbortedDeferredError) {
-      this.unlistenAbortSignal();
-      Object.defineProperty(promise, "_error", {
-        get: () => error
-      });
-      return Promise.reject(error);
-    }
-
-    this.pendingKeys.delete(key);
-
-    if (this.done) {
-      // Nothing left to abort!
-      this.unlistenAbortSignal();
-    }
-
-    const subscriber = this.subscriber;
-
-    if (error) {
-      Object.defineProperty(promise, "_error", {
-        get: () => error
-      });
-      subscriber && subscriber(false);
-      return Promise.reject(error);
-    }
-
-    Object.defineProperty(promise, "_data", {
-      get: () => data
-    });
-    subscriber && subscriber(false);
-    return data;
-  }
-
-  subscribe(fn) {
-    this.subscriber = fn;
-  }
-
-  cancel() {
-    this.controller.abort();
-    this.pendingKeys.forEach((v, k) => this.pendingKeys.delete(k));
-    let subscriber = this.subscriber;
-    subscriber && subscriber(true);
-  }
-
-  async resolveData(signal) {
-    let aborted = false;
-
-    if (!this.done) {
-      let onAbort = () => this.cancel();
-
-      signal.addEventListener("abort", onAbort);
-      aborted = await new Promise(resolve => {
-        this.subscribe(aborted => {
-          signal.removeEventListener("abort", onAbort);
-
-          if (aborted || this.done) {
-            resolve(aborted);
-          }
-        });
-      });
-    }
-
-    return aborted;
-  }
-
-  get done() {
-    return this.pendingKeys.size === 0;
-  }
-
-  get unwrappedData() {
-    invariant(this.data !== null && this.done, "Can only unwrap data on initialized and settled deferreds");
-    return Object.entries(this.data).reduce((acc, _ref2) => {
-      let [key, value] = _ref2;
-      return Object.assign(acc, {
-        [key]: unwrapTrackedPromise(value)
-      });
-    }, {});
-  }
-
-}
-
-function isTrackedPromise(value) {
-  return value instanceof Promise && value._tracked === true;
-}
-
-function unwrapTrackedPromise(value) {
-  if (!isTrackedPromise(value)) {
-    return value;
-  }
-
-  if (value._error) {
-    throw value._error;
-  }
-
-  return value._data;
-}
-
-function defer(data) {
-  return new DeferredData(data);
-}
-/**
- * A redirect response. Sets the status code and the `Location` header.
- * Defaults to "302 Found".
- */
-
-const redirect = function redirect(url, init) {
-  if (init === void 0) {
-    init = 302;
-  }
-
-  let responseInit = init;
-
-  if (typeof responseInit === "number") {
-    responseInit = {
-      status: responseInit
-    };
-  } else if (typeof responseInit.status === "undefined") {
-    responseInit.status = 302;
-  }
-
-  let headers = new Headers(responseInit.headers);
-  headers.set("Location", url);
-  return new Response(null, _extends({}, responseInit, {
-    headers
-  }));
-};
-/**
- * @private
- * Utility class we use to hold auto-unwrapped 4xx/5xx Response bodies
- */
-
-class ErrorResponse {
-  constructor(status, statusText, data, internal) {
-    if (internal === void 0) {
-      internal = false;
-    }
-
-    this.status = status;
-    this.statusText = statusText || "";
-    this.internal = internal;
-
-    if (data instanceof Error) {
-      this.data = data.toString();
-      this.error = data;
-    } else {
-      this.data = data;
-    }
-  }
-
-}
-/**
- * Check if the given error is an ErrorResponse generated from a 4xx/5xx
- * Response throw from an action/loader
- */
-
-function isRouteErrorResponse(e) {
-  return e instanceof ErrorResponse;
-}
-
-const validActionMethodsArr = ["post", "put", "patch", "delete"];
-const validActionMethods = new Set(validActionMethodsArr);
-const validRequestMethodsArr = ["get", ...validActionMethodsArr];
-const validRequestMethods = new Set(validRequestMethodsArr);
-const redirectStatusCodes = new Set([301, 302, 303, 307, 308]);
-const redirectPreserveMethodStatusCodes = new Set([307, 308]);
-const IDLE_NAVIGATION = {
-  state: "idle",
-  location: undefined,
-  formMethod: undefined,
-  formAction: undefined,
-  formEncType: undefined,
-  formData: undefined
-};
-const IDLE_FETCHER = {
-  state: "idle",
-  data: undefined,
-  formMethod: undefined,
-  formAction: undefined,
-  formEncType: undefined,
-  formData: undefined
-};
-const isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
-const isServer = !isBrowser; //#endregion
-////////////////////////////////////////////////////////////////////////////////
-//#region createRouter
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Create a router and listen to history POP navigations
- */
-
-function createRouter(init) {
-  invariant(init.routes.length > 0, "You must provide a non-empty routes array to createRouter");
-  let dataRoutes = convertRoutesToDataRoutes(init.routes); // Cleanup function for history
-
-  let unlistenHistory = null; // Externally-provided functions to call on all state changes
-
-  let subscribers = new Set(); // Externally-provided object to hold scroll restoration locations during routing
-
-  let savedScrollPositions = null; // Externally-provided function to get scroll restoration keys
-
-  let getScrollRestorationKey = null; // Externally-provided function to get current scroll position
-
-  let getScrollPosition = null; // One-time flag to control the initial hydration scroll restoration.  Because
-  // we don't get the saved positions from <ScrollRestoration /> until _after_
-  // the initial render, we need to manually trigger a separate updateState to
-  // send along the restoreScrollPosition
-
-  let initialScrollRestored = false;
-  let initialMatches = matchRoutes(dataRoutes, init.history.location, init.basename);
-  let initialErrors = null;
-
-  if (initialMatches == null) {
-    // If we do not match a user-provided-route, fall back to the root
-    // to allow the error boundary to take over
-    let error = getInternalRouterError(404, {
-      pathname: init.history.location.pathname
-    });
-    let {
-      matches,
-      route
-    } = getShortCircuitMatches(dataRoutes);
-    initialMatches = matches;
-    initialErrors = {
-      [route.id]: error
-    };
-  }
-
-  let initialized = !initialMatches.some(m => m.route.loader) || init.hydrationData != null;
-  let router;
-  let state = {
-    historyAction: init.history.action,
-    location: init.history.location,
-    matches: initialMatches,
-    initialized,
-    navigation: IDLE_NAVIGATION,
-    restoreScrollPosition: null,
-    preventScrollReset: false,
-    revalidation: "idle",
-    loaderData: init.hydrationData && init.hydrationData.loaderData || {},
-    actionData: init.hydrationData && init.hydrationData.actionData || null,
-    errors: init.hydrationData && init.hydrationData.errors || initialErrors,
-    fetchers: new Map()
-  }; // -- Stateful internal variables to manage navigations --
-  // Current navigation in progress (to be committed in completeNavigation)
-
-  let pendingAction = Action.Pop; // Should the current navigation prevent the scroll reset if scroll cannot
-  // be restored?
-
-  let pendingPreventScrollReset = false; // AbortController for the active navigation
-
-  let pendingNavigationController; // We use this to avoid touching history in completeNavigation if a
-  // revalidation is entirely uninterrupted
-
-  let isUninterruptedRevalidation = false; // Use this internal flag to force revalidation of all loaders:
-  //  - submissions (completed or interrupted)
-  //  - useRevalidate()
-  //  - X-Remix-Revalidate (from redirect)
-
-  let isRevalidationRequired = false; // Use this internal array to capture routes that require revalidation due
-  // to a cancelled deferred on action submission
-
-  let cancelledDeferredRoutes = []; // Use this internal array to capture fetcher loads that were cancelled by an
-  // action navigation and require revalidation
-
-  let cancelledFetcherLoads = []; // AbortControllers for any in-flight fetchers
-
-  let fetchControllers = new Map(); // Track loads based on the order in which they started
-
-  let incrementingLoadId = 0; // Track the outstanding pending navigation data load to be compared against
-  // the globally incrementing load when a fetcher load lands after a completed
-  // navigation
-
-  let pendingNavigationLoadId = -1; // Fetchers that triggered data reloads as a result of their actions
-
-  let fetchReloadIds = new Map(); // Fetchers that triggered redirect navigations from their actions
-
-  let fetchRedirectIds = new Set(); // Most recent href/match for fetcher.load calls for fetchers
-
-  let fetchLoadMatches = new Map(); // Store DeferredData instances for active route matches.  When a
-  // route loader returns defer() we stick one in here.  Then, when a nested
-  // promise resolves we update loaderData.  If a new navigation starts we
-  // cancel active deferreds for eliminated routes.
-
-  let activeDeferreds = new Map(); // Initialize the router, all side effects should be kicked off from here.
-  // Implemented as a Fluent API for ease of:
-  //   let router = createRouter(init).initialize();
-
-  function initialize() {
-    // If history informs us of a POP navigation, start the navigation but do not update
-    // state.  We'll update our own state once the navigation completes
-    unlistenHistory = init.history.listen(_ref => {
-      let {
-        action: historyAction,
-        location
-      } = _ref;
-      return startNavigation(historyAction, location);
-    }); // Kick off initial data load if needed.  Use Pop to avoid modifying history
-
-    if (!state.initialized) {
-      startNavigation(Action.Pop, state.location);
-    }
-
-    return router;
-  } // Clean up a router and it's side effects
-
-
-  function dispose() {
-    if (unlistenHistory) {
-      unlistenHistory();
-    }
-
-    subscribers.clear();
-    pendingNavigationController && pendingNavigationController.abort();
-    state.fetchers.forEach((_, key) => deleteFetcher(key));
-  } // Subscribe to state updates for the router
-
-
-  function subscribe(fn) {
-    subscribers.add(fn);
-    return () => subscribers.delete(fn);
-  } // Update our state and notify the calling context of the change
-
-
-  function updateState(newState) {
-    state = _extends({}, state, newState);
-    subscribers.forEach(subscriber => subscriber(state));
-  } // Complete a navigation returning the state.navigation back to the IDLE_NAVIGATION
-  // and setting state.[historyAction/location/matches] to the new route.
-  // - Location is a required param
-  // - Navigation will always be set to IDLE_NAVIGATION
-  // - Can pass any other state in newState
-
-
-  function completeNavigation(location, newState) {
-    var _state$navigation$for;
-
-    // Deduce if we're in a loading/actionReload state:
-    // - We have committed actionData in the store
-    // - The current navigation was a submission
-    // - We're past the submitting state and into the loading state
-    // - The location we've finished loading is different from the submission
-    //   location, indicating we redirected from the action (avoids false
-    //   positives for loading/submissionRedirect when actionData returned
-    //   on a prior submission)
-    let isActionReload = state.actionData != null && state.navigation.formMethod != null && state.navigation.state === "loading" && ((_state$navigation$for = state.navigation.formAction) == null ? void 0 : _state$navigation$for.split("?")[0]) === location.pathname; // Always preserve any existing loaderData from re-used routes
-
-    let newLoaderData = newState.loaderData ? {
-      loaderData: mergeLoaderData(state.loaderData, newState.loaderData, newState.matches || [])
-    } : {};
-    updateState(_extends({}, isActionReload ? {} : {
-      actionData: null
-    }, newState, newLoaderData, {
-      historyAction: pendingAction,
-      location,
-      initialized: true,
-      navigation: IDLE_NAVIGATION,
-      revalidation: "idle",
-      // Don't restore on submission navigations
-      restoreScrollPosition: state.navigation.formData ? false : getSavedScrollPosition(location, newState.matches || state.matches),
-      preventScrollReset: pendingPreventScrollReset
-    }));
-
-    if (isUninterruptedRevalidation) ; else if (pendingAction === Action.Pop) ; else if (pendingAction === Action.Push) {
-      init.history.push(location, location.state);
-    } else if (pendingAction === Action.Replace) {
-      init.history.replace(location, location.state);
-    } // Reset stateful navigation vars
-
-
-    pendingAction = Action.Pop;
-    pendingPreventScrollReset = false;
-    isUninterruptedRevalidation = false;
-    isRevalidationRequired = false;
-    cancelledDeferredRoutes = [];
-    cancelledFetcherLoads = [];
-  } // Trigger a navigation event, which can either be a numerical POP or a PUSH
-  // replace with an optional submission
-
-
-  async function navigate(to, opts) {
-    if (typeof to === "number") {
-      init.history.go(to);
-      return;
-    }
-
-    let {
-      path,
-      submission,
-      error
-    } = normalizeNavigateOptions(to, opts);
-    let location = createLocation(state.location, path, opts && opts.state); // When using navigate as a PUSH/REPLACE we aren't reading an already-encoded
-    // URL from window.location, so we need to encode it here so the behavior
-    // remains the same as POP and non-data-router usages.  new URL() does all
-    // the same encoding we'd get from a history.pushState/window.location read
-    // without having to touch history
-
-    location = _extends({}, location, init.history.encodeLocation(location));
-    let historyAction = (opts && opts.replace) === true || submission != null ? Action.Replace : Action.Push;
-    let preventScrollReset = opts && "preventScrollReset" in opts ? opts.preventScrollReset === true : undefined;
-    return await startNavigation(historyAction, location, {
-      submission,
-      // Send through the formData serialization error if we have one so we can
-      // render at the right error boundary after we match routes
-      pendingError: error,
-      preventScrollReset,
-      replace: opts && opts.replace
-    });
-  } // Revalidate all current loaders.  If a navigation is in progress or if this
-  // is interrupted by a navigation, allow this to "succeed" by calling all
-  // loaders during the next loader round
-
-
-  function revalidate() {
-    interruptActiveLoads();
-    updateState({
-      revalidation: "loading"
-    }); // If we're currently submitting an action, we don't need to start a new
-    // navigation, we'll just let the follow up loader execution call all loaders
-
-    if (state.navigation.state === "submitting") {
-      return;
-    } // If we're currently in an idle state, start a new navigation for the current
-    // action/location and mark it as uninterrupted, which will skip the history
-    // update in completeNavigation
-
-
-    if (state.navigation.state === "idle") {
-      startNavigation(state.historyAction, state.location, {
-        startUninterruptedRevalidation: true
-      });
-      return;
-    } // Otherwise, if we're currently in a loading state, just start a new
-    // navigation to the navigation.location but do not trigger an uninterrupted
-    // revalidation so that history correctly updates once the navigation completes
-
-
-    startNavigation(pendingAction || state.historyAction, state.navigation.location, {
-      overrideNavigation: state.navigation
-    });
-  } // Start a navigation to the given action/location.  Can optionally provide a
-  // overrideNavigation which will override the normalLoad in the case of a redirect
-  // navigation
-
-
-  async function startNavigation(historyAction, location, opts) {
-    // Abort any in-progress navigations and start a new one. Unset any ongoing
-    // uninterrupted revalidations unless told otherwise, since we want this
-    // new navigation to update history normally
-    pendingNavigationController && pendingNavigationController.abort();
-    pendingNavigationController = null;
-    pendingAction = historyAction;
-    isUninterruptedRevalidation = (opts && opts.startUninterruptedRevalidation) === true; // Save the current scroll position every time we start a new navigation,
-    // and track whether we should reset scroll on completion
-
-    saveScrollPosition(state.location, state.matches);
-    pendingPreventScrollReset = (opts && opts.preventScrollReset) === true;
-    let loadingNavigation = opts && opts.overrideNavigation;
-    let matches = matchRoutes(dataRoutes, location, init.basename); // Short circuit with a 404 on the root error boundary if we match nothing
-
-    if (!matches) {
-      let error = getInternalRouterError(404, {
-        pathname: location.pathname
-      });
-      let {
-        matches: notFoundMatches,
-        route
-      } = getShortCircuitMatches(dataRoutes); // Cancel all pending deferred on 404s since we don't keep any routes
-
-      cancelActiveDeferreds();
-      completeNavigation(location, {
-        matches: notFoundMatches,
-        loaderData: {},
-        errors: {
-          [route.id]: error
-        }
-      });
-      return;
-    } // Short circuit if it's only a hash change
-
-
-    if (isHashChangeOnly(state.location, location)) {
-      completeNavigation(location, {
-        matches
-      });
-      return;
-    } // Create a controller/Request for this navigation
-
-
-    pendingNavigationController = new AbortController();
-    let request = createRequest(location, pendingNavigationController.signal, opts && opts.submission);
-    let pendingActionData;
-    let pendingError;
-
-    if (opts && opts.pendingError) {
-      // If we have a pendingError, it means the user attempted a GET submission
-      // with binary FormData so assign here and skip to handleLoaders.  That
-      // way we handle calling loaders above the boundary etc.  It's not really
-      // different from an actionError in that sense.
-      pendingError = {
-        [findNearestBoundary(matches).route.id]: opts.pendingError
-      };
-    } else if (opts && opts.submission) {
-      // Call action if we received an action submission
-      let actionOutput = await handleAction(request, location, opts.submission, matches, {
-        replace: opts.replace
-      });
-
-      if (actionOutput.shortCircuited) {
-        return;
-      }
-
-      pendingActionData = actionOutput.pendingActionData;
-      pendingError = actionOutput.pendingActionError;
-
-      let navigation = _extends({
-        state: "loading",
-        location
-      }, opts.submission);
-
-      loadingNavigation = navigation;
-    } // Call loaders
-
-
-    let {
-      shortCircuited,
-      loaderData,
-      errors
-    } = await handleLoaders(request, location, matches, loadingNavigation, opts && opts.submission, opts && opts.replace, pendingActionData, pendingError);
-
-    if (shortCircuited) {
-      return;
-    } // Clean up now that the action/loaders have completed.  Don't clean up if
-    // we short circuited because pendingNavigationController will have already
-    // been assigned to a new controller for the next navigation
-
-
-    pendingNavigationController = null;
-    completeNavigation(location, {
-      matches,
-      loaderData,
-      errors
-    });
-  } // Call the action matched by the leaf route for this navigation and handle
-  // redirects/errors
-
-
-  async function handleAction(request, location, submission, matches, opts) {
-    interruptActiveLoads(); // Put us in a submitting state
-
-    let navigation = _extends({
-      state: "submitting",
-      location
-    }, submission);
-
-    updateState({
-      navigation
-    }); // Call our action and get the result
-
-    let result;
-    let actionMatch = getTargetMatch(matches, location);
-
-    if (!actionMatch.route.action) {
-      result = {
-        type: ResultType.error,
-        error: getInternalRouterError(405, {
-          method: request.method,
-          pathname: location.pathname,
-          routeId: actionMatch.route.id
-        })
-      };
-    } else {
-      result = await callLoaderOrAction("action", request, actionMatch, matches, router.basename);
-
-      if (request.signal.aborted) {
-        return {
-          shortCircuited: true
-        };
-      }
-    }
-
-    if (isRedirectResult(result)) {
-      await startRedirectNavigation(state, result, opts && opts.replace === true);
-      return {
-        shortCircuited: true
-      };
-    }
-
-    if (isErrorResult(result)) {
-      // Store off the pending error - we use it to determine which loaders
-      // to call and will commit it when we complete the navigation
-      let boundaryMatch = findNearestBoundary(matches, actionMatch.route.id); // By default, all submissions are REPLACE navigations, but if the
-      // action threw an error that'll be rendered in an errorElement, we fall
-      // back to PUSH so that the user can use the back button to get back to
-      // the pre-submission form location to try again
-
-      if ((opts && opts.replace) !== true) {
-        pendingAction = Action.Push;
-      }
-
-      return {
-        pendingActionError: {
-          [boundaryMatch.route.id]: result.error
-        }
-      };
-    }
-
-    if (isDeferredResult(result)) {
-      throw new Error("defer() is not supported in actions");
-    }
-
-    return {
-      pendingActionData: {
-        [actionMatch.route.id]: result.data
-      }
-    };
-  } // Call all applicable loaders for the given matches, handling redirects,
-  // errors, etc.
-
-
-  async function handleLoaders(request, location, matches, overrideNavigation, submission, replace, pendingActionData, pendingError) {
-    // Figure out the right navigation we want to use for data loading
-    let loadingNavigation = overrideNavigation;
-
-    if (!loadingNavigation) {
-      let navigation = {
-        state: "loading",
-        location,
-        formMethod: undefined,
-        formAction: undefined,
-        formEncType: undefined,
-        formData: undefined
-      };
-      loadingNavigation = navigation;
-    }
-
-    let [matchesToLoad, revalidatingFetchers] = getMatchesToLoad(state, matches, submission, location, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, pendingActionData, pendingError, fetchLoadMatches); // Cancel pending deferreds for no-longer-matched routes or routes we're
-    // about to reload.  Note that if this is an action reload we would have
-    // already cancelled all pending deferreds so this would be a no-op
-
-    cancelActiveDeferreds(routeId => !(matches && matches.some(m => m.route.id === routeId)) || matchesToLoad && matchesToLoad.some(m => m.route.id === routeId)); // Short circuit if we have no loaders to run
-
-    if (matchesToLoad.length === 0 && revalidatingFetchers.length === 0) {
-      completeNavigation(location, {
-        matches,
-        loaderData: mergeLoaderData(state.loaderData, {}, matches),
-        // Commit pending error if we're short circuiting
-        errors: pendingError || null,
-        actionData: pendingActionData || null
-      });
-      return {
-        shortCircuited: true
-      };
-    } // If this is an uninterrupted revalidation, we remain in our current idle
-    // state.  If not, we need to switch to our loading state and load data,
-    // preserving any new action data or existing action data (in the case of
-    // a revalidation interrupting an actionReload)
-
-
-    if (!isUninterruptedRevalidation) {
-      revalidatingFetchers.forEach(_ref2 => {
-        let [key] = _ref2;
-        let fetcher = state.fetchers.get(key);
-        let revalidatingFetcher = {
-          state: "loading",
-          data: fetcher && fetcher.data,
-          formMethod: undefined,
-          formAction: undefined,
-          formEncType: undefined,
-          formData: undefined
-        };
-        state.fetchers.set(key, revalidatingFetcher);
-      });
-      updateState(_extends({
-        navigation: loadingNavigation,
-        actionData: pendingActionData || state.actionData || null
-      }, revalidatingFetchers.length > 0 ? {
-        fetchers: new Map(state.fetchers)
-      } : {}));
-    }
-
-    pendingNavigationLoadId = ++incrementingLoadId;
-    revalidatingFetchers.forEach(_ref3 => {
-      let [key] = _ref3;
-      return fetchControllers.set(key, pendingNavigationController);
-    });
-    let {
-      results,
-      loaderResults,
-      fetcherResults
-    } = await callLoadersAndMaybeResolveData(state.matches, matches, matchesToLoad, revalidatingFetchers, request);
-
-    if (request.signal.aborted) {
-      return {
-        shortCircuited: true
-      };
-    } // Clean up _after_ loaders have completed.  Don't clean up if we short
-    // circuited because fetchControllers would have been aborted and
-    // reassigned to new controllers for the next navigation
-
-
-    revalidatingFetchers.forEach(_ref4 => {
-      let [key] = _ref4;
-      return fetchControllers.delete(key);
-    }); // If any loaders returned a redirect Response, start a new REPLACE navigation
-
-    let redirect = findRedirect(results);
-
-    if (redirect) {
-      await startRedirectNavigation(state, redirect, replace);
-      return {
-        shortCircuited: true
-      };
-    } // Process and commit output from loaders
-
-
-    let {
-      loaderData,
-      errors
-    } = processLoaderData(state, matches, matchesToLoad, loaderResults, pendingError, revalidatingFetchers, fetcherResults, activeDeferreds); // Wire up subscribers to update loaderData as promises settle
-
-    activeDeferreds.forEach((deferredData, routeId) => {
-      deferredData.subscribe(aborted => {
-        // Note: No need to updateState here since the TrackedPromise on
-        // loaderData is stable across resolve/reject
-        // Remove this instance if we were aborted or if promises have settled
-        if (aborted || deferredData.done) {
-          activeDeferreds.delete(routeId);
-        }
-      });
-    });
-    markFetchRedirectsDone();
-    let didAbortFetchLoads = abortStaleFetchLoads(pendingNavigationLoadId);
-    return _extends({
-      loaderData,
-      errors
-    }, didAbortFetchLoads || revalidatingFetchers.length > 0 ? {
-      fetchers: new Map(state.fetchers)
-    } : {});
-  }
-
-  function getFetcher(key) {
-    return state.fetchers.get(key) || IDLE_FETCHER;
-  } // Trigger a fetcher load/submit for the given fetcher key
-
-
-  function fetch(key, routeId, href, opts) {
-    if (isServer) {
-      throw new Error("router.fetch() was called during the server render, but it shouldn't be. " + "You are likely calling a useFetcher() method in the body of your component. " + "Try moving it to a useEffect or a callback.");
-    }
-
-    if (fetchControllers.has(key)) abortFetcher(key);
-    let matches = matchRoutes(dataRoutes, href, init.basename);
-
-    if (!matches) {
-      setFetcherError(key, routeId, getInternalRouterError(404, {
-        pathname: href
-      }));
-      return;
-    }
-
-    let {
-      path,
-      submission
-    } = normalizeNavigateOptions(href, opts, true);
-    let match = getTargetMatch(matches, path);
-
-    if (submission) {
-      handleFetcherAction(key, routeId, path, match, matches, submission);
-      return;
-    } // Store off the match so we can call it's shouldRevalidate on subsequent
-    // revalidations
-
-
-    fetchLoadMatches.set(key, [path, match, matches]);
-    handleFetcherLoader(key, routeId, path, match, matches);
-  } // Call the action for the matched fetcher.submit(), and then handle redirects,
-  // errors, and revalidation
-
-
-  async function handleFetcherAction(key, routeId, path, match, requestMatches, submission) {
-    interruptActiveLoads();
-    fetchLoadMatches.delete(key);
-
-    if (!match.route.action) {
-      let error = getInternalRouterError(405, {
-        method: submission.formMethod,
-        pathname: path,
-        routeId: routeId
-      });
-      setFetcherError(key, routeId, error);
-      return;
-    } // Put this fetcher into it's submitting state
-
-
-    let existingFetcher = state.fetchers.get(key);
-
-    let fetcher = _extends({
-      state: "submitting"
-    }, submission, {
-      data: existingFetcher && existingFetcher.data
-    });
-
-    state.fetchers.set(key, fetcher);
-    updateState({
-      fetchers: new Map(state.fetchers)
-    }); // Call the action for the fetcher
-
-    let abortController = new AbortController();
-    let fetchRequest = createRequest(path, abortController.signal, submission);
-    fetchControllers.set(key, abortController);
-    let actionResult = await callLoaderOrAction("action", fetchRequest, match, requestMatches, router.basename);
-
-    if (fetchRequest.signal.aborted) {
-      // We can delete this so long as we weren't aborted by ou our own fetcher
-      // re-submit which would have put _new_ controller is in fetchControllers
-      if (fetchControllers.get(key) === abortController) {
-        fetchControllers.delete(key);
-      }
-
-      return;
-    }
-
-    if (isRedirectResult(actionResult)) {
-      fetchControllers.delete(key);
-      fetchRedirectIds.add(key);
-
-      let loadingFetcher = _extends({
-        state: "loading"
-      }, submission, {
-        data: undefined
-      });
-
-      state.fetchers.set(key, loadingFetcher);
-      updateState({
-        fetchers: new Map(state.fetchers)
-      });
-      return startRedirectNavigation(state, actionResult);
-    } // Process any non-redirect errors thrown
-
-
-    if (isErrorResult(actionResult)) {
-      setFetcherError(key, routeId, actionResult.error);
-      return;
-    }
-
-    if (isDeferredResult(actionResult)) {
-      invariant(false, "defer() is not supported in actions");
-    } // Start the data load for current matches, or the next location if we're
-    // in the middle of a navigation
-
-
-    let nextLocation = state.navigation.location || state.location;
-    let revalidationRequest = createRequest(nextLocation, abortController.signal);
-    let matches = state.navigation.state !== "idle" ? matchRoutes(dataRoutes, state.navigation.location, init.basename) : state.matches;
-    invariant(matches, "Didn't find any matches after fetcher action");
-    let loadId = ++incrementingLoadId;
-    fetchReloadIds.set(key, loadId);
-
-    let loadFetcher = _extends({
-      state: "loading",
-      data: actionResult.data
-    }, submission);
-
-    state.fetchers.set(key, loadFetcher);
-    let [matchesToLoad, revalidatingFetchers] = getMatchesToLoad(state, matches, submission, nextLocation, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, {
-      [match.route.id]: actionResult.data
-    }, undefined, // No need to send through errors since we short circuit above
-    fetchLoadMatches); // Put all revalidating fetchers into the loading state, except for the
-    // current fetcher which we want to keep in it's current loading state which
-    // contains it's action submission info + action data
-
-    revalidatingFetchers.filter(_ref5 => {
-      let [staleKey] = _ref5;
-      return staleKey !== key;
-    }).forEach(_ref6 => {
-      let [staleKey] = _ref6;
-      let existingFetcher = state.fetchers.get(staleKey);
-      let revalidatingFetcher = {
-        state: "loading",
-        data: existingFetcher && existingFetcher.data,
-        formMethod: undefined,
-        formAction: undefined,
-        formEncType: undefined,
-        formData: undefined
-      };
-      state.fetchers.set(staleKey, revalidatingFetcher);
-      fetchControllers.set(staleKey, abortController);
-    });
-    updateState({
-      fetchers: new Map(state.fetchers)
-    });
-    let {
-      results,
-      loaderResults,
-      fetcherResults
-    } = await callLoadersAndMaybeResolveData(state.matches, matches, matchesToLoad, revalidatingFetchers, revalidationRequest);
-
-    if (abortController.signal.aborted) {
-      return;
-    }
-
-    fetchReloadIds.delete(key);
-    fetchControllers.delete(key);
-    revalidatingFetchers.forEach(_ref7 => {
-      let [staleKey] = _ref7;
-      return fetchControllers.delete(staleKey);
-    });
-    let redirect = findRedirect(results);
-
-    if (redirect) {
-      return startRedirectNavigation(state, redirect);
-    } // Process and commit output from loaders
-
-
-    let {
-      loaderData,
-      errors
-    } = processLoaderData(state, state.matches, matchesToLoad, loaderResults, undefined, revalidatingFetchers, fetcherResults, activeDeferreds);
-    let doneFetcher = {
-      state: "idle",
-      data: actionResult.data,
-      formMethod: undefined,
-      formAction: undefined,
-      formEncType: undefined,
-      formData: undefined
-    };
-    state.fetchers.set(key, doneFetcher);
-    let didAbortFetchLoads = abortStaleFetchLoads(loadId); // If we are currently in a navigation loading state and this fetcher is
-    // more recent than the navigation, we want the newer data so abort the
-    // navigation and complete it with the fetcher data
-
-    if (state.navigation.state === "loading" && loadId > pendingNavigationLoadId) {
-      invariant(pendingAction, "Expected pending action");
-      pendingNavigationController && pendingNavigationController.abort();
-      completeNavigation(state.navigation.location, {
-        matches,
-        loaderData,
-        errors,
-        fetchers: new Map(state.fetchers)
-      });
-    } else {
-      // otherwise just update with the fetcher data, preserving any existing
-      // loaderData for loaders that did not need to reload.  We have to
-      // manually merge here since we aren't going through completeNavigation
-      updateState(_extends({
-        errors,
-        loaderData: mergeLoaderData(state.loaderData, loaderData, matches)
-      }, didAbortFetchLoads ? {
-        fetchers: new Map(state.fetchers)
-      } : {}));
-      isRevalidationRequired = false;
-    }
-  } // Call the matched loader for fetcher.load(), handling redirects, errors, etc.
-
-
-  async function handleFetcherLoader(key, routeId, path, match, matches) {
-    let existingFetcher = state.fetchers.get(key); // Put this fetcher into it's loading state
-
-    let loadingFetcher = {
-      state: "loading",
-      formMethod: undefined,
-      formAction: undefined,
-      formEncType: undefined,
-      formData: undefined,
-      data: existingFetcher && existingFetcher.data
-    };
-    state.fetchers.set(key, loadingFetcher);
-    updateState({
-      fetchers: new Map(state.fetchers)
-    }); // Call the loader for this fetcher route match
-
-    let abortController = new AbortController();
-    let fetchRequest = createRequest(path, abortController.signal);
-    fetchControllers.set(key, abortController);
-    let result = await callLoaderOrAction("loader", fetchRequest, match, matches, router.basename); // Deferred isn't supported or fetcher loads, await everything and treat it
-    // as a normal load.  resolveDeferredData will return undefined if this
-    // fetcher gets aborted, so we just leave result untouched and short circuit
-    // below if that happens
-
-    if (isDeferredResult(result)) {
-      result = (await resolveDeferredData(result, fetchRequest.signal, true)) || result;
-    } // We can delete this so long as we weren't aborted by ou our own fetcher
-    // re-load which would have put _new_ controller is in fetchControllers
-
-
-    if (fetchControllers.get(key) === abortController) {
-      fetchControllers.delete(key);
-    }
-
-    if (fetchRequest.signal.aborted) {
-      return;
-    } // If the loader threw a redirect Response, start a new REPLACE navigation
-
-
-    if (isRedirectResult(result)) {
-      await startRedirectNavigation(state, result);
-      return;
-    } // Process any non-redirect errors thrown
-
-
-    if (isErrorResult(result)) {
-      let boundaryMatch = findNearestBoundary(state.matches, routeId);
-      state.fetchers.delete(key); // TODO: In remix, this would reset to IDLE_NAVIGATION if it was a catch -
-      // do we need to behave any differently with our non-redirect errors?
-      // What if it was a non-redirect Response?
-
-      updateState({
-        fetchers: new Map(state.fetchers),
-        errors: {
-          [boundaryMatch.route.id]: result.error
-        }
-      });
-      return;
-    }
-
-    invariant(!isDeferredResult(result), "Unhandled fetcher deferred data"); // Put the fetcher back into an idle state
-
-    let doneFetcher = {
-      state: "idle",
-      data: result.data,
-      formMethod: undefined,
-      formAction: undefined,
-      formEncType: undefined,
-      formData: undefined
-    };
-    state.fetchers.set(key, doneFetcher);
-    updateState({
-      fetchers: new Map(state.fetchers)
-    });
-  }
-  /**
-   * Utility function to handle redirects returned from an action or loader.
-   * Normally, a redirect "replaces" the navigation that triggered it.  So, for
-   * example:
-   *
-   *  - user is on /a
-   *  - user clicks a link to /b
-   *  - loader for /b redirects to /c
-   *
-   * In a non-JS app the browser would track the in-flight navigation to /b and
-   * then replace it with /c when it encountered the redirect response.  In
-   * the end it would only ever update the URL bar with /c.
-   *
-   * In client-side routing using pushState/replaceState, we aim to emulate
-   * this behavior and we also do not update history until the end of the
-   * navigation (including processed redirects).  This means that we never
-   * actually touch history until we've processed redirects, so we just use
-   * the history action from the original navigation (PUSH or REPLACE).
-   */
-
-
-  async function startRedirectNavigation(state, redirect, replace) {
-    if (redirect.revalidate) {
-      isRevalidationRequired = true;
-    }
-
-    let redirectLocation = createLocation(state.location, redirect.location);
-    invariant(redirectLocation, "Expected a location on the redirect navigation");
-
-    if (redirect.external && typeof window !== "undefined" && typeof window.location !== "undefined") {
-      if (replace) {
-        window.location.replace(redirect.location);
-      } else {
-        window.location.assign(redirect.location);
-      }
-
-      return;
-    } // There's no need to abort on redirects, since we don't detect the
-    // redirect until the action/loaders have settled
-
-
-    pendingNavigationController = null;
-    let redirectHistoryAction = replace === true ? Action.Replace : Action.Push;
-    let {
-      formMethod,
-      formAction,
-      formEncType,
-      formData
-    } = state.navigation; // If this was a 307/308 submission we want to preserve the HTTP method and
-    // re-submit the POST/PUT/PATCH/DELETE as a submission navigation to the
-    // redirected location
-
-    if (redirectPreserveMethodStatusCodes.has(redirect.status) && formMethod && isSubmissionMethod(formMethod) && formEncType && formData) {
-      await startNavigation(redirectHistoryAction, redirectLocation, {
-        submission: {
-          formMethod,
-          formAction: redirect.location,
-          formEncType,
-          formData
-        }
-      });
-    } else {
-      // Otherwise, we kick off a new loading navigation, preserving the
-      // submission info for the duration of this navigation
-      await startNavigation(redirectHistoryAction, redirectLocation, {
-        overrideNavigation: {
-          state: "loading",
-          location: redirectLocation,
-          formMethod: formMethod || undefined,
-          formAction: formAction || undefined,
-          formEncType: formEncType || undefined,
-          formData: formData || undefined
-        }
-      });
-    }
-  }
-
-  async function callLoadersAndMaybeResolveData(currentMatches, matches, matchesToLoad, fetchersToLoad, request) {
-    // Call all navigation loaders and revalidating fetcher loaders in parallel,
-    // then slice off the results into separate arrays so we can handle them
-    // accordingly
-    let results = await Promise.all([...matchesToLoad.map(match => callLoaderOrAction("loader", request, match, matches, router.basename)), ...fetchersToLoad.map(_ref8 => {
-      let [, href, match, fetchMatches] = _ref8;
-      return callLoaderOrAction("loader", createRequest(href, request.signal), match, fetchMatches, router.basename);
-    })]);
-    let loaderResults = results.slice(0, matchesToLoad.length);
-    let fetcherResults = results.slice(matchesToLoad.length);
-    await Promise.all([resolveDeferredResults(currentMatches, matchesToLoad, loaderResults, request.signal, false, state.loaderData), resolveDeferredResults(currentMatches, fetchersToLoad.map(_ref9 => {
-      let [,, match] = _ref9;
-      return match;
-    }), fetcherResults, request.signal, true)]);
-    return {
-      results,
-      loaderResults,
-      fetcherResults
-    };
-  }
-
-  function interruptActiveLoads() {
-    // Every interruption triggers a revalidation
-    isRevalidationRequired = true; // Cancel pending route-level deferreds and mark cancelled routes for
-    // revalidation
-
-    cancelledDeferredRoutes.push(...cancelActiveDeferreds()); // Abort in-flight fetcher loads
-
-    fetchLoadMatches.forEach((_, key) => {
-      if (fetchControllers.has(key)) {
-        cancelledFetcherLoads.push(key);
-        abortFetcher(key);
-      }
-    });
-  }
-
-  function setFetcherError(key, routeId, error) {
-    let boundaryMatch = findNearestBoundary(state.matches, routeId);
-    deleteFetcher(key);
-    updateState({
-      errors: {
-        [boundaryMatch.route.id]: error
-      },
-      fetchers: new Map(state.fetchers)
-    });
-  }
-
-  function deleteFetcher(key) {
-    if (fetchControllers.has(key)) abortFetcher(key);
-    fetchLoadMatches.delete(key);
-    fetchReloadIds.delete(key);
-    fetchRedirectIds.delete(key);
-    state.fetchers.delete(key);
-  }
-
-  function abortFetcher(key) {
-    let controller = fetchControllers.get(key);
-    invariant(controller, "Expected fetch controller: " + key);
-    controller.abort();
-    fetchControllers.delete(key);
-  }
-
-  function markFetchersDone(keys) {
-    for (let key of keys) {
-      let fetcher = getFetcher(key);
-      let doneFetcher = {
-        state: "idle",
-        data: fetcher.data,
-        formMethod: undefined,
-        formAction: undefined,
-        formEncType: undefined,
-        formData: undefined
-      };
-      state.fetchers.set(key, doneFetcher);
-    }
-  }
-
-  function markFetchRedirectsDone() {
-    let doneKeys = [];
-
-    for (let key of fetchRedirectIds) {
-      let fetcher = state.fetchers.get(key);
-      invariant(fetcher, "Expected fetcher: " + key);
-
-      if (fetcher.state === "loading") {
-        fetchRedirectIds.delete(key);
-        doneKeys.push(key);
-      }
-    }
-
-    markFetchersDone(doneKeys);
-  }
-
-  function abortStaleFetchLoads(landedId) {
-    let yeetedKeys = [];
-
-    for (let [key, id] of fetchReloadIds) {
-      if (id < landedId) {
-        let fetcher = state.fetchers.get(key);
-        invariant(fetcher, "Expected fetcher: " + key);
-
-        if (fetcher.state === "loading") {
-          abortFetcher(key);
-          fetchReloadIds.delete(key);
-          yeetedKeys.push(key);
-        }
-      }
-    }
-
-    markFetchersDone(yeetedKeys);
-    return yeetedKeys.length > 0;
-  }
-
-  function cancelActiveDeferreds(predicate) {
-    let cancelledRouteIds = [];
-    activeDeferreds.forEach((dfd, routeId) => {
-      if (!predicate || predicate(routeId)) {
-        // Cancel the deferred - but do not remove from activeDeferreds here -
-        // we rely on the subscribers to do that so our tests can assert proper
-        // cleanup via _internalActiveDeferreds
-        dfd.cancel();
-        cancelledRouteIds.push(routeId);
-        activeDeferreds.delete(routeId);
-      }
-    });
-    return cancelledRouteIds;
-  } // Opt in to capturing and reporting scroll positions during navigations,
-  // used by the <ScrollRestoration> component
-
-
-  function enableScrollRestoration(positions, getPosition, getKey) {
-    savedScrollPositions = positions;
-    getScrollPosition = getPosition;
-
-    getScrollRestorationKey = getKey || (location => location.key); // Perform initial hydration scroll restoration, since we miss the boat on
-    // the initial updateState() because we've not yet rendered <ScrollRestoration/>
-    // and therefore have no savedScrollPositions available
-
-
-    if (!initialScrollRestored && state.navigation === IDLE_NAVIGATION) {
-      initialScrollRestored = true;
-      let y = getSavedScrollPosition(state.location, state.matches);
-
-      if (y != null) {
-        updateState({
-          restoreScrollPosition: y
-        });
-      }
-    }
-
-    return () => {
-      savedScrollPositions = null;
-      getScrollPosition = null;
-      getScrollRestorationKey = null;
-    };
-  }
-
-  function saveScrollPosition(location, matches) {
-    if (savedScrollPositions && getScrollRestorationKey && getScrollPosition) {
-      let userMatches = matches.map(m => createUseMatchesMatch(m, state.loaderData));
-      let key = getScrollRestorationKey(location, userMatches) || location.key;
-      savedScrollPositions[key] = getScrollPosition();
-    }
-  }
-
-  function getSavedScrollPosition(location, matches) {
-    if (savedScrollPositions && getScrollRestorationKey && getScrollPosition) {
-      let userMatches = matches.map(m => createUseMatchesMatch(m, state.loaderData));
-      let key = getScrollRestorationKey(location, userMatches) || location.key;
-      let y = savedScrollPositions[key];
-
-      if (typeof y === "number") {
-        return y;
-      }
-    }
-
-    return null;
-  }
-
-  router = {
-    get basename() {
-      return init.basename;
-    },
-
-    get state() {
-      return state;
-    },
-
-    get routes() {
-      return dataRoutes;
-    },
-
-    initialize,
-    subscribe,
-    enableScrollRestoration,
-    navigate,
-    fetch,
-    revalidate,
-    // Passthrough to history-aware createHref used by useHref so we get proper
-    // hash-aware URLs in DOM paths
-    createHref: to => init.history.createHref(to),
-    encodeLocation: to => init.history.encodeLocation(to),
-    getFetcher,
-    deleteFetcher,
-    dispose,
-    _internalFetchControllers: fetchControllers,
-    _internalActiveDeferreds: activeDeferreds
-  };
-  return router;
-} //#endregion
-////////////////////////////////////////////////////////////////////////////////
-//#region createStaticHandler
-////////////////////////////////////////////////////////////////////////////////
-
-function unstable_createStaticHandler(routes, opts) {
-  invariant(routes.length > 0, "You must provide a non-empty routes array to unstable_createStaticHandler");
-  let dataRoutes = convertRoutesToDataRoutes(routes);
-  let basename = (opts ? opts.basename : null) || "/";
-  /**
-   * The query() method is intended for document requests, in which we want to
-   * call an optional action and potentially multiple loaders for all nested
-   * routes.  It returns a StaticHandlerContext object, which is very similar
-   * to the router state (location, loaderData, actionData, errors, etc.) and
-   * also adds SSR-specific information such as the statusCode and headers
-   * from action/loaders Responses.
-   *
-   * It _should_ never throw and should report all errors through the
-   * returned context.errors object, properly associating errors to their error
-   * boundary.  Additionally, it tracks _deepestRenderedBoundaryId which can be
-   * used to emulate React error boundaries during SSr by performing a second
-   * pass only down to the boundaryId.
-   *
-   * The one exception where we do not return a StaticHandlerContext is when a
-   * redirect response is returned or thrown from any action/loader.  We
-   * propagate that out and return the raw Response so the HTTP server can
-   * return it directly.
-   */
-
-  async function query(request) {
-    let url = new URL(request.url);
-    let method = request.method.toLowerCase();
-    let location = createLocation("", createPath(url), null, "default");
-    let matches = matchRoutes(dataRoutes, location, basename); // SSR supports HEAD requests while SPA doesn't
-
-    if (!isValidMethod(method) && method !== "head") {
-      let error = getInternalRouterError(405, {
-        method
-      });
-      let {
-        matches: methodNotAllowedMatches,
-        route
-      } = getShortCircuitMatches(dataRoutes);
-      return {
-        basename,
-        location,
-        matches: methodNotAllowedMatches,
-        loaderData: {},
-        actionData: null,
-        errors: {
-          [route.id]: error
-        },
-        statusCode: error.status,
-        loaderHeaders: {},
-        actionHeaders: {}
-      };
-    } else if (!matches) {
-      let error = getInternalRouterError(404, {
-        pathname: location.pathname
-      });
-      let {
-        matches: notFoundMatches,
-        route
-      } = getShortCircuitMatches(dataRoutes);
-      return {
-        basename,
-        location,
-        matches: notFoundMatches,
-        loaderData: {},
-        actionData: null,
-        errors: {
-          [route.id]: error
-        },
-        statusCode: error.status,
-        loaderHeaders: {},
-        actionHeaders: {}
-      };
-    }
-
-    let result = await queryImpl(request, location, matches);
-
-    if (result instanceof Response) {
-      return result;
-    } // When returning StaticHandlerContext, we patch back in the location here
-    // since we need it for React Context.  But this helps keep our submit and
-    // loadRouteData operating on a Request instead of a Location
-
-
-    return _extends({
-      location,
-      basename
-    }, result);
-  }
-  /**
-   * The queryRoute() method is intended for targeted route requests, either
-   * for fetch ?_data requests or resource route requests.  In this case, we
-   * are only ever calling a single action or loader, and we are returning the
-   * returned value directly.  In most cases, this will be a Response returned
-   * from the action/loader, but it may be a primitive or other value as well -
-   * and in such cases the calling context should handle that accordingly.
-   *
-   * We do respect the throw/return differentiation, so if an action/loader
-   * throws, then this method will throw the value.  This is important so we
-   * can do proper boundary identification in Remix where a thrown Response
-   * must go to the Catch Boundary but a returned Response is happy-path.
-   *
-   * One thing to note is that any Router-initiated Errors that make sense
-   * to associate with a status code will be thrown as an ErrorResponse
-   * instance which include the raw Error, such that the calling context can
-   * serialize the error as they see fit while including the proper response
-   * code.  Examples here are 404 and 405 errors that occur prior to reaching
-   * any user-defined loaders.
-   */
-
-
-  async function queryRoute(request, routeId) {
-    let url = new URL(request.url);
-    let method = request.method.toLowerCase();
-    let location = createLocation("", createPath(url), null, "default");
-    let matches = matchRoutes(dataRoutes, location, basename); // SSR supports HEAD requests while SPA doesn't
-
-    if (!isValidMethod(method) && method !== "head") {
-      throw getInternalRouterError(405, {
-        method
-      });
-    } else if (!matches) {
-      throw getInternalRouterError(404, {
-        pathname: location.pathname
-      });
-    }
-
-    let match = routeId ? matches.find(m => m.route.id === routeId) : getTargetMatch(matches, location);
-
-    if (routeId && !match) {
-      throw getInternalRouterError(403, {
-        pathname: location.pathname,
-        routeId
-      });
-    } else if (!match) {
-      // This should never hit I don't think?
-      throw getInternalRouterError(404, {
-        pathname: location.pathname
-      });
-    }
-
-    let result = await queryImpl(request, location, matches, match);
-
-    if (result instanceof Response) {
-      return result;
-    }
-
-    let error = result.errors ? Object.values(result.errors)[0] : undefined;
-
-    if (error !== undefined) {
-      // If we got back result.errors, that means the loader/action threw
-      // _something_ that wasn't a Response, but it's not guaranteed/required
-      // to be an `instanceof Error` either, so we have to use throw here to
-      // preserve the "error" state outside of queryImpl.
-      throw error;
-    } // Pick off the right state value to return
-
-
-    let routeData = [result.actionData, result.loaderData].find(v => v);
-    return Object.values(routeData || {})[0];
-  }
-
-  async function queryImpl(request, location, matches, routeMatch) {
-    invariant(request.signal, "query()/queryRoute() requests must contain an AbortController signal");
-
-    try {
-      if (isSubmissionMethod(request.method.toLowerCase())) {
-        let result = await submit(request, matches, routeMatch || getTargetMatch(matches, location), routeMatch != null);
-        return result;
-      }
-
-      let result = await loadRouteData(request, matches, routeMatch);
-      return result instanceof Response ? result : _extends({}, result, {
-        actionData: null,
-        actionHeaders: {}
-      });
-    } catch (e) {
-      // If the user threw/returned a Response in callLoaderOrAction, we throw
-      // it to bail out and then return or throw here based on whether the user
-      // returned or threw
-      if (isQueryRouteResponse(e)) {
-        if (e.type === ResultType.error && !isRedirectResponse(e.response)) {
-          throw e.response;
-        }
-
-        return e.response;
-      } // Redirects are always returned since they don't propagate to catch
-      // boundaries
-
-
-      if (isRedirectResponse(e)) {
-        return e;
-      }
-
-      throw e;
-    }
-  }
-
-  async function submit(request, matches, actionMatch, isRouteRequest) {
-    let result;
-
-    if (!actionMatch.route.action) {
-      let error = getInternalRouterError(405, {
-        method: request.method,
-        pathname: createURL(request.url).pathname,
-        routeId: actionMatch.route.id
-      });
-
-      if (isRouteRequest) {
-        throw error;
-      }
-
-      result = {
-        type: ResultType.error,
-        error
-      };
-    } else {
-      result = await callLoaderOrAction("action", request, actionMatch, matches, basename, true, isRouteRequest);
-
-      if (request.signal.aborted) {
-        let method = isRouteRequest ? "queryRoute" : "query";
-        throw new Error(method + "() call aborted");
-      }
-    }
-
-    if (isRedirectResult(result)) {
-      // Uhhhh - this should never happen, we should always throw these from
-      // callLoaderOrAction, but the type narrowing here keeps TS happy and we
-      // can get back on the "throw all redirect responses" train here should
-      // this ever happen :/
-      throw new Response(null, {
-        status: result.status,
-        headers: {
-          Location: result.location
-        }
-      });
-    }
-
-    if (isDeferredResult(result)) {
-      throw new Error("defer() is not supported in actions");
-    }
-
-    if (isRouteRequest) {
-      // Note: This should only be non-Response values if we get here, since
-      // isRouteRequest should throw any Response received in callLoaderOrAction
-      if (isErrorResult(result)) {
-        throw result.error;
-      }
-
-      return {
-        matches: [actionMatch],
-        loaderData: {},
-        actionData: {
-          [actionMatch.route.id]: result.data
-        },
-        errors: null,
-        // Note: statusCode + headers are unused here since queryRoute will
-        // return the raw Response or value
-        statusCode: 200,
-        loaderHeaders: {},
-        actionHeaders: {}
-      };
-    }
-
-    if (isErrorResult(result)) {
-      // Store off the pending error - we use it to determine which loaders
-      // to call and will commit it when we complete the navigation
-      let boundaryMatch = findNearestBoundary(matches, actionMatch.route.id);
-      let context = await loadRouteData(request, matches, undefined, {
-        [boundaryMatch.route.id]: result.error
-      }); // action status codes take precedence over loader status codes
-
-      return _extends({}, context, {
-        statusCode: isRouteErrorResponse(result.error) ? result.error.status : 500,
-        actionData: null,
-        actionHeaders: _extends({}, result.headers ? {
-          [actionMatch.route.id]: result.headers
-        } : {})
-      });
-    }
-
-    let context = await loadRouteData(request, matches);
-    return _extends({}, context, result.statusCode ? {
-      statusCode: result.statusCode
-    } : {}, {
-      actionData: {
-        [actionMatch.route.id]: result.data
-      },
-      actionHeaders: _extends({}, result.headers ? {
-        [actionMatch.route.id]: result.headers
-      } : {})
-    });
-  }
-
-  async function loadRouteData(request, matches, routeMatch, pendingActionError) {
-    let isRouteRequest = routeMatch != null; // Short circuit if we have no loaders to run (queryRoute())
-
-    if (isRouteRequest && !(routeMatch != null && routeMatch.route.loader)) {
-      throw getInternalRouterError(400, {
-        method: request.method,
-        pathname: createURL(request.url).pathname,
-        routeId: routeMatch == null ? void 0 : routeMatch.route.id
-      });
-    }
-
-    let requestMatches = routeMatch ? [routeMatch] : getLoaderMatchesUntilBoundary(matches, Object.keys(pendingActionError || {})[0]);
-    let matchesToLoad = requestMatches.filter(m => m.route.loader); // Short circuit if we have no loaders to run (query())
-
-    if (matchesToLoad.length === 0) {
-      return {
-        matches,
-        loaderData: {},
-        errors: pendingActionError || null,
-        statusCode: 200,
-        loaderHeaders: {}
-      };
-    }
-
-    let results = await Promise.all([...matchesToLoad.map(match => callLoaderOrAction("loader", request, match, matches, basename, true, isRouteRequest))]);
-
-    if (request.signal.aborted) {
-      let method = isRouteRequest ? "queryRoute" : "query";
-      throw new Error(method + "() call aborted");
-    } // Can't do anything with these without the Remix side of things, so just
-    // cancel them for now
-
-
-    results.forEach(result => {
-      if (isDeferredResult(result)) {
-        result.deferredData.cancel();
-      }
-    }); // Process and commit output from loaders
-
-    let context = processRouteLoaderData(matches, matchesToLoad, results, pendingActionError);
-    return _extends({}, context, {
-      matches
-    });
-  }
-
-  return {
-    dataRoutes,
-    query,
-    queryRoute
-  };
-} //#endregion
-////////////////////////////////////////////////////////////////////////////////
-//#region Helpers
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Given an existing StaticHandlerContext and an error thrown at render time,
- * provide an updated StaticHandlerContext suitable for a second SSR render
- */
-
-function getStaticContextFromError(routes, context, error) {
-  let newContext = _extends({}, context, {
-    statusCode: 500,
-    errors: {
-      [context._deepestRenderedBoundaryId || routes[0].id]: error
-    }
-  });
-
-  return newContext;
-}
-
-function isSubmissionNavigation(opts) {
-  return opts != null && "formData" in opts;
-} // Normalize navigation options by converting formMethod=GET formData objects to
-// URLSearchParams so they behave identically to links with query params
-
-
-function normalizeNavigateOptions(to, opts, isFetcher) {
-  if (isFetcher === void 0) {
-    isFetcher = false;
-  }
-
-  let path = typeof to === "string" ? to : createPath(to); // Return location verbatim on non-submission navigations
-
-  if (!opts || !isSubmissionNavigation(opts)) {
-    return {
-      path
-    };
-  }
-
-  if (opts.formMethod && !isValidMethod(opts.formMethod)) {
-    return {
-      path,
-      error: getInternalRouterError(405, {
-        method: opts.formMethod
-      })
-    };
-  } // Create a Submission on non-GET navigations
-
-
-  if (opts.formMethod && isSubmissionMethod(opts.formMethod)) {
-    return {
-      path,
-      submission: {
-        formMethod: opts.formMethod,
-        formAction: stripHashFromPath(path),
-        formEncType: opts && opts.formEncType || "application/x-www-form-urlencoded",
-        formData: opts.formData
-      }
-    };
-  } // Flatten submission onto URLSearchParams for GET submissions
-
-
-  let parsedPath = parsePath(path);
-
-  try {
-    let searchParams = convertFormDataToSearchParams(opts.formData); // Since fetcher GET submissions only run a single loader (as opposed to
-    // navigation GET submissions which run all loaders), we need to preserve
-    // any incoming ?index params
-
-    if (isFetcher && parsedPath.search && hasNakedIndexQuery(parsedPath.search)) {
-      searchParams.append("index", "");
-    }
-
-    parsedPath.search = "?" + searchParams;
-  } catch (e) {
-    return {
-      path,
-      error: getInternalRouterError(400)
-    };
-  }
-
-  return {
-    path: createPath(parsedPath)
-  };
-} // Filter out all routes below any caught error as they aren't going to
-// render so we don't need to load them
-
-
-function getLoaderMatchesUntilBoundary(matches, boundaryId) {
-  let boundaryMatches = matches;
-
-  if (boundaryId) {
-    let index = matches.findIndex(m => m.route.id === boundaryId);
-
-    if (index >= 0) {
-      boundaryMatches = matches.slice(0, index);
-    }
-  }
-
-  return boundaryMatches;
-}
-
-function getMatchesToLoad(state, matches, submission, location, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, pendingActionData, pendingError, fetchLoadMatches) {
-  let actionResult = pendingError ? Object.values(pendingError)[0] : pendingActionData ? Object.values(pendingActionData)[0] : null; // Pick navigation matches that are net-new or qualify for revalidation
-
-  let boundaryId = pendingError ? Object.keys(pendingError)[0] : undefined;
-  let boundaryMatches = getLoaderMatchesUntilBoundary(matches, boundaryId);
-  let navigationMatches = boundaryMatches.filter((match, index) => match.route.loader != null && (isNewLoader(state.loaderData, state.matches[index], match) || // If this route had a pending deferred cancelled it must be revalidated
-  cancelledDeferredRoutes.some(id => id === match.route.id) || shouldRevalidateLoader(state.location, state.matches[index], submission, location, match, isRevalidationRequired, actionResult))); // Pick fetcher.loads that need to be revalidated
-
-  let revalidatingFetchers = [];
-  fetchLoadMatches && fetchLoadMatches.forEach((_ref10, key) => {
-    let [href, match, fetchMatches] = _ref10;
-
-    // This fetcher was cancelled from a prior action submission - force reload
-    if (cancelledFetcherLoads.includes(key)) {
-      revalidatingFetchers.push([key, href, match, fetchMatches]);
-    } else if (isRevalidationRequired) {
-      let shouldRevalidate = shouldRevalidateLoader(href, match, submission, href, match, isRevalidationRequired, actionResult);
-
-      if (shouldRevalidate) {
-        revalidatingFetchers.push([key, href, match, fetchMatches]);
-      }
-    }
-  });
-  return [navigationMatches, revalidatingFetchers];
-}
-
-function isNewLoader(currentLoaderData, currentMatch, match) {
-  let isNew = // [a] -> [a, b]
-  !currentMatch || // [a, b] -> [a, c]
-  match.route.id !== currentMatch.route.id; // Handle the case that we don't have data for a re-used route, potentially
-  // from a prior error or from a cancelled pending deferred
-
-  let isMissingData = currentLoaderData[match.route.id] === undefined; // Always load if this is a net-new route or we don't yet have data
-
-  return isNew || isMissingData;
-}
-
-function isNewRouteInstance(currentMatch, match) {
-  let currentPath = currentMatch.route.path;
-  return (// param change for this match, /users/123 -> /users/456
-    currentMatch.pathname !== match.pathname || // splat param changed, which is not present in match.path
-    // e.g. /files/images/avatar.jpg -> files/finances.xls
-    currentPath && currentPath.endsWith("*") && currentMatch.params["*"] !== match.params["*"]
-  );
-}
-
-function shouldRevalidateLoader(currentLocation, currentMatch, submission, location, match, isRevalidationRequired, actionResult) {
-  let currentUrl = createURL(currentLocation);
-  let currentParams = currentMatch.params;
-  let nextUrl = createURL(location);
-  let nextParams = match.params; // This is the default implementation as to when we revalidate.  If the route
-  // provides it's own implementation, then we give them full control but
-  // provide this value so they can leverage it if needed after they check
-  // their own specific use cases
-  // Note that fetchers always provide the same current/next locations so the
-  // URL-based checks here don't apply to fetcher shouldRevalidate calls
-
-  let defaultShouldRevalidate = isNewRouteInstance(currentMatch, match) || // Clicked the same link, resubmitted a GET form
-  currentUrl.toString() === nextUrl.toString() || // Search params affect all loaders
-  currentUrl.search !== nextUrl.search || // Forced revalidation due to submission, useRevalidate, or X-Remix-Revalidate
-  isRevalidationRequired;
-
-  if (match.route.shouldRevalidate) {
-    let routeChoice = match.route.shouldRevalidate(_extends({
-      currentUrl,
-      currentParams,
-      nextUrl,
-      nextParams
-    }, submission, {
-      actionResult,
-      defaultShouldRevalidate
-    }));
-
-    if (typeof routeChoice === "boolean") {
-      return routeChoice;
-    }
-  }
-
-  return defaultShouldRevalidate;
-}
-
-async function callLoaderOrAction(type, request, match, matches, basename, isStaticRequest, isRouteRequest) {
-  if (basename === void 0) {
-    basename = "/";
-  }
-
-  if (isStaticRequest === void 0) {
-    isStaticRequest = false;
-  }
-
-  if (isRouteRequest === void 0) {
-    isRouteRequest = false;
-  }
-
-  let resultType;
-  let result; // Setup a promise we can race against so that abort signals short circuit
-
-  let reject;
-  let abortPromise = new Promise((_, r) => reject = r);
-
-  let onReject = () => reject();
-
-  request.signal.addEventListener("abort", onReject);
-
-  try {
-    let handler = match.route[type];
-    invariant(handler, "Could not find the " + type + " to run on the \"" + match.route.id + "\" route");
-    result = await Promise.race([handler({
-      request,
-      params: match.params
-    }), abortPromise]);
-    invariant(result !== undefined, "You defined " + (type === "action" ? "an action" : "a loader") + " for route " + ("\"" + match.route.id + "\" but didn't return anything from your `" + type + "` ") + "function. Please return a value or `null`.");
-  } catch (e) {
-    resultType = ResultType.error;
-    result = e;
-  } finally {
-    request.signal.removeEventListener("abort", onReject);
-  }
-
-  if (result instanceof Response) {
-    let status = result.status; // Process redirects
-
-    if (redirectStatusCodes.has(status)) {
-      let location = result.headers.get("Location");
-      invariant(location, "Redirects returned/thrown from loaders/actions must have a Location header"); // Check if this an external redirect that goes to a new origin
-
-      let external = createURL(location).origin !== createURL("/").origin; // Support relative routing in internal redirects
-
-      if (!external) {
-        let activeMatches = matches.slice(0, matches.indexOf(match) + 1);
-        let routePathnames = getPathContributingMatches(activeMatches).map(match => match.pathnameBase);
-        let requestPath = createURL(request.url).pathname;
-        let resolvedLocation = resolveTo(location, routePathnames, requestPath);
-        invariant(createPath(resolvedLocation), "Unable to resolve redirect location: " + location); // Prepend the basename to the redirect location if we have one
-
-        if (basename) {
-          let path = resolvedLocation.pathname;
-          resolvedLocation.pathname = path === "/" ? basename : joinPaths([basename, path]);
-        }
-
-        location = createPath(resolvedLocation);
-      } // Don't process redirects in the router during static requests requests.
-      // Instead, throw the Response and let the server handle it with an HTTP
-      // redirect.  We also update the Location header in place in this flow so
-      // basename and relative routing is taken into account
-
-
-      if (isStaticRequest) {
-        result.headers.set("Location", location);
-        throw result;
-      }
-
-      return {
-        type: ResultType.redirect,
-        status,
-        location,
-        revalidate: result.headers.get("X-Remix-Revalidate") !== null,
-        external
-      };
-    } // For SSR single-route requests, we want to hand Responses back directly
-    // without unwrapping.  We do this with the QueryRouteResponse wrapper
-    // interface so we can know whether it was returned or thrown
-
-
-    if (isRouteRequest) {
-      // eslint-disable-next-line no-throw-literal
-      throw {
-        type: resultType || ResultType.data,
-        response: result
-      };
-    }
-
-    let data;
-    let contentType = result.headers.get("Content-Type");
-
-    if (contentType && contentType.startsWith("application/json")) {
-      data = await result.json();
-    } else {
-      data = await result.text();
-    }
-
-    if (resultType === ResultType.error) {
-      return {
-        type: resultType,
-        error: new ErrorResponse(status, result.statusText, data),
-        headers: result.headers
-      };
-    }
-
-    return {
-      type: ResultType.data,
-      data,
-      statusCode: result.status,
-      headers: result.headers
-    };
-  }
-
-  if (resultType === ResultType.error) {
-    return {
-      type: resultType,
-      error: result
-    };
-  }
-
-  if (result instanceof DeferredData) {
-    return {
-      type: ResultType.deferred,
-      deferredData: result
-    };
-  }
-
-  return {
-    type: ResultType.data,
-    data: result
-  };
-}
-
-function createRequest(location, signal, submission) {
-  let url = createURL(stripHashFromPath(location)).toString();
-  let init = {
-    signal
-  };
-
-  if (submission) {
-    let {
-      formMethod,
-      formEncType,
-      formData
-    } = submission;
-    init.method = formMethod.toUpperCase();
-    init.body = formEncType === "application/x-www-form-urlencoded" ? convertFormDataToSearchParams(formData) : formData;
-  } // Content-Type is inferred (https://fetch.spec.whatwg.org/#dom-request)
-
-
-  return new Request(url, init);
-}
-
-function convertFormDataToSearchParams(formData) {
-  let searchParams = new URLSearchParams();
-
-  for (let [key, value] of formData.entries()) {
-    invariant(typeof value === "string", 'File inputs are not supported with encType "application/x-www-form-urlencoded", ' + 'please use "multipart/form-data" instead.');
-    searchParams.append(key, value);
-  }
-
-  return searchParams;
-}
-
-function processRouteLoaderData(matches, matchesToLoad, results, pendingError, activeDeferreds) {
-  // Fill in loaderData/errors from our loaders
-  let loaderData = {};
-  let errors = null;
-  let statusCode;
-  let foundError = false;
-  let loaderHeaders = {}; // Process loader results into state.loaderData/state.errors
-
-  results.forEach((result, index) => {
-    let id = matchesToLoad[index].route.id;
-    invariant(!isRedirectResult(result), "Cannot handle redirect results in processLoaderData");
-
-    if (isErrorResult(result)) {
-      // Look upwards from the matched route for the closest ancestor
-      // error boundary, defaulting to the root match
-      let boundaryMatch = findNearestBoundary(matches, id);
-      let error = result.error; // If we have a pending action error, we report it at the highest-route
-      // that throws a loader error, and then clear it out to indicate that
-      // it was consumed
-
-      if (pendingError) {
-        error = Object.values(pendingError)[0];
-        pendingError = undefined;
-      }
-
-      errors = Object.assign(errors || {}, {
-        [boundaryMatch.route.id]: error
-      }); // Once we find our first (highest) error, we set the status code and
-      // prevent deeper status codes from overriding
-
-      if (!foundError) {
-        foundError = true;
-        statusCode = isRouteErrorResponse(result.error) ? result.error.status : 500;
-      }
-
-      if (result.headers) {
-        loaderHeaders[id] = result.headers;
-      }
-    } else if (isDeferredResult(result)) {
-      activeDeferreds && activeDeferreds.set(id, result.deferredData);
-      loaderData[id] = result.deferredData.data; // TODO: Add statusCode/headers once we wire up streaming in Remix
-    } else {
-      loaderData[id] = result.data; // Error status codes always override success status codes, but if all
-      // loaders are successful we take the deepest status code.
-
-      if (result.statusCode != null && result.statusCode !== 200 && !foundError) {
-        statusCode = result.statusCode;
-      }
-
-      if (result.headers) {
-        loaderHeaders[id] = result.headers;
-      }
-    }
-  }); // If we didn't consume the pending action error (i.e., all loaders
-  // resolved), then consume it here
-
-  if (pendingError) {
-    errors = pendingError;
-  }
-
-  return {
-    loaderData,
-    errors,
-    statusCode: statusCode || 200,
-    loaderHeaders
-  };
-}
-
-function processLoaderData(state, matches, matchesToLoad, results, pendingError, revalidatingFetchers, fetcherResults, activeDeferreds) {
-  let {
-    loaderData,
-    errors
-  } = processRouteLoaderData(matches, matchesToLoad, results, pendingError, activeDeferreds); // Process results from our revalidating fetchers
-
-  for (let index = 0; index < revalidatingFetchers.length; index++) {
-    let [key,, match] = revalidatingFetchers[index];
-    invariant(fetcherResults !== undefined && fetcherResults[index] !== undefined, "Did not find corresponding fetcher result");
-    let result = fetcherResults[index]; // Process fetcher non-redirect errors
-
-    if (isErrorResult(result)) {
-      let boundaryMatch = findNearestBoundary(state.matches, match.route.id);
-
-      if (!(errors && errors[boundaryMatch.route.id])) {
-        errors = _extends({}, errors, {
-          [boundaryMatch.route.id]: result.error
-        });
-      }
-
-      state.fetchers.delete(key);
-    } else if (isRedirectResult(result)) {
-      // Should never get here, redirects should get processed above, but we
-      // keep this to type narrow to a success result in the else
-      throw new Error("Unhandled fetcher revalidation redirect");
-    } else if (isDeferredResult(result)) {
-      // Should never get here, deferred data should be awaited for fetchers
-      // in resolveDeferredResults
-      throw new Error("Unhandled fetcher deferred data");
-    } else {
-      let doneFetcher = {
-        state: "idle",
-        data: result.data,
-        formMethod: undefined,
-        formAction: undefined,
-        formEncType: undefined,
-        formData: undefined
-      };
-      state.fetchers.set(key, doneFetcher);
-    }
-  }
-
-  return {
-    loaderData,
-    errors
-  };
-}
-
-function mergeLoaderData(loaderData, newLoaderData, matches) {
-  let mergedLoaderData = _extends({}, newLoaderData);
-
-  matches.forEach(match => {
-    let id = match.route.id;
-
-    if (newLoaderData[id] === undefined && loaderData[id] !== undefined) {
-      mergedLoaderData[id] = loaderData[id];
-    }
-  });
-  return mergedLoaderData;
-} // Find the nearest error boundary, looking upwards from the leaf route (or the
-// route specified by routeId) for the closest ancestor error boundary,
-// defaulting to the root match
-
-
-function findNearestBoundary(matches, routeId) {
-  let eligibleMatches = routeId ? matches.slice(0, matches.findIndex(m => m.route.id === routeId) + 1) : [...matches];
-  return eligibleMatches.reverse().find(m => m.route.hasErrorBoundary === true) || matches[0];
-}
-
-function getShortCircuitMatches(routes) {
-  // Prefer a root layout route if present, otherwise shim in a route object
-  let route = routes.find(r => r.index || !r.path || r.path === "/") || {
-    id: "__shim-error-route__"
-  };
-  return {
-    matches: [{
-      params: {},
-      pathname: "",
-      pathnameBase: "",
-      route
-    }],
-    route
-  };
-}
-
-function getInternalRouterError(status, _temp) {
-  let {
-    pathname,
-    routeId,
-    method,
-    message
-  } = _temp === void 0 ? {} : _temp;
-  let statusText = "Unknown Server Error";
-  let errorMessage = "Unknown @remix-run/router error";
-
-  if (status === 400) {
-    statusText = "Bad Request";
-
-    if (method && pathname && routeId) {
-      errorMessage = "You made a " + method + " request to \"" + pathname + "\" but " + ("did not provide a `loader` for route \"" + routeId + "\", ") + "so there is no way to handle the request.";
-    } else {
-      errorMessage = "Cannot submit binary form data using GET";
-    }
-  } else if (status === 403) {
-    statusText = "Forbidden";
-    errorMessage = "Route \"" + routeId + "\" does not match URL \"" + pathname + "\"";
-  } else if (status === 404) {
-    statusText = "Not Found";
-    errorMessage = "No route matches URL \"" + pathname + "\"";
-  } else if (status === 405) {
-    statusText = "Method Not Allowed";
-
-    if (method && pathname && routeId) {
-      errorMessage = "You made a " + method.toUpperCase() + " request to \"" + pathname + "\" but " + ("did not provide an `action` for route \"" + routeId + "\", ") + "so there is no way to handle the request.";
-    } else if (method) {
-      errorMessage = "Invalid request method \"" + method.toUpperCase() + "\"";
-    }
-  }
-
-  return new ErrorResponse(status || 500, statusText, new Error(errorMessage), true);
-} // Find any returned redirect errors, starting from the lowest match
-
-
-function findRedirect(results) {
-  for (let i = results.length - 1; i >= 0; i--) {
-    let result = results[i];
-
-    if (isRedirectResult(result)) {
-      return result;
-    }
-  }
-}
-
-function stripHashFromPath(path) {
-  let parsedPath = typeof path === "string" ? parsePath(path) : path;
-  return createPath(_extends({}, parsedPath, {
-    hash: ""
-  }));
-}
-
-function isHashChangeOnly(a, b) {
-  return a.pathname === b.pathname && a.search === b.search && a.hash !== b.hash;
-}
-
-function isDeferredResult(result) {
-  return result.type === ResultType.deferred;
-}
-
-function isErrorResult(result) {
-  return result.type === ResultType.error;
-}
-
-function isRedirectResult(result) {
-  return (result && result.type) === ResultType.redirect;
-}
-
-function isRedirectResponse(result) {
-  if (!(result instanceof Response)) {
-    return false;
-  }
-
-  let status = result.status;
-  let location = result.headers.get("Location");
-  return status >= 300 && status <= 399 && location != null;
-}
-
-function isQueryRouteResponse(obj) {
-  return obj && obj.response instanceof Response && (obj.type === ResultType.data || ResultType.error);
-}
-
-function isValidMethod(method) {
-  return validRequestMethods.has(method);
-}
-
-function isSubmissionMethod(method) {
-  return validActionMethods.has(method);
-}
-
-async function resolveDeferredResults(currentMatches, matchesToLoad, results, signal, isFetcher, currentLoaderData) {
-  for (let index = 0; index < results.length; index++) {
-    let result = results[index];
-    let match = matchesToLoad[index];
-    let currentMatch = currentMatches.find(m => m.route.id === match.route.id);
-    let isRevalidatingLoader = currentMatch != null && !isNewRouteInstance(currentMatch, match) && (currentLoaderData && currentLoaderData[match.route.id]) !== undefined;
-
-    if (isDeferredResult(result) && (isFetcher || isRevalidatingLoader)) {
-      // Note: we do not have to touch activeDeferreds here since we race them
-      // against the signal in resolveDeferredData and they'll get aborted
-      // there if needed
-      await resolveDeferredData(result, signal, isFetcher).then(result => {
-        if (result) {
-          results[index] = result || results[index];
-        }
-      });
-    }
-  }
-}
-
-async function resolveDeferredData(result, signal, unwrap) {
-  if (unwrap === void 0) {
-    unwrap = false;
-  }
-
-  let aborted = await result.deferredData.resolveData(signal);
-
-  if (aborted) {
-    return;
-  }
-
-  if (unwrap) {
-    try {
-      return {
-        type: ResultType.data,
-        data: result.deferredData.unwrappedData
-      };
-    } catch (e) {
-      // Handle any TrackedPromise._error values encountered while unwrapping
-      return {
-        type: ResultType.error,
-        error: e
-      };
-    }
-  }
-
-  return {
-    type: ResultType.data,
-    data: result.deferredData.data
-  };
-}
-
-function hasNakedIndexQuery(search) {
-  return new URLSearchParams(search).getAll("index").some(v => v === "");
-} // Note: This should match the format exported by useMatches, so if you change
-// this please also change that :)  Eventually we'll DRY this up
-
-
-function createUseMatchesMatch(match, loaderData) {
-  let {
-    route,
-    pathname,
-    params
-  } = match;
-  return {
-    id: route.id,
-    pathname,
-    params,
-    data: loaderData[route.id],
-    handle: route.handle
-  };
-}
-
-function getTargetMatch(matches, location) {
-  let search = typeof location === "string" ? parsePath(location).search : location.search;
-
-  if (matches[matches.length - 1].route.index && hasNakedIndexQuery(search || "")) {
-    // Return the leaf index route when index is present
-    return matches[matches.length - 1];
-  } // Otherwise grab the deepest "path contributing" match (ignoring index and
-  // pathless layout routes)
-
-
-  let pathMatches = getPathContributingMatches(matches);
-  return pathMatches[pathMatches.length - 1];
-} //#endregion
-
-
-//# sourceMappingURL=router.js.map
-
-
-/***/ }),
-
 /***/ "./node_modules/@tannin/compile/index.js":
 /*!***********************************************!*\
   !*** ./node_modules/@tannin/compile/index.js ***!
@@ -9622,16 +6135,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/dist/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/dist/index.js");
-/* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
 /* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
 /* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _tab__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tab */ "./assets/src/js/backend/tab/index.jsx");
 /* harmony import */ var _tab_contents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tab/contents */ "./assets/src/js/backend/tab/contents.jsx");
 /* harmony import */ var _form_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./form-table */ "./assets/src/js/backend/form-table/index.jsx");
-/* harmony import */ var _components_backend_activates__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @components/backend/activates */ "./assets/src/js/backend/activates/index.jsx");
-/* harmony import */ var _components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @components/backend/feature-cards */ "./assets/src/js/backend/feature-cards/index.jsx");
+/* harmony import */ var _components_backend_components__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @components/backend/components */ "./assets/src/js/backend/components/index.jsx");
+/* harmony import */ var _components_backend_activates__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @components/backend/activates */ "./assets/src/js/backend/activates/index.jsx");
+/* harmony import */ var _components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @components/backend/feature-cards */ "./assets/src/js/backend/feature-cards/index.jsx");
+/* harmony import */ var _components_services__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @components/services */ "./assets/src/js/services/index.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator.return && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, catch: function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -9643,8 +6168,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
@@ -9663,8 +6186,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
+
 var App = function App() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_8__.HashRouter, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.HashRouter, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Route, {
     path: "/*",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Main, null)
   })));
@@ -9673,50 +6198,52 @@ var App = function App() {
 var Main = function Main() {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h1", {
     className: ""
-  }, "Rhema"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.TabWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_8__.NavLink, {
+  }, "Rhema"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.TabWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.NavLink, {
     className: function className(_ref) {
       var isActive = _ref.isActive;
       return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
     },
     to: "/settings"
-  }, "Settings"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_8__.NavLink, {
+  }, "Settings"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.NavLink, {
     className: function className(_ref2) {
       var isActive = _ref2.isActive;
       return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
     },
     to: "/features"
-  }, "Features"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_8__.NavLink, {
+  }, "Features"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.NavLink, {
     className: function className(_ref3) {
       var isActive = _ref3.isActive;
       return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
     },
     to: "/about"
-  }, "About"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_8__.NavLink, {
+  }, "About"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.NavLink, {
     className: function className(_ref4) {
       var isActive = _ref4.isActive;
       return isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab';
     },
     to: "/account"
-  }, "My Account")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.ContentsWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.ContentWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  }, "My Account")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.ContentsWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab__WEBPACK_IMPORTED_MODULE_3__.ContentWrap, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Route, {
     path: "/settings",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Settings, null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Route, {
     path: "/features",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Features, null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Route, {
     path: "/about",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab_contents__WEBPACK_IMPORTED_MODULE_4__.About, null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Route, {
     path: "/account",
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab_contents__WEBPACK_IMPORTED_MODULE_4__.Account, null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.Route, {
     index: true,
     element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Settings, null)
   })))));
 };
 
 var Settings = function Settings() {
-  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_10__.useForm)({
+  var _updateOptionsRespons, _updateOptionsError$d, _updateOptionsError$d2, _updateOptionsRespons2, _updateOptionsError$d3, _updateOptionsError$d4;
+
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
     defaultValues: _objectSpread({
       bible_entry: 'bible'
     }, (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_BACKEND.OPTIONS.general))
@@ -9726,20 +6253,55 @@ var Settings = function Settings() {
       formState = formMethods.formState;
   var isSubmitting = formState.isSubmitting;
 
-  var onSubmit = function onSubmit(data) {
-    console.log(data);
-    return fetch("".concat((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_REST_ENDPOINTS.OPTIONS)), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams(data).toString()
-    }).then(function (res) {
-      return res.json;
-    }).then(function (resData) {
-      console.log(resData);
-    });
+  var _useUpdateOptionsMuta = (0,_components_services__WEBPACK_IMPORTED_MODULE_9__.useUpdateOptionsMutation)(),
+      _useUpdateOptionsMuta2 = _slicedToArray(_useUpdateOptionsMuta, 2),
+      updateOptions = _useUpdateOptionsMuta2[0],
+      _useUpdateOptionsMuta3 = _useUpdateOptionsMuta2[1],
+      updateOptionsResponse = _useUpdateOptionsMuta3.data,
+      updateOptionsError = _useUpdateOptionsMuta3.error,
+      isRTKMutation = _useUpdateOptionsMuta3.isLoading;
+
+  var isUpdating = isRTKMutation || isSubmitting;
+  var showExceptionMessage = !!updateOptionsResponse && !/2[0-9][0-9]/.test(updateOptionsResponse === null || updateOptionsResponse === void 0 ? void 0 : (_updateOptionsRespons = updateOptionsResponse.response) === null || _updateOptionsRespons === void 0 ? void 0 : _updateOptionsRespons.code) || !!updateOptionsError;
+  console.log(updateOptionsError, updateOptionsResponse);
+  var exceptionMessage = {
+    code: updateOptionsError === null || updateOptionsError === void 0 ? void 0 : updateOptionsError.status,
+    label: '',
+    message: (updateOptionsError === null || updateOptionsError === void 0 ? void 0 : (_updateOptionsError$d = updateOptionsError.data) === null || _updateOptionsError$d === void 0 ? void 0 : (_updateOptionsError$d2 = _updateOptionsError$d.data) === null || _updateOptionsError$d2 === void 0 ? void 0 : _updateOptionsError$d2.message) || 'There has been a critical error.'
   };
+  var successMessage = {
+    code: (updateOptionsResponse === null || updateOptionsResponse === void 0 ? void 0 : (_updateOptionsRespons2 = updateOptionsResponse.response) === null || _updateOptionsRespons2 === void 0 ? void 0 : _updateOptionsRespons2.code) || 200,
+    label: '',
+    message: (updateOptionsError === null || updateOptionsError === void 0 ? void 0 : (_updateOptionsError$d3 = updateOptionsError.data) === null || _updateOptionsError$d3 === void 0 ? void 0 : (_updateOptionsError$d4 = _updateOptionsError$d3.data) === null || _updateOptionsError$d4 === void 0 ? void 0 : _updateOptionsError$d4.message) || 'Update Successfully.'
+  };
+
+  var onSubmit = /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(data) {
+      var payload;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              console.log(data);
+              _context.next = 3;
+              return updateOptions(data);
+
+            case 3:
+              payload = _context.sent;
+              console.log(payload);
+
+            case 5:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    return function onSubmit(_x) {
+      return _ref5.apply(this, arguments);
+    };
+  }();
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
     onSubmit: handleSubmit(onSubmit)
@@ -9758,18 +6320,22 @@ var Settings = function Settings() {
     id: "bible_default_translation"
   }, register('bible_default_translation')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
     value: ""
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
-    value: "cuv"
-  }, "\u548C\u5408\u672C"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
-    value: "kjv"
-  }, "King James Version"))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Default', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_DOMAIN_TEXT))), RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().RHEMA_BACKEND.DATA.AVAILABLE_TRANSLATIONS.map(function (translation) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("option", {
+      value: translation.abbr.toLowerCase(),
+      key: translation.id
+    }, translation.name);
+  }))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "flex"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
     type: "submit",
-    className: "button button-primary"
-  }, isSubmitting && {
+    className: "button button-primary m-0"
+  }, isUpdating && {
     disabled: true
-  }), isSubmitting ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
-    className: "spinner is-active"
-  }) : 'Save Settings'));
+  }), isUpdating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_6__.ButtonSpinner, null) : 'Save Settings'), showExceptionMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_form_table__WEBPACK_IMPORTED_MODULE_5__.ResponseErrorMsg, {
+    code: exceptionMessage.code,
+    label: exceptionMessage.label
+  }, exceptionMessage.message || 'There has been a critical error.')));
 };
 
 var Features = function Features() {
@@ -9787,7 +6353,7 @@ var Features = function Features() {
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Features", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex flex-wrap -mx-2"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_7__.Core, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.Core, {
     onClickActive: function onClickActive(e) {
       console.log('click Active');
       e.preventDefault();
@@ -9798,13 +6364,13 @@ var Features = function Features() {
       e.preventDefault();
       setDisplayLicenseModal([true, 'core']);
     }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_7__.Relation, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_7__.QandA, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_7__.OfflineReading, null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_activates__WEBPACK_IMPORTED_MODULE_6__.Core, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.Relation, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.QandA, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.OfflineReading, null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_activates__WEBPACK_IMPORTED_MODULE_7__.Core, {
     show: displayActiveCoreModal,
     onClickClose: function onClickClose() {
       console.log('onClickClose onClick');
       setDisplayActiveCoreModal(false);
     }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_activates__WEBPACK_IMPORTED_MODULE_6__.License, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_activates__WEBPACK_IMPORTED_MODULE_7__.License, {
     show: displayLicensModal,
     onClickClose: function onClickClose() {
       setDisplayLicenseModal(false);
@@ -9856,7 +6422,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator.return && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, catch: function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
 
@@ -9894,7 +6460,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
-var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function (_ref) {
+var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Core(_ref) {
   var _errors$email, _errors$username, _errors$password, _errors$confirm_passw, _errors$identity_type, _errors$product_slug;
 
   var show = _ref.show,
@@ -10072,10 +6638,10 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function (_r
     className: "button button-primary flex items-center"
   }, (isSubmitting || isActivatingCore || showActivatingFeature) && {
     disabled: 'disabled'
-  }), isSubmitting || isActivatingCore ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
-    className: "spinner is-active m-0 mr-1 float-none inline-block"
-  }), "Applying...") : showActivatingFeature ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
-    className: "spinner is-active m-0 mr-1 float-none inline-block"
+  }), isSubmitting || isActivatingCore ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_8__.ButtonSpinner, {
+    className: "mr-1"
+  }), "Applying...") : showActivatingFeature ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_8__.ButtonSpinner, {
+    className: "mr-1"
   }), "Activating...", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_countdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
     date: Date.now() + _components_constants__WEBPACK_IMPORTED_MODULE_6__.ACTIVATING_COUNT_DOWN_TIME,
     renderer: function renderer(_ref3) {
@@ -10367,10 +6933,10 @@ var License = function License(_ref4) {
     className: "button button-primary flex items-center"
   }, (isSubmitting || isActivating || showActivating) && {
     disabled: 'disabled'
-  }), isSubmitting || isActivating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
-    className: "spinner is-active m-0 mr-1 float-none inline-block"
-  }), "Verifying...") : showActivating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
-    className: "spinner is-active m-0 mr-1 float-none inline-block"
+  }), isSubmitting || isActivating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_8__.ButtonSpinner, {
+    className: "mr-1"
+  }), "Verifying...") : showActivating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_8__.ButtonSpinner, {
+    className: "mr-1"
   }), "Activating...", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_countdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
     date: Date.now() + _components_constants__WEBPACK_IMPORTED_MODULE_6__.ACTIVATING_COUNT_DOWN_TIME,
     renderer: function renderer(_ref7) {
@@ -10412,6 +6978,7 @@ License.propTypes = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ButtonSpinner": () => (/* binding */ ButtonSpinner),
 /* harmony export */   "FeatureCard": () => (/* binding */ FeatureCard),
 /* harmony export */   "ScreenOverlay": () => (/* binding */ ScreenOverlay),
 /* harmony export */   "SwitchToggle": () => (/* binding */ SwitchToggle)
@@ -10424,7 +6991,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
 /* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _components_backend_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @components/backend/components */ "./assets/src/js/backend/components/index.jsx");
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -10451,10 +7018,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
 
-var SwitchToggle = function SwitchToggle(_ref) {
-  var isActive = _ref.isActive,
-      onSwitchOn = _ref.onSwitchOn,
-      onSwitchOff = _ref.onSwitchOff;
+var ButtonSpinner = function ButtonSpinner(_ref) {
+  var className = _ref.className;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "spinner is-active m-0 float-none inline-block ".concat(className)
+  });
+};
+ButtonSpinner.propTypes = {
+  className: (prop_types__WEBPACK_IMPORTED_MODULE_4___default().string)
+};
+var SwitchToggle = function SwitchToggle(_ref2) {
+  var isActive = _ref2.isActive,
+      onSwitchOn = _ref2.onSwitchOn,
+      onSwitchOff = _ref2.onSwitchOff;
   var classNames = {
     input: ['peer', 'absolute', 'top-0', 'left-0', 'w-full', 'h-full', 'm-0', 'p-0', 'border-none', 'z-10', 'opacity-0', 'checked:before:bg-none', 'focus:border-sky-600', 'focus:outline-2', 'focus:outline', 'focus:outline-transparent'],
     border: ['box-border', 'content-none', 'inline-block', 'align-top', 'border', 'border-solid', 'w-9', 'h-18px', 'rounded-xl', 'transition-colors', 'peer-focus:outline-2', 'peer-focus:outline-offset-2', 'peer-checked:peer-focus:shadow-[0_0_0_2px_#fff,0_0_0_4px_#0284c7]', 'peer-checked:bg-sky-600', 'peer-checked:border-sky-600'],
@@ -10484,13 +7060,13 @@ var SwitchToggle = function SwitchToggle(_ref) {
 SwitchToggle.propTypes = {
   isActive: (prop_types__WEBPACK_IMPORTED_MODULE_4___default().bool)
 };
-var ScreenOverlay = function ScreenOverlay(_ref2) {
-  var show = _ref2.show,
-      title = _ref2.title,
-      className = _ref2.className,
-      onClickClose = _ref2.onClickClose,
-      ref = _ref2.ref,
-      children = _ref2.children;
+var ScreenOverlay = function ScreenOverlay(_ref3) {
+  var show = _ref3.show,
+      title = _ref3.title,
+      className = _ref3.className,
+      onClickClose = _ref3.onClickClose,
+      ref = _ref3.ref,
+      children = _ref3.children;
 
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
       _useState2 = _slicedToArray(_useState, 2),
@@ -10548,21 +7124,21 @@ ScreenOverlay.propTypes = {
   ref: (prop_types__WEBPACK_IMPORTED_MODULE_4___default().any),
   children: prop_types__WEBPACK_IMPORTED_MODULE_4___default().oneOfType([(prop_types__WEBPACK_IMPORTED_MODULE_4___default().string), (prop_types__WEBPACK_IMPORTED_MODULE_4___default().element), prop_types__WEBPACK_IMPORTED_MODULE_4___default().arrayOf((prop_types__WEBPACK_IMPORTED_MODULE_4___default().element))])
 };
-var FeatureCard = function FeatureCard(_ref3) {
-  var title = _ref3.title,
-      isActive = _ref3.isActive,
-      _ref3$version = _ref3.version,
-      version = _ref3$version === void 0 ? '0.0.0' : _ref3$version,
-      commingSoon = _ref3.commingSoon,
-      _ref3$onClickActive = _ref3.onClickActive,
-      onClickActive = _ref3$onClickActive === void 0 ? function () {
+var FeatureCard = function FeatureCard(_ref4) {
+  var title = _ref4.title,
+      isActive = _ref4.isActive,
+      _ref4$version = _ref4.version,
+      version = _ref4$version === void 0 ? '0.0.0' : _ref4$version,
+      commingSoon = _ref4.commingSoon,
+      _ref4$onClickActive = _ref4.onClickActive,
+      onClickActive = _ref4$onClickActive === void 0 ? function () {
     return false;
-  } : _ref3$onClickActive,
-      _ref3$onClickLicense = _ref3.onClickLicense,
-      onClickLicense = _ref3$onClickLicense === void 0 ? function () {
+  } : _ref4$onClickActive,
+      _ref4$onClickLicense = _ref4.onClickLicense,
+      onClickLicense = _ref4$onClickLicense === void 0 ? function () {
     return false;
-  } : _ref3$onClickLicense,
-      children = _ref3.children;
+  } : _ref4$onClickLicense,
+      children = _ref4.children;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "px-2 py-2 w-80"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -10828,7 +7404,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @components/constants */ "./assets/src/js/constants.js");
 /* harmony import */ var _components_backend_form_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @components/backend/form-table */ "./assets/src/js/backend/form-table/index.jsx");
 /* harmony import */ var _components_backend_schema__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @components/backend/schema */ "./assets/src/js/backend/schema/index.js");
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
 
@@ -11130,9 +7706,9 @@ var store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_3__.configureStore)({
   reducer: (_reducer = {
     general: _states_generalSlice__WEBPACK_IMPORTED_MODULE_1__["default"],
     account: _states_accountSlice__WEBPACK_IMPORTED_MODULE_2__["default"]
-  }, _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducer), _reducer),
+  }, _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducer), _reducer),
   middleware: function middleware(getDefaultMiddleware) {
-    return getDefaultMiddleware().concat(_components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.middleware);
+    return getDefaultMiddleware().concat([_components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.middleware]);
   }
 });
 (0,_reduxjs_toolkit_query__WEBPACK_IMPORTED_MODULE_4__.setupListeners)(store.dispatch);
@@ -11349,7 +7925,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "queryStringModifier": () => (/* binding */ queryStringModifier),
 /* harmony export */   "retrieveChapterByParamString": () => (/* binding */ retrieveChapterByParamString)
 /* harmony export */ });
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ "./node_modules/@remix-run/router/dist/router.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
 
 /**
  * 將相同的書、章的字串縮短
@@ -11409,12 +7985,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "activateApi": () => (/* binding */ activateApi),
 /* harmony export */   "bibleApi": () => (/* binding */ bibleApi),
 /* harmony export */   "deactivateApi": () => (/* binding */ deactivateApi),
+/* harmony export */   "optionsApi": () => (/* binding */ optionsApi),
 /* harmony export */   "signinApi": () => (/* binding */ signinApi),
 /* harmony export */   "useActivateByLicenseMutation": () => (/* binding */ useActivateByLicenseMutation),
 /* harmony export */   "useActivateCoreMutation": () => (/* binding */ useActivateCoreMutation),
 /* harmony export */   "useDeactivateMutation": () => (/* binding */ useDeactivateMutation),
 /* harmony export */   "useGetBibleRawQuery": () => (/* binding */ useGetBibleRawQuery),
-/* harmony export */   "useSigninMutation": () => (/* binding */ useSigninMutation)
+/* harmony export */   "useSigninMutation": () => (/* binding */ useSigninMutation),
+/* harmony export */   "useUpdateOptionsMutation": () => (/* binding */ useUpdateOptionsMutation)
 /* harmony export */ });
 /* harmony import */ var _reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @reduxjs/toolkit/query/react */ "./node_modules/@reduxjs/toolkit/dist/query/react/rtk-query-react.esm.js");
 /* harmony import */ var _reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @reduxjs/toolkit/query/react */ "./node_modules/@reduxjs/toolkit/dist/query/rtk-query.esm.js");
@@ -11442,6 +8020,35 @@ var prepareHeaders = function prepareHeaders(headers) {
 
   return headers;
 };
+
+var optionsApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_3__.createApi)({
+  reducerPath: 'api.options',
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.options),
+    prepareHeaders: prepareHeaders
+  }),
+  endpoints: function endpoints(builder) {
+    return {
+      updateOptions: builder.mutation({
+        query: function query(body) {
+          return {
+            method: 'POST',
+            body: body
+          };
+        },
+        transformResponse: function transformResponse(response, meta, arg) {
+          console.log(meta, arg);
+          return response;
+        },
+        transformErrorResponse: function transformErrorResponse(response, meta, arg) {
+          console.log(meta, arg);
+          return response;
+        }
+      })
+    };
+  }
+});
+var useUpdateOptionsMutation = optionsApi.useUpdateOptionsMutation;
 
 var bibleApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_3__.createApi)({
   reducerPath: 'api.bible',
@@ -11621,6 +8228,822 @@ var useSigninMutation = signinApi.useSigninMutation;
 
 /***/ }),
 
+/***/ "./node_modules/history/index.js":
+/*!***************************************!*\
+  !*** ./node_modules/history/index.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Action": () => (/* binding */ Action),
+/* harmony export */   "createBrowserHistory": () => (/* binding */ createBrowserHistory),
+/* harmony export */   "createHashHistory": () => (/* binding */ createHashHistory),
+/* harmony export */   "createMemoryHistory": () => (/* binding */ createMemoryHistory),
+/* harmony export */   "createPath": () => (/* binding */ createPath),
+/* harmony export */   "parsePath": () => (/* binding */ parsePath)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/history/node_modules/@babel/runtime/helpers/esm/extends.js");
+
+
+/**
+ * Actions represent the type of change to a location value.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#action
+ */
+var Action;
+
+(function (Action) {
+  /**
+   * A POP indicates a change to an arbitrary index in the history stack, such
+   * as a back or forward navigation. It does not describe the direction of the
+   * navigation, only that the current index changed.
+   *
+   * Note: This is the default action for newly created history objects.
+   */
+  Action["Pop"] = "POP";
+  /**
+   * A PUSH indicates a new entry being added to the history stack, such as when
+   * a link is clicked and a new page loads. When this happens, all subsequent
+   * entries in the stack are lost.
+   */
+
+  Action["Push"] = "PUSH";
+  /**
+   * A REPLACE indicates the entry at the current index in the history stack
+   * being replaced by a new one.
+   */
+
+  Action["Replace"] = "REPLACE";
+})(Action || (Action = {}));
+
+var readOnly =  true ? function (obj) {
+  return Object.freeze(obj);
+} : 0;
+
+function warning(cond, message) {
+  if (!cond) {
+    // eslint-disable-next-line no-console
+    if (typeof console !== 'undefined') console.warn(message);
+
+    try {
+      // Welcome to debugging history!
+      //
+      // This error is thrown as a convenience so you can more easily
+      // find the source for a warning that appears in the console by
+      // enabling "pause on exceptions" in your JavaScript debugger.
+      throw new Error(message); // eslint-disable-next-line no-empty
+    } catch (e) {}
+  }
+}
+
+var BeforeUnloadEventType = 'beforeunload';
+var HashChangeEventType = 'hashchange';
+var PopStateEventType = 'popstate';
+/**
+ * Browser history stores the location in regular URLs. This is the standard for
+ * most web apps, but it requires some configuration on the server to ensure you
+ * serve the same app at multiple URLs.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createbrowserhistory
+ */
+
+function createBrowserHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  var _options = options,
+      _options$window = _options.window,
+      window = _options$window === void 0 ? document.defaultView : _options$window;
+  var globalHistory = window.history;
+
+  function getIndexAndLocation() {
+    var _window$location = window.location,
+        pathname = _window$location.pathname,
+        search = _window$location.search,
+        hash = _window$location.hash;
+    var state = globalHistory.state || {};
+    return [state.idx, readOnly({
+      pathname: pathname,
+      search: search,
+      hash: hash,
+      state: state.usr || null,
+      key: state.key || 'default'
+    })];
+  }
+
+  var blockedPopTx = null;
+
+  function handlePop() {
+    if (blockedPopTx) {
+      blockers.call(blockedPopTx);
+      blockedPopTx = null;
+    } else {
+      var nextAction = Action.Pop;
+
+      var _getIndexAndLocation = getIndexAndLocation(),
+          nextIndex = _getIndexAndLocation[0],
+          nextLocation = _getIndexAndLocation[1];
+
+      if (blockers.length) {
+        if (nextIndex != null) {
+          var delta = index - nextIndex;
+
+          if (delta) {
+            // Revert the POP
+            blockedPopTx = {
+              action: nextAction,
+              location: nextLocation,
+              retry: function retry() {
+                go(delta * -1);
+              }
+            };
+            go(delta);
+          }
+        } else {
+          // Trying to POP to a location with no index. We did not create
+          // this location, so we can't effectively block the navigation.
+           true ? warning(false, // TODO: Write up a doc that explains our blocking strategy in
+          // detail and link to it here so people can understand better what
+          // is going on and how to avoid it.
+          "You are trying to block a POP navigation to a location that was not " + "created by the history library. The block will fail silently in " + "production, but in general you should do all navigation with the " + "history library (instead of using window.history.pushState directly) " + "to avoid this situation.") : 0;
+        }
+      } else {
+        applyTx(nextAction);
+      }
+    }
+  }
+
+  window.addEventListener(PopStateEventType, handlePop);
+  var action = Action.Pop;
+
+  var _getIndexAndLocation2 = getIndexAndLocation(),
+      index = _getIndexAndLocation2[0],
+      location = _getIndexAndLocation2[1];
+
+  var listeners = createEvents();
+  var blockers = createEvents();
+
+  if (index == null) {
+    index = 0;
+    globalHistory.replaceState((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, globalHistory.state, {
+      idx: index
+    }), '');
+  }
+
+  function createHref(to) {
+    return typeof to === 'string' ? to : createPath(to);
+  } // state defaults to `null` because `window.history.state` does
+
+
+  function getNextLocation(to, state) {
+    if (state === void 0) {
+      state = null;
+    }
+
+    return readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: location.pathname,
+      hash: '',
+      search: ''
+    }, typeof to === 'string' ? parsePath(to) : to, {
+      state: state,
+      key: createKey()
+    }));
+  }
+
+  function getHistoryStateAndUrl(nextLocation, index) {
+    return [{
+      usr: nextLocation.state,
+      key: nextLocation.key,
+      idx: index
+    }, createHref(nextLocation)];
+  }
+
+  function allowTx(action, location, retry) {
+    return !blockers.length || (blockers.call({
+      action: action,
+      location: location,
+      retry: retry
+    }), false);
+  }
+
+  function applyTx(nextAction) {
+    action = nextAction;
+
+    var _getIndexAndLocation3 = getIndexAndLocation();
+
+    index = _getIndexAndLocation3[0];
+    location = _getIndexAndLocation3[1];
+    listeners.call({
+      action: action,
+      location: location
+    });
+  }
+
+  function push(to, state) {
+    var nextAction = Action.Push;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      push(to, state);
+    }
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr = getHistoryStateAndUrl(nextLocation, index + 1),
+          historyState = _getHistoryStateAndUr[0],
+          url = _getHistoryStateAndUr[1]; // TODO: Support forced reloading
+      // try...catch because iOS limits us to 100 pushState calls :/
+
+
+      try {
+        globalHistory.pushState(historyState, '', url);
+      } catch (error) {
+        // They are going to lose state here, but there is no real
+        // way to warn them about it since the page will refresh...
+        window.location.assign(url);
+      }
+
+      applyTx(nextAction);
+    }
+  }
+
+  function replace(to, state) {
+    var nextAction = Action.Replace;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      replace(to, state);
+    }
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr2 = getHistoryStateAndUrl(nextLocation, index),
+          historyState = _getHistoryStateAndUr2[0],
+          url = _getHistoryStateAndUr2[1]; // TODO: Support forced reloading
+
+
+      globalHistory.replaceState(historyState, '', url);
+      applyTx(nextAction);
+    }
+  }
+
+  function go(delta) {
+    globalHistory.go(delta);
+  }
+
+  var history = {
+    get action() {
+      return action;
+    },
+
+    get location() {
+      return location;
+    },
+
+    createHref: createHref,
+    push: push,
+    replace: replace,
+    go: go,
+    back: function back() {
+      go(-1);
+    },
+    forward: function forward() {
+      go(1);
+    },
+    listen: function listen(listener) {
+      return listeners.push(listener);
+    },
+    block: function block(blocker) {
+      var unblock = blockers.push(blocker);
+
+      if (blockers.length === 1) {
+        window.addEventListener(BeforeUnloadEventType, promptBeforeUnload);
+      }
+
+      return function () {
+        unblock(); // Remove the beforeunload listener so the document may
+        // still be salvageable in the pagehide event.
+        // See https://html.spec.whatwg.org/#unloading-documents
+
+        if (!blockers.length) {
+          window.removeEventListener(BeforeUnloadEventType, promptBeforeUnload);
+        }
+      };
+    }
+  };
+  return history;
+}
+/**
+ * Hash history stores the location in window.location.hash. This makes it ideal
+ * for situations where you don't want to send the location to the server for
+ * some reason, either because you do cannot configure it or the URL space is
+ * reserved for something else.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createhashhistory
+ */
+
+function createHashHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  var _options2 = options,
+      _options2$window = _options2.window,
+      window = _options2$window === void 0 ? document.defaultView : _options2$window;
+  var globalHistory = window.history;
+
+  function getIndexAndLocation() {
+    var _parsePath = parsePath(window.location.hash.substr(1)),
+        _parsePath$pathname = _parsePath.pathname,
+        pathname = _parsePath$pathname === void 0 ? '/' : _parsePath$pathname,
+        _parsePath$search = _parsePath.search,
+        search = _parsePath$search === void 0 ? '' : _parsePath$search,
+        _parsePath$hash = _parsePath.hash,
+        hash = _parsePath$hash === void 0 ? '' : _parsePath$hash;
+
+    var state = globalHistory.state || {};
+    return [state.idx, readOnly({
+      pathname: pathname,
+      search: search,
+      hash: hash,
+      state: state.usr || null,
+      key: state.key || 'default'
+    })];
+  }
+
+  var blockedPopTx = null;
+
+  function handlePop() {
+    if (blockedPopTx) {
+      blockers.call(blockedPopTx);
+      blockedPopTx = null;
+    } else {
+      var nextAction = Action.Pop;
+
+      var _getIndexAndLocation4 = getIndexAndLocation(),
+          nextIndex = _getIndexAndLocation4[0],
+          nextLocation = _getIndexAndLocation4[1];
+
+      if (blockers.length) {
+        if (nextIndex != null) {
+          var delta = index - nextIndex;
+
+          if (delta) {
+            // Revert the POP
+            blockedPopTx = {
+              action: nextAction,
+              location: nextLocation,
+              retry: function retry() {
+                go(delta * -1);
+              }
+            };
+            go(delta);
+          }
+        } else {
+          // Trying to POP to a location with no index. We did not create
+          // this location, so we can't effectively block the navigation.
+           true ? warning(false, // TODO: Write up a doc that explains our blocking strategy in
+          // detail and link to it here so people can understand better
+          // what is going on and how to avoid it.
+          "You are trying to block a POP navigation to a location that was not " + "created by the history library. The block will fail silently in " + "production, but in general you should do all navigation with the " + "history library (instead of using window.history.pushState directly) " + "to avoid this situation.") : 0;
+        }
+      } else {
+        applyTx(nextAction);
+      }
+    }
+  }
+
+  window.addEventListener(PopStateEventType, handlePop); // popstate does not fire on hashchange in IE 11 and old (trident) Edge
+  // https://developer.mozilla.org/de/docs/Web/API/Window/popstate_event
+
+  window.addEventListener(HashChangeEventType, function () {
+    var _getIndexAndLocation5 = getIndexAndLocation(),
+        nextLocation = _getIndexAndLocation5[1]; // Ignore extraneous hashchange events.
+
+
+    if (createPath(nextLocation) !== createPath(location)) {
+      handlePop();
+    }
+  });
+  var action = Action.Pop;
+
+  var _getIndexAndLocation6 = getIndexAndLocation(),
+      index = _getIndexAndLocation6[0],
+      location = _getIndexAndLocation6[1];
+
+  var listeners = createEvents();
+  var blockers = createEvents();
+
+  if (index == null) {
+    index = 0;
+    globalHistory.replaceState((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, globalHistory.state, {
+      idx: index
+    }), '');
+  }
+
+  function getBaseHref() {
+    var base = document.querySelector('base');
+    var href = '';
+
+    if (base && base.getAttribute('href')) {
+      var url = window.location.href;
+      var hashIndex = url.indexOf('#');
+      href = hashIndex === -1 ? url : url.slice(0, hashIndex);
+    }
+
+    return href;
+  }
+
+  function createHref(to) {
+    return getBaseHref() + '#' + (typeof to === 'string' ? to : createPath(to));
+  }
+
+  function getNextLocation(to, state) {
+    if (state === void 0) {
+      state = null;
+    }
+
+    return readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: location.pathname,
+      hash: '',
+      search: ''
+    }, typeof to === 'string' ? parsePath(to) : to, {
+      state: state,
+      key: createKey()
+    }));
+  }
+
+  function getHistoryStateAndUrl(nextLocation, index) {
+    return [{
+      usr: nextLocation.state,
+      key: nextLocation.key,
+      idx: index
+    }, createHref(nextLocation)];
+  }
+
+  function allowTx(action, location, retry) {
+    return !blockers.length || (blockers.call({
+      action: action,
+      location: location,
+      retry: retry
+    }), false);
+  }
+
+  function applyTx(nextAction) {
+    action = nextAction;
+
+    var _getIndexAndLocation7 = getIndexAndLocation();
+
+    index = _getIndexAndLocation7[0];
+    location = _getIndexAndLocation7[1];
+    listeners.call({
+      action: action,
+      location: location
+    });
+  }
+
+  function push(to, state) {
+    var nextAction = Action.Push;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      push(to, state);
+    }
+
+     true ? warning(nextLocation.pathname.charAt(0) === '/', "Relative pathnames are not supported in hash history.push(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr3 = getHistoryStateAndUrl(nextLocation, index + 1),
+          historyState = _getHistoryStateAndUr3[0],
+          url = _getHistoryStateAndUr3[1]; // TODO: Support forced reloading
+      // try...catch because iOS limits us to 100 pushState calls :/
+
+
+      try {
+        globalHistory.pushState(historyState, '', url);
+      } catch (error) {
+        // They are going to lose state here, but there is no real
+        // way to warn them about it since the page will refresh...
+        window.location.assign(url);
+      }
+
+      applyTx(nextAction);
+    }
+  }
+
+  function replace(to, state) {
+    var nextAction = Action.Replace;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      replace(to, state);
+    }
+
+     true ? warning(nextLocation.pathname.charAt(0) === '/', "Relative pathnames are not supported in hash history.replace(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr4 = getHistoryStateAndUrl(nextLocation, index),
+          historyState = _getHistoryStateAndUr4[0],
+          url = _getHistoryStateAndUr4[1]; // TODO: Support forced reloading
+
+
+      globalHistory.replaceState(historyState, '', url);
+      applyTx(nextAction);
+    }
+  }
+
+  function go(delta) {
+    globalHistory.go(delta);
+  }
+
+  var history = {
+    get action() {
+      return action;
+    },
+
+    get location() {
+      return location;
+    },
+
+    createHref: createHref,
+    push: push,
+    replace: replace,
+    go: go,
+    back: function back() {
+      go(-1);
+    },
+    forward: function forward() {
+      go(1);
+    },
+    listen: function listen(listener) {
+      return listeners.push(listener);
+    },
+    block: function block(blocker) {
+      var unblock = blockers.push(blocker);
+
+      if (blockers.length === 1) {
+        window.addEventListener(BeforeUnloadEventType, promptBeforeUnload);
+      }
+
+      return function () {
+        unblock(); // Remove the beforeunload listener so the document may
+        // still be salvageable in the pagehide event.
+        // See https://html.spec.whatwg.org/#unloading-documents
+
+        if (!blockers.length) {
+          window.removeEventListener(BeforeUnloadEventType, promptBeforeUnload);
+        }
+      };
+    }
+  };
+  return history;
+}
+/**
+ * Memory history stores the current location in memory. It is designed for use
+ * in stateful non-browser environments like tests and React Native.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#creatememoryhistory
+ */
+
+function createMemoryHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  var _options3 = options,
+      _options3$initialEntr = _options3.initialEntries,
+      initialEntries = _options3$initialEntr === void 0 ? ['/'] : _options3$initialEntr,
+      initialIndex = _options3.initialIndex;
+  var entries = initialEntries.map(function (entry) {
+    var location = readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: null,
+      key: createKey()
+    }, typeof entry === 'string' ? parsePath(entry) : entry));
+     true ? warning(location.pathname.charAt(0) === '/', "Relative pathnames are not supported in createMemoryHistory({ initialEntries }) (invalid entry: " + JSON.stringify(entry) + ")") : 0;
+    return location;
+  });
+  var index = clamp(initialIndex == null ? entries.length - 1 : initialIndex, 0, entries.length - 1);
+  var action = Action.Pop;
+  var location = entries[index];
+  var listeners = createEvents();
+  var blockers = createEvents();
+
+  function createHref(to) {
+    return typeof to === 'string' ? to : createPath(to);
+  }
+
+  function getNextLocation(to, state) {
+    if (state === void 0) {
+      state = null;
+    }
+
+    return readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: location.pathname,
+      search: '',
+      hash: ''
+    }, typeof to === 'string' ? parsePath(to) : to, {
+      state: state,
+      key: createKey()
+    }));
+  }
+
+  function allowTx(action, location, retry) {
+    return !blockers.length || (blockers.call({
+      action: action,
+      location: location,
+      retry: retry
+    }), false);
+  }
+
+  function applyTx(nextAction, nextLocation) {
+    action = nextAction;
+    location = nextLocation;
+    listeners.call({
+      action: action,
+      location: location
+    });
+  }
+
+  function push(to, state) {
+    var nextAction = Action.Push;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      push(to, state);
+    }
+
+     true ? warning(location.pathname.charAt(0) === '/', "Relative pathnames are not supported in memory history.push(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      index += 1;
+      entries.splice(index, entries.length, nextLocation);
+      applyTx(nextAction, nextLocation);
+    }
+  }
+
+  function replace(to, state) {
+    var nextAction = Action.Replace;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      replace(to, state);
+    }
+
+     true ? warning(location.pathname.charAt(0) === '/', "Relative pathnames are not supported in memory history.replace(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      entries[index] = nextLocation;
+      applyTx(nextAction, nextLocation);
+    }
+  }
+
+  function go(delta) {
+    var nextIndex = clamp(index + delta, 0, entries.length - 1);
+    var nextAction = Action.Pop;
+    var nextLocation = entries[nextIndex];
+
+    function retry() {
+      go(delta);
+    }
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      index = nextIndex;
+      applyTx(nextAction, nextLocation);
+    }
+  }
+
+  var history = {
+    get index() {
+      return index;
+    },
+
+    get action() {
+      return action;
+    },
+
+    get location() {
+      return location;
+    },
+
+    createHref: createHref,
+    push: push,
+    replace: replace,
+    go: go,
+    back: function back() {
+      go(-1);
+    },
+    forward: function forward() {
+      go(1);
+    },
+    listen: function listen(listener) {
+      return listeners.push(listener);
+    },
+    block: function block(blocker) {
+      return blockers.push(blocker);
+    }
+  };
+  return history;
+} ////////////////////////////////////////////////////////////////////////////////
+// UTILS
+////////////////////////////////////////////////////////////////////////////////
+
+function clamp(n, lowerBound, upperBound) {
+  return Math.min(Math.max(n, lowerBound), upperBound);
+}
+
+function promptBeforeUnload(event) {
+  // Cancel the event.
+  event.preventDefault(); // Chrome (and legacy IE) requires returnValue to be set.
+
+  event.returnValue = '';
+}
+
+function createEvents() {
+  var handlers = [];
+  return {
+    get length() {
+      return handlers.length;
+    },
+
+    push: function push(fn) {
+      handlers.push(fn);
+      return function () {
+        handlers = handlers.filter(function (handler) {
+          return handler !== fn;
+        });
+      };
+    },
+    call: function call(arg) {
+      handlers.forEach(function (fn) {
+        return fn && fn(arg);
+      });
+    }
+  };
+}
+
+function createKey() {
+  return Math.random().toString(36).substr(2, 8);
+}
+/**
+ * Creates a string URL path from the given pathname, search, and hash components.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createpath
+ */
+
+
+function createPath(_ref) {
+  var _ref$pathname = _ref.pathname,
+      pathname = _ref$pathname === void 0 ? '/' : _ref$pathname,
+      _ref$search = _ref.search,
+      search = _ref$search === void 0 ? '' : _ref$search,
+      _ref$hash = _ref.hash,
+      hash = _ref$hash === void 0 ? '' : _ref$hash;
+  if (search && search !== '?') pathname += search.charAt(0) === '?' ? search : '?' + search;
+  if (hash && hash !== '#') pathname += hash.charAt(0) === '#' ? hash : '#' + hash;
+  return pathname;
+}
+/**
+ * Parses a string URL path into its separate pathname, search, and hash components.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#parsepath
+ */
+
+function parsePath(path) {
+  var parsedPath = {};
+
+  if (path) {
+    var hashIndex = path.indexOf('#');
+
+    if (hashIndex >= 0) {
+      parsedPath.hash = path.substr(hashIndex);
+      path = path.substr(0, hashIndex);
+    }
+
+    var searchIndex = path.indexOf('?');
+
+    if (searchIndex >= 0) {
+      parsedPath.search = path.substr(searchIndex);
+      path = path.substr(0, searchIndex);
+    }
+
+    if (path) {
+      parsedPath.pathname = path;
+    }
+  }
+
+  return parsedPath;
+}
+
+
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
 /***/ "./node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js":
 /*!**********************************************************************************!*\
   !*** ./node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js ***!
@@ -11741,7 +9164,7 @@ module.exports = hoistNonReactStatics;
   \**************************************************/
 /***/ ((module) => {
 
-!function(e,t){ true?module.exports=t():0}(self,(()=>{return e={7629:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(9474),i=r(1687),o=r(8652),l=r(8160),c=r(3292),u=r(6354),f=r(8901),h=r(9708),d=r(6914),m=r(2294),p=r(6133),g=r(1152),y=r(8863),b=r(2036),v={Base:class{constructor(e){this.type=e,this.$_root=null,this._definition={},this._reset()}_reset(){this._ids=new m.Ids,this._preferences=null,this._refs=new p.Manager,this._cache=null,this._valids=null,this._invalids=null,this._flags={},this._rules=[],this._singleRules=new Map,this.$_terms={},this.$_temp={ruleset:null,whens:{}}}describe(){return s("function"==typeof h.describe,"Manifest functionality disabled"),h.describe(this)}allow(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"allow"),this._values(t,"_valids")}alter(e){s(e&&"object"==typeof e&&!Array.isArray(e),"Invalid targets argument"),s(!this._inRuleset(),"Cannot set alterations inside a ruleset");const t=this.clone();t.$_terms.alterations=t.$_terms.alterations||[];for(const r in e){const n=e[r];s("function"==typeof n,"Alteration adjuster for",r,"must be a function"),t.$_terms.alterations.push({target:r,adjuster:n})}return t.$_temp.ruleset=!1,t}artifact(e){return s(void 0!==e,"Artifact cannot be undefined"),s(!this._cache,"Cannot set an artifact with a rule cache"),this.$_setFlag("artifact",e)}cast(e){return s(!1===e||"string"==typeof e,"Invalid to value"),s(!1===e||this._definition.cast[e],"Type",this.type,"does not support casting to",e),this.$_setFlag("cast",!1===e?void 0:e)}default(e,t){return this._default("default",e,t)}description(e){return s(e&&"string"==typeof e,"Description must be a non-empty string"),this.$_setFlag("description",e)}empty(e){const t=this.clone();return void 0!==e&&(e=t.$_compile(e,{override:!1})),t.$_setFlag("empty",e,{clone:!1})}error(e){return s(e,"Missing error"),s(e instanceof Error||"function"==typeof e,"Must provide a valid Error object or a function"),this.$_setFlag("error",e)}example(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};return s(void 0!==e,"Missing example"),l.assertOptions(t,["override"]),this._inner("examples",e,{single:!0,override:t.override})}external(e,t){return"object"==typeof e&&(s(!t,"Cannot combine options with description"),t=e.description,e=e.method),s("function"==typeof e,"Method must be a function"),s(void 0===t||t&&"string"==typeof t,"Description must be a non-empty string"),this._inner("externals",{method:e,description:t},{single:!0})}failover(e,t){return this._default("failover",e,t)}forbidden(){return this.presence("forbidden")}id(e){return e?(s("string"==typeof e,"id must be a non-empty string"),s(/^[^\.]+$/.test(e),"id cannot contain period character"),this.$_setFlag("id",e)):this.$_setFlag("id",void 0)}invalid(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return this._values(t,"_invalids")}label(e){return s(e&&"string"==typeof e,"Label name must be a non-empty string"),this.$_setFlag("label",e)}meta(e){return s(void 0!==e,"Meta cannot be undefined"),this._inner("metas",e,{single:!0})}note(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];s(t.length,"Missing notes");for(const e of t)s(e&&"string"==typeof e,"Notes must be non-empty strings");return this._inner("notes",t)}only(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"Invalid mode:",e),this.$_setFlag("only",e)}optional(){return this.presence("optional")}prefs(e){s(e,"Missing preferences"),s(void 0===e.context,"Cannot override context"),s(void 0===e.externals,"Cannot override externals"),s(void 0===e.warnings,"Cannot override warnings"),s(void 0===e.debug,"Cannot override debug"),l.checkPreferences(e);const t=this.clone();return t._preferences=l.preferences(t._preferences,e),t}presence(e){return s(["optional","required","forbidden"].includes(e),"Unknown presence mode",e),this.$_setFlag("presence",e)}raw(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("result",e?"raw":void 0)}result(e){return s(["raw","strip"].includes(e),"Unknown result mode",e),this.$_setFlag("result",e)}required(){return this.presence("required")}strict(e){const t=this.clone(),r=void 0!==e&&!e;return t._preferences=l.preferences(t._preferences,{convert:r}),t}strip(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("result",e?"strip":void 0)}tag(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];s(t.length,"Missing tags");for(const e of t)s(e&&"string"==typeof e,"Tags must be non-empty strings");return this._inner("tags",t)}unit(e){return s(e&&"string"==typeof e,"Unit name must be a non-empty string"),this.$_setFlag("unit",e)}valid(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];l.verifyFlat(t,"valid");const s=this.allow(...t);return s.$_setFlag("only",!!s._valids,{clone:!1}),s}when(e,t){const r=this.clone();r.$_terms.whens||(r.$_terms.whens=[]);const n=c.when(r,e,t);if(!["any","link"].includes(r.type)){const e=n.is?[n]:n.switch;for(const t of e)s(!t.then||"any"===t.then.type||t.then.type===r.type,"Cannot combine",r.type,"with",t.then&&t.then.type),s(!t.otherwise||"any"===t.otherwise.type||t.otherwise.type===r.type,"Cannot combine",r.type,"with",t.otherwise&&t.otherwise.type)}return r.$_terms.whens.push(n),r.$_mutateRebuild()}cache(e){s(!this._inRuleset(),"Cannot set caching inside a ruleset"),s(!this._cache,"Cannot override schema cache"),s(void 0===this._flags.artifact,"Cannot cache a rule with an artifact");const t=this.clone();return t._cache=e||o.provider.provision(),t.$_temp.ruleset=!1,t}clone(){const e=Object.create(Object.getPrototypeOf(this));return this._assign(e)}concat(e){s(l.isSchema(e),"Invalid schema object"),s("any"===this.type||"any"===e.type||e.type===this.type,"Cannot merge type",this.type,"with another type:",e.type),s(!this._inRuleset(),"Cannot concatenate onto a schema with open ruleset"),s(!e._inRuleset(),"Cannot concatenate a schema with open ruleset");let t=this.clone();if("any"===this.type&&"any"!==e.type){const r=e.clone();for(const e of Object.keys(t))"type"!==e&&(r[e]=t[e]);t=r}t._ids.concat(e._ids),t._refs.register(e,p.toSibling),t._preferences=t._preferences?l.preferences(t._preferences,e._preferences):e._preferences,t._valids=b.merge(t._valids,e._valids,e._invalids),t._invalids=b.merge(t._invalids,e._invalids,e._valids);for(const r of e._singleRules.keys())t._singleRules.has(r)&&(t._rules=t._rules.filter((e=>e.keep||e.name!==r)),t._singleRules.delete(r));for(const r of e._rules)e._definition.rules[r.method].multi||t._singleRules.set(r.name,r),t._rules.push(r);if(t._flags.empty&&e._flags.empty){t._flags.empty=t._flags.empty.concat(e._flags.empty);const r=Object.assign({},e._flags);delete r.empty,i(t._flags,r)}else if(e._flags.empty){t._flags.empty=e._flags.empty;const r=Object.assign({},e._flags);delete r.empty,i(t._flags,r)}else i(t._flags,e._flags);for(const r in e.$_terms){const s=e.$_terms[r];s?t.$_terms[r]?t.$_terms[r]=t.$_terms[r].concat(s):t.$_terms[r]=s.slice():t.$_terms[r]||(t.$_terms[r]=s)}return this.$_root._tracer&&this.$_root._tracer._combine(t,[this,e]),t.$_mutateRebuild()}extend(e){return s(!e.base,"Cannot extend type with another base"),f.type(this,e)}extract(e){return e=Array.isArray(e)?e:e.split("."),this._ids.reach(e)}fork(e,t){s(!this._inRuleset(),"Cannot fork inside a ruleset");let r=this;for(let s of[].concat(e))s=Array.isArray(s)?s:s.split("."),r=r._ids.fork(s,t,r);return r.$_temp.ruleset=!1,r}rule(e){const t=this._definition;l.assertOptions(e,Object.keys(t.modifiers)),s(!1!==this.$_temp.ruleset,"Cannot apply rules to empty ruleset or the last rule added does not support rule properties");const r=null===this.$_temp.ruleset?this._rules.length-1:this.$_temp.ruleset;s(r>=0&&r<this._rules.length,"Cannot apply rules to empty ruleset");const a=this.clone();for(let i=r;i<a._rules.length;++i){const r=a._rules[i],o=n(r);for(const n in e)t.modifiers[n](o,e[n]),s(o.name===r.name,"Cannot change rule name");a._rules[i]=o,a._singleRules.get(o.name)===r&&a._singleRules.set(o.name,o)}return a.$_temp.ruleset=!1,a.$_mutateRebuild()}get ruleset(){s(!this._inRuleset(),"Cannot start a new ruleset without closing the previous one");const e=this.clone();return e.$_temp.ruleset=e._rules.length,e}get $(){return this.ruleset}tailor(e){e=[].concat(e),s(!this._inRuleset(),"Cannot tailor inside a ruleset");let t=this;if(this.$_terms.alterations)for(const{target:r,adjuster:n}of this.$_terms.alterations)e.includes(r)&&(t=n(t),s(l.isSchema(t),"Alteration adjuster for",r,"failed to return a schema object"));return t=t.$_modify({each:t=>t.tailor(e),ref:!1}),t.$_temp.ruleset=!1,t.$_mutateRebuild()}tracer(){return g.location?g.location(this):this}validate(e,t){return y.entry(e,this,t)}validateAsync(e,t){return y.entryAsync(e,this,t)}$_addRule(e){"string"==typeof e&&(e={name:e}),s(e&&"object"==typeof e,"Invalid options"),s(e.name&&"string"==typeof e.name,"Invalid rule name");for(const t in e)s("_"!==t[0],"Cannot set private rule properties");const t=Object.assign({},e);t._resolve=[],t.method=t.method||t.name;const r=this._definition.rules[t.method],n=t.args;s(r,"Unknown rule",t.method);const a=this.clone();if(n){s(1===Object.keys(n).length||Object.keys(n).length===this._definition.rules[t.name].args.length,"Invalid rule definition for",this.type,t.name);for(const e in n){let i=n[e];if(r.argsByName){const o=r.argsByName.get(e);if(o.ref&&l.isResolvable(i))t._resolve.push(e),a.$_mutateRegister(i);else if(o.normalize&&(i=o.normalize(i),n[e]=i),o.assert){const t=l.validateArg(i,e,o);s(!t,t,"or reference")}}void 0!==i?n[e]=i:delete n[e]}}return r.multi||(a._ruleRemove(t.name,{clone:!1}),a._singleRules.set(t.name,t)),!1===a.$_temp.ruleset&&(a.$_temp.ruleset=null),r.priority?a._rules.unshift(t):a._rules.push(t),a}$_compile(e,t){return c.schema(this.$_root,e,t)}$_createError(e,t,r,s,n){let a=arguments.length>5&&void 0!==arguments[5]?arguments[5]:{};const i=!1!==a.flags?this._flags:{},o=a.messages?d.merge(this._definition.messages,a.messages):this._definition.messages;return new u.Report(e,t,r,i,o,s,n)}$_getFlag(e){return this._flags[e]}$_getRule(e){return this._singleRules.get(e)}$_mapLabels(e){return e=Array.isArray(e)?e:e.split("."),this._ids.labels(e)}$_match(e,t,r,s){(r=Object.assign({},r)).abortEarly=!0,r._externals=!1,t.snapshot();const n=!y.validate(e,this,t,r,s).errors;return t.restore(),n}$_modify(e){return l.assertOptions(e,["each","once","ref","schema"]),m.schema(this,e)||this}$_mutateRebuild(){return s(!this._inRuleset(),"Cannot add this rule inside a ruleset"),this._refs.reset(),this._ids.reset(),this.$_modify({each:(e,t)=>{let{source:r,name:s,path:n,key:a}=t;const i=this._definition[r][s]&&this._definition[r][s].register;!1!==i&&this.$_mutateRegister(e,{family:i,key:a})}}),this._definition.rebuild&&this._definition.rebuild(this),this.$_temp.ruleset=!1,this}$_mutateRegister(e){let{family:t,key:r}=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};this._refs.register(e,t),this._ids.register(e,{key:r})}$_property(e){return this._definition.properties[e]}$_reach(e){return this._ids.reach(e)}$_rootReferences(){return this._refs.roots()}$_setFlag(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};s("_"===e[0]||!this._inRuleset(),"Cannot set flag inside a ruleset");const n=this._definition.flags[e]||{};if(a(t,n.default)&&(t=void 0),a(t,this._flags[e]))return this;const i=!1!==r.clone?this.clone():this;return void 0!==t?(i._flags[e]=t,i.$_mutateRegister(t)):delete i._flags[e],"_"!==e[0]&&(i.$_temp.ruleset=!1),i}$_parent(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),s=1;s<t;s++)r[s-1]=arguments[s];return this[e][l.symbols.parent].call(this,...r)}$_validate(e,t,r){return y.validate(e,this,t,r)}_assign(e){e.type=this.type,e.$_root=this.$_root,e.$_temp=Object.assign({},this.$_temp),e.$_temp.whens={},e._ids=this._ids.clone(),e._preferences=this._preferences,e._valids=this._valids&&this._valids.clone(),e._invalids=this._invalids&&this._invalids.clone(),e._rules=this._rules.slice(),e._singleRules=n(this._singleRules,{shallow:!0}),e._refs=this._refs.clone(),e._flags=Object.assign({},this._flags),e._cache=null,e.$_terms={};for(const t in this.$_terms)e.$_terms[t]=this.$_terms[t]?this.$_terms[t].slice():null;e.$_super={};for(const t in this.$_super)e.$_super[t]=this._super[t].bind(e);return e}_bare(){const e=this.clone();e._reset();const t=e._definition.terms;for(const r in t){const s=t[r];e.$_terms[r]=s.init}return e.$_mutateRebuild()}_default(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};return l.assertOptions(r,"literal"),s(void 0!==t,"Missing",e,"value"),s("function"==typeof t||!r.literal,"Only function value supports literal option"),"function"==typeof t&&r.literal&&(t={[l.symbols.literal]:!0,literal:t}),this.$_setFlag(e,t)}_generate(e,t,r){if(!this.$_terms.whens)return{schema:this};const s=[],n=[];for(let a=0;a<this.$_terms.whens.length;++a){const i=this.$_terms.whens[a];if(i.concat){s.push(i.concat),n.push(`${a}.concat`);continue}const o=i.ref?i.ref.resolve(e,t,r):e,l=i.is?[i]:i.switch,c=n.length;for(let c=0;c<l.length;++c){const{is:u,then:f,otherwise:h}=l[c],d=`${a}${i.switch?"."+c:""}`;if(u.$_match(o,t.nest(u,`${d}.is`),r)){if(f){const a=t.localize([...t.path,`${d}.then`],t.ancestors,t.schemas),{schema:i,id:o}=f._generate(e,a,r);s.push(i),n.push(`${d}.then${o?`(${o})`:""}`);break}}else if(h){const a=t.localize([...t.path,`${d}.otherwise`],t.ancestors,t.schemas),{schema:i,id:o}=h._generate(e,a,r);s.push(i),n.push(`${d}.otherwise${o?`(${o})`:""}`);break}}if(i.break&&n.length>c)break}const a=n.join(", ");if(t.mainstay.tracer.debug(t,"rule","when",a),!a)return{schema:this};if(!t.mainstay.tracer.active&&this.$_temp.whens[a])return{schema:this.$_temp.whens[a],id:a};let i=this;this._definition.generate&&(i=this._definition.generate(this,e,t,r));for(const e of s)i=i.concat(e);return this.$_root._tracer&&this.$_root._tracer._combine(i,[this,...s]),this.$_temp.whens[a]=i,{schema:i,id:a}}_inner(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};s(!this._inRuleset(),`Cannot set ${e} inside a ruleset`);const n=this.clone();return n.$_terms[e]&&!r.override||(n.$_terms[e]=[]),r.single?n.$_terms[e].push(t):n.$_terms[e].push(...t),n.$_temp.ruleset=!1,n}_inRuleset(){return null!==this.$_temp.ruleset&&!1!==this.$_temp.ruleset}_ruleRemove(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!this._singleRules.has(e))return this;const r=!1!==t.clone?this.clone():this;r._singleRules.delete(e);const s=[];for(let t=0;t<r._rules.length;++t){const n=r._rules[t];n.name!==e||n.keep?s.push(n):r._inRuleset()&&t<r.$_temp.ruleset&&--r.$_temp.ruleset}return r._rules=s,r}_values(e,t){l.verifyFlat(e,t.slice(1,-1));const r=this.clone(),n=e[0]===l.symbols.override;if(n&&(e=e.slice(1)),!r[t]&&e.length?r[t]=new b:n&&(r[t]=e.length?new b:null,r.$_mutateRebuild()),!r[t])return r;n&&r[t].override();for(const n of e){s(void 0!==n,"Cannot call allow/valid/invalid with undefined"),s(n!==l.symbols.override,"Override must be the first value");const e="_invalids"===t?"_valids":"_invalids";r[e]&&(r[e].remove(n),r[e].length||(s("_valids"===t||!r._flags.only,"Setting invalid value",n,"leaves schema rejecting all values due to previous valid rule"),r[e]=null)),r[t].add(n,r._refs)}return r}}};v.Base.prototype[l.symbols.any]={version:l.version,compile:c.compile,root:"$_root"},v.Base.prototype.isImmutable=!0,v.Base.prototype.deny=v.Base.prototype.invalid,v.Base.prototype.disallow=v.Base.prototype.invalid,v.Base.prototype.equal=v.Base.prototype.valid,v.Base.prototype.exist=v.Base.prototype.required,v.Base.prototype.not=v.Base.prototype.invalid,v.Base.prototype.options=v.Base.prototype.prefs,v.Base.prototype.preferences=v.Base.prototype.prefs,e.exports=new v.Base},8652:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(8160),i={max:1e3,supported:new Set(["undefined","boolean","number","string"])};t.provider={provision:e=>new i.Cache(e)},i.Cache=class{constructor(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};a.assertOptions(e,["max"]),s(void 0===e.max||e.max&&e.max>0&&isFinite(e.max),"Invalid max cache size"),this._max=e.max||i.max,this._map=new Map,this._list=new i.List}get length(){return this._map.size}set(e,t){if(null!==e&&!i.supported.has(typeof e))return;let r=this._map.get(e);if(r)return r.value=t,void this._list.first(r);r=this._list.unshift({key:e,value:t}),this._map.set(e,r),this._compact()}get(e){const t=this._map.get(e);if(t)return this._list.first(t),n(t.value)}_compact(){if(this._map.size>this._max){const e=this._list.pop();this._map.delete(e.key)}}},i.List=class{constructor(){this.tail=null,this.head=null}unshift(e){return e.next=null,e.prev=this.head,this.head&&(this.head.next=e),this.head=e,this.tail||(this.tail=e),e}first(e){e!==this.head&&(this._remove(e),this.unshift(e))}pop(){return this._remove(this.tail)}_remove(e){const{next:t,prev:r}=e;return t.prev=r,r&&(r.next=t),e===this.tail&&(this.tail=t),e.prev=null,e.next=null,e}}},8160:(e,t,r)=>{"use strict";const s=r(375),n=r(7916),a=r(5934);let i,o;const l={isoDate:/^(?:[-+]\d{2})?(?:\d{4}(?!\d{2}\b))(?:(-?)(?:(?:0[1-9]|1[0-2])(?:\1(?:[12]\d|0[1-9]|3[01]))?|W(?:[0-4]\d|5[0-2])(?:-?[1-7])?|(?:00[1-9]|0[1-9]\d|[12]\d{2}|3(?:[0-5]\d|6[1-6])))(?![T]$|[T][\d]+Z$)(?:[T\s](?:(?:(?:[01]\d|2[0-3])(?:(:?)[0-5]\d)?|24\:?00)(?:[.,]\d+(?!:))?)(?:\2[0-5]\d(?:[.,]\d+)?)?(?:[Z]|(?:[+-])(?:[01]\d|2[0-3])(?::?[0-5]\d)?)?)?)?$/};t.version=a.version,t.defaults={abortEarly:!0,allowUnknown:!1,artifacts:!1,cache:!0,context:null,convert:!0,dateFormat:"iso",errors:{escapeHtml:!1,label:"path",language:null,render:!0,stack:!1,wrap:{label:'"',array:"[]"}},externals:!0,messages:{},nonEnumerables:!1,noDefaults:!1,presence:"optional",skipFunctions:!1,stripUnknown:!1,warnings:!1},t.symbols={any:Symbol.for("@hapi/joi/schema"),arraySingle:Symbol("arraySingle"),deepDefault:Symbol("deepDefault"),errors:Symbol("errors"),literal:Symbol("literal"),override:Symbol("override"),parent:Symbol("parent"),prefs:Symbol("prefs"),ref:Symbol("ref"),template:Symbol("template"),values:Symbol("values")},t.assertOptions=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"Options";s(e&&"object"==typeof e&&!Array.isArray(e),"Options must be of type object");const n=Object.keys(e).filter((e=>!t.includes(e)));s(0===n.length,`${r} contain unknown keys: ${n}`)},t.checkPreferences=function(e){o=o||r(3378);const t=o.preferences.validate(e);if(t.error)throw new n([t.error.details[0].message])},t.compare=function(e,t,r){switch(r){case"=":return e===t;case">":return e>t;case"<":return e<t;case">=":return e>=t;case"<=":return e<=t}},t.default=function(e,t){return void 0===e?t:e},t.isIsoDate=function(e){return l.isoDate.test(e)},t.isNumber=function(e){return"number"==typeof e&&!isNaN(e)},t.isResolvable=function(e){return!!e&&(e[t.symbols.ref]||e[t.symbols.template])},t.isSchema=function(e){let r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};const n=e&&e[t.symbols.any];return!!n&&(s(r.legacy||n.version===t.version,"Cannot mix different versions of joi schemas"),!0)},t.isValues=function(e){return e[t.symbols.values]},t.limit=function(e){return Number.isSafeInteger(e)&&e>=0},t.preferences=function(e,s){i=i||r(6914),e=e||{},s=s||{};const n=Object.assign({},e,s);return s.errors&&e.errors&&(n.errors=Object.assign({},e.errors,s.errors),n.errors.wrap=Object.assign({},e.errors.wrap,s.errors.wrap)),s.messages&&(n.messages=i.compile(s.messages,e.messages)),delete n[t.symbols.prefs],n},t.tryWithPath=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};try{return e()}catch(e){throw void 0!==e.path?e.path=t+"."+e.path:e.path=t,r.append&&(e.message=`${e.message} (${e.path})`),e}},t.validateArg=function(e,r,s){let{assert:n,message:a}=s;if(t.isSchema(n)){const t=n.validate(e);if(!t.error)return;return t.error.message}if(!n(e))return r?`${r} ${a}`:a},t.verifyFlat=function(e,t){for(const r of e)s(!Array.isArray(r),"Method no longer accepts array arguments:",t)}},3292:(e,t,r)=>{"use strict";const s=r(375),n=r(8160),a=r(6133),i={};t.schema=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};n.assertOptions(r,["appendPath","override"]);try{return i.schema(e,t,r)}catch(e){throw r.appendPath&&void 0!==e.path&&(e.message=`${e.message} (${e.path})`),e}},i.schema=function(e,t,r){s(void 0!==t,"Invalid undefined schema"),Array.isArray(t)&&(s(t.length,"Invalid empty array schema"),1===t.length&&(t=t[0]));const a=function(t){for(var s=arguments.length,n=new Array(s>1?s-1:0),a=1;a<s;a++)n[a-1]=arguments[a];return!1!==r.override?t.valid(e.override,...n):t.valid(...n)};if(i.simple(t))return a(e,t);if("function"==typeof t)return e.custom(t);if(s("object"==typeof t,"Invalid schema content:",typeof t),n.isResolvable(t))return a(e,t);if(n.isSchema(t))return t;if(Array.isArray(t)){for(const r of t)if(!i.simple(r))return e.alternatives().try(...t);return a(e,...t)}return t instanceof RegExp?e.string().regex(t):t instanceof Date?a(e.date(),t):(s(Object.getPrototypeOf(t)===Object.getPrototypeOf({}),"Schema can only contain plain objects"),e.object().keys(t))},t.ref=function(e,t){return a.isRef(e)?e:a.create(e,t)},t.compile=function(e,r){let a=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};n.assertOptions(a,["legacy"]);const o=r&&r[n.symbols.any];if(o)return s(a.legacy||o.version===n.version,"Cannot mix different versions of joi schemas:",o.version,n.version),r;if("object"!=typeof r||!a.legacy)return t.schema(e,r,{appendPath:!0});const l=i.walk(r);return l?l.compile(l.root,r):t.schema(e,r,{appendPath:!0})},i.walk=function(e){if("object"!=typeof e)return null;if(Array.isArray(e)){for(const t of e){const e=i.walk(t);if(e)return e}return null}const t=e[n.symbols.any];if(t)return{root:e[t.root],compile:t.compile};s(Object.getPrototypeOf(e)===Object.getPrototypeOf({}),"Schema can only contain plain objects");for(const t in e){const r=i.walk(e[t]);if(r)return r}return null},i.simple=function(e){return null===e||["boolean","string","number"].includes(typeof e)},t.when=function(e,r,o){if(void 0===o&&(s(r&&"object"==typeof r,"Missing options"),o=r,r=a.create(".")),Array.isArray(o)&&(o={switch:o}),n.assertOptions(o,["is","not","then","otherwise","switch","break"]),n.isSchema(r))return s(void 0===o.is,'"is" can not be used with a schema condition'),s(void 0===o.not,'"not" can not be used with a schema condition'),s(void 0===o.switch,'"switch" can not be used with a schema condition'),i.condition(e,{is:r,then:o.then,otherwise:o.otherwise,break:o.break});if(s(a.isRef(r)||"string"==typeof r,"Invalid condition:",r),s(void 0===o.not||void 0===o.is,'Cannot combine "is" with "not"'),void 0===o.switch){let l=o;void 0!==o.not&&(l={is:o.not,then:o.otherwise,otherwise:o.then,break:o.break});let c=void 0!==l.is?e.$_compile(l.is):e.$_root.invalid(null,!1,0,"").required();return s(void 0!==l.then||void 0!==l.otherwise,'options must have at least one of "then", "otherwise", or "switch"'),s(void 0===l.break||void 0===l.then||void 0===l.otherwise,"Cannot specify then, otherwise, and break all together"),void 0===o.is||a.isRef(o.is)||n.isSchema(o.is)||(c=c.required()),i.condition(e,{ref:t.ref(r),is:c,then:l.then,otherwise:l.otherwise,break:l.break})}s(Array.isArray(o.switch),'"switch" must be an array'),s(void 0===o.is,'Cannot combine "switch" with "is"'),s(void 0===o.not,'Cannot combine "switch" with "not"'),s(void 0===o.then,'Cannot combine "switch" with "then"');const l={ref:t.ref(r),switch:[],break:o.break};for(let t=0;t<o.switch.length;++t){const r=o.switch[t],i=t===o.switch.length-1;n.assertOptions(r,i?["is","then","otherwise"]:["is","then"]),s(void 0!==r.is,'Switch statement missing "is"'),s(void 0!==r.then,'Switch statement missing "then"');const c={is:e.$_compile(r.is),then:e.$_compile(r.then)};if(a.isRef(r.is)||n.isSchema(r.is)||(c.is=c.is.required()),i){s(void 0===o.otherwise||void 0===r.otherwise,'Cannot specify "otherwise" inside and outside a "switch"');const t=void 0!==o.otherwise?o.otherwise:r.otherwise;void 0!==t&&(s(void 0===l.break,"Cannot specify both otherwise and break"),c.otherwise=e.$_compile(t))}l.switch.push(c)}return l},i.condition=function(e,t){for(const r of["then","otherwise"])void 0===t[r]?delete t[r]:t[r]=e.$_compile(t[r]);return t}},6354:(e,t,r)=>{"use strict";const s=r(5688),n=r(8160),a=r(3328);t.Report=class{constructor(e,r,s,n,a,i,o){if(this.code=e,this.flags=n,this.messages=a,this.path=i.path,this.prefs=o,this.state=i,this.value=r,this.message=null,this.template=null,this.local=s||{},this.local.label=t.label(this.flags,this.state,this.prefs,this.messages),void 0===this.value||this.local.hasOwnProperty("value")||(this.local.value=this.value),this.path.length){const e=this.path[this.path.length-1];"object"!=typeof e&&(this.local.key=e)}}_setTemplate(e){if(this.template=e,!this.flags.label&&0===this.path.length){const e=this._template(this.template,"root");e&&(this.local.label=e)}}toString(){if(this.message)return this.message;const e=this.code;if(!this.prefs.errors.render)return this.code;const t=this._template(this.template)||this._template(this.prefs.messages)||this._template(this.messages);return void 0===t?`Error code "${e}" is not defined, your custom type is missing the correct messages definition`:(this.message=t.render(this.value,this.state,this.prefs,this.local,{errors:this.prefs.errors,messages:[this.prefs.messages,this.messages]}),this.prefs.errors.label||(this.message=this.message.replace(/^"" /,"").trim()),this.message)}_template(e,r){return t.template(this.value,e,r||this.code,this.state,this.prefs)}},t.path=function(e){let t="";for(const r of e)"object"!=typeof r&&("string"==typeof r?(t&&(t+="."),t+=r):t+=`[${r}]`);return t},t.template=function(e,t,r,s,i){if(!t)return;if(a.isTemplate(t))return"root"!==r?t:null;let o=i.errors.language;if(n.isResolvable(o)&&(o=o.resolve(e,s,i)),o&&t[o]){if(void 0!==t[o][r])return t[o][r];if(void 0!==t[o]["*"])return t[o]["*"]}return t[r]?t[r]:t["*"]},t.label=function(e,r,s,n){if(e.label)return e.label;if(!s.errors.label)return"";let a=r.path;"key"===s.errors.label&&r.path.length>1&&(a=r.path.slice(-1));return t.path(a)||t.template(null,s.messages,"root",r,s)||n&&t.template(null,n,"root",r,s)||"value"},t.process=function(e,r,s){if(!e)return null;const{override:n,message:a,details:i}=t.details(e);if(n)return n;if(s.errors.stack)return new t.ValidationError(a,i,r);const o=Error.stackTraceLimit;Error.stackTraceLimit=0;const l=new t.ValidationError(a,i,r);return Error.stackTraceLimit=o,l},t.details=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=[];const s=[];for(const n of e){if(n instanceof Error){if(!1!==t.override)return{override:n};const e=n.toString();r.push(e),s.push({message:e,type:"override",context:{error:n}});continue}const e=n.toString();r.push(e),s.push({message:e,path:n.path.filter((e=>"object"!=typeof e)),type:n.code,context:n.local})}return r.length>1&&(r=[...new Set(r)]),{message:r.join(". "),details:s}},t.ValidationError=class extends Error{constructor(e,t,r){super(e),this._original=r,this.details=t}static isError(e){return e instanceof t.ValidationError}},t.ValidationError.prototype.isJoi=!0,t.ValidationError.prototype.name="ValidationError",t.ValidationError.prototype.annotate=s.error},8901:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(8160),i=r(6914),o={};t.type=function(e,t){const r=Object.getPrototypeOf(e),l=n(r),c=e._assign(Object.create(l)),u=Object.assign({},t);delete u.base,l._definition=u;const f=r._definition||{};u.messages=i.merge(f.messages,u.messages),u.properties=Object.assign({},f.properties,u.properties),c.type=u.type,u.flags=Object.assign({},f.flags,u.flags);const h=Object.assign({},f.terms);if(u.terms)for(const e in u.terms){const t=u.terms[e];s(void 0===c.$_terms[e],"Invalid term override for",u.type,e),c.$_terms[e]=t.init,h[e]=t}u.terms=h,u.args||(u.args=f.args),u.prepare=o.prepare(u.prepare,f.prepare),u.coerce&&("function"==typeof u.coerce&&(u.coerce={method:u.coerce}),u.coerce.from&&!Array.isArray(u.coerce.from)&&(u.coerce={method:u.coerce.method,from:[].concat(u.coerce.from)})),u.coerce=o.coerce(u.coerce,f.coerce),u.validate=o.validate(u.validate,f.validate);const d=Object.assign({},f.rules);if(u.rules)for(const e in u.rules){const t=u.rules[e];s("object"==typeof t,"Invalid rule definition for",u.type,e);let r=t.method;if(void 0===r&&(r=function(){return this.$_addRule(e)}),r&&(s(!l[e],"Rule conflict in",u.type,e),l[e]=r),s(!d[e],"Rule conflict in",u.type,e),d[e]=t,t.alias){const e=[].concat(t.alias);for(const r of e)l[r]=t.method}t.args&&(t.argsByName=new Map,t.args=t.args.map((e=>("string"==typeof e&&(e={name:e}),s(!t.argsByName.has(e.name),"Duplicated argument name",e.name),a.isSchema(e.assert)&&(e.assert=e.assert.strict().label(e.name)),t.argsByName.set(e.name,e),e))))}u.rules=d;const m=Object.assign({},f.modifiers);if(u.modifiers)for(const e in u.modifiers){s(!l[e],"Rule conflict in",u.type,e);const t=u.modifiers[e];s("function"==typeof t,"Invalid modifier definition for",u.type,e);const r=function(t){return this.rule({[e]:t})};l[e]=r,m[e]=t}if(u.modifiers=m,u.overrides){l._super=r,c.$_super={};for(const e in u.overrides)s(r[e],"Cannot override missing",e),u.overrides[e][a.symbols.parent]=r[e],c.$_super[e]=r[e].bind(c);Object.assign(l,u.overrides)}u.cast=Object.assign({},f.cast,u.cast);const p=Object.assign({},f.manifest,u.manifest);return p.build=o.build(u.manifest&&u.manifest.build,f.manifest&&f.manifest.build),u.manifest=p,u.rebuild=o.rebuild(u.rebuild,f.rebuild),c},o.build=function(e,t){return e&&t?function(r,s){return t(e(r,s),s)}:e||t},o.coerce=function(e,t){return e&&t?{from:e.from&&t.from?[...new Set([...e.from,...t.from])]:null,method(r,s){let n;if((!t.from||t.from.includes(typeof r))&&(n=t.method(r,s),n)){if(n.errors||void 0===n.value)return n;r=n.value}if(!e.from||e.from.includes(typeof r)){const t=e.method(r,s);if(t)return t}return n}}:e||t},o.prepare=function(e,t){return e&&t?function(r,s){const n=e(r,s);if(n){if(n.errors||void 0===n.value)return n;r=n.value}return t(r,s)||n}:e||t},o.rebuild=function(e,t){return e&&t?function(r){t(r),e(r)}:e||t},o.validate=function(e,t){return e&&t?function(r,s){const n=t(r,s);if(n){if(n.errors&&(!Array.isArray(n.errors)||n.errors.length))return n;r=n.value}return e(r,s)||n}:e||t}},5107:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(8652),i=r(8160),o=r(3292),l=r(6354),c=r(8901),u=r(9708),f=r(6133),h=r(3328),d=r(1152);let m;const p={types:{alternatives:r(4946),any:r(8068),array:r(546),boolean:r(4937),date:r(7500),function:r(390),link:r(8785),number:r(3832),object:r(8966),string:r(7417),symbol:r(8826)},aliases:{alt:"alternatives",bool:"boolean",func:"function"},root:function(){const e={_types:new Set(Object.keys(p.types))};for(const t of e._types)e[t]=function(){for(var e=arguments.length,r=new Array(e),n=0;n<e;n++)r[n]=arguments[n];return s(!r.length||["alternatives","link","object"].includes(t),"The",t,"type does not allow arguments"),p.generate(this,p.types[t],r)};for(const t of["allow","custom","disallow","equal","exist","forbidden","invalid","not","only","optional","options","prefs","preferences","required","strip","valid","when"])e[t]=function(){return this.any()[t](...arguments)};Object.assign(e,p.methods);for(const t in p.aliases){const r=p.aliases[t];e[t]=e[r]}return e.x=e.expression,d.setup&&d.setup(e),e}};p.methods={ValidationError:l.ValidationError,version:i.version,cache:a.provider,assert(e,t){for(var r=arguments.length,s=new Array(r>2?r-2:0),n=2;n<r;n++)s[n-2]=arguments[n];p.assert(e,t,!0,s)},attempt(e,t){for(var r=arguments.length,s=new Array(r>2?r-2:0),n=2;n<r;n++)s[n-2]=arguments[n];return p.assert(e,t,!1,s)},build(e){return s("function"==typeof u.build,"Manifest functionality disabled"),u.build(this,e)},checkPreferences(e){i.checkPreferences(e)},compile(e,t){return o.compile(this,e,t)},defaults(e){s("function"==typeof e,"modifier must be a function");const t=Object.assign({},this);for(const r of t._types){const n=e(t[r]());s(i.isSchema(n),"modifier must return a valid schema object"),t[r]=function(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return p.generate(this,n,t)}}return t},expression(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return new h(...t)},extend(){for(var e=arguments.length,t=new Array(e),n=0;n<e;n++)t[n]=arguments[n];i.verifyFlat(t,"extend"),m=m||r(3378),s(t.length,"You need to provide at least one extension"),this.assert(t,m.extensions);const a=Object.assign({},this);a._types=new Set(a._types);for(let e of t){"function"==typeof e&&(e=e(a)),this.assert(e,m.extension);const t=p.expandExtension(e,a);for(const e of t){s(void 0===a[e.type]||a._types.has(e.type),"Cannot override name",e.type);const t=e.base||this.any(),r=c.type(t,e);a._types.add(e.type),a[e.type]=function(){for(var e=arguments.length,t=new Array(e),s=0;s<e;s++)t[s]=arguments[s];return p.generate(this,r,t)}}}return a},isError:l.ValidationError.isError,isExpression:h.isTemplate,isRef:f.isRef,isSchema:i.isSchema,in(){return f.in(...arguments)},override:i.symbols.override,ref(){return f.create(...arguments)},types(){const e={};for(const t of this._types)e[t]=this[t]();for(const t in p.aliases)e[t]=this[t]();return e}},p.assert=function(e,t,r,s){const a=s[0]instanceof Error||"string"==typeof s[0]?s[0]:null,o=null!==a?s[1]:s[0],c=t.validate(e,i.preferences({errors:{stack:!0}},o||{}));let u=c.error;if(!u)return c.value;if(a instanceof Error)throw a;const f=r&&"function"==typeof u.annotate?u.annotate():u.message;throw u instanceof l.ValidationError==0&&(u=n(u)),u.message=a?`${a} ${f}`:f,u},p.generate=function(e,t,r){return s(e,"Must be invoked on a Joi instance."),t.$_root=e,t._definition.args&&r.length?t._definition.args(t,...r):t},p.expandExtension=function(e,t){if("string"==typeof e.type)return[e];const r=[];for(const s of t._types)if(e.type.test(s)){const n=Object.assign({},e);n.type=s,n.base=t[s](),r.push(n)}return r},e.exports=p.root()},6914:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(3328);t.compile=function(e,t){if("string"==typeof e)return s(!t,"Cannot set single message string"),new a(e);if(a.isTemplate(e))return s(!t,"Cannot set single message template"),e;s("object"==typeof e&&!Array.isArray(e),"Invalid message options"),t=t?n(t):{};for(let r in e){const n=e[r];if("root"===r||a.isTemplate(n)){t[r]=n;continue}if("string"==typeof n){t[r]=new a(n);continue}s("object"==typeof n&&!Array.isArray(n),"Invalid message for",r);const i=r;for(r in t[i]=t[i]||{},n){const e=n[r];"root"===r||a.isTemplate(e)?t[i][r]=e:(s("string"==typeof e,"Invalid message for",r,"in",i),t[i][r]=new a(e))}}return t},t.decompile=function(e){const t={};for(let r in e){const s=e[r];if("root"===r){t.root=s;continue}if(a.isTemplate(s)){t[r]=s.describe({compact:!0});continue}const n=r;for(r in t[n]={},s){const e=s[r];"root"!==r?t[n][r]=e.describe({compact:!0}):t[n].root=e}}return t},t.merge=function(e,r){if(!e)return t.compile(r);if(!r)return e;if("string"==typeof r)return new a(r);if(a.isTemplate(r))return r;const i=n(e);for(let e in r){const t=r[e];if("root"===e||a.isTemplate(t)){i[e]=t;continue}if("string"==typeof t){i[e]=new a(t);continue}s("object"==typeof t&&!Array.isArray(t),"Invalid message for",e);const n=e;for(e in i[n]=i[n]||{},t){const r=t[e];"root"===e||a.isTemplate(r)?i[n][e]=r:(s("string"==typeof r,"Invalid message for",e,"in",n),i[n][e]=new a(r))}}return i}},2294:(e,t,r)=>{"use strict";const s=r(375),n=r(8160),a=r(6133),i={};t.Ids=i.Ids=class{constructor(){this._byId=new Map,this._byKey=new Map,this._schemaChain=!1}clone(){const e=new i.Ids;return e._byId=new Map(this._byId),e._byKey=new Map(this._byKey),e._schemaChain=this._schemaChain,e}concat(e){e._schemaChain&&(this._schemaChain=!0);for(const[t,r]of e._byId.entries())s(!this._byKey.has(t),"Schema id conflicts with existing key:",t),this._byId.set(t,r);for(const[t,r]of e._byKey.entries())s(!this._byId.has(t),"Schema key conflicts with existing id:",t),this._byKey.set(t,r)}fork(e,t,r){const a=this._collect(e);a.push({schema:r});const o=a.shift();let l={id:o.id,schema:t(o.schema)};s(n.isSchema(l.schema),"adjuster function failed to return a joi schema type");for(const e of a)l={id:e.id,schema:i.fork(e.schema,l.id,l.schema)};return l.schema}labels(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[];const r=e[0],s=this._get(r);if(!s)return[...t,...e].join(".");const n=e.slice(1);return t=[...t,s.schema._flags.label||r],n.length?s.schema._ids.labels(n,t):t.join(".")}reach(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[];const r=e[0],n=this._get(r);s(n,"Schema does not contain path",[...t,...e].join("."));const a=e.slice(1);return a.length?n.schema._ids.reach(a,[...t,r]):n.schema}register(e){let{key:t}=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!e||!n.isSchema(e))return;(e.$_property("schemaChain")||e._ids._schemaChain)&&(this._schemaChain=!0);const r=e._flags.id;if(r){const t=this._byId.get(r);s(!t||t.schema===e,"Cannot add different schemas with the same id:",r),s(!this._byKey.has(r),"Schema id conflicts with existing key:",r),this._byId.set(r,{schema:e,id:r})}t&&(s(!this._byKey.has(t),"Schema already contains key:",t),s(!this._byId.has(t),"Schema key conflicts with existing id:",t),this._byKey.set(t,{schema:e,id:t}))}reset(){this._byId=new Map,this._byKey=new Map,this._schemaChain=!1}_collect(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[];const n=e[0],a=this._get(n);s(a,"Schema does not contain path",[...t,...e].join(".")),r=[a,...r];const i=e.slice(1);return i.length?a.schema._ids._collect(i,[...t,n],r):r}_get(e){return this._byId.get(e)||this._byKey.get(e)}},i.fork=function(e,r,s){const n=t.schema(e,{each:(e,t)=>{let{key:n}=t;if(r===(e._flags.id||n))return s},ref:!1});return n?n.$_mutateRebuild():e},t.schema=function(e,t){let r;for(const s in e._flags){if("_"===s[0])continue;const n=i.scan(e._flags[s],{source:"flags",name:s},t);void 0!==n&&(r=r||e.clone(),r._flags[s]=n)}for(let s=0;s<e._rules.length;++s){const n=e._rules[s],a=i.scan(n.args,{source:"rules",name:n.name},t);if(void 0!==a){r=r||e.clone();const t=Object.assign({},n);t.args=a,r._rules[s]=t,r._singleRules.get(n.name)===n&&r._singleRules.set(n.name,t)}}for(const s in e.$_terms){if("_"===s[0])continue;const n=i.scan(e.$_terms[s],{source:"terms",name:s},t);void 0!==n&&(r=r||e.clone(),r.$_terms[s]=n)}return r},i.scan=function(e,t,r,s,o){const l=s||[];if(null===e||"object"!=typeof e)return;let c;if(Array.isArray(e)){for(let s=0;s<e.length;++s){const n="terms"===t.source&&"keys"===t.name&&e[s].key,a=i.scan(e[s],t,r,[s,...l],n);void 0!==a&&(c=c||e.slice(),c[s]=a)}return c}if(!1!==r.schema&&n.isSchema(e)||!1!==r.ref&&a.isRef(e)){const s=r.each(e,{...t,path:l,key:o});if(s===e)return;return s}for(const s in e){if("_"===s[0])continue;const n=i.scan(e[s],t,r,[s,...l],o);void 0!==n&&(c=c||Object.assign({},e),c[s]=n)}return c}},6133:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(9621),i=r(8160);let o;const l={symbol:Symbol("ref"),defaults:{adjust:null,in:!1,iterables:null,map:null,separator:".",type:"value"}};t.create=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};s("string"==typeof e,"Invalid reference key:",e),i.assertOptions(t,["adjust","ancestor","in","iterables","map","prefix","render","separator"]),s(!t.prefix||"object"==typeof t.prefix,"options.prefix must be of type object");const r=Object.assign({},l.defaults,t);delete r.prefix;const n=r.separator,a=l.context(e,n,t.prefix);if(r.type=a.type,e=a.key,"value"===r.type)if(a.root&&(s(!n||e[0]!==n,"Cannot specify relative path with root prefix"),r.ancestor="root",e||(e=null)),n&&n===e)e=null,r.ancestor=0;else if(void 0!==r.ancestor)s(!n||!e||e[0]!==n,"Cannot combine prefix with ancestor option");else{const[t,s]=l.ancestor(e,n);s&&""===(e=e.slice(s))&&(e=null),r.ancestor=t}return r.path=n?null===e?[]:e.split(n):[e],new l.Ref(r)},t.in=function(e){let r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};return t.create(e,{...r,in:!0})},t.isRef=function(e){return!!e&&!!e[i.symbols.ref]},l.Ref=class{constructor(e){s("object"==typeof e,"Invalid reference construction"),i.assertOptions(e,["adjust","ancestor","in","iterables","map","path","render","separator","type","depth","key","root","display"]),s([!1,void 0].includes(e.separator)||"string"==typeof e.separator&&1===e.separator.length,"Invalid separator"),s(!e.adjust||"function"==typeof e.adjust,"options.adjust must be a function"),s(!e.map||Array.isArray(e.map),"options.map must be an array"),s(!e.map||!e.adjust,"Cannot set both map and adjust options"),Object.assign(this,l.defaults,e),s("value"===this.type||void 0===this.ancestor,"Non-value references cannot reference ancestors"),Array.isArray(this.map)&&(this.map=new Map(this.map)),this.depth=this.path.length,this.key=this.path.length?this.path.join(this.separator):null,this.root=this.path[0],this.updateDisplay()}resolve(e,t,r,n){let a=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{};return s(!this.in||a.in,"Invalid in() reference usage"),"global"===this.type?this._resolve(r.context,t,a):"local"===this.type?this._resolve(n,t,a):this.ancestor?"root"===this.ancestor?this._resolve(t.ancestors[t.ancestors.length-1],t,a):(s(this.ancestor<=t.ancestors.length,"Invalid reference exceeds the schema root:",this.display),this._resolve(t.ancestors[this.ancestor-1],t,a)):this._resolve(e,t,a)}_resolve(e,t,r){let s;if("value"===this.type&&t.mainstay.shadow&&!1!==r.shadow&&(s=t.mainstay.shadow.get(this.absolute(t))),void 0===s&&(s=a(e,this.path,{iterables:this.iterables,functions:!0})),this.adjust&&(s=this.adjust(s)),this.map){const e=this.map.get(s);void 0!==e&&(s=e)}return t.mainstay&&t.mainstay.tracer.resolve(t,this,s),s}toString(){return this.display}absolute(e){return[...e.path.slice(0,-this.ancestor),...this.path]}clone(){return new l.Ref(this)}describe(){const e={path:this.path};"value"!==this.type&&(e.type=this.type),"."!==this.separator&&(e.separator=this.separator),"value"===this.type&&1!==this.ancestor&&(e.ancestor=this.ancestor),this.map&&(e.map=[...this.map]);for(const t of["adjust","iterables","render"])null!==this[t]&&void 0!==this[t]&&(e[t]=this[t]);return!1!==this.in&&(e.in=!0),{ref:e}}updateDisplay(){const e=null!==this.key?this.key:"";if("value"!==this.type)return void(this.display=`ref:${this.type}:${e}`);if(!this.separator)return void(this.display=`ref:${e}`);if(!this.ancestor)return void(this.display=`ref:${this.separator}${e}`);if("root"===this.ancestor)return void(this.display=`ref:root:${e}`);if(1===this.ancestor)return void(this.display=`ref:${e||".."}`);const t=new Array(this.ancestor+1).fill(this.separator).join("");this.display=`ref:${t}${e||""}`}},l.Ref.prototype[i.symbols.ref]=!0,t.build=function(e){return"value"===(e=Object.assign({},l.defaults,e)).type&&void 0===e.ancestor&&(e.ancestor=1),new l.Ref(e)},l.context=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if(e=e.trim(),r){const s=void 0===r.global?"$":r.global;if(s!==t&&e.startsWith(s))return{key:e.slice(s.length),type:"global"};const n=void 0===r.local?"#":r.local;if(n!==t&&e.startsWith(n))return{key:e.slice(n.length),type:"local"};const a=void 0===r.root?"/":r.root;if(a!==t&&e.startsWith(a))return{key:e.slice(a.length),type:"value",root:!0}}return{key:e,type:"value"}},l.ancestor=function(e,t){if(!t)return[1,0];if(e[0]!==t)return[1,0];if(e[1]!==t)return[0,1];let r=2;for(;e[r]===t;)++r;return[r-1,r]},t.toSibling=0,t.toParent=1,t.Manager=class{constructor(){this.refs=[]}register(e,s){if(e)if(s=void 0===s?t.toParent:s,Array.isArray(e))for(const t of e)this.register(t,s);else if(i.isSchema(e))for(const t of e._refs.refs)t.ancestor-s>=0&&this.refs.push({ancestor:t.ancestor-s,root:t.root});else t.isRef(e)&&"value"===e.type&&e.ancestor-s>=0&&this.refs.push({ancestor:e.ancestor-s,root:e.root}),o=o||r(3328),o.isTemplate(e)&&this.register(e.refs(),s)}get length(){return this.refs.length}clone(){const e=new t.Manager;return e.refs=n(this.refs),e}reset(){this.refs=[]}roots(){return this.refs.filter((e=>!e.ancestor)).map((e=>e.root))}}},3378:(e,t,r)=>{"use strict";const s=r(5107),n={};n.wrap=s.string().min(1).max(2).allow(!1),t.preferences=s.object({allowUnknown:s.boolean(),abortEarly:s.boolean(),artifacts:s.boolean(),cache:s.boolean(),context:s.object(),convert:s.boolean(),dateFormat:s.valid("date","iso","string","time","utc"),debug:s.boolean(),errors:{escapeHtml:s.boolean(),label:s.valid("path","key",!1),language:[s.string(),s.object().ref()],render:s.boolean(),stack:s.boolean(),wrap:{label:n.wrap,array:n.wrap,string:n.wrap}},externals:s.boolean(),messages:s.object(),noDefaults:s.boolean(),nonEnumerables:s.boolean(),presence:s.valid("required","optional","forbidden"),skipFunctions:s.boolean(),stripUnknown:s.object({arrays:s.boolean(),objects:s.boolean()}).or("arrays","objects").allow(!0,!1),warnings:s.boolean()}).strict(),n.nameRx=/^[a-zA-Z0-9]\w*$/,n.rule=s.object({alias:s.array().items(s.string().pattern(n.nameRx)).single(),args:s.array().items(s.string(),s.object({name:s.string().pattern(n.nameRx).required(),ref:s.boolean(),assert:s.alternatives([s.function(),s.object().schema()]).conditional("ref",{is:!0,then:s.required()}),normalize:s.function(),message:s.string().when("assert",{is:s.function(),then:s.required()})})),convert:s.boolean(),manifest:s.boolean(),method:s.function().allow(!1),multi:s.boolean(),validate:s.function()}),t.extension=s.object({type:s.alternatives([s.string(),s.object().regex()]).required(),args:s.function(),cast:s.object().pattern(n.nameRx,s.object({from:s.function().maxArity(1).required(),to:s.function().minArity(1).maxArity(2).required()})),base:s.object().schema().when("type",{is:s.object().regex(),then:s.forbidden()}),coerce:[s.function().maxArity(3),s.object({method:s.function().maxArity(3).required(),from:s.array().items(s.string()).single()})],flags:s.object().pattern(n.nameRx,s.object({setter:s.string(),default:s.any()})),manifest:{build:s.function().arity(2)},messages:[s.object(),s.string()],modifiers:s.object().pattern(n.nameRx,s.function().minArity(1).maxArity(2)),overrides:s.object().pattern(n.nameRx,s.function()),prepare:s.function().maxArity(3),rebuild:s.function().arity(1),rules:s.object().pattern(n.nameRx,n.rule),terms:s.object().pattern(n.nameRx,s.object({init:s.array().allow(null).required(),manifest:s.object().pattern(/.+/,[s.valid("schema","single"),s.object({mapped:s.object({from:s.string().required(),to:s.string().required()}).required()})])})),validate:s.function().maxArity(3)}).strict(),t.extensions=s.array().items(s.object(),s.function().arity(1)).strict(),n.desc={buffer:s.object({buffer:s.string()}),func:s.object({function:s.function().required(),options:{literal:!0}}),override:s.object({override:!0}),ref:s.object({ref:s.object({type:s.valid("value","global","local"),path:s.array().required(),separator:s.string().length(1).allow(!1),ancestor:s.number().min(0).integer().allow("root"),map:s.array().items(s.array().length(2)).min(1),adjust:s.function(),iterables:s.boolean(),in:s.boolean(),render:s.boolean()}).required()}),regex:s.object({regex:s.string().min(3)}),special:s.object({special:s.valid("deep").required()}),template:s.object({template:s.string().required(),options:s.object()}),value:s.object({value:s.alternatives([s.object(),s.array()]).required()})},n.desc.entity=s.alternatives([s.array().items(s.link("...")),s.boolean(),s.function(),s.number(),s.string(),n.desc.buffer,n.desc.func,n.desc.ref,n.desc.regex,n.desc.special,n.desc.template,n.desc.value,s.link("/")]),n.desc.values=s.array().items(null,s.boolean(),s.function(),s.number().allow(1/0,-1/0),s.string().allow(""),s.symbol(),n.desc.buffer,n.desc.func,n.desc.override,n.desc.ref,n.desc.regex,n.desc.template,n.desc.value),n.desc.messages=s.object().pattern(/.+/,[s.string(),n.desc.template,s.object().pattern(/.+/,[s.string(),n.desc.template])]),t.description=s.object({type:s.string().required(),flags:s.object({cast:s.string(),default:s.any(),description:s.string(),empty:s.link("/"),failover:n.desc.entity,id:s.string(),label:s.string(),only:!0,presence:["optional","required","forbidden"],result:["raw","strip"],strip:s.boolean(),unit:s.string()}).unknown(),preferences:{allowUnknown:s.boolean(),abortEarly:s.boolean(),artifacts:s.boolean(),cache:s.boolean(),convert:s.boolean(),dateFormat:["date","iso","string","time","utc"],errors:{escapeHtml:s.boolean(),label:["path","key"],language:[s.string(),n.desc.ref],wrap:{label:n.wrap,array:n.wrap}},externals:s.boolean(),messages:n.desc.messages,noDefaults:s.boolean(),nonEnumerables:s.boolean(),presence:["required","optional","forbidden"],skipFunctions:s.boolean(),stripUnknown:s.object({arrays:s.boolean(),objects:s.boolean()}).or("arrays","objects").allow(!0,!1),warnings:s.boolean()},allow:n.desc.values,invalid:n.desc.values,rules:s.array().min(1).items({name:s.string().required(),args:s.object().min(1),keep:s.boolean(),message:[s.string(),n.desc.messages],warn:s.boolean()}),keys:s.object().pattern(/.*/,s.link("/")),link:n.desc.ref}).pattern(/^[a-z]\w*$/,s.any())},493:(e,t,r)=>{"use strict";const s=r(8571),n=r(9621),a=r(8160),i={value:Symbol("value")};e.exports=i.State=class{constructor(e,t,r){this.path=e,this.ancestors=t,this.mainstay=r.mainstay,this.schemas=r.schemas,this.debug=null}localize(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null,r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:null;const s=new i.State(e,t,this);return r&&s.schemas&&(s.schemas=[i.schemas(r),...s.schemas]),s}nest(e,t){const r=new i.State(this.path,this.ancestors,this);return r.schemas=r.schemas&&[i.schemas(e),...r.schemas],r.debug=t,r}shadow(e,t){this.mainstay.shadow=this.mainstay.shadow||new i.Shadow,this.mainstay.shadow.set(this.path,e,t)}snapshot(){this.mainstay.shadow&&(this._snapshot=s(this.mainstay.shadow.node(this.path)))}restore(){this.mainstay.shadow&&(this.mainstay.shadow.override(this.path,this._snapshot),this._snapshot=void 0)}},i.schemas=function(e){return a.isSchema(e)?{schema:e}:e},i.Shadow=class{constructor(){this._values=null}set(e,t,r){if(!e.length)return;if("strip"===r&&"number"==typeof e[e.length-1])return;this._values=this._values||new Map;let s=this._values;for(let t=0;t<e.length;++t){const r=e[t];let n=s.get(r);n||(n=new Map,s.set(r,n)),s=n}s[i.value]=t}get(e){const t=this.node(e);if(t)return t[i.value]}node(e){if(this._values)return n(this._values,e,{iterables:!0})}override(e,t){if(!this._values)return;const r=e.slice(0,-1),s=e[e.length-1],a=n(this._values,r,{iterables:!0});t?a.set(s,t):a&&a.delete(s)}}},3328:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(5277),i=r(1447),o=r(8160),l=r(6354),c=r(6133),u={symbol:Symbol("template"),opens:new Array(1e3).join("\0"),closes:new Array(1e3).join(""),dateFormat:{date:Date.prototype.toDateString,iso:Date.prototype.toISOString,string:Date.prototype.toString,time:Date.prototype.toTimeString,utc:Date.prototype.toUTCString}};e.exports=u.Template=class{constructor(e,t){s("string"==typeof e,"Template source must be a string"),s(!e.includes("\0")&&!e.includes(""),"Template source cannot contain reserved control characters"),this.source=e,this.rendered=e,this._template=null,this._settings=n(t),this._parse()}_parse(){if(!this.source.includes("{"))return;const e=u.encode(this.source),t=u.split(e);let r=!1;const s=[],n=t.shift();n&&s.push(n);for(const e of t){const t="{"!==e[0],n=t?"}":"}}",a=e.indexOf(n);if(-1===a||"{"===e[1]){s.push(`{${u.decode(e)}`);continue}let i=e.slice(t?0:1,a);const o=":"===i[0];o&&(i=i.slice(1));const l=this._ref(u.decode(i),{raw:t,wrapped:o});s.push(l),"string"!=typeof l&&(r=!0);const c=e.slice(a+n.length);c&&s.push(u.decode(c))}r?this._template=s:this.rendered=s.join("")}static date(e,t){return u.dateFormat[t.dateFormat].call(e)}describe(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};if(!this._settings&&e.compact)return this.source;const t={template:this.source};return this._settings&&(t.options=this._settings),t}static build(e){return new u.Template(e.template,e.options)}isDynamic(){return!!this._template}static isTemplate(e){return!!e&&!!e[o.symbols.template]}refs(){if(!this._template)return;const e=[];for(const t of this._template)"string"!=typeof t&&e.push(...t.refs);return e}resolve(e,t,r,s){return this._template&&1===this._template.length?this._part(this._template[0],e,t,r,s,{}):this.render(e,t,r,s)}_part(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),s=1;s<t;s++)r[s-1]=arguments[s];return e.ref?e.ref.resolve(...r):e.formula.evaluate(r)}render(e,t,r,s){let n=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{};if(!this.isDynamic())return this.rendered;const i=[];for(const o of this._template)if("string"==typeof o)i.push(o);else{const l=this._part(o,e,t,r,s,n),c=u.stringify(l,e,t,r,s,n);if(void 0!==c){const e=o.raw||!1===(n.errors&&n.errors.escapeHtml)?c:a(c);i.push(u.wrap(e,o.wrapped&&r.errors.wrap.label))}}return i.join("")}_ref(e,t){let{raw:r,wrapped:s}=t;const n=[],a=e=>{const t=c.create(e,this._settings);return n.push(t),e=>t.resolve(...e)};try{var o=new i.Parser(e,{reference:a,functions:u.functions,constants:u.constants})}catch(t){throw t.message=`Invalid template variable "${e}" fails due to: ${t.message}`,t}if(o.single){if("reference"===o.single.type){const e=n[0];return{ref:e,raw:r,refs:n,wrapped:s||"local"===e.type&&"label"===e.key}}return u.stringify(o.single.value)}return{formula:o,raw:r,refs:n}}toString(){return this.source}},u.Template.prototype[o.symbols.template]=!0,u.Template.prototype.isImmutable=!0,u.encode=function(e){return e.replace(/\\(\{+)/g,((e,t)=>u.opens.slice(0,t.length))).replace(/\\(\}+)/g,((e,t)=>u.closes.slice(0,t.length)))},u.decode=function(e){return e.replace(/\u0000/g,"{").replace(/\u0001/g,"}")},u.split=function(e){const t=[];let r="";for(let s=0;s<e.length;++s){const n=e[s];if("{"===n){let n="";for(;s+1<e.length&&"{"===e[s+1];)n+="{",++s;t.push(r),r=n}else r+=n}return t.push(r),t},u.wrap=function(e,t){return t?1===t.length?`${t}${e}${t}`:`${t[0]}${e}${t[1]}`:e},u.stringify=function(e,t,r,s,n){let a=arguments.length>5&&void 0!==arguments[5]?arguments[5]:{};const i=typeof e,o=s&&s.errors&&s.errors.wrap||{};let l=!1;if(c.isRef(e)&&e.render&&(l=e.in,e=e.resolve(t,r,s,n,{in:e.in,...a})),null===e)return"null";if("string"===i)return u.wrap(e,a.arrayItems&&o.string);if("number"===i||"function"===i||"symbol"===i)return e.toString();if("object"!==i)return JSON.stringify(e);if(e instanceof Date)return u.Template.date(e,s);if(e instanceof Map){const t=[];for(const[r,s]of e.entries())t.push(`${r.toString()} -> ${s.toString()}`);e=t}if(!Array.isArray(e))return e.toString();const f=[];for(const i of e)f.push(u.stringify(i,t,r,s,n,{arrayItems:!0,...a}));return u.wrap(f.join(", "),!l&&o.array)},u.constants={true:!0,false:!1,null:null,second:1e3,minute:6e4,hour:36e5,day:864e5},u.functions={if:(e,t,r)=>e?t:r,length:e=>"string"==typeof e?e.length:e&&"object"==typeof e?Array.isArray(e)?e.length:Object.keys(e).length:null,msg(e){const[t,r,s,n,a]=this,i=a.messages;if(!i)return"";const o=l.template(t,i[0],e,r,s)||l.template(t,i[1],e,r,s);return o?o.render(t,r,s,n,a):""},number:e=>"number"==typeof e?e:"string"==typeof e?parseFloat(e):"boolean"==typeof e?e?1:0:e instanceof Date?e.getTime():null}},4946:(e,t,r)=>{"use strict";const s=r(375),n=r(1687),a=r(8068),i=r(8160),o=r(3292),l=r(6354),c=r(6133),u={};e.exports=a.extend({type:"alternatives",flags:{match:{default:"any"}},terms:{matches:{init:[],register:c.toSibling}},args(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),s=1;s<t;s++)r[s-1]=arguments[s];return 1===r.length&&Array.isArray(r[0])?e.try(...r[0]):e.try(...r)},validate(e,t){const{schema:r,error:s,state:a,prefs:i}=t;if(r._flags.match){const t=[],o=[];for(let s=0;s<r.$_terms.matches.length;++s){const n=r.$_terms.matches[s],l=a.nest(n.schema,`match.${s}`);l.snapshot();const c=n.schema.$_validate(e,l,i);c.errors?(o.push(c.errors),l.restore()):t.push(c.value)}if(0===t.length)return{errors:s("alternatives.any",{details:o.map((e=>l.details(e,{override:!1})))})};if("one"===r._flags.match)return 1===t.length?{value:t[0]}:{errors:s("alternatives.one")};if(t.length!==r.$_terms.matches.length)return{errors:s("alternatives.all",{details:o.map((e=>l.details(e,{override:!1})))})};const c=e=>e.$_terms.matches.some((e=>"object"===e.schema.type||"alternatives"===e.schema.type&&c(e.schema)));return c(r)?{value:t.reduce(((e,t)=>n(e,t,{mergeArrays:!1})))}:{value:t[t.length-1]}}const o=[];for(let t=0;t<r.$_terms.matches.length;++t){const s=r.$_terms.matches[t];if(s.schema){const r=a.nest(s.schema,`match.${t}`);r.snapshot();const n=s.schema.$_validate(e,r,i);if(!n.errors)return n;r.restore(),o.push({schema:s.schema,reports:n.errors});continue}const n=s.ref?s.ref.resolve(e,a,i):e,l=s.is?[s]:s.switch;for(let r=0;r<l.length;++r){const o=l[r],{is:c,then:u,otherwise:f}=o,h=`match.${t}${s.switch?"."+r:""}`;if(c.$_match(n,a.nest(c,`${h}.is`),i)){if(u)return u.$_validate(e,a.nest(u,`${h}.then`),i)}else if(f)return f.$_validate(e,a.nest(f,`${h}.otherwise`),i)}}return u.errors(o,t)},rules:{conditional:{method(e,t){s(!this._flags._endedSwitch,"Unreachable condition"),s(!this._flags.match,"Cannot combine match mode",this._flags.match,"with conditional rule"),s(void 0===t.break,"Cannot use break option with alternatives conditional");const r=this.clone(),n=o.when(r,e,t),a=n.is?[n]:n.switch;for(const e of a)if(e.then&&e.otherwise){r.$_setFlag("_endedSwitch",!0,{clone:!1});break}return r.$_terms.matches.push(n),r.$_mutateRebuild()}},match:{method(e){if(s(["any","one","all"].includes(e),"Invalid alternatives match mode",e),"any"!==e)for(const t of this.$_terms.matches)s(t.schema,"Cannot combine match mode",e,"with conditional rules");return this.$_setFlag("match",e)}},try:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];s(t.length,"Missing alternative schemas"),i.verifyFlat(t,"try"),s(!this._flags._endedSwitch,"Unreachable condition");const n=this.clone();for(const e of t)n.$_terms.matches.push({schema:n.$_compile(e)});return n.$_mutateRebuild()}}},overrides:{label(e){return this.$_parent("label",e).$_modify({each:(t,r)=>"is"!==r.path[0]?t.label(e):void 0,ref:!1})}},rebuild(e){e.$_modify({each:t=>{i.isSchema(t)&&"array"===t.type&&e.$_setFlag("_arrayItems",!0,{clone:!1})}})},manifest:{build(e,t){if(t.matches)for(const r of t.matches){const{schema:t,ref:s,is:n,not:a,then:i,otherwise:o}=r;e=t?e.try(t):s?e.conditional(s,{is:n,then:i,not:a,otherwise:o,switch:r.switch}):e.conditional(n,{then:i,otherwise:o})}return e}},messages:{"alternatives.all":"{{#label}} does not match all of the required types","alternatives.any":"{{#label}} does not match any of the allowed types","alternatives.match":"{{#label}} does not match any of the allowed types","alternatives.one":"{{#label}} matches more than one allowed type","alternatives.types":"{{#label}} must be one of {{#types}}"}}),u.errors=function(e,t){let{error:r,state:s}=t;if(!e.length)return{errors:r("alternatives.any")};if(1===e.length)return{errors:e[0].reports};const n=new Set,a=[];for(const{reports:t,schema:i}of e){if(t.length>1)return u.unmatched(e,r);const o=t[0];if(o instanceof l.Report==0)return u.unmatched(e,r);if(o.state.path.length!==s.path.length){a.push({type:i.type,report:o});continue}if("any.only"===o.code){for(const e of o.local.valids)n.add(e);continue}const[c,f]=o.code.split(".");"base"===f?n.add(c):a.push({type:i.type,report:o})}return a.length?1===a.length?{errors:a[0].report}:u.unmatched(e,r):{errors:r("alternatives.types",{types:[...n]})}},u.unmatched=function(e,t){const r=[];for(const t of e)r.push(...t.reports);return{errors:t("alternatives.match",l.details(r,{override:!1}))}}},8068:(e,t,r)=>{"use strict";const s=r(375),n=r(7629),a=r(8160),i=r(6914);e.exports=n.extend({type:"any",flags:{only:{default:!1}},terms:{alterations:{init:null},examples:{init:null},externals:{init:null},metas:{init:[]},notes:{init:[]},shared:{init:null},tags:{init:[]},whens:{init:null}},rules:{custom:{method(e,t){return s("function"==typeof e,"Method must be a function"),s(void 0===t||t&&"string"==typeof t,"Description must be a non-empty string"),this.$_addRule({name:"custom",args:{method:e,description:t}})},validate(e,t,r){let{method:s}=r;try{return s(e,t)}catch(e){return t.error("any.custom",{error:e})}},args:["method","description"],multi:!0},messages:{method(e){return this.prefs({messages:e})}},shared:{method(e){s(a.isSchema(e)&&e._flags.id,"Schema must be a schema with an id");const t=this.clone();return t.$_terms.shared=t.$_terms.shared||[],t.$_terms.shared.push(e),t.$_mutateRegister(e),t}},warning:{method(e,t){return s(e&&"string"==typeof e,"Invalid warning code"),this.$_addRule({name:"warning",args:{code:e,local:t},warn:!0})},validate(e,t,r){let{code:s,local:n}=r;return t.error(s,n)},args:["code","local"],multi:!0}},modifiers:{keep(e){let t=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];e.keep=t},message(e,t){e.message=i.compile(t)},warn(e){let t=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];e.warn=t}},manifest:{build(e,t){for(const r in t){const s=t[r];if(["examples","externals","metas","notes","tags"].includes(r))for(const t of s)e=e[r.slice(0,-1)](t);else if("alterations"!==r)if("whens"!==r){if("shared"===r)for(const t of s)e=e.shared(t)}else for(const t of s){const{ref:r,is:s,not:n,then:a,otherwise:i,concat:o}=t;e=o?e.concat(o):r?e.when(r,{is:s,not:n,then:a,otherwise:i,switch:t.switch,break:t.break}):e.when(s,{then:a,otherwise:i,break:t.break})}else{const t={};for(const{target:e,adjuster:r}of s)t[e]=r;e=e.alter(t)}}return e}},messages:{"any.custom":"{{#label}} failed custom validation because {{#error.message}}","any.default":"{{#label}} threw an error when running default method","any.failover":"{{#label}} threw an error when running failover method","any.invalid":"{{#label}} contains an invalid value","any.only":'{{#label}} must be {if(#valids.length == 1, "", "one of ")}{{#valids}}',"any.ref":"{{#label}} {{#arg}} references {{:#ref}} which {{#reason}}","any.required":"{{#label}} is required","any.unknown":"{{#label}} is not allowed"}})},546:(e,t,r)=>{"use strict";const s=r(375),n=r(9474),a=r(9621),i=r(8068),o=r(8160),l=r(3292),c={};e.exports=i.extend({type:"array",flags:{single:{default:!1},sparse:{default:!1}},terms:{items:{init:[],manifest:"schema"},ordered:{init:[],manifest:"schema"},_exclusions:{init:[]},_inclusions:{init:[]},_requireds:{init:[]}},coerce:{from:"object",method(e,t){let{schema:r,state:s,prefs:n}=t;if(!Array.isArray(e))return;const a=r.$_getRule("sort");return a?c.sort(r,e,a.args.options,s,n):void 0}},validate(e,t){let{schema:r,error:s}=t;if(!Array.isArray(e)){if(r._flags.single){const t=[e];return t[o.symbols.arraySingle]=!0,{value:t}}return{errors:s("array.base")}}if(r.$_getRule("items")||r.$_terms.externals)return{value:e.slice()}},rules:{has:{method(e){e=this.$_compile(e,{appendPath:!0});const t=this.$_addRule({name:"has",args:{schema:e}});return t.$_mutateRegister(e),t},validate(e,t,r){let{state:s,prefs:n,error:a}=t,{schema:i}=r;const o=[e,...s.ancestors];for(let t=0;t<e.length;++t){const r=s.localize([...s.path,t],o,i);if(i.$_match(e[t],r,n))return e}const l=i._flags.label;return l?a("array.hasKnown",{patternLabel:l}):a("array.hasUnknown",null)},multi:!0},items:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];o.verifyFlat(t,"items");const s=this.$_addRule("items");for(let e=0;e<t.length;++e){const r=o.tryWithPath((()=>this.$_compile(t[e])),e,{append:!0});s.$_terms.items.push(r)}return s.$_mutateRebuild()},validate(e,t){let{schema:r,error:s,state:n,prefs:a,errorsArray:i}=t;const l=r.$_terms._requireds.slice(),u=r.$_terms.ordered.slice(),f=[...r.$_terms._inclusions,...l],h=!e[o.symbols.arraySingle];delete e[o.symbols.arraySingle];const d=i();let m=e.length;for(let t=0;t<m;++t){const i=e[t];let o=!1,p=!1;const g=h?t:new Number(t),y=[...n.path,g];if(!r._flags.sparse&&void 0===i){if(d.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),a.abortEarly)return d;u.shift();continue}const b=[e,...n.ancestors];for(const e of r.$_terms._exclusions)if(e.$_match(i,n.localize(y,b,e),a,{presence:"ignore"})){if(d.push(s("array.excludes",{pos:t,value:i},n.localize(y))),a.abortEarly)return d;o=!0,u.shift();break}if(o)continue;if(r.$_terms.ordered.length){if(u.length){const o=u.shift(),l=o.$_validate(i,n.localize(y,b,o),a);if(l.errors){if(d.push(...l.errors),a.abortEarly)return d}else if("strip"===o._flags.result)c.fastSplice(e,t),--t,--m;else{if(!r._flags.sparse&&void 0===l.value){if(d.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),a.abortEarly)return d;continue}e[t]=l.value}continue}if(!r.$_terms.items.length){if(d.push(s("array.orderedLength",{pos:t,limit:r.$_terms.ordered.length})),a.abortEarly)return d;break}}const v=[];let _=l.length;for(let o=0;o<_;++o){const u=n.localize(y,b,l[o]);u.snapshot();const f=l[o].$_validate(i,u,a);if(v[o]=f,!f.errors){if(e[t]=f.value,p=!0,c.fastSplice(l,o),--o,--_,!r._flags.sparse&&void 0===f.value&&(d.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),a.abortEarly))return d;break}u.restore()}if(p)continue;const w=a.stripUnknown&&!!a.stripUnknown.arrays||!1;_=f.length;for(const u of f){let f;const h=l.indexOf(u);if(-1!==h)f=v[h];else{const l=n.localize(y,b,u);if(l.snapshot(),f=u.$_validate(i,l,a),!f.errors){"strip"===u._flags.result?(c.fastSplice(e,t),--t,--m):r._flags.sparse||void 0!==f.value?e[t]=f.value:(d.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),o=!0),p=!0;break}l.restore()}if(1===_){if(w){c.fastSplice(e,t),--t,--m,p=!0;break}if(d.push(...f.errors),a.abortEarly)return d;o=!0;break}}if(!o&&(r.$_terms._inclusions.length||r.$_terms._requireds.length)&&!p){if(w){c.fastSplice(e,t),--t,--m;continue}if(d.push(s("array.includes",{pos:t,value:i},n.localize(y))),a.abortEarly)return d}}return l.length&&c.fillMissedErrors(r,d,l,e,n,a),u.length&&(c.fillOrderedErrors(r,d,u,e,n,a),d.length||c.fillDefault(u,e,n,a)),d.length?d:e},priority:!0,manifest:!1},length:{method(e){return this.$_addRule({name:"length",args:{limit:e},operator:"="})},validate(e,t,r,s){let{limit:n}=r,{name:a,operator:i,args:l}=s;return o.compare(e.length,n,i)?e:t.error("array."+a,{limit:l.limit,value:e})},args:[{name:"limit",ref:!0,assert:o.limit,message:"must be a positive integer"}]},max:{method(e){return this.$_addRule({name:"max",method:"length",args:{limit:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"length",args:{limit:e},operator:">="})}},ordered:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];o.verifyFlat(t,"ordered");const s=this.$_addRule("items");for(let e=0;e<t.length;++e){const r=o.tryWithPath((()=>this.$_compile(t[e])),e,{append:!0});c.validateSingle(r,s),s.$_mutateRegister(r),s.$_terms.ordered.push(r)}return s.$_mutateRebuild()}},single:{method(e){const t=void 0===e||!!e;return s(!t||!this._flags._arrayItems,"Cannot specify single rule when array has array items"),this.$_setFlag("single",t)}},sort:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};o.assertOptions(e,["by","order"]);const t={order:e.order||"ascending"};return e.by&&(t.by=l.ref(e.by,{ancestor:0}),s(!t.by.ancestor,"Cannot sort by ancestor")),this.$_addRule({name:"sort",args:{options:t}})},validate(e,t,r){let{error:s,state:n,prefs:a,schema:i}=t,{options:o}=r;const{value:l,errors:u}=c.sort(i,e,o,n,a);if(u)return u;for(let t=0;t<e.length;++t)if(e[t]!==l[t])return s("array.sort",{order:o.order,by:o.by?o.by.key:"value"});return e},convert:!0},sparse:{method(e){const t=void 0===e||!!e;return this._flags.sparse===t?this:(t?this.clone():this.$_addRule("items")).$_setFlag("sparse",t,{clone:!1})}},unique:{method(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};s(!e||"function"==typeof e||"string"==typeof e,"comparator must be a function or a string"),o.assertOptions(t,["ignoreUndefined","separator"]);const r={name:"unique",args:{options:t,comparator:e}};if(e)if("string"==typeof e){const s=o.default(t.separator,".");r.path=s?e.split(s):[e]}else r.comparator=e;return this.$_addRule(r)},validate(e,t,r,i){let{state:o,error:l,schema:c}=t,{comparator:u,options:f}=r,{comparator:h,path:d}=i;const m={string:Object.create(null),number:Object.create(null),undefined:Object.create(null),boolean:Object.create(null),object:new Map,function:new Map,custom:new Map},p=h||n,g=f.ignoreUndefined;for(let t=0;t<e.length;++t){const r=d?a(e[t],d):e[t],n=h?m.custom:m[typeof r];if(s(n,"Failed to find unique map container for type",typeof r),n instanceof Map){const s=n.entries();let a;for(;!(a=s.next()).done;)if(p(a.value[0],r)){const r=o.localize([...o.path,t],[e,...o.ancestors]),s={pos:t,value:e[t],dupePos:a.value[1],dupeValue:e[a.value[1]]};return d&&(s.path=u),l("array.unique",s,r)}n.set(r,t)}else{if((!g||void 0!==r)&&void 0!==n[r]){const s={pos:t,value:e[t],dupePos:n[r],dupeValue:e[n[r]]};return d&&(s.path=u),l("array.unique",s,o.localize([...o.path,t],[e,...o.ancestors]))}n[r]=t}}return e},args:["comparator","options"],multi:!0}},cast:{set:{from:Array.isArray,to:(e,t)=>new Set(e)}},rebuild(e){e.$_terms._inclusions=[],e.$_terms._exclusions=[],e.$_terms._requireds=[];for(const t of e.$_terms.items)c.validateSingle(t,e),"required"===t._flags.presence?e.$_terms._requireds.push(t):"forbidden"===t._flags.presence?e.$_terms._exclusions.push(t):e.$_terms._inclusions.push(t);for(const t of e.$_terms.ordered)c.validateSingle(t,e)},manifest:{build:(e,t)=>(t.items&&(e=e.items(...t.items)),t.ordered&&(e=e.ordered(...t.ordered)),e)},messages:{"array.base":"{{#label}} must be an array","array.excludes":"{{#label}} contains an excluded value","array.hasKnown":"{{#label}} does not contain at least one required match for type {:#patternLabel}","array.hasUnknown":"{{#label}} does not contain at least one required match","array.includes":"{{#label}} does not match any of the allowed types","array.includesRequiredBoth":"{{#label}} does not contain {{#knownMisses}} and {{#unknownMisses}} other required value(s)","array.includesRequiredKnowns":"{{#label}} does not contain {{#knownMisses}}","array.includesRequiredUnknowns":"{{#label}} does not contain {{#unknownMisses}} required value(s)","array.length":"{{#label}} must contain {{#limit}} items","array.max":"{{#label}} must contain less than or equal to {{#limit}} items","array.min":"{{#label}} must contain at least {{#limit}} items","array.orderedLength":"{{#label}} must contain at most {{#limit}} items","array.sort":"{{#label}} must be sorted in {#order} order by {{#by}}","array.sort.mismatching":"{{#label}} cannot be sorted due to mismatching types","array.sort.unsupported":"{{#label}} cannot be sorted due to unsupported type {#type}","array.sparse":"{{#label}} must not be a sparse array item","array.unique":"{{#label}} contains a duplicate value"}}),c.fillMissedErrors=function(e,t,r,s,n,a){const i=[];let o=0;for(const e of r){const t=e._flags.label;t?i.push(t):++o}i.length?o?t.push(e.$_createError("array.includesRequiredBoth",s,{knownMisses:i,unknownMisses:o},n,a)):t.push(e.$_createError("array.includesRequiredKnowns",s,{knownMisses:i},n,a)):t.push(e.$_createError("array.includesRequiredUnknowns",s,{unknownMisses:o},n,a))},c.fillOrderedErrors=function(e,t,r,s,n,a){const i=[];for(const e of r)"required"===e._flags.presence&&i.push(e);i.length&&c.fillMissedErrors(e,t,i,s,n,a)},c.fillDefault=function(e,t,r,s){const n=[];let a=!0;for(let i=e.length-1;i>=0;--i){const o=e[i],l=[t,...r.ancestors],c=o.$_validate(void 0,r.localize(r.path,l,o),s).value;if(a){if(void 0===c)continue;a=!1}n.unshift(c)}n.length&&t.push(...n)},c.fastSplice=function(e,t){let r=t;for(;r<e.length;)e[r++]=e[r];--e.length},c.validateSingle=function(e,t){("array"===e.type||e._flags._arrayItems)&&(s(!t._flags.single,"Cannot specify array item with single rule enabled"),t.$_setFlag("_arrayItems",!0,{clone:!1}))},c.sort=function(e,t,r,s,n){const a="ascending"===r.order?1:-1,i=-1*a,o=a,l=(l,u)=>{let f=c.compare(l,u,i,o);if(null!==f)return f;if(r.by&&(l=r.by.resolve(l,s,n),u=r.by.resolve(u,s,n)),f=c.compare(l,u,i,o),null!==f)return f;const h=typeof l;if(h!==typeof u)throw e.$_createError("array.sort.mismatching",t,null,s,n);if("number"!==h&&"string"!==h)throw e.$_createError("array.sort.unsupported",t,{type:h},s,n);return"number"===h?(l-u)*a:l<u?i:o};try{return{value:t.slice().sort(l)}}catch(e){return{errors:e}}},c.compare=function(e,t,r,s){return e===t?0:void 0===e?1:void 0===t?-1:null===e?s:null===t?r:null}},4937:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i=r(2036),o={isBool:function(e){return"boolean"==typeof e}};e.exports=n.extend({type:"boolean",flags:{sensitive:{default:!1}},terms:{falsy:{init:null,manifest:"values"},truthy:{init:null,manifest:"values"}},coerce(e,t){let{schema:r}=t;if("boolean"!=typeof e){if("string"==typeof e){const t=r._flags.sensitive?e:e.toLowerCase();e="true"===t||"false"!==t&&e}return"boolean"!=typeof e&&(e=r.$_terms.truthy&&r.$_terms.truthy.has(e,null,null,!r._flags.sensitive)||(!r.$_terms.falsy||!r.$_terms.falsy.has(e,null,null,!r._flags.sensitive))&&e),{value:e}}},validate(e,t){let{error:r}=t;if("boolean"!=typeof e)return{value:e,errors:r("boolean.base")}},rules:{truthy:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];a.verifyFlat(t,"truthy");const n=this.clone();n.$_terms.truthy=n.$_terms.truthy||new i;for(let e=0;e<t.length;++e){const r=t[e];s(void 0!==r,"Cannot call truthy with undefined"),n.$_terms.truthy.add(r)}return n}},falsy:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];a.verifyFlat(t,"falsy");const n=this.clone();n.$_terms.falsy=n.$_terms.falsy||new i;for(let e=0;e<t.length;++e){const r=t[e];s(void 0!==r,"Cannot call falsy with undefined"),n.$_terms.falsy.add(r)}return n}},sensitive:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("sensitive",e)}}},cast:{number:{from:o.isBool,to:(e,t)=>e?1:0},string:{from:o.isBool,to:(e,t)=>e?"true":"false"}},manifest:{build:(e,t)=>(t.truthy&&(e=e.truthy(...t.truthy)),t.falsy&&(e=e.falsy(...t.falsy)),e)},messages:{"boolean.base":"{{#label}} must be a boolean"}})},7500:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i=r(3328),o={isDate:function(e){return e instanceof Date}};e.exports=n.extend({type:"date",coerce:{from:["number","string"],method(e,t){let{schema:r}=t;return{value:o.parse(e,r._flags.format)||e}}},validate(e,t){let{schema:r,error:s,prefs:n}=t;if(e instanceof Date&&!isNaN(e.getTime()))return;const a=r._flags.format;return n.convert&&a&&"string"==typeof e?{value:e,errors:s("date.format",{format:a})}:{value:e,errors:s("date.base")}},rules:{compare:{method:!1,validate(e,t,r,s){let{date:n}=r,{name:i,operator:o,args:l}=s;const c="now"===n?Date.now():n.getTime();return a.compare(e.getTime(),c,o)?e:t.error("date."+i,{limit:l.date,value:e})},args:[{name:"date",ref:!0,normalize:e=>"now"===e?e:o.parse(e),assert:e=>null!==e,message:"must have a valid date format"}]},format:{method(e){return s(["iso","javascript","unix"].includes(e),"Unknown date format",e),this.$_setFlag("format",e)}},greater:{method(e){return this.$_addRule({name:"greater",method:"compare",args:{date:e},operator:">"})}},iso:{method(){return this.format("iso")}},less:{method(e){return this.$_addRule({name:"less",method:"compare",args:{date:e},operator:"<"})}},max:{method(e){return this.$_addRule({name:"max",method:"compare",args:{date:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"compare",args:{date:e},operator:">="})}},timestamp:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"javascript";return s(["javascript","unix"].includes(e),'"type" must be one of "javascript, unix"'),this.format(e)}}},cast:{number:{from:o.isDate,to:(e,t)=>e.getTime()},string:{from:o.isDate,to(e,t){let{prefs:r}=t;return i.date(e,r)}}},messages:{"date.base":"{{#label}} must be a valid date","date.format":'{{#label}} must be in {msg("date.format." + #format) || #format} format',"date.greater":"{{#label}} must be greater than {{:#limit}}","date.less":"{{#label}} must be less than {{:#limit}}","date.max":"{{#label}} must be less than or equal to {{:#limit}}","date.min":"{{#label}} must be greater than or equal to {{:#limit}}","date.format.iso":"ISO 8601 date","date.format.javascript":"timestamp or number of milliseconds","date.format.unix":"timestamp or number of seconds"}}),o.parse=function(e,t){if(e instanceof Date)return e;if("string"!=typeof e&&(isNaN(e)||!isFinite(e)))return null;if(/^\s*$/.test(e))return null;if("iso"===t)return a.isIsoDate(e)?o.date(e.toString()):null;const r=e;if("string"==typeof e&&/^[+-]?\d+(\.\d+)?$/.test(e)&&(e=parseFloat(e)),t){if("javascript"===t)return o.date(1*e);if("unix"===t)return o.date(1e3*e);if("string"==typeof r)return null}return o.date(e)},o.date=function(e){const t=new Date(e);return isNaN(t.getTime())?null:t}},390:(e,t,r)=>{"use strict";const s=r(375),n=r(7824);e.exports=n.extend({type:"function",properties:{typeof:"function"},rules:{arity:{method(e){return s(Number.isSafeInteger(e)&&e>=0,"n must be a positive integer"),this.$_addRule({name:"arity",args:{n:e}})},validate(e,t,r){let{n:s}=r;return e.length===s?e:t.error("function.arity",{n:s})}},class:{method(){return this.$_addRule("class")},validate:(e,t)=>/^\s*class\s/.test(e.toString())?e:t.error("function.class",{value:e})},minArity:{method(e){return s(Number.isSafeInteger(e)&&e>0,"n must be a strict positive integer"),this.$_addRule({name:"minArity",args:{n:e}})},validate(e,t,r){let{n:s}=r;return e.length>=s?e:t.error("function.minArity",{n:s})}},maxArity:{method(e){return s(Number.isSafeInteger(e)&&e>=0,"n must be a positive integer"),this.$_addRule({name:"maxArity",args:{n:e}})},validate(e,t,r){let{n:s}=r;return e.length<=s?e:t.error("function.maxArity",{n:s})}}},messages:{"function.arity":"{{#label}} must have an arity of {{#n}}","function.class":"{{#label}} must be a class","function.maxArity":"{{#label}} must have an arity lesser or equal to {{#n}}","function.minArity":"{{#label}} must have an arity greater or equal to {{#n}}"}})},7824:(e,t,r)=>{"use strict";const s=r(978),n=r(375),a=r(8571),i=r(3652),o=r(8068),l=r(8160),c=r(3292),u=r(6354),f=r(6133),h=r(3328),d={renameDefaults:{alias:!1,multiple:!1,override:!1}};e.exports=o.extend({type:"_keys",properties:{typeof:"object"},flags:{unknown:{default:!1}},terms:{dependencies:{init:null},keys:{init:null,manifest:{mapped:{from:"schema",to:"key"}}},patterns:{init:null},renames:{init:null}},args:(e,t)=>e.keys(t),validate(e,t){let{schema:r,error:s,state:n,prefs:a}=t;if(!e||typeof e!==r.$_property("typeof")||Array.isArray(e))return{value:e,errors:s("object.base",{type:r.$_property("typeof")})};if(!(r.$_terms.renames||r.$_terms.dependencies||r.$_terms.keys||r.$_terms.patterns||r.$_terms.externals))return;e=d.clone(e,a);const i=[];if(r.$_terms.renames&&!d.rename(r,e,n,a,i))return{value:e,errors:i};if(!r.$_terms.keys&&!r.$_terms.patterns&&!r.$_terms.dependencies)return{value:e,errors:i};const o=new Set(Object.keys(e));if(r.$_terms.keys){const t=[e,...n.ancestors];for(const s of r.$_terms.keys){const r=s.key,l=e[r];o.delete(r);const c=n.localize([...n.path,r],t,s),u=s.schema.$_validate(l,c,a);if(u.errors){if(a.abortEarly)return{value:e,errors:u.errors};void 0!==u.value&&(e[r]=u.value),i.push(...u.errors)}else"strip"===s.schema._flags.result||void 0===u.value&&void 0!==l?delete e[r]:void 0!==u.value&&(e[r]=u.value)}}if(o.size||r._flags._hasPatternMatch){const t=d.unknown(r,e,o,i,n,a);if(t)return t}if(r.$_terms.dependencies)for(const t of r.$_terms.dependencies){if(null!==t.key&&!1===d.isPresent(t.options)(t.key.resolve(e,n,a,null,{shadow:!1})))continue;const s=d.dependencies[t.rel](r,t,e,n,a);if(s){const t=r.$_createError(s.code,e,s.context,n,a);if(a.abortEarly)return{value:e,errors:t};i.push(t)}}return{value:e,errors:i}},rules:{and:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"and"),d.dependency(this,"and",null,t)}},append:{method(e){return null==e||0===Object.keys(e).length?this:this.keys(e)}},assert:{method(e,t,r){h.isTemplate(e)||(e=c.ref(e)),n(void 0===r||"string"==typeof r,"Message must be a string"),t=this.$_compile(t,{appendPath:!0});const s=this.$_addRule({name:"assert",args:{subject:e,schema:t,message:r}});return s.$_mutateRegister(e),s.$_mutateRegister(t),s},validate(e,t,r){let{error:s,prefs:n,state:a}=t,{subject:i,schema:o,message:l}=r;const c=i.resolve(e,a,n),u=f.isRef(i)?i.absolute(a):[];return o.$_match(c,a.localize(u,[e,...a.ancestors],o),n)?e:s("object.assert",{subject:i,message:l})},args:["subject","schema","message"],multi:!0},instance:{method(e,t){return n("function"==typeof e,"constructor must be a function"),t=t||e.name,this.$_addRule({name:"instance",args:{constructor:e,name:t}})},validate(e,t,r){let{constructor:s,name:n}=r;return e instanceof s?e:t.error("object.instance",{type:n,value:e})},args:["constructor","name"]},keys:{method(e){n(void 0===e||"object"==typeof e,"Object schema must be a valid object"),n(!l.isSchema(e),"Object schema cannot be a joi schema");const t=this.clone();if(e)if(Object.keys(e).length){t.$_terms.keys=t.$_terms.keys?t.$_terms.keys.filter((t=>!e.hasOwnProperty(t.key))):new d.Keys;for(const r in e)l.tryWithPath((()=>t.$_terms.keys.push({key:r,schema:this.$_compile(e[r])})),r)}else t.$_terms.keys=new d.Keys;else t.$_terms.keys=null;return t.$_mutateRebuild()}},length:{method(e){return this.$_addRule({name:"length",args:{limit:e},operator:"="})},validate(e,t,r,s){let{limit:n}=r,{name:a,operator:i,args:o}=s;return l.compare(Object.keys(e).length,n,i)?e:t.error("object."+a,{limit:o.limit,value:e})},args:[{name:"limit",ref:!0,assert:l.limit,message:"must be a positive integer"}]},max:{method(e){return this.$_addRule({name:"max",method:"length",args:{limit:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"length",args:{limit:e},operator:">="})}},nand:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"nand"),d.dependency(this,"nand",null,t)}},or:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"or"),d.dependency(this,"or",null,t)}},oxor:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return d.dependency(this,"oxor",null,t)}},pattern:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};const s=e instanceof RegExp;s||(e=this.$_compile(e,{appendPath:!0})),n(void 0!==t,"Invalid rule"),l.assertOptions(r,["fallthrough","matches"]),s&&n(!e.flags.includes("g")&&!e.flags.includes("y"),"pattern should not use global or sticky mode"),t=this.$_compile(t,{appendPath:!0});const a=this.clone();a.$_terms.patterns=a.$_terms.patterns||[];const i={[s?"regex":"schema"]:e,rule:t};return r.matches&&(i.matches=this.$_compile(r.matches),"array"!==i.matches.type&&(i.matches=i.matches.$_root.array().items(i.matches)),a.$_mutateRegister(i.matches),a.$_setFlag("_hasPatternMatch",!0,{clone:!1})),r.fallthrough&&(i.fallthrough=!0),a.$_terms.patterns.push(i),a.$_mutateRegister(t),a}},ref:{method(){return this.$_addRule("ref")},validate:(e,t)=>f.isRef(e)?e:t.error("object.refType",{value:e})},regex:{method(){return this.$_addRule("regex")},validate:(e,t)=>e instanceof RegExp?e:t.error("object.regex",{value:e})},rename:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};n("string"==typeof e||e instanceof RegExp,"Rename missing the from argument"),n("string"==typeof t||t instanceof h,"Invalid rename to argument"),n(t!==e,"Cannot rename key to same name:",e),l.assertOptions(r,["alias","ignoreUndefined","override","multiple"]);const a=this.clone();a.$_terms.renames=a.$_terms.renames||[];for(const t of a.$_terms.renames)n(t.from!==e,"Cannot rename the same key multiple times");return t instanceof h&&a.$_mutateRegister(t),a.$_terms.renames.push({from:e,to:t,options:s(d.renameDefaults,r)}),a}},schema:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"any";return this.$_addRule({name:"schema",args:{type:e}})},validate(e,t,r){let{type:s}=r;return!l.isSchema(e)||"any"!==s&&e.type!==s?t.error("object.schema",{type:s}):e}},unknown:{method(e){return this.$_setFlag("unknown",!1!==e)}},with:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};return d.dependency(this,"with",e,t,r)}},without:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};return d.dependency(this,"without",e,t,r)}},xor:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"xor"),d.dependency(this,"xor",null,t)}}},overrides:{default(e,t){return void 0===e&&(e=l.symbols.deepDefault),this.$_parent("default",e,t)}},rebuild(e){if(e.$_terms.keys){const t=new i.Sorter;for(const r of e.$_terms.keys)l.tryWithPath((()=>t.add(r,{after:r.schema.$_rootReferences(),group:r.key})),r.key);e.$_terms.keys=new d.Keys(...t.nodes)}},manifest:{build(e,t){if(t.keys&&(e=e.keys(t.keys)),t.dependencies)for(const{rel:r,key:s=null,peers:n,options:a}of t.dependencies)e=d.dependency(e,r,s,n,a);if(t.patterns)for(const{regex:r,schema:s,rule:n,fallthrough:a,matches:i}of t.patterns)e=e.pattern(r||s,n,{fallthrough:a,matches:i});if(t.renames)for(const{from:r,to:s,options:n}of t.renames)e=e.rename(r,s,n);return e}},messages:{"object.and":"{{#label}} contains {{#presentWithLabels}} without its required peers {{#missingWithLabels}}","object.assert":'{{#label}} is invalid because {if(#subject.key, `"` + #subject.key + `" failed to ` + (#message || "pass the assertion test"), #message || "the assertion failed")}',"object.base":"{{#label}} must be of type {{#type}}","object.instance":"{{#label}} must be an instance of {{:#type}}","object.length":'{{#label}} must have {{#limit}} key{if(#limit == 1, "", "s")}',"object.max":'{{#label}} must have less than or equal to {{#limit}} key{if(#limit == 1, "", "s")}',"object.min":'{{#label}} must have at least {{#limit}} key{if(#limit == 1, "", "s")}',"object.missing":"{{#label}} must contain at least one of {{#peersWithLabels}}","object.nand":"{{:#mainWithLabel}} must not exist simultaneously with {{#peersWithLabels}}","object.oxor":"{{#label}} contains a conflict between optional exclusive peers {{#peersWithLabels}}","object.pattern.match":"{{#label}} keys failed to match pattern requirements","object.refType":"{{#label}} must be a Joi reference","object.regex":"{{#label}} must be a RegExp object","object.rename.multiple":"{{#label}} cannot rename {{:#from}} because multiple renames are disabled and another key was already renamed to {{:#to}}","object.rename.override":"{{#label}} cannot rename {{:#from}} because override is disabled and target {{:#to}} exists","object.schema":"{{#label}} must be a Joi schema of {{#type}} type","object.unknown":"{{#label}} is not allowed","object.with":"{{:#mainWithLabel}} missing required peer {{:#peerWithLabel}}","object.without":"{{:#mainWithLabel}} conflict with forbidden peer {{:#peerWithLabel}}","object.xor":"{{#label}} contains a conflict between exclusive peers {{#peersWithLabels}}"}}),d.clone=function(e,t){if("object"==typeof e){if(t.nonEnumerables)return a(e,{shallow:!0});const r=Object.create(Object.getPrototypeOf(e));return Object.assign(r,e),r}const r=function(){for(var t=arguments.length,r=new Array(t),s=0;s<t;s++)r[s]=arguments[s];return e.apply(this,r)};return r.prototype=a(e.prototype),Object.defineProperty(r,"name",{value:e.name,writable:!1}),Object.defineProperty(r,"length",{value:e.length,writable:!1}),Object.assign(r,e),r},d.dependency=function(e,t,r,s,a){n(null===r||"string"==typeof r,t,"key must be a strings"),a||(a=s.length>1&&"object"==typeof s[s.length-1]?s.pop():{}),l.assertOptions(a,["separator","isPresent"]),s=[].concat(s);const i=l.default(a.separator,"."),o=[];for(const e of s)n("string"==typeof e,t,"peers must be strings"),o.push(c.ref(e,{separator:i,ancestor:0,prefix:!1}));null!==r&&(r=c.ref(r,{separator:i,ancestor:0,prefix:!1}));const u=e.clone();return u.$_terms.dependencies=u.$_terms.dependencies||[],u.$_terms.dependencies.push(new d.Dependency(t,r,o,s,a)),u},d.dependencies={and(e,t,r,s,n){const a=[],i=[],o=t.peers.length,l=d.isPresent(t.options);for(const e of t.peers)!1===l(e.resolve(r,s,n,null,{shadow:!1}))?a.push(e.key):i.push(e.key);if(a.length!==o&&i.length!==o)return{code:"object.and",context:{present:i,presentWithLabels:d.keysToLabels(e,i),missing:a,missingWithLabels:d.keysToLabels(e,a)}}},nand(e,t,r,s,n){const a=[],i=d.isPresent(t.options);for(const e of t.peers)i(e.resolve(r,s,n,null,{shadow:!1}))&&a.push(e.key);if(a.length!==t.peers.length)return;const o=t.paths[0],l=t.paths.slice(1);return{code:"object.nand",context:{main:o,mainWithLabel:d.keysToLabels(e,o),peers:l,peersWithLabels:d.keysToLabels(e,l)}}},or(e,t,r,s,n){const a=d.isPresent(t.options);for(const e of t.peers)if(a(e.resolve(r,s,n,null,{shadow:!1})))return;return{code:"object.missing",context:{peers:t.paths,peersWithLabels:d.keysToLabels(e,t.paths)}}},oxor(e,t,r,s,n){const a=[],i=d.isPresent(t.options);for(const e of t.peers)i(e.resolve(r,s,n,null,{shadow:!1}))&&a.push(e.key);if(!a.length||1===a.length)return;const o={peers:t.paths,peersWithLabels:d.keysToLabels(e,t.paths)};return o.present=a,o.presentWithLabels=d.keysToLabels(e,a),{code:"object.oxor",context:o}},with(e,t,r,s,n){const a=d.isPresent(t.options);for(const i of t.peers)if(!1===a(i.resolve(r,s,n,null,{shadow:!1})))return{code:"object.with",context:{main:t.key.key,mainWithLabel:d.keysToLabels(e,t.key.key),peer:i.key,peerWithLabel:d.keysToLabels(e,i.key)}}},without(e,t,r,s,n){const a=d.isPresent(t.options);for(const i of t.peers)if(a(i.resolve(r,s,n,null,{shadow:!1})))return{code:"object.without",context:{main:t.key.key,mainWithLabel:d.keysToLabels(e,t.key.key),peer:i.key,peerWithLabel:d.keysToLabels(e,i.key)}}},xor(e,t,r,s,n){const a=[],i=d.isPresent(t.options);for(const e of t.peers)i(e.resolve(r,s,n,null,{shadow:!1}))&&a.push(e.key);if(1===a.length)return;const o={peers:t.paths,peersWithLabels:d.keysToLabels(e,t.paths)};return 0===a.length?{code:"object.missing",context:o}:(o.present=a,o.presentWithLabels=d.keysToLabels(e,a),{code:"object.xor",context:o})}},d.keysToLabels=function(e,t){return Array.isArray(t)?t.map((t=>e.$_mapLabels(t))):e.$_mapLabels(t)},d.isPresent=function(e){return"function"==typeof e.isPresent?e.isPresent:e=>void 0!==e},d.rename=function(e,t,r,s,n){const a={};for(const i of e.$_terms.renames){const o=[],l="string"!=typeof i.from;if(l)for(const e in t){if(void 0===t[e]&&i.options.ignoreUndefined)continue;if(e===i.to)continue;const r=i.from.exec(e);r&&o.push({from:e,to:i.to,match:r})}else!Object.prototype.hasOwnProperty.call(t,i.from)||void 0===t[i.from]&&i.options.ignoreUndefined||o.push(i);for(const c of o){const o=c.from;let u=c.to;if(u instanceof h&&(u=u.render(t,r,s,c.match)),o!==u){if(!i.options.multiple&&a[u]&&(n.push(e.$_createError("object.rename.multiple",t,{from:o,to:u,pattern:l},r,s)),s.abortEarly))return!1;if(Object.prototype.hasOwnProperty.call(t,u)&&!i.options.override&&!a[u]&&(n.push(e.$_createError("object.rename.override",t,{from:o,to:u,pattern:l},r,s)),s.abortEarly))return!1;void 0===t[o]?delete t[u]:t[u]=t[o],a[u]=!0,i.options.alias||delete t[o]}}}return!0},d.unknown=function(e,t,r,s,n,a){if(e.$_terms.patterns){let i=!1;const o=e.$_terms.patterns.map((e=>{if(e.matches)return i=!0,[]})),l=[t,...n.ancestors];for(const i of r){const c=t[i],u=[...n.path,i];for(let f=0;f<e.$_terms.patterns.length;++f){const h=e.$_terms.patterns[f];if(h.regex){const e=h.regex.test(i);if(n.mainstay.tracer.debug(n,"rule",`pattern.${f}`,e?"pass":"error"),!e)continue}else if(!h.schema.$_match(i,n.nest(h.schema,`pattern.${f}`),a))continue;r.delete(i);const d=n.localize(u,l,{schema:h.rule,key:i}),m=h.rule.$_validate(c,d,a);if(m.errors){if(a.abortEarly)return{value:t,errors:m.errors};s.push(...m.errors)}if(h.matches&&o[f].push(i),t[i]=m.value,!h.fallthrough)break}}if(i)for(let r=0;r<o.length;++r){const i=o[r];if(!i)continue;const c=e.$_terms.patterns[r].matches,f=n.localize(n.path,l,c),h=c.$_validate(i,f,a);if(h.errors){const r=u.details(h.errors,{override:!1});r.matches=i;const o=e.$_createError("object.pattern.match",t,r,n,a);if(a.abortEarly)return{value:t,errors:o};s.push(o)}}}if(r.size&&(e.$_terms.keys||e.$_terms.patterns)){if(a.stripUnknown&&!e._flags.unknown||a.skipFunctions){const e=!(!a.stripUnknown||!0!==a.stripUnknown&&!a.stripUnknown.objects);for(const s of r)e?(delete t[s],r.delete(s)):"function"==typeof t[s]&&r.delete(s)}if(!l.default(e._flags.unknown,a.allowUnknown))for(const i of r){const r=n.localize([...n.path,i],[]),o=e.$_createError("object.unknown",t[i],{child:i},r,a,{flags:!1});if(a.abortEarly)return{value:t,errors:o};s.push(o)}}},d.Dependency=class{constructor(e,t,r,s,n){this.rel=e,this.key=t,this.peers=r,this.paths=s,this.options=n}describe(){const e={rel:this.rel,peers:this.paths};return null!==this.key&&(e.key=this.key.key),"."!==this.peers[0].separator&&(e.options={...e.options,separator:this.peers[0].separator}),this.options.isPresent&&(e.options={...e.options,isPresent:this.options.isPresent}),e}},d.Keys=class extends Array{concat(e){const t=this.slice(),r=new Map;for(let e=0;e<t.length;++e)r.set(t[e].key,e);for(const s of e){const e=s.key,n=r.get(e);void 0!==n?t[n]={key:e,schema:t[n].schema.concat(s.schema)}:t.push(s)}return t}}},8785:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i=r(3292),o=r(6354),l={};e.exports=n.extend({type:"link",properties:{schemaChain:!0},terms:{link:{init:null,manifest:"single",register:!1}},args:(e,t)=>e.ref(t),validate(e,t){let{schema:r,state:n,prefs:a}=t;s(r.$_terms.link,"Uninitialized link schema");const i=l.generate(r,e,n,a),o=r.$_terms.link[0].ref;return i.$_validate(e,n.nest(i,`link:${o.display}:${i.type}`),a)},generate:(e,t,r,s)=>l.generate(e,t,r,s),rules:{ref:{method(e){s(!this.$_terms.link,"Cannot reinitialize schema"),e=i.ref(e),s("value"===e.type||"local"===e.type,"Invalid reference type:",e.type),s("local"===e.type||"root"===e.ancestor||e.ancestor>0,"Link cannot reference itself");const t=this.clone();return t.$_terms.link=[{ref:e}],t}},relative:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("relative",e)}}},overrides:{concat(e){s(this.$_terms.link,"Uninitialized link schema"),s(a.isSchema(e),"Invalid schema object"),s("link"!==e.type,"Cannot merge type link with another link");const t=this.clone();return t.$_terms.whens||(t.$_terms.whens=[]),t.$_terms.whens.push({concat:e}),t.$_mutateRebuild()}},manifest:{build:(e,t)=>(s(t.link,"Invalid link description missing link"),e.ref(t.link))}}),l.generate=function(e,t,r,s){let n=r.mainstay.links.get(e);if(n)return n._generate(t,r,s).schema;const a=e.$_terms.link[0].ref,{perspective:i,path:o}=l.perspective(a,r);l.assert(i,"which is outside of schema boundaries",a,e,r,s);try{n=o.length?i.$_reach(o):i}catch(t){l.assert(!1,"to non-existing schema",a,e,r,s)}return l.assert("link"!==n.type,"which is another link",a,e,r,s),e._flags.relative||r.mainstay.links.set(e,n),n._generate(t,r,s).schema},l.perspective=function(e,t){if("local"===e.type){for(const{schema:r,key:s}of t.schemas){if((r._flags.id||s)===e.path[0])return{perspective:r,path:e.path.slice(1)};if(r.$_terms.shared)for(const t of r.$_terms.shared)if(t._flags.id===e.path[0])return{perspective:t,path:e.path.slice(1)}}return{perspective:null,path:null}}return"root"===e.ancestor?{perspective:t.schemas[t.schemas.length-1].schema,path:e.path}:{perspective:t.schemas[e.ancestor]&&t.schemas[e.ancestor].schema,path:e.path}},l.assert=function(e,t,r,n,a,i){e||s(!1,`"${o.label(n._flags,a,i)}" contains link reference "${r.display}" ${t}`)}},3832:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i={numberRx:/^\s*[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e([+-]?\d+))?\s*$/i,precisionRx:/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/,exponentialPartRegex:/[eE][+-]?\d+$/,leadingSignAndZerosRegex:/^[+-]?(0*)?/,dotRegex:/\./,trailingZerosRegex:/0+$/};e.exports=n.extend({type:"number",flags:{unsafe:{default:!1}},coerce:{from:"string",method(e,t){let{schema:r,error:s}=t;if(!e.match(i.numberRx))return;e=e.trim();const n={value:parseFloat(e)};if(0===n.value&&(n.value=0),!r._flags.unsafe)if(e.match(/e/i)){if(i.extractSignificantDigits(e)!==i.extractSignificantDigits(String(n.value)))return n.errors=s("number.unsafe"),n}else{const t=n.value.toString();if(t.match(/e/i))return n;if(t!==i.normalizeDecimal(e))return n.errors=s("number.unsafe"),n}return n}},validate(e,t){let{schema:r,error:s,prefs:n}=t;if(e===1/0||e===-1/0)return{value:e,errors:s("number.infinity")};if(!a.isNumber(e))return{value:e,errors:s("number.base")};const i={value:e};if(n.convert){const e=r.$_getRule("precision");if(e){const t=Math.pow(10,e.args.limit);i.value=Math.round(i.value*t)/t}}return 0===i.value&&(i.value=0),!r._flags.unsafe&&(e>Number.MAX_SAFE_INTEGER||e<Number.MIN_SAFE_INTEGER)&&(i.errors=s("number.unsafe")),i},rules:{compare:{method:!1,validate(e,t,r,s){let{limit:n}=r,{name:i,operator:o,args:l}=s;return a.compare(e,n,o)?e:t.error("number."+i,{limit:l.limit,value:e})},args:[{name:"limit",ref:!0,assert:a.isNumber,message:"must be a number"}]},greater:{method(e){return this.$_addRule({name:"greater",method:"compare",args:{limit:e},operator:">"})}},integer:{method(){return this.$_addRule("integer")},validate:(e,t)=>Math.trunc(e)-e==0?e:t.error("number.integer")},less:{method(e){return this.$_addRule({name:"less",method:"compare",args:{limit:e},operator:"<"})}},max:{method(e){return this.$_addRule({name:"max",method:"compare",args:{limit:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"compare",args:{limit:e},operator:">="})}},multiple:{method(e){return this.$_addRule({name:"multiple",args:{base:e}})},validate(e,t,r,s){let{base:n}=r;return e*(1/n)%1==0?e:t.error("number.multiple",{multiple:s.args.base,value:e})},args:[{name:"base",ref:!0,assert:e=>"number"==typeof e&&isFinite(e)&&e>0,message:"must be a positive number"}],multi:!0},negative:{method(){return this.sign("negative")}},port:{method(){return this.$_addRule("port")},validate:(e,t)=>Number.isSafeInteger(e)&&e>=0&&e<=65535?e:t.error("number.port")},positive:{method(){return this.sign("positive")}},precision:{method(e){return s(Number.isSafeInteger(e),"limit must be an integer"),this.$_addRule({name:"precision",args:{limit:e}})},validate(e,t,r){let{limit:s}=r;const n=e.toString().match(i.precisionRx);return Math.max((n[1]?n[1].length:0)-(n[2]?parseInt(n[2],10):0),0)<=s?e:t.error("number.precision",{limit:s,value:e})},convert:!0},sign:{method(e){return s(["negative","positive"].includes(e),"Invalid sign",e),this.$_addRule({name:"sign",args:{sign:e}})},validate(e,t,r){let{sign:s}=r;return"negative"===s&&e<0||"positive"===s&&e>0?e:t.error(`number.${s}`)}},unsafe:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"enabled must be a boolean"),this.$_setFlag("unsafe",e)}}},cast:{string:{from:e=>"number"==typeof e,to:(e,t)=>e.toString()}},messages:{"number.base":"{{#label}} must be a number","number.greater":"{{#label}} must be greater than {{#limit}}","number.infinity":"{{#label}} cannot be infinity","number.integer":"{{#label}} must be an integer","number.less":"{{#label}} must be less than {{#limit}}","number.max":"{{#label}} must be less than or equal to {{#limit}}","number.min":"{{#label}} must be greater than or equal to {{#limit}}","number.multiple":"{{#label}} must be a multiple of {{#multiple}}","number.negative":"{{#label}} must be a negative number","number.port":"{{#label}} must be a valid port","number.positive":"{{#label}} must be a positive number","number.precision":"{{#label}} must have no more than {{#limit}} decimal places","number.unsafe":"{{#label}} must be a safe number"}}),i.extractSignificantDigits=function(e){return e.replace(i.exponentialPartRegex,"").replace(i.dotRegex,"").replace(i.trailingZerosRegex,"").replace(i.leadingSignAndZerosRegex,"")},i.normalizeDecimal=function(e){return(e=e.replace(/^\+/,"").replace(/\.0*$/,"").replace(/^(-?)\.([^\.]*)$/,"$10.$2").replace(/^(-?)0+([0-9])/,"$1$2")).includes(".")&&e.endsWith("0")&&(e=e.replace(/0+$/,"")),"-0"===e?"0":e}},8966:(e,t,r)=>{"use strict";const s=r(7824);e.exports=s.extend({type:"object",cast:{map:{from:e=>e&&"object"==typeof e,to:(e,t)=>new Map(Object.entries(e))}}})},7417:(e,t,r)=>{"use strict";const s=r(375),n=r(5380),a=r(1745),i=r(9959),o=r(6064),l=r(9926),c=r(5752),u=r(8068),f=r(8160),h={tlds:l instanceof Set&&{tlds:{allow:l,deny:null}},base64Regex:{true:{true:/^(?:[\w\-]{2}[\w\-]{2})*(?:[\w\-]{2}==|[\w\-]{3}=)?$/,false:/^(?:[A-Za-z0-9+\/]{2}[A-Za-z0-9+\/]{2})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/},false:{true:/^(?:[\w\-]{2}[\w\-]{2})*(?:[\w\-]{2}(==)?|[\w\-]{3}=?)?$/,false:/^(?:[A-Za-z0-9+\/]{2}[A-Za-z0-9+\/]{2})*(?:[A-Za-z0-9+\/]{2}(==)?|[A-Za-z0-9+\/]{3}=?)?$/}},dataUriRegex:/^data:[\w+.-]+\/[\w+.-]+;((charset=[\w-]+|base64),)?(.*)$/,hexRegex:/^[a-f0-9]+$/i,ipRegex:i.regex({cidr:"forbidden"}).regex,isoDurationRegex:/^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/,guidBrackets:{"{":"}","[":"]","(":")","":""},guidVersions:{uuidv1:"1",uuidv2:"2",uuidv3:"3",uuidv4:"4",uuidv5:"5"},guidSeparators:new Set([void 0,!0,!1,"-",":"]),normalizationForms:["NFC","NFD","NFKC","NFKD"]};e.exports=u.extend({type:"string",flags:{insensitive:{default:!1},truncate:{default:!1}},terms:{replacements:{init:null}},coerce:{from:"string",method(e,t){let{schema:r,state:s,prefs:n}=t;const a=r.$_getRule("normalize");a&&(e=e.normalize(a.args.form));const i=r.$_getRule("case");i&&(e="upper"===i.args.direction?e.toLocaleUpperCase():e.toLocaleLowerCase());const o=r.$_getRule("trim");if(o&&o.args.enabled&&(e=e.trim()),r.$_terms.replacements)for(const t of r.$_terms.replacements)e=e.replace(t.pattern,t.replacement);const l=r.$_getRule("hex");if(l&&l.args.options.byteAligned&&e.length%2!=0&&(e=`0${e}`),r.$_getRule("isoDate")){const t=h.isoDate(e);t&&(e=t)}if(r._flags.truncate){const t=r.$_getRule("max");if(t){let a=t.args.limit;if(f.isResolvable(a)&&(a=a.resolve(e,s,n),!f.limit(a)))return{value:e,errors:r.$_createError("any.ref",a,{ref:t.args.limit,arg:"limit",reason:"must be a positive integer"},s,n)};e=e.slice(0,a)}}return{value:e}}},validate(e,t){let{schema:r,error:s}=t;if("string"!=typeof e)return{value:e,errors:s("string.base")};if(""===e){const t=r.$_getRule("min");if(t&&0===t.args.limit)return;return{value:e,errors:s("string.empty")}}},rules:{alphanum:{method(){return this.$_addRule("alphanum")},validate:(e,t)=>/^[a-zA-Z0-9]+$/.test(e)?e:t.error("string.alphanum")},base64:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return f.assertOptions(e,["paddingRequired","urlSafe"]),e={urlSafe:!1,paddingRequired:!0,...e},s("boolean"==typeof e.paddingRequired,"paddingRequired must be boolean"),s("boolean"==typeof e.urlSafe,"urlSafe must be boolean"),this.$_addRule({name:"base64",args:{options:e}})},validate(e,t,r){let{options:s}=r;return h.base64Regex[s.paddingRequired][s.urlSafe].test(e)?e:t.error("string.base64")}},case:{method(e){return s(["lower","upper"].includes(e),"Invalid case:",e),this.$_addRule({name:"case",args:{direction:e}})},validate(e,t,r){let{direction:s}=r;return"lower"===s&&e===e.toLocaleLowerCase()||"upper"===s&&e===e.toLocaleUpperCase()?e:t.error(`string.${s}case`)},convert:!0},creditCard:{method(){return this.$_addRule("creditCard")},validate(e,t){let r=e.length,s=0,n=1;for(;r--;){const t=e.charAt(r)*n;s+=t-9*(t>9),n^=3}return s>0&&s%10==0?e:t.error("string.creditCard")}},dataUri:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return f.assertOptions(e,["paddingRequired"]),e={paddingRequired:!0,...e},s("boolean"==typeof e.paddingRequired,"paddingRequired must be boolean"),this.$_addRule({name:"dataUri",args:{options:e}})},validate(e,t,r){let{options:s}=r;const n=e.match(h.dataUriRegex);if(n){if(!n[2])return e;if("base64"!==n[2])return e;if(h.base64Regex[s.paddingRequired].false.test(n[3]))return e}return t.error("string.dataUri")}},domain:{method(e){e&&f.assertOptions(e,["allowFullyQualified","allowUnicode","maxDomainSegments","minDomainSegments","tlds"]);const t=h.addressOptions(e);return this.$_addRule({name:"domain",args:{options:e},address:t})},validate(e,t,r,s){let{address:a}=s;return n.isValid(e,a)?e:t.error("string.domain")}},email:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["allowFullyQualified","allowUnicode","ignoreLength","maxDomainSegments","minDomainSegments","multiple","separator","tlds"]),s(void 0===e.multiple||"boolean"==typeof e.multiple,"multiple option must be an boolean");const t=h.addressOptions(e),r=new RegExp(`\\s*[${e.separator?o(e.separator):","}]\\s*`);return this.$_addRule({name:"email",args:{options:e},regex:r,address:t})},validate(e,t,r,s){let{options:n}=r,{regex:i,address:o}=s;const l=n.multiple?e.split(i):[e],c=[];for(const e of l)a.isValid(e,o)||c.push(e);return c.length?t.error("string.email",{value:e,invalids:c}):e}},guid:{alias:"uuid",method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["version","separator"]);let t="";if(e.version){const r=[].concat(e.version);s(r.length>=1,"version must have at least 1 valid version specified");const n=new Set;for(let e=0;e<r.length;++e){const a=r[e];s("string"==typeof a,"version at position "+e+" must be a string");const i=h.guidVersions[a.toLowerCase()];s(i,"version at position "+e+" must be one of "+Object.keys(h.guidVersions).join(", ")),s(!n.has(i),"version at position "+e+" must not be a duplicate"),t+=i,n.add(i)}}s(h.guidSeparators.has(e.separator),'separator must be one of true, false, "-", or ":"');const r=void 0===e.separator?"[:-]?":!0===e.separator?"[:-]":!1===e.separator?"[]?":`\\${e.separator}`,n=new RegExp(`^([\\[{\\(]?)[0-9A-F]{8}(${r})[0-9A-F]{4}\\2?[${t||"0-9A-F"}][0-9A-F]{3}\\2?[${t?"89AB":"0-9A-F"}][0-9A-F]{3}\\2?[0-9A-F]{12}([\\]}\\)]?)$`,"i");return this.$_addRule({name:"guid",args:{options:e},regex:n})},validate(e,t,r,s){let{regex:n}=s;const a=n.exec(e);return a?h.guidBrackets[a[1]]!==a[a.length-1]?t.error("string.guid"):e:t.error("string.guid")}},hex:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return f.assertOptions(e,["byteAligned"]),e={byteAligned:!1,...e},s("boolean"==typeof e.byteAligned,"byteAligned must be boolean"),this.$_addRule({name:"hex",args:{options:e}})},validate(e,t,r){let{options:s}=r;return h.hexRegex.test(e)?s.byteAligned&&e.length%2!=0?t.error("string.hexAlign"):e:t.error("string.hex")}},hostname:{method(){return this.$_addRule("hostname")},validate:(e,t)=>n.isValid(e,{minDomainSegments:1})||h.ipRegex.test(e)?e:t.error("string.hostname")},insensitive:{method(){return this.$_setFlag("insensitive",!0)}},ip:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["cidr","version"]);const{cidr:t,versions:r,regex:s}=i.regex(e),n=e.version?r:void 0;return this.$_addRule({name:"ip",args:{options:{cidr:t,version:n}},regex:s})},validate(e,t,r,s){let{options:n}=r,{regex:a}=s;return a.test(e)?e:n.version?t.error("string.ipVersion",{value:e,cidr:n.cidr,version:n.version}):t.error("string.ip",{value:e,cidr:n.cidr})}},isoDate:{method(){return this.$_addRule("isoDate")},validate(e,t){let{error:r}=t;return h.isoDate(e)?e:r("string.isoDate")}},isoDuration:{method(){return this.$_addRule("isoDuration")},validate:(e,t)=>h.isoDurationRegex.test(e)?e:t.error("string.isoDuration")},length:{method(e,t){return h.length(this,"length",e,"=",t)},validate(e,t,r,s){let{limit:n,encoding:a}=r,{name:i,operator:o,args:l}=s;const c=!a&&e.length;return f.compare(c,n,o)?e:t.error("string."+i,{limit:l.limit,value:e,encoding:a})},args:[{name:"limit",ref:!0,assert:f.limit,message:"must be a positive integer"},"encoding"]},lowercase:{method(){return this.case("lower")}},max:{method(e,t){return h.length(this,"max",e,"<=",t)},args:["limit","encoding"]},min:{method(e,t){return h.length(this,"min",e,">=",t)},args:["limit","encoding"]},normalize:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"NFC";return s(h.normalizationForms.includes(e),"normalization form must be one of "+h.normalizationForms.join(", ")),this.$_addRule({name:"normalize",args:{form:e}})},validate(e,t,r){let{error:s}=t,{form:n}=r;return e===e.normalize(n)?e:s("string.normalize",{value:e,form:n})},convert:!0},pattern:{alias:"regex",method(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};s(e instanceof RegExp,"regex must be a RegExp"),s(!e.flags.includes("g")&&!e.flags.includes("y"),"regex should not use global or sticky mode"),"string"==typeof t&&(t={name:t}),f.assertOptions(t,["invert","name"]);const r=["string.pattern",t.invert?".invert":"",t.name?".name":".base"].join("");return this.$_addRule({name:"pattern",args:{regex:e,options:t},errorCode:r})},validate(e,t,r,s){let{regex:n,options:a}=r,{errorCode:i}=s;return n.test(e)^a.invert?e:t.error(i,{name:a.name,regex:n,value:e})},args:["regex","options"],multi:!0},replace:{method(e,t){"string"==typeof e&&(e=new RegExp(o(e),"g")),s(e instanceof RegExp,"pattern must be a RegExp"),s("string"==typeof t,"replacement must be a String");const r=this.clone();return r.$_terms.replacements||(r.$_terms.replacements=[]),r.$_terms.replacements.push({pattern:e,replacement:t}),r}},token:{method(){return this.$_addRule("token")},validate:(e,t)=>/^\w+$/.test(e)?e:t.error("string.token")},trim:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"enabled must be a boolean"),this.$_addRule({name:"trim",args:{enabled:e}})},validate(e,t,r){let{enabled:s}=r;return s&&e!==e.trim()?t.error("string.trim"):e},convert:!0},truncate:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"enabled must be a boolean"),this.$_setFlag("truncate",e)}},uppercase:{method(){return this.case("upper")}},uri:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["allowRelative","allowQuerySquareBrackets","domain","relativeOnly","scheme"]),e.domain&&f.assertOptions(e.domain,["allowFullyQualified","allowUnicode","maxDomainSegments","minDomainSegments","tlds"]);const{regex:t,scheme:r}=c.regex(e),s=e.domain?h.addressOptions(e.domain):null;return this.$_addRule({name:"uri",args:{options:e},regex:t,domain:s,scheme:r})},validate(e,t,r,s){let{options:a}=r,{regex:i,domain:o,scheme:l}=s;if(["http:/","https:/"].includes(e))return t.error("string.uri");const c=i.exec(e);if(c){const r=c[1]||c[2];return!o||a.allowRelative&&!r||n.isValid(r,o)?e:t.error("string.domain",{value:r})}return a.relativeOnly?t.error("string.uriRelativeOnly"):a.scheme?t.error("string.uriCustomScheme",{scheme:l,value:e}):t.error("string.uri")}}},manifest:{build(e,t){if(t.replacements)for(const{pattern:r,replacement:s}of t.replacements)e=e.replace(r,s);return e}},messages:{"string.alphanum":"{{#label}} must only contain alpha-numeric characters","string.base":"{{#label}} must be a string","string.base64":"{{#label}} must be a valid base64 string","string.creditCard":"{{#label}} must be a credit card","string.dataUri":"{{#label}} must be a valid dataUri string","string.domain":"{{#label}} must contain a valid domain name","string.email":"{{#label}} must be a valid email","string.empty":"{{#label}} is not allowed to be empty","string.guid":"{{#label}} must be a valid GUID","string.hex":"{{#label}} must only contain hexadecimal characters","string.hexAlign":"{{#label}} hex decoded representation must be byte aligned","string.hostname":"{{#label}} must be a valid hostname","string.ip":"{{#label}} must be a valid ip address with a {{#cidr}} CIDR","string.ipVersion":"{{#label}} must be a valid ip address of one of the following versions {{#version}} with a {{#cidr}} CIDR","string.isoDate":"{{#label}} must be in iso format","string.isoDuration":"{{#label}} must be a valid ISO 8601 duration","string.length":"{{#label}} length must be {{#limit}} characters long","string.lowercase":"{{#label}} must only contain lowercase characters","string.max":"{{#label}} length must be less than or equal to {{#limit}} characters long","string.min":"{{#label}} length must be at least {{#limit}} characters long","string.normalize":"{{#label}} must be unicode normalized in the {{#form}} form","string.token":"{{#label}} must only contain alpha-numeric and underscore characters","string.pattern.base":"{{#label}} with value {:[.]} fails to match the required pattern: {{#regex}}","string.pattern.name":"{{#label}} with value {:[.]} fails to match the {{#name}} pattern","string.pattern.invert.base":"{{#label}} with value {:[.]} matches the inverted pattern: {{#regex}}","string.pattern.invert.name":"{{#label}} with value {:[.]} matches the inverted {{#name}} pattern","string.trim":"{{#label}} must not have leading or trailing whitespace","string.uri":"{{#label}} must be a valid uri","string.uriCustomScheme":"{{#label}} must be a valid uri with a scheme matching the {{#scheme}} pattern","string.uriRelativeOnly":"{{#label}} must be a valid relative uri","string.uppercase":"{{#label}} must only contain uppercase characters"}}),h.addressOptions=function(e){if(!e)return e;if(s(void 0===e.minDomainSegments||Number.isSafeInteger(e.minDomainSegments)&&e.minDomainSegments>0,"minDomainSegments must be a positive integer"),s(void 0===e.maxDomainSegments||Number.isSafeInteger(e.maxDomainSegments)&&e.maxDomainSegments>0,"maxDomainSegments must be a positive integer"),!1===e.tlds)return e;if(!0===e.tlds||void 0===e.tlds)return s(h.tlds,"Built-in TLD list disabled"),Object.assign({},e,h.tlds);s("object"==typeof e.tlds,"tlds must be true, false, or an object");const t=e.tlds.deny;if(t)return Array.isArray(t)&&(e=Object.assign({},e,{tlds:{deny:new Set(t)}})),s(e.tlds.deny instanceof Set,"tlds.deny must be an array, Set, or boolean"),s(!e.tlds.allow,"Cannot specify both tlds.allow and tlds.deny lists"),h.validateTlds(e.tlds.deny,"tlds.deny"),e;const r=e.tlds.allow;return r?!0===r?(s(h.tlds,"Built-in TLD list disabled"),Object.assign({},e,h.tlds)):(Array.isArray(r)&&(e=Object.assign({},e,{tlds:{allow:new Set(r)}})),s(e.tlds.allow instanceof Set,"tlds.allow must be an array, Set, or boolean"),h.validateTlds(e.tlds.allow,"tlds.allow"),e):e},h.validateTlds=function(e,t){for(const r of e)s(n.isValid(r,{minDomainSegments:1,maxDomainSegments:1}),`${t} must contain valid top level domain names`)},h.isoDate=function(e){if(!f.isIsoDate(e))return null;/.*T.*[+-]\d\d$/.test(e)&&(e+="00");const t=new Date(e);return isNaN(t.getTime())?null:t.toISOString()},h.length=function(e,t,r,n,a){return s(!a||!1,"Invalid encoding:",a),e.$_addRule({name:t,method:"length",args:{limit:r,encoding:a},operator:n})}},8826:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a={};a.Map=class extends Map{slice(){return new a.Map(this)}},e.exports=n.extend({type:"symbol",terms:{map:{init:new a.Map}},coerce:{method(e,t){let{schema:r,error:s}=t;const n=r.$_terms.map.get(e);return n&&(e=n),r._flags.only&&"symbol"!=typeof e?{value:e,errors:s("symbol.map",{map:r.$_terms.map})}:{value:e}}},validate(e,t){let{error:r}=t;if("symbol"!=typeof e)return{value:e,errors:r("symbol.base")}},rules:{map:{method(e){e&&!e[Symbol.iterator]&&"object"==typeof e&&(e=Object.entries(e)),s(e&&e[Symbol.iterator],"Iterable must be an iterable or object");const t=this.clone(),r=[];for(const n of e){s(n&&n[Symbol.iterator],"Entry must be an iterable");const[e,a]=n;s("object"!=typeof e&&"function"!=typeof e&&"symbol"!=typeof e,"Key must not be of type object, function, or Symbol"),s("symbol"==typeof a,"Value must be a Symbol"),t.$_terms.map.set(e,a),r.push(a)}return t.valid(...r)}}},manifest:{build:(e,t)=>(t.map&&(e=e.map(t.map)),e)},messages:{"symbol.base":"{{#label}} must be a symbol","symbol.map":"{{#label}} must be one of {{#map}}"}})},8863:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(738),i=r(9621),o=r(8160),l=r(6354),c=r(493),u={result:Symbol("result")};t.entry=function(e,t,r){let n=o.defaults;r&&(s(void 0===r.warnings,"Cannot override warnings preference in synchronous validation"),s(void 0===r.artifacts,"Cannot override artifacts preference in synchronous validation"),n=o.preferences(o.defaults,r));const a=u.entry(e,t,n);s(!a.mainstay.externals.length,"Schema with external rules must use validateAsync()");const i={value:a.value};return a.error&&(i.error=a.error),a.mainstay.warnings.length&&(i.warning=l.details(a.mainstay.warnings)),a.mainstay.debug&&(i.debug=a.mainstay.debug),a.mainstay.artifacts&&(i.artifacts=a.mainstay.artifacts),i},t.entryAsync=async function(e,t,r){let s=o.defaults;r&&(s=o.preferences(o.defaults,r));const n=u.entry(e,t,s),a=n.mainstay;if(n.error)throw a.debug&&(n.error.debug=a.debug),n.error;if(a.externals.length){let e=n.value;for(const{method:t,path:n,label:o}of a.externals){let a,l,c=e;n.length&&(a=n[n.length-1],l=i(e,n.slice(0,-1)),c=l[a]);try{const s=await t(c,{prefs:r});if(void 0===s||s===c)continue;l?l[a]=s:e=s}catch(e){throw s.errors.label&&(e.message+=` (${o})`),e}}n.value=e}if(!s.warnings&&!s.debug&&!s.artifacts)return n.value;const c={value:n.value};return a.warnings.length&&(c.warning=l.details(a.warnings)),a.debug&&(c.debug=a.debug),a.artifacts&&(c.artifacts=a.artifacts),c},u.entry=function(e,r,s){const{tracer:n,cleanup:a}=u.tracer(r,s),i={externals:[],warnings:[],tracer:n,debug:s.debug?[]:null,links:r._ids._schemaChain?new Map:null},o=r._ids._schemaChain?[{schema:r}]:null,f=new c([],[],{mainstay:i,schemas:o}),h=t.validate(e,r,f,s);a&&r.$_root.untrace();const d=l.process(h.errors,e,s);return{value:h.value,error:d,mainstay:i}},u.tracer=function(e,t){return e.$_root._tracer?{tracer:e.$_root._tracer._register(e)}:t.debug?(s(e.$_root.trace,"Debug mode not supported"),{tracer:e.$_root.trace()._register(e),cleanup:!0}):{tracer:u.ignore}},t.validate=function(e,t,r,s){let n=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{};if(t.$_terms.whens&&(t=t._generate(e,r,s).schema),t._preferences&&(s=u.prefs(t,s)),t._cache&&s.cache){const s=t._cache.get(e);if(r.mainstay.tracer.debug(r,"validate","cached",!!s),s)return s}const a=(n,a,i)=>t.$_createError(n,e,a,i||r,s),i={original:e,prefs:s,schema:t,state:r,error:a,errorsArray:u.errorsArray,warn:(e,t,s)=>r.mainstay.warnings.push(a(e,t,s)),message:(n,a)=>t.$_createError("custom",e,a,r,s,{messages:n})};r.mainstay.tracer.entry(t,r);const l=t._definition;if(l.prepare&&void 0!==e&&s.convert){const t=l.prepare(e,i);if(t){if(r.mainstay.tracer.value(r,"prepare",e,t.value),t.errors)return u.finalize(t.value,[].concat(t.errors),i);e=t.value}}if(l.coerce&&void 0!==e&&s.convert&&(!l.coerce.from||l.coerce.from.includes(typeof e))){const t=l.coerce.method(e,i);if(t){if(r.mainstay.tracer.value(r,"coerced",e,t.value),t.errors)return u.finalize(t.value,[].concat(t.errors),i);e=t.value}}const c=t._flags.empty;c&&c.$_match(u.trim(e,t),r.nest(c),o.defaults)&&(r.mainstay.tracer.value(r,"empty",e,void 0),e=void 0);const f=n.presence||t._flags.presence||(t._flags._endedSwitch?null:s.presence);if(void 0===e){if("forbidden"===f)return u.finalize(e,null,i);if("required"===f)return u.finalize(e,[t.$_createError("any.required",e,null,r,s)],i);if("optional"===f){if(t._flags.default!==o.symbols.deepDefault)return u.finalize(e,null,i);r.mainstay.tracer.value(r,"default",e,{}),e={}}}else if("forbidden"===f)return u.finalize(e,[t.$_createError("any.unknown",e,null,r,s)],i);const h=[];if(t._valids){const n=t._valids.get(e,r,s,t._flags.insensitive);if(n)return s.convert&&(r.mainstay.tracer.value(r,"valids",e,n.value),e=n.value),r.mainstay.tracer.filter(t,r,"valid",n),u.finalize(e,null,i);if(t._flags.only){const n=t.$_createError("any.only",e,{valids:t._valids.values({display:!0})},r,s);if(s.abortEarly)return u.finalize(e,[n],i);h.push(n)}}if(t._invalids){const n=t._invalids.get(e,r,s,t._flags.insensitive);if(n){r.mainstay.tracer.filter(t,r,"invalid",n);const a=t.$_createError("any.invalid",e,{invalids:t._invalids.values({display:!0})},r,s);if(s.abortEarly)return u.finalize(e,[a],i);h.push(a)}}if(l.validate){const t=l.validate(e,i);if(t&&(r.mainstay.tracer.value(r,"base",e,t.value),e=t.value,t.errors)){if(!Array.isArray(t.errors))return h.push(t.errors),u.finalize(e,h,i);if(t.errors.length)return h.push(...t.errors),u.finalize(e,h,i)}}return t._rules.length?u.rules(e,h,i):u.finalize(e,h,i)},u.rules=function(e,t,r){const{schema:s,state:n,prefs:a}=r;for(const i of s._rules){const l=s._definition.rules[i.method];if(l.convert&&a.convert){n.mainstay.tracer.log(s,n,"rule",i.name,"full");continue}let c,f=i.args;if(i._resolve.length){f=Object.assign({},f);for(const t of i._resolve){const r=l.argsByName.get(t),i=f[t].resolve(e,n,a),u=r.normalize?r.normalize(i):i,h=o.validateArg(u,null,r);if(h){c=s.$_createError("any.ref",i,{arg:t,ref:f[t],reason:h},n,a);break}f[t]=u}}c=c||l.validate(e,r,f,i);const h=u.rule(c,i);if(h.errors){if(n.mainstay.tracer.log(s,n,"rule",i.name,"error"),i.warn){n.mainstay.warnings.push(...h.errors);continue}if(a.abortEarly)return u.finalize(e,h.errors,r);t.push(...h.errors)}else n.mainstay.tracer.log(s,n,"rule",i.name,"pass"),n.mainstay.tracer.value(n,"rule",e,h.value,i.name),e=h.value}return u.finalize(e,t,r)},u.rule=function(e,t){return e instanceof l.Report?(u.error(e,t),{errors:[e],value:null}):Array.isArray(e)&&e[o.symbols.errors]?(e.forEach((e=>u.error(e,t))),{errors:e,value:null}):{errors:null,value:e}},u.error=function(e,t){return t.message&&e._setTemplate(t.message),e},u.finalize=function(e,t,r){t=t||[];const{schema:n,state:a,prefs:i}=r;if(t.length){const s=u.default("failover",void 0,t,r);void 0!==s&&(a.mainstay.tracer.value(a,"failover",e,s),e=s,t=[])}if(t.length&&n._flags.error)if("function"==typeof n._flags.error){t=n._flags.error(t),Array.isArray(t)||(t=[t]);for(const e of t)s(e instanceof Error||e instanceof l.Report,"error() must return an Error object")}else t=[n._flags.error];if(void 0===e){const s=u.default("default",e,t,r);a.mainstay.tracer.value(a,"default",e,s),e=s}if(n._flags.cast&&void 0!==e){const t=n._definition.cast[n._flags.cast];if(t.from(e)){const s=t.to(e,r);a.mainstay.tracer.value(a,"cast",e,s,n._flags.cast),e=s}}if(n.$_terms.externals&&i.externals&&!1!==i._externals)for(const{method:e}of n.$_terms.externals)a.mainstay.externals.push({method:e,path:a.path,label:l.label(n._flags,a,i)});const o={value:e,errors:t.length?t:null};return n._flags.result&&(o.value="strip"===n._flags.result?void 0:r.original,a.mainstay.tracer.value(a,n._flags.result,e,o.value),a.shadow(e,n._flags.result)),n._cache&&!1!==i.cache&&!n._refs.length&&n._cache.set(r.original,o),void 0===e||o.errors||void 0===n._flags.artifact||(a.mainstay.artifacts=a.mainstay.artifacts||new Map,a.mainstay.artifacts.has(n._flags.artifact)||a.mainstay.artifacts.set(n._flags.artifact,[]),a.mainstay.artifacts.get(n._flags.artifact).push(a.path)),o},u.prefs=function(e,t){const r=t===o.defaults;return r&&e._preferences[o.symbols.prefs]?e._preferences[o.symbols.prefs]:(t=o.preferences(t,e._preferences),r&&(e._preferences[o.symbols.prefs]=t),t)},u.default=function(e,t,r,s){const{schema:a,state:i,prefs:l}=s,c=a._flags[e];if(l.noDefaults||void 0===c)return t;if(i.mainstay.tracer.log(a,i,"rule",e,"full"),!c)return c;if("function"==typeof c){const t=c.length?[n(i.ancestors[0]),s]:[];try{return c(...t)}catch(t){return void r.push(a.$_createError(`any.${e}`,null,{error:t},i,l))}}return"object"!=typeof c?c:c[o.symbols.literal]?c.literal:o.isResolvable(c)?c.resolve(t,i,l):n(c)},u.trim=function(e,t){if("string"!=typeof e)return e;const r=t.$_getRule("trim");return r&&r.args.enabled?e.trim():e},u.ignore={active:!1,debug:a,entry:a,filter:a,log:a,resolve:a,value:a},u.errorsArray=function(){const e=[];return e[o.symbols.errors]=!0,e}},2036:(e,t,r)=>{"use strict";const s=r(375),n=r(9474),a=r(8160),i={};e.exports=i.Values=class{constructor(e,t){this._values=new Set(e),this._refs=new Set(t),this._lowercase=i.lowercases(e),this._override=!1}get length(){return this._values.size+this._refs.size}add(e,t){a.isResolvable(e)?this._refs.has(e)||(this._refs.add(e),t&&t.register(e)):this.has(e,null,null,!1)||(this._values.add(e),"string"==typeof e&&this._lowercase.set(e.toLowerCase(),e))}static merge(e,t,r){if(e=e||new i.Values,t){if(t._override)return t.clone();for(const r of[...t._values,...t._refs])e.add(r)}if(r)for(const t of[...r._values,...r._refs])e.remove(t);return e.length?e:null}remove(e){a.isResolvable(e)?this._refs.delete(e):(this._values.delete(e),"string"==typeof e&&this._lowercase.delete(e.toLowerCase()))}has(e,t,r,s){return!!this.get(e,t,r,s)}get(e,t,r,s){if(!this.length)return!1;if(this._values.has(e))return{value:e};if("string"==typeof e&&e&&s){const t=this._lowercase.get(e.toLowerCase());if(t)return{value:t}}if(!this._refs.size&&"object"!=typeof e)return!1;if("object"==typeof e)for(const t of this._values)if(n(t,e))return{value:t};if(t)for(const a of this._refs){const i=a.resolve(e,t,r,null,{in:!0});if(void 0===i)continue;const o=a.in&&"object"==typeof i?Array.isArray(i)?i:Object.keys(i):[i];for(const t of o)if(typeof t==typeof e)if(s&&e&&"string"==typeof e){if(t.toLowerCase()===e.toLowerCase())return{value:t,ref:a}}else if(n(t,e))return{value:t,ref:a}}return!1}override(){this._override=!0}values(e){if(e&&e.display){const e=[];for(const t of[...this._values,...this._refs])void 0!==t&&e.push(t);return e}return Array.from([...this._values,...this._refs])}clone(){const e=new i.Values(this._values,this._refs);return e._override=this._override,e}concat(e){s(!e._override,"Cannot concat override set of values");const t=new i.Values([...this._values,...e._values],[...this._refs,...e._refs]);return t._override=this._override,t}describe(){const e=[];this._override&&e.push({override:!0});for(const t of this._values.values())e.push(t&&"object"==typeof t?{value:t}:t);for(const t of this._refs.values())e.push(t.describe());return e}},i.Values.prototype[a.symbols.values]=!0,i.Values.prototype.slice=i.Values.prototype.clone,i.lowercases=function(e){const t=new Map;if(e)for(const r of e)"string"==typeof r&&t.set(r.toLowerCase(),r);return t}},978:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(1687),i=r(9621),o={};e.exports=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if(s(e&&"object"==typeof e,"Invalid defaults value: must be an object"),s(!t||!0===t||"object"==typeof t,"Invalid source value: must be true, falsy or an object"),s("object"==typeof r,"Invalid options: must be an object"),!t)return null;if(r.shallow)return o.applyToDefaultsWithShallow(e,t,r);const i=n(e);if(!0===t)return i;const l=void 0!==r.nullOverride&&r.nullOverride;return a(i,t,{nullOverride:l,mergeArrays:!1})},o.applyToDefaultsWithShallow=function(e,t,r){const l=r.shallow;s(Array.isArray(l),"Invalid keys");const c=new Map,u=!0===t?null:new Set;for(let r of l){r=Array.isArray(r)?r:r.split(".");const s=i(e,r);s&&"object"==typeof s?c.set(s,u&&i(t,r)||s):u&&u.add(r)}const f=n(e,{},c);if(!u)return f;for(const e of u)o.reachCopy(f,t,e);const h=void 0!==r.nullOverride&&r.nullOverride;return a(f,t,{nullOverride:h,mergeArrays:!1})},o.reachCopy=function(e,t,r){for(const e of r){if(!(e in t))return;const r=t[e];if("object"!=typeof r||null===r)return;t=r}const s=t;let n=e;for(let e=0;e<r.length-1;++e){const t=r[e];"object"!=typeof n[t]&&(n[t]={}),n=n[t]}n[r[r.length-1]]=s}},375:(e,t,r)=>{"use strict";const s=r(7916);e.exports=function(e){if(!e){for(var t=arguments.length,r=new Array(t>1?t-1:0),n=1;n<t;n++)r[n-1]=arguments[n];if(1===r.length&&r[0]instanceof Error)throw r[0];throw new s(r)}}},8571:(e,t,r)=>{"use strict";const s=r(9621),n=r(4277),a=r(7043),i={needsProtoHack:new Set([n.set,n.map,n.weakSet,n.weakMap])};e.exports=i.clone=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:null;if("object"!=typeof e||null===e)return e;let s=i.clone,o=r;if(t.shallow){if(!0!==t.shallow)return i.cloneWithShallow(e,t);s=e=>e}else if(o){const t=o.get(e);if(t)return t}else o=new Map;const l=n.getInternalProto(e);if(l===n.buffer)return!1;if(l===n.date)return new Date(e.getTime());if(l===n.regex)return new RegExp(e);const c=i.base(e,l,t);if(c===e)return e;if(o&&o.set(e,c),l===n.set)for(const r of e)c.add(s(r,t,o));else if(l===n.map)for(const[r,n]of e)c.set(r,s(n,t,o));const u=a.keys(e,t);for(const r of u){if("__proto__"===r)continue;if(l===n.array&&"length"===r){c.length=e.length;continue}const a=Object.getOwnPropertyDescriptor(e,r);a?a.get||a.set?Object.defineProperty(c,r,a):a.enumerable?c[r]=s(e[r],t,o):Object.defineProperty(c,r,{enumerable:!1,writable:!0,configurable:!0,value:s(e[r],t,o)}):Object.defineProperty(c,r,{enumerable:!0,writable:!0,configurable:!0,value:s(e[r],t,o)})}return c},i.cloneWithShallow=function(e,t){const r=t.shallow;(t=Object.assign({},t)).shallow=!1;const n=new Map;for(const t of r){const r=s(e,t);"object"!=typeof r&&"function"!=typeof r||n.set(r,r)}return i.clone(e,t,n)},i.base=function(e,t,r){if(!1===r.prototype)return i.needsProtoHack.has(t)?new t.constructor:t===n.array?[]:{};const s=Object.getPrototypeOf(e);if(s&&s.isImmutable)return e;if(t===n.array){const e=[];return s!==t&&Object.setPrototypeOf(e,s),e}if(i.needsProtoHack.has(t)){const e=new s.constructor;return s!==t&&Object.setPrototypeOf(e,s),e}return Object.create(s)}},9474:(e,t,r)=>{"use strict";const s=r(4277),n={mismatched:null};e.exports=function(e,t,r){return r=Object.assign({prototype:!0},r),!!n.isDeepEqual(e,t,r,[])},n.isDeepEqual=function(e,t,r,a){if(e===t)return 0!==e||1/e==1/t;const i=typeof e;if(i!==typeof t)return!1;if(null===e||null===t)return!1;if("function"===i){if(!r.deepFunction||e.toString()!==t.toString())return!1}else if("object"!==i)return e!=e&&t!=t;const o=n.getSharedType(e,t,!!r.prototype);switch(o){case s.buffer:return!1;case s.promise:return e===t;case s.regex:return e.toString()===t.toString();case n.mismatched:return!1}for(let r=a.length-1;r>=0;--r)if(a[r].isSame(e,t))return!0;a.push(new n.SeenEntry(e,t));try{return!!n.isDeepEqualObj(o,e,t,r,a)}finally{a.pop()}},n.getSharedType=function(e,t,r){if(r)return Object.getPrototypeOf(e)!==Object.getPrototypeOf(t)?n.mismatched:s.getInternalProto(e);const a=s.getInternalProto(e);return a!==s.getInternalProto(t)?n.mismatched:a},n.valueOf=function(e){const t=e.valueOf;if(void 0===t)return e;try{return t.call(e)}catch(e){return e}},n.hasOwnEnumerableProperty=function(e,t){return Object.prototype.propertyIsEnumerable.call(e,t)},n.isSetSimpleEqual=function(e,t){for(const r of Set.prototype.values.call(e))if(!Set.prototype.has.call(t,r))return!1;return!0},n.isDeepEqualObj=function(e,t,r,a,i){const{isDeepEqual:o,valueOf:l,hasOwnEnumerableProperty:c}=n,{keys:u,getOwnPropertySymbols:f}=Object;if(e===s.array){if(!a.part){if(t.length!==r.length)return!1;for(let e=0;e<t.length;++e)if(!o(t[e],r[e],a,i))return!1;return!0}for(const e of t)for(const t of r)if(o(e,t,a,i))return!0}else if(e===s.set){if(t.size!==r.size)return!1;if(!n.isSetSimpleEqual(t,r)){const e=new Set(Set.prototype.values.call(r));for(const r of Set.prototype.values.call(t)){if(e.delete(r))continue;let t=!1;for(const s of e)if(o(r,s,a,i)){e.delete(s),t=!0;break}if(!t)return!1}}}else if(e===s.map){if(t.size!==r.size)return!1;for(const[e,s]of Map.prototype.entries.call(t)){if(void 0===s&&!Map.prototype.has.call(r,e))return!1;if(!o(s,Map.prototype.get.call(r,e),a,i))return!1}}else if(e===s.error&&(t.name!==r.name||t.message!==r.message))return!1;const h=l(t),d=l(r);if((t!==h||r!==d)&&!o(h,d,a,i))return!1;const m=u(t);if(!a.part&&m.length!==u(r).length&&!a.skip)return!1;let p=0;for(const e of m)if(a.skip&&a.skip.includes(e))void 0===r[e]&&++p;else{if(!c(r,e))return!1;if(!o(t[e],r[e],a,i))return!1}if(!a.part&&m.length-p!==u(r).length)return!1;if(!1!==a.symbols){const e=f(t),s=new Set(f(r));for(const n of e){if(!a.skip||!a.skip.includes(n))if(c(t,n)){if(!c(r,n))return!1;if(!o(t[n],r[n],a,i))return!1}else if(c(r,n))return!1;s.delete(n)}for(const e of s)if(c(r,e))return!1}return!0},n.SeenEntry=class{constructor(e,t){this.obj=e,this.ref=t}isSame(e,t){return this.obj===e&&this.ref===t}}},7916:(e,t,r)=>{"use strict";const s=r(8761);e.exports=class extends Error{constructor(e){super(e.filter((e=>""!==e)).map((e=>"string"==typeof e?e:e instanceof Error?e.message:s(e))).join(" ")||"Unknown error"),"function"==typeof Error.captureStackTrace&&Error.captureStackTrace(this,t.assert)}}},5277:e=>{"use strict";const t={};e.exports=function(e){if(!e)return"";let r="";for(let s=0;s<e.length;++s){const n=e.charCodeAt(s);t.isSafe(n)?r+=e[s]:r+=t.escapeHtmlChar(n)}return r},t.escapeHtmlChar=function(e){return t.namedHtml.get(e)||(e>=256?"&#"+e+";":`&#x${e.toString(16).padStart(2,"0")};`)},t.isSafe=function(e){return t.safeCharCodes.has(e)},t.namedHtml=new Map([[38,"&amp;"],[60,"&lt;"],[62,"&gt;"],[34,"&quot;"],[160,"&nbsp;"],[162,"&cent;"],[163,"&pound;"],[164,"&curren;"],[169,"&copy;"],[174,"&reg;"]]),t.safeCharCodes=function(){const e=new Set;for(let t=32;t<123;++t)(t>=97||t>=65&&t<=90||t>=48&&t<=57||32===t||46===t||44===t||45===t||58===t||95===t)&&e.add(t);return e}()},6064:e=>{"use strict";e.exports=function(e){return e.replace(/[\^\$\.\*\+\-\?\=\!\:\|\\\/\(\)\[\]\{\}\,]/g,"\\$&")}},738:e=>{"use strict";e.exports=function(){}},1687:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(7043),i={};e.exports=i.merge=function(e,t,r){if(s(e&&"object"==typeof e,"Invalid target value: must be an object"),s(null==t||"object"==typeof t,"Invalid source value: must be null, undefined, or an object"),!t)return e;if(r=Object.assign({nullOverride:!0,mergeArrays:!0},r),Array.isArray(t)){s(Array.isArray(e),"Cannot merge array onto an object"),r.mergeArrays||(e.length=0);for(let s=0;s<t.length;++s)e.push(n(t[s],{symbols:r.symbols}));return e}const o=a.keys(t,r);for(let s=0;s<o.length;++s){const a=o[s];if("__proto__"===a||!Object.prototype.propertyIsEnumerable.call(t,a))continue;const l=t[a];if(l&&"object"==typeof l){if(e[a]===l)continue;!e[a]||"object"!=typeof e[a]||Array.isArray(e[a])!==Array.isArray(l)||l instanceof Date||l instanceof RegExp?e[a]=n(l,{symbols:r.symbols}):i.merge(e[a],l,r)}else(null!=l||r.nullOverride)&&(e[a]=l)}return e}},9621:(e,t,r)=>{"use strict";const s=r(375),n={};e.exports=function(e,t,r){if(!1===t||null==t)return e;"string"==typeof(r=r||{})&&(r={separator:r});const a=Array.isArray(t);s(!a||!r.separator,"Separator option is not valid for array-based chain");const i=a?t:t.split(r.separator||".");let o=e;for(let e=0;e<i.length;++e){let a=i[e];const l=r.iterables&&n.iterables(o);if(Array.isArray(o)||"set"===l){const e=Number(a);Number.isInteger(e)&&(a=e<0?o.length+e:e)}if(!o||"function"==typeof o&&!1===r.functions||!l&&void 0===o[a]){s(!r.strict||e+1===i.length,"Missing segment",a,"in reach path ",t),s("object"==typeof o||!0===r.functions||"function"!=typeof o,"Invalid segment",a,"in reach path ",t),o=r.default;break}o=l?"set"===l?[...o][a]:o.get(a):o[a]}return o},n.iterables=function(e){return e instanceof Set?"set":e instanceof Map?"map":void 0}},8761:e=>{"use strict";e.exports=function(){try{return JSON.stringify(...arguments)}catch(e){return"[Cannot display object: "+e.message+"]"}}},4277:(e,t)=>{"use strict";const r={};t=e.exports={array:Array.prototype,buffer:!1,date:Date.prototype,error:Error.prototype,generic:Object.prototype,map:Map.prototype,promise:Promise.prototype,regex:RegExp.prototype,set:Set.prototype,weakMap:WeakMap.prototype,weakSet:WeakSet.prototype},r.typeMap=new Map([["[object Error]",t.error],["[object Map]",t.map],["[object Promise]",t.promise],["[object Set]",t.set],["[object WeakMap]",t.weakMap],["[object WeakSet]",t.weakSet]]),t.getInternalProto=function(e){if(Array.isArray(e))return t.array;if(e instanceof Date)return t.date;if(e instanceof RegExp)return t.regex;if(e instanceof Error)return t.error;const s=Object.prototype.toString.call(e);return r.typeMap.get(s)||t.generic}},7043:(e,t)=>{"use strict";t.keys=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};return!1!==t.symbols?Reflect.ownKeys(e):Object.getOwnPropertyNames(e)}},3652:(e,t,r)=>{"use strict";const s=r(375),n={};t.Sorter=class{constructor(){this._items=[],this.nodes=[]}add(e,t){const r=[].concat((t=t||{}).before||[]),n=[].concat(t.after||[]),a=t.group||"?",i=t.sort||0;s(!r.includes(a),`Item cannot come before itself: ${a}`),s(!r.includes("?"),"Item cannot come before unassociated items"),s(!n.includes(a),`Item cannot come after itself: ${a}`),s(!n.includes("?"),"Item cannot come after unassociated items"),Array.isArray(e)||(e=[e]);for(const t of e){const e={seq:this._items.length,sort:i,before:r,after:n,group:a,node:t};this._items.push(e)}if(!t.manual){const e=this._sort();s(e,"item","?"!==a?`added into group ${a}`:"","created a dependencies error")}return this.nodes}merge(e){Array.isArray(e)||(e=[e]);for(const t of e)if(t)for(const e of t._items)this._items.push(Object.assign({},e));this._items.sort(n.mergeSort);for(let e=0;e<this._items.length;++e)this._items[e].seq=e;const t=this._sort();return s(t,"merge created a dependencies error"),this.nodes}sort(){const e=this._sort();return s(e,"sort created a dependencies error"),this.nodes}_sort(){const e={},t=Object.create(null),r=Object.create(null);for(const s of this._items){const n=s.seq,a=s.group;r[a]=r[a]||[],r[a].push(n),e[n]=s.before;for(const e of s.after)t[e]=t[e]||[],t[e].push(n)}for(const t in e){const s=[];for(const n in e[t]){const a=e[t][n];r[a]=r[a]||[],s.push(...r[a])}e[t]=s}for(const s in t)if(r[s])for(const n of r[s])e[n].push(...t[s]);const s={};for(const t in e){const r=e[t];for(const e of r)s[e]=s[e]||[],s[e].push(t)}const n={},a=[];for(let e=0;e<this._items.length;++e){let t=e;if(s[e]){t=null;for(let e=0;e<this._items.length;++e){if(!0===n[e])continue;s[e]||(s[e]=[]);const r=s[e].length;let a=0;for(let t=0;t<r;++t)n[s[e][t]]&&++a;if(a===r){t=e;break}}}null!==t&&(n[t]=!0,a.push(t))}if(a.length!==this._items.length)return!1;const i={};for(const e of this._items)i[e.seq]=e;this._items=[],this.nodes=[];for(const e of a){const t=i[e];this.nodes.push(t.node),this._items.push(t)}return!0}},n.mergeSort=(e,t)=>e.sort===t.sort?0:e.sort<t.sort?-1:1},5380:(e,t,r)=>{"use strict";const s=r(443),n=r(2178),a={minDomainSegments:2,nonAsciiRx:/[^\x00-\x7f]/,domainControlRx:/[\x00-\x20@\:\/\\#!\$&\'\(\)\*\+,;=\?]/,tldSegmentRx:/^[a-zA-Z](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$/,domainSegmentRx:/^[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$/,URL:s.URL||URL};t.analyze=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!e)return n.code("DOMAIN_NON_EMPTY_STRING");if("string"!=typeof e)throw new Error("Invalid input: domain must be a string");if(e.length>256)return n.code("DOMAIN_TOO_LONG");const r=!a.nonAsciiRx.test(e);if(!r){if(!1===t.allowUnicode)return n.code("DOMAIN_INVALID_UNICODE_CHARS");e=e.normalize("NFC")}if(a.domainControlRx.test(e))return n.code("DOMAIN_INVALID_CHARS");e=a.punycode(e),t.allowFullyQualified&&"."===e[e.length-1]&&(e=e.slice(0,-1));const s=t.minDomainSegments||a.minDomainSegments,i=e.split(".");if(i.length<s)return n.code("DOMAIN_SEGMENTS_COUNT");if(t.maxDomainSegments&&i.length>t.maxDomainSegments)return n.code("DOMAIN_SEGMENTS_COUNT_MAX");const o=t.tlds;if(o){const e=i[i.length-1].toLowerCase();if(o.deny&&o.deny.has(e)||o.allow&&!o.allow.has(e))return n.code("DOMAIN_FORBIDDEN_TLDS")}for(let e=0;e<i.length;++e){const t=i[e];if(!t.length)return n.code("DOMAIN_EMPTY_SEGMENT");if(t.length>63)return n.code("DOMAIN_LONG_SEGMENT");if(e<i.length-1){if(!a.domainSegmentRx.test(t))return n.code("DOMAIN_INVALID_CHARS")}else if(!a.tldSegmentRx.test(t))return n.code("DOMAIN_INVALID_TLDS_CHARS")}return null},t.isValid=function(e,r){return!t.analyze(e,r)},a.punycode=function(e){e.includes("%")&&(e=e.replace(/%/g,"%25"));try{return new a.URL(`http://${e}`).host}catch(t){return e}}},1745:(e,t,r)=>{"use strict";const s=r(9848),n=r(5380),a=r(2178),i={nonAsciiRx:/[^\x00-\x7f]/,encoder:new(s.TextEncoder||TextEncoder)};t.analyze=function(e,t){return i.email(e,t)},t.isValid=function(e,t){return!i.email(e,t)},i.email=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if("string"!=typeof e)throw new Error("Invalid input: email must be a string");if(!e)return a.code("EMPTY_STRING");const r=!i.nonAsciiRx.test(e);if(!r){if(!1===t.allowUnicode)return a.code("FORBIDDEN_UNICODE");e=e.normalize("NFC")}const s=e.split("@");if(2!==s.length)return s.length>2?a.code("MULTIPLE_AT_CHAR"):a.code("MISSING_AT_CHAR");const[o,l]=s;if(!o)return a.code("EMPTY_LOCAL");if(!t.ignoreLength){if(e.length>254)return a.code("ADDRESS_TOO_LONG");if(i.encoder.encode(o).length>64)return a.code("LOCAL_TOO_LONG")}return i.local(o,r)||n.analyze(l,t)},i.local=function(e,t){const r=e.split(".");for(const e of r){if(!e.length)return a.code("EMPTY_LOCAL_SEGMENT");if(t){if(!i.atextRx.test(e))return a.code("INVALID_LOCAL_CHARS")}else for(const t of e){if(i.atextRx.test(t))continue;const e=i.binary(t);if(!i.atomRx.test(e))return a.code("INVALID_LOCAL_CHARS")}}},i.binary=function(e){return Array.from(i.encoder.encode(e)).map((e=>String.fromCharCode(e))).join("")},i.atextRx=/^[\w!#\$%&'\*\+\-/=\?\^`\{\|\}~]+$/,i.atomRx=new RegExp(["(?:[\\xc2-\\xdf][\\x80-\\xbf])","(?:\\xe0[\\xa0-\\xbf][\\x80-\\xbf])|(?:[\\xe1-\\xec][\\x80-\\xbf]{2})|(?:\\xed[\\x80-\\x9f][\\x80-\\xbf])|(?:[\\xee-\\xef][\\x80-\\xbf]{2})","(?:\\xf0[\\x90-\\xbf][\\x80-\\xbf]{2})|(?:[\\xf1-\\xf3][\\x80-\\xbf]{3})|(?:\\xf4[\\x80-\\x8f][\\x80-\\xbf]{2})"].join("|"))},2178:(e,t)=>{"use strict";t.codes={EMPTY_STRING:"Address must be a non-empty string",FORBIDDEN_UNICODE:"Address contains forbidden Unicode characters",MULTIPLE_AT_CHAR:"Address cannot contain more than one @ character",MISSING_AT_CHAR:"Address must contain one @ character",EMPTY_LOCAL:"Address local part cannot be empty",ADDRESS_TOO_LONG:"Address too long",LOCAL_TOO_LONG:"Address local part too long",EMPTY_LOCAL_SEGMENT:"Address local part contains empty dot-separated segment",INVALID_LOCAL_CHARS:"Address local part contains invalid character",DOMAIN_NON_EMPTY_STRING:"Domain must be a non-empty string",DOMAIN_TOO_LONG:"Domain too long",DOMAIN_INVALID_UNICODE_CHARS:"Domain contains forbidden Unicode characters",DOMAIN_INVALID_CHARS:"Domain contains invalid character",DOMAIN_INVALID_TLDS_CHARS:"Domain contains invalid tld character",DOMAIN_SEGMENTS_COUNT:"Domain lacks the minimum required number of segments",DOMAIN_SEGMENTS_COUNT_MAX:"Domain contains too many segments",DOMAIN_FORBIDDEN_TLDS:"Domain uses forbidden TLD",DOMAIN_EMPTY_SEGMENT:"Domain contains empty dot-separated segment",DOMAIN_LONG_SEGMENT:"Domain contains dot-separated segment that is too long"},t.code=function(e){return{code:e,error:t.codes[e]}}},9959:(e,t,r)=>{"use strict";const s=r(375),n=r(5752);t.regex=function(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};s(void 0===e.cidr||"string"==typeof e.cidr,"options.cidr must be a string");const t=e.cidr?e.cidr.toLowerCase():"optional";s(["required","optional","forbidden"].includes(t),"options.cidr must be one of required, optional, forbidden"),s(void 0===e.version||"string"==typeof e.version||Array.isArray(e.version),"options.version must be a string or an array of string");let r=e.version||["ipv4","ipv6","ipvfuture"];Array.isArray(r)||(r=[r]),s(r.length>=1,"options.version must have at least 1 version specified");for(let e=0;e<r.length;++e)s("string"==typeof r[e],"options.version must only contain strings"),r[e]=r[e].toLowerCase(),s(["ipv4","ipv6","ipvfuture"].includes(r[e]),"options.version contains unknown version "+r[e]+" - must be one of ipv4, ipv6, ipvfuture");r=Array.from(new Set(r));const a=r.map((e=>{if("forbidden"===t)return n.ip[e];const r=`\\/${"ipv4"===e?n.ip.v4Cidr:n.ip.v6Cidr}`;return"required"===t?`${n.ip[e]}${r}`:`${n.ip[e]}(?:${r})?`})),i=`(?:${a.join("|")})`,o=new RegExp(`^${i}$`);return{cidr:t,versions:r,regex:o,raw:i}}},5752:(e,t,r)=>{"use strict";const s=r(375),n=r(6064),a={generate:function(){const e={},t="!\\$&'\\(\\)\\*\\+,;=",r="\\w-\\.~%\\dA-Fa-f"+t+":@",s="["+r+"]",n="(?:0{0,2}\\d|0?[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])";e.ipv4address="(?:"+n+"\\.){3}"+n;const a="[\\dA-Fa-f]{1,4}",i="(?:"+a+":"+a+"|"+e.ipv4address+")",o="(?:"+a+":){6}"+i,l="::(?:"+a+":){5}"+i,c="(?:"+a+")?::(?:"+a+":){4}"+i,u="(?:(?:"+a+":){0,1}"+a+")?::(?:"+a+":){3}"+i,f="(?:(?:"+a+":){0,2}"+a+")?::(?:"+a+":){2}"+i,h="(?:(?:"+a+":){0,3}"+a+")?::"+a+":"+i,d="(?:(?:"+a+":){0,4}"+a+")?::"+i;e.ipv4Cidr="(?:\\d|[1-2]\\d|3[0-2])",e.ipv6Cidr="(?:0{0,2}\\d|0?[1-9]\\d|1[01]\\d|12[0-8])",e.ipv6address="(?:"+o+"|"+l+"|"+c+"|"+u+"|"+f+"|"+h+"|"+d+"|(?:(?:[\\dA-Fa-f]{1,4}:){0,5}[\\dA-Fa-f]{1,4})?::[\\dA-Fa-f]{1,4}|(?:(?:[\\dA-Fa-f]{1,4}:){0,6}[\\dA-Fa-f]{1,4})?::)",e.ipvFuture="v[\\dA-Fa-f]+\\.[\\w-\\.~"+t+":]+",e.scheme="[a-zA-Z][a-zA-Z\\d+-\\.]*",e.schemeRegex=new RegExp(e.scheme);const m="[\\w-\\.~%\\dA-Fa-f"+t+":]*",p="(?:\\[(?:"+e.ipv6address+"|"+e.ipvFuture+")\\]|"+e.ipv4address+"|[\\w-\\.~%\\dA-Fa-f!\\$&'\\(\\)\\*\\+,;=]{1,255})",g="(?:"+m+"@)?"+p+"(?::\\d*)?",y="(?:"+m+"@)?("+p+")(?::\\d*)?",b=s+"+",v="(?:\\/[\\w-\\.~%\\dA-Fa-f!\\$&'\\(\\)\\*\\+,;=:@]*)*",_="\\/(?:"+b+v+")?",w=b+v,$="[\\w-\\.~%\\dA-Fa-f!\\$&'\\(\\)\\*\\+,;=@]+"+v;return e.hierPart="(?:(?:\\/\\/"+g+v+")|"+_+"|"+w+"|(?:\\/\\/\\/[\\w-\\.~%\\dA-Fa-f!\\$&'\\(\\)\\*\\+,;=:@]*(?:\\/[\\w-\\.~%\\dA-Fa-f!\\$&'\\(\\)\\*\\+,;=:@]*)*))",e.hierPartCapture="(?:(?:\\/\\/"+y+v+")|"+_+"|"+w+")",e.relativeRef="(?:(?:\\/\\/"+g+v+")|"+_+"|"+$+"|)",e.relativeRefCapture="(?:(?:\\/\\/"+y+v+")|"+_+"|"+$+"|)",e.query="["+r+"\\/\\?]*(?=#|$)",e.queryWithSquareBrackets="["+r+"\\[\\]\\/\\?]*(?=#|$)",e.fragment="["+r+"\\/\\?]*",e}};a.rfc3986=a.generate(),t.ip={v4Cidr:a.rfc3986.ipv4Cidr,v6Cidr:a.rfc3986.ipv6Cidr,ipv4:a.rfc3986.ipv4address,ipv6:a.rfc3986.ipv6address,ipvfuture:a.rfc3986.ipvFuture},a.createRegex=function(e){const t=a.rfc3986,r="(?:\\?"+(e.allowQuerySquareBrackets?t.queryWithSquareBrackets:t.query)+")?(?:#"+t.fragment+")?",i=e.domain?t.relativeRefCapture:t.relativeRef;if(e.relativeOnly)return a.wrap(i+r);let o="";if(e.scheme){s(e.scheme instanceof RegExp||"string"==typeof e.scheme||Array.isArray(e.scheme),"scheme must be a RegExp, String, or Array");const r=[].concat(e.scheme);s(r.length>=1,"scheme must have at least 1 scheme specified");const a=[];for(let e=0;e<r.length;++e){const i=r[e];s(i instanceof RegExp||"string"==typeof i,"scheme at position "+e+" must be a RegExp or String"),i instanceof RegExp?a.push(i.source.toString()):(s(t.schemeRegex.test(i),"scheme at position "+e+" must be a valid scheme"),a.push(n(i)))}o=a.join("|")}const l="(?:"+(o?"(?:"+o+")":t.scheme)+":"+(e.domain?t.hierPartCapture:t.hierPart)+")",c=e.allowRelative?"(?:"+l+"|"+i+")":l;return a.wrap(c+r,o)},a.wrap=function(e,t){return{raw:e=`(?=.)(?!https?:/(?:$|[^/]))(?!https?:///)(?!https?:[^/])${e}`,regex:new RegExp(`^${e}$`),scheme:t}},a.uriRegex=a.createRegex({}),t.regex=function(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return e.scheme||e.allowRelative||e.relativeOnly||e.allowQuerySquareBrackets||e.domain?a.createRegex(e):a.uriRegex}},1447:(e,t)=>{"use strict";const r={operators:["!","^","*","/","%","+","-","<","<=",">",">=","==","!=","&&","||","??"],operatorCharacters:["!","^","*","/","%","+","-","<","=",">","&","|","?"],operatorsOrder:[["^"],["*","/","%"],["+","-"],["<","<=",">",">="],["==","!="],["&&"],["||","??"]],operatorsPrefix:["!","n"],literals:{'"':'"',"`":"`","'":"'","[":"]"},numberRx:/^(?:[0-9]*\.?[0-9]*){1}$/,tokenRx:/^[\w\$\#\.\@\:\{\}]+$/,symbol:Symbol("formula"),settings:Symbol("settings")};t.Parser=class{constructor(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!t[r.settings]&&t.constants)for(const e in t.constants){const r=t.constants[e];if(null!==r&&!["boolean","number","string"].includes(typeof r))throw new Error(`Formula constant ${e} contains invalid ${typeof r} value type`)}this.settings=t[r.settings]?t:Object.assign({[r.settings]:!0,constants:{},functions:{}},t),this.single=null,this._parts=null,this._parse(e)}_parse(e){let s=[],n="",a=0,i=!1;const o=e=>{if(a)throw new Error("Formula missing closing parenthesis");const o=s.length?s[s.length-1]:null;if(i||n||e){if(o&&"reference"===o.type&&")"===e)return o.type="function",o.value=this._subFormula(n,o.value),void(n="");if(")"===e){const e=new t.Parser(n,this.settings);s.push({type:"segment",value:e})}else if(i){if("]"===i)return s.push({type:"reference",value:n}),void(n="");s.push({type:"literal",value:n})}else if(r.operatorCharacters.includes(n))o&&"operator"===o.type&&r.operators.includes(o.value+n)?o.value+=n:s.push({type:"operator",value:n});else if(n.match(r.numberRx))s.push({type:"constant",value:parseFloat(n)});else if(void 0!==this.settings.constants[n])s.push({type:"constant",value:this.settings.constants[n]});else{if(!n.match(r.tokenRx))throw new Error(`Formula contains invalid token: ${n}`);s.push({type:"reference",value:n})}n=""}};for(const t of e)i?t===i?(o(),i=!1):n+=t:a?"("===t?(n+=t,++a):")"===t?(--a,a?n+=t:o(t)):n+=t:t in r.literals?i=r.literals[t]:"("===t?(o(),++a):r.operatorCharacters.includes(t)?(o(),n=t,o()):" "!==t?n+=t:o();o(),s=s.map(((e,t)=>"operator"!==e.type||"-"!==e.value||t&&"operator"!==s[t-1].type?e:{type:"operator",value:"n"}));let l=!1;for(const e of s){if("operator"===e.type){if(r.operatorsPrefix.includes(e.value))continue;if(!l)throw new Error("Formula contains an operator in invalid position");if(!r.operators.includes(e.value))throw new Error(`Formula contains an unknown operator ${e.value}`)}else if(l)throw new Error("Formula missing expected operator");l=!l}if(!l)throw new Error("Formula contains invalid trailing operator");1===s.length&&["reference","literal","constant"].includes(s[0].type)&&(this.single={type:"reference"===s[0].type?"reference":"value",value:s[0].value}),this._parts=s.map((e=>{if("operator"===e.type)return r.operatorsPrefix.includes(e.value)?e:e.value;if("reference"!==e.type)return e.value;if(this.settings.tokenRx&&!this.settings.tokenRx.test(e.value))throw new Error(`Formula contains invalid reference ${e.value}`);return this.settings.reference?this.settings.reference(e.value):r.reference(e.value)}))}_subFormula(e,s){const n=this.settings.functions[s];if("function"!=typeof n)throw new Error(`Formula contains unknown function ${s}`);let a=[];if(e){let t="",n=0,i=!1;const o=()=>{if(!t)throw new Error(`Formula contains function ${s} with invalid arguments ${e}`);a.push(t),t=""};for(let s=0;s<e.length;++s){const a=e[s];i?(t+=a,a===i&&(i=!1)):a in r.literals&&!n?(t+=a,i=r.literals[a]):","!==a||n?(t+=a,"("===a?++n:")"===a&&--n):o()}o()}return a=a.map((e=>new t.Parser(e,this.settings))),function(e){const t=[];for(const r of a)t.push(r.evaluate(e));return n.call(e,...t)}}evaluate(e){const t=this._parts.slice();for(let s=t.length-2;s>=0;--s){const n=t[s];if(n&&"operator"===n.type){const a=t[s+1];t.splice(s+1,1);const i=r.evaluate(a,e);t[s]=r.single(n.value,i)}}return r.operatorsOrder.forEach((s=>{for(let n=1;n<t.length-1;)if(s.includes(t[n])){const s=t[n],a=r.evaluate(t[n-1],e),i=r.evaluate(t[n+1],e);t.splice(n,2);const o=r.calculate(s,a,i);t[n-1]=0===o?0:o}else n+=2})),r.evaluate(t[0],e)}},t.Parser.prototype[r.symbol]=!0,r.reference=function(e){return function(t){return t&&void 0!==t[e]?t[e]:null}},r.evaluate=function(e,t){return null===e?null:"function"==typeof e?e(t):e[r.symbol]?e.evaluate(t):e},r.single=function(e,t){if("!"===e)return!t;const r=-t;return 0===r?0:r},r.calculate=function(e,t,s){if("??"===e)return r.exists(t)?t:s;if("string"==typeof t||"string"==typeof s){if("+"===e)return(t=r.exists(t)?t:"")+(r.exists(s)?s:"")}else switch(e){case"^":return Math.pow(t,s);case"*":return t*s;case"/":return t/s;case"%":return t%s;case"+":return t+s;case"-":return t-s}switch(e){case"<":return t<s;case"<=":return t<=s;case">":return t>s;case">=":return t>=s;case"==":return t===s;case"!=":return t!==s;case"&&":return t&&s;case"||":return t||s}return null},r.exists=function(e){return null!=e}},9926:()=>{},5688:()=>{},9708:()=>{},1152:()=>{},443:()=>{},9848:()=>{},5934:e=>{"use strict";e.exports={version:"17.7.0"}}},t={},function r(s){var n=t[s];if(void 0!==n)return n.exports;var a=t[s]={exports:{}};return e[s](a,a.exports,r),a.exports}(5107);var e,t}));
+!function(e,t){ true?module.exports=t():0}(self,(()=>{return e={7629:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(9474),i=r(1687),o=r(8652),l=r(8160),c=r(3292),u=r(6354),f=r(8901),h=r(9708),m=r(6914),d=r(2294),p=r(6133),g=r(1152),y=r(8863),b=r(2036),v={Base:class{constructor(e){this.type=e,this.$_root=null,this._definition={},this._reset()}_reset(){this._ids=new d.Ids,this._preferences=null,this._refs=new p.Manager,this._cache=null,this._valids=null,this._invalids=null,this._flags={},this._rules=[],this._singleRules=new Map,this.$_terms={},this.$_temp={ruleset:null,whens:{}}}describe(){return s("function"==typeof h.describe,"Manifest functionality disabled"),h.describe(this)}allow(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"allow"),this._values(t,"_valids")}alter(e){s(e&&"object"==typeof e&&!Array.isArray(e),"Invalid targets argument"),s(!this._inRuleset(),"Cannot set alterations inside a ruleset");const t=this.clone();t.$_terms.alterations=t.$_terms.alterations||[];for(const r in e){const n=e[r];s("function"==typeof n,"Alteration adjuster for",r,"must be a function"),t.$_terms.alterations.push({target:r,adjuster:n})}return t.$_temp.ruleset=!1,t}artifact(e){return s(void 0!==e,"Artifact cannot be undefined"),s(!this._cache,"Cannot set an artifact with a rule cache"),this.$_setFlag("artifact",e)}cast(e){return s(!1===e||"string"==typeof e,"Invalid to value"),s(!1===e||this._definition.cast[e],"Type",this.type,"does not support casting to",e),this.$_setFlag("cast",!1===e?void 0:e)}default(e,t){return this._default("default",e,t)}description(e){return s(e&&"string"==typeof e,"Description must be a non-empty string"),this.$_setFlag("description",e)}empty(e){const t=this.clone();return void 0!==e&&(e=t.$_compile(e,{override:!1})),t.$_setFlag("empty",e,{clone:!1})}error(e){return s(e,"Missing error"),s(e instanceof Error||"function"==typeof e,"Must provide a valid Error object or a function"),this.$_setFlag("error",e)}example(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};return s(void 0!==e,"Missing example"),l.assertOptions(t,["override"]),this._inner("examples",e,{single:!0,override:t.override})}external(e,t){return"object"==typeof e&&(s(!t,"Cannot combine options with description"),t=e.description,e=e.method),s("function"==typeof e,"Method must be a function"),s(void 0===t||t&&"string"==typeof t,"Description must be a non-empty string"),this._inner("externals",{method:e,description:t},{single:!0})}failover(e,t){return this._default("failover",e,t)}forbidden(){return this.presence("forbidden")}id(e){return e?(s("string"==typeof e,"id must be a non-empty string"),s(/^[^\.]+$/.test(e),"id cannot contain period character"),this.$_setFlag("id",e)):this.$_setFlag("id",void 0)}invalid(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return this._values(t,"_invalids")}label(e){return s(e&&"string"==typeof e,"Label name must be a non-empty string"),this.$_setFlag("label",e)}meta(e){return s(void 0!==e,"Meta cannot be undefined"),this._inner("metas",e,{single:!0})}note(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];s(t.length,"Missing notes");for(const e of t)s(e&&"string"==typeof e,"Notes must be non-empty strings");return this._inner("notes",t)}only(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"Invalid mode:",e),this.$_setFlag("only",e)}optional(){return this.presence("optional")}prefs(e){s(e,"Missing preferences"),s(void 0===e.context,"Cannot override context"),s(void 0===e.externals,"Cannot override externals"),s(void 0===e.warnings,"Cannot override warnings"),s(void 0===e.debug,"Cannot override debug"),l.checkPreferences(e);const t=this.clone();return t._preferences=l.preferences(t._preferences,e),t}presence(e){return s(["optional","required","forbidden"].includes(e),"Unknown presence mode",e),this.$_setFlag("presence",e)}raw(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("result",e?"raw":void 0)}result(e){return s(["raw","strip"].includes(e),"Unknown result mode",e),this.$_setFlag("result",e)}required(){return this.presence("required")}strict(e){const t=this.clone(),r=void 0!==e&&!e;return t._preferences=l.preferences(t._preferences,{convert:r}),t}strip(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("result",e?"strip":void 0)}tag(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];s(t.length,"Missing tags");for(const e of t)s(e&&"string"==typeof e,"Tags must be non-empty strings");return this._inner("tags",t)}unit(e){return s(e&&"string"==typeof e,"Unit name must be a non-empty string"),this.$_setFlag("unit",e)}valid(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];l.verifyFlat(t,"valid");const s=this.allow(...t);return s.$_setFlag("only",!!s._valids,{clone:!1}),s}when(e,t){const r=this.clone();r.$_terms.whens||(r.$_terms.whens=[]);const n=c.when(r,e,t);if(!["any","link"].includes(r.type)){const e=n.is?[n]:n.switch;for(const t of e)s(!t.then||"any"===t.then.type||t.then.type===r.type,"Cannot combine",r.type,"with",t.then&&t.then.type),s(!t.otherwise||"any"===t.otherwise.type||t.otherwise.type===r.type,"Cannot combine",r.type,"with",t.otherwise&&t.otherwise.type)}return r.$_terms.whens.push(n),r.$_mutateRebuild()}cache(e){s(!this._inRuleset(),"Cannot set caching inside a ruleset"),s(!this._cache,"Cannot override schema cache"),s(void 0===this._flags.artifact,"Cannot cache a rule with an artifact");const t=this.clone();return t._cache=e||o.provider.provision(),t.$_temp.ruleset=!1,t}clone(){const e=Object.create(Object.getPrototypeOf(this));return this._assign(e)}concat(e){s(l.isSchema(e),"Invalid schema object"),s("any"===this.type||"any"===e.type||e.type===this.type,"Cannot merge type",this.type,"with another type:",e.type),s(!this._inRuleset(),"Cannot concatenate onto a schema with open ruleset"),s(!e._inRuleset(),"Cannot concatenate a schema with open ruleset");let t=this.clone();if("any"===this.type&&"any"!==e.type){const r=e.clone();for(const e of Object.keys(t))"type"!==e&&(r[e]=t[e]);t=r}t._ids.concat(e._ids),t._refs.register(e,p.toSibling),t._preferences=t._preferences?l.preferences(t._preferences,e._preferences):e._preferences,t._valids=b.merge(t._valids,e._valids,e._invalids),t._invalids=b.merge(t._invalids,e._invalids,e._valids);for(const r of e._singleRules.keys())t._singleRules.has(r)&&(t._rules=t._rules.filter((e=>e.keep||e.name!==r)),t._singleRules.delete(r));for(const r of e._rules)e._definition.rules[r.method].multi||t._singleRules.set(r.name,r),t._rules.push(r);if(t._flags.empty&&e._flags.empty){t._flags.empty=t._flags.empty.concat(e._flags.empty);const r=Object.assign({},e._flags);delete r.empty,i(t._flags,r)}else if(e._flags.empty){t._flags.empty=e._flags.empty;const r=Object.assign({},e._flags);delete r.empty,i(t._flags,r)}else i(t._flags,e._flags);for(const r in e.$_terms){const s=e.$_terms[r];s?t.$_terms[r]?t.$_terms[r]=t.$_terms[r].concat(s):t.$_terms[r]=s.slice():t.$_terms[r]||(t.$_terms[r]=s)}return this.$_root._tracer&&this.$_root._tracer._combine(t,[this,e]),t.$_mutateRebuild()}extend(e){return s(!e.base,"Cannot extend type with another base"),f.type(this,e)}extract(e){return e=Array.isArray(e)?e:e.split("."),this._ids.reach(e)}fork(e,t){s(!this._inRuleset(),"Cannot fork inside a ruleset");let r=this;for(let s of[].concat(e))s=Array.isArray(s)?s:s.split("."),r=r._ids.fork(s,t,r);return r.$_temp.ruleset=!1,r}rule(e){const t=this._definition;l.assertOptions(e,Object.keys(t.modifiers)),s(!1!==this.$_temp.ruleset,"Cannot apply rules to empty ruleset or the last rule added does not support rule properties");const r=null===this.$_temp.ruleset?this._rules.length-1:this.$_temp.ruleset;s(r>=0&&r<this._rules.length,"Cannot apply rules to empty ruleset");const a=this.clone();for(let i=r;i<a._rules.length;++i){const r=a._rules[i],o=n(r);for(const n in e)t.modifiers[n](o,e[n]),s(o.name===r.name,"Cannot change rule name");a._rules[i]=o,a._singleRules.get(o.name)===r&&a._singleRules.set(o.name,o)}return a.$_temp.ruleset=!1,a.$_mutateRebuild()}get ruleset(){s(!this._inRuleset(),"Cannot start a new ruleset without closing the previous one");const e=this.clone();return e.$_temp.ruleset=e._rules.length,e}get $(){return this.ruleset}tailor(e){e=[].concat(e),s(!this._inRuleset(),"Cannot tailor inside a ruleset");let t=this;if(this.$_terms.alterations)for(const{target:r,adjuster:n}of this.$_terms.alterations)e.includes(r)&&(t=n(t),s(l.isSchema(t),"Alteration adjuster for",r,"failed to return a schema object"));return t=t.$_modify({each:t=>t.tailor(e),ref:!1}),t.$_temp.ruleset=!1,t.$_mutateRebuild()}tracer(){return g.location?g.location(this):this}validate(e,t){return y.entry(e,this,t)}validateAsync(e,t){return y.entryAsync(e,this,t)}$_addRule(e){"string"==typeof e&&(e={name:e}),s(e&&"object"==typeof e,"Invalid options"),s(e.name&&"string"==typeof e.name,"Invalid rule name");for(const t in e)s("_"!==t[0],"Cannot set private rule properties");const t=Object.assign({},e);t._resolve=[],t.method=t.method||t.name;const r=this._definition.rules[t.method],n=t.args;s(r,"Unknown rule",t.method);const a=this.clone();if(n){s(1===Object.keys(n).length||Object.keys(n).length===this._definition.rules[t.name].args.length,"Invalid rule definition for",this.type,t.name);for(const e in n){let i=n[e];if(r.argsByName){const o=r.argsByName.get(e);if(o.ref&&l.isResolvable(i))t._resolve.push(e),a.$_mutateRegister(i);else if(o.normalize&&(i=o.normalize(i),n[e]=i),o.assert){const t=l.validateArg(i,e,o);s(!t,t,"or reference")}}void 0!==i?n[e]=i:delete n[e]}}return r.multi||(a._ruleRemove(t.name,{clone:!1}),a._singleRules.set(t.name,t)),!1===a.$_temp.ruleset&&(a.$_temp.ruleset=null),r.priority?a._rules.unshift(t):a._rules.push(t),a}$_compile(e,t){return c.schema(this.$_root,e,t)}$_createError(e,t,r,s,n){let a=arguments.length>5&&void 0!==arguments[5]?arguments[5]:{};const i=!1!==a.flags?this._flags:{},o=a.messages?m.merge(this._definition.messages,a.messages):this._definition.messages;return new u.Report(e,t,r,i,o,s,n)}$_getFlag(e){return this._flags[e]}$_getRule(e){return this._singleRules.get(e)}$_mapLabels(e){return e=Array.isArray(e)?e:e.split("."),this._ids.labels(e)}$_match(e,t,r,s){(r=Object.assign({},r)).abortEarly=!0,r._externals=!1,t.snapshot();const n=!y.validate(e,this,t,r,s).errors;return t.restore(),n}$_modify(e){return l.assertOptions(e,["each","once","ref","schema"]),d.schema(this,e)||this}$_mutateRebuild(){return s(!this._inRuleset(),"Cannot add this rule inside a ruleset"),this._refs.reset(),this._ids.reset(),this.$_modify({each:(e,t)=>{let{source:r,name:s,path:n,key:a}=t;const i=this._definition[r][s]&&this._definition[r][s].register;!1!==i&&this.$_mutateRegister(e,{family:i,key:a})}}),this._definition.rebuild&&this._definition.rebuild(this),this.$_temp.ruleset=!1,this}$_mutateRegister(e){let{family:t,key:r}=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};this._refs.register(e,t),this._ids.register(e,{key:r})}$_property(e){return this._definition.properties[e]}$_reach(e){return this._ids.reach(e)}$_rootReferences(){return this._refs.roots()}$_setFlag(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};s("_"===e[0]||!this._inRuleset(),"Cannot set flag inside a ruleset");const n=this._definition.flags[e]||{};if(a(t,n.default)&&(t=void 0),a(t,this._flags[e]))return this;const i=!1!==r.clone?this.clone():this;return void 0!==t?(i._flags[e]=t,i.$_mutateRegister(t)):delete i._flags[e],"_"!==e[0]&&(i.$_temp.ruleset=!1),i}$_parent(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),s=1;s<t;s++)r[s-1]=arguments[s];return this[e][l.symbols.parent].call(this,...r)}$_validate(e,t,r){return y.validate(e,this,t,r)}_assign(e){e.type=this.type,e.$_root=this.$_root,e.$_temp=Object.assign({},this.$_temp),e.$_temp.whens={},e._ids=this._ids.clone(),e._preferences=this._preferences,e._valids=this._valids&&this._valids.clone(),e._invalids=this._invalids&&this._invalids.clone(),e._rules=this._rules.slice(),e._singleRules=n(this._singleRules,{shallow:!0}),e._refs=this._refs.clone(),e._flags=Object.assign({},this._flags),e._cache=null,e.$_terms={};for(const t in this.$_terms)e.$_terms[t]=this.$_terms[t]?this.$_terms[t].slice():null;e.$_super={};for(const t in this.$_super)e.$_super[t]=this._super[t].bind(e);return e}_bare(){const e=this.clone();e._reset();const t=e._definition.terms;for(const r in t){const s=t[r];e.$_terms[r]=s.init}return e.$_mutateRebuild()}_default(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};return l.assertOptions(r,"literal"),s(void 0!==t,"Missing",e,"value"),s("function"==typeof t||!r.literal,"Only function value supports literal option"),"function"==typeof t&&r.literal&&(t={[l.symbols.literal]:!0,literal:t}),this.$_setFlag(e,t)}_generate(e,t,r){if(!this.$_terms.whens)return{schema:this};const s=[],n=[];for(let a=0;a<this.$_terms.whens.length;++a){const i=this.$_terms.whens[a];if(i.concat){s.push(i.concat),n.push(`${a}.concat`);continue}const o=i.ref?i.ref.resolve(e,t,r):e,l=i.is?[i]:i.switch,c=n.length;for(let c=0;c<l.length;++c){const{is:u,then:f,otherwise:h}=l[c],m=`${a}${i.switch?"."+c:""}`;if(u.$_match(o,t.nest(u,`${m}.is`),r)){if(f){const a=t.localize([...t.path,`${m}.then`],t.ancestors,t.schemas),{schema:i,id:o}=f._generate(e,a,r);s.push(i),n.push(`${m}.then${o?`(${o})`:""}`);break}}else if(h){const a=t.localize([...t.path,`${m}.otherwise`],t.ancestors,t.schemas),{schema:i,id:o}=h._generate(e,a,r);s.push(i),n.push(`${m}.otherwise${o?`(${o})`:""}`);break}}if(i.break&&n.length>c)break}const a=n.join(", ");if(t.mainstay.tracer.debug(t,"rule","when",a),!a)return{schema:this};if(!t.mainstay.tracer.active&&this.$_temp.whens[a])return{schema:this.$_temp.whens[a],id:a};let i=this;this._definition.generate&&(i=this._definition.generate(this,e,t,r));for(const e of s)i=i.concat(e);return this.$_root._tracer&&this.$_root._tracer._combine(i,[this,...s]),this.$_temp.whens[a]=i,{schema:i,id:a}}_inner(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};s(!this._inRuleset(),`Cannot set ${e} inside a ruleset`);const n=this.clone();return n.$_terms[e]&&!r.override||(n.$_terms[e]=[]),r.single?n.$_terms[e].push(t):n.$_terms[e].push(...t),n.$_temp.ruleset=!1,n}_inRuleset(){return null!==this.$_temp.ruleset&&!1!==this.$_temp.ruleset}_ruleRemove(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!this._singleRules.has(e))return this;const r=!1!==t.clone?this.clone():this;r._singleRules.delete(e);const s=[];for(let t=0;t<r._rules.length;++t){const n=r._rules[t];n.name!==e||n.keep?s.push(n):r._inRuleset()&&t<r.$_temp.ruleset&&--r.$_temp.ruleset}return r._rules=s,r}_values(e,t){l.verifyFlat(e,t.slice(1,-1));const r=this.clone(),n=e[0]===l.symbols.override;if(n&&(e=e.slice(1)),!r[t]&&e.length?r[t]=new b:n&&(r[t]=e.length?new b:null,r.$_mutateRebuild()),!r[t])return r;n&&r[t].override();for(const n of e){s(void 0!==n,"Cannot call allow/valid/invalid with undefined"),s(n!==l.symbols.override,"Override must be the first value");const e="_invalids"===t?"_valids":"_invalids";r[e]&&(r[e].remove(n),r[e].length||(s("_valids"===t||!r._flags.only,"Setting invalid value",n,"leaves schema rejecting all values due to previous valid rule"),r[e]=null)),r[t].add(n,r._refs)}return r}}};v.Base.prototype[l.symbols.any]={version:l.version,compile:c.compile,root:"$_root"},v.Base.prototype.isImmutable=!0,v.Base.prototype.deny=v.Base.prototype.invalid,v.Base.prototype.disallow=v.Base.prototype.invalid,v.Base.prototype.equal=v.Base.prototype.valid,v.Base.prototype.exist=v.Base.prototype.required,v.Base.prototype.not=v.Base.prototype.invalid,v.Base.prototype.options=v.Base.prototype.prefs,v.Base.prototype.preferences=v.Base.prototype.prefs,e.exports=new v.Base},8652:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(8160),i={max:1e3,supported:new Set(["undefined","boolean","number","string"])};t.provider={provision:e=>new i.Cache(e)},i.Cache=class{constructor(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};a.assertOptions(e,["max"]),s(void 0===e.max||e.max&&e.max>0&&isFinite(e.max),"Invalid max cache size"),this._max=e.max||i.max,this._map=new Map,this._list=new i.List}get length(){return this._map.size}set(e,t){if(null!==e&&!i.supported.has(typeof e))return;let r=this._map.get(e);if(r)return r.value=t,void this._list.first(r);r=this._list.unshift({key:e,value:t}),this._map.set(e,r),this._compact()}get(e){const t=this._map.get(e);if(t)return this._list.first(t),n(t.value)}_compact(){if(this._map.size>this._max){const e=this._list.pop();this._map.delete(e.key)}}},i.List=class{constructor(){this.tail=null,this.head=null}unshift(e){return e.next=null,e.prev=this.head,this.head&&(this.head.next=e),this.head=e,this.tail||(this.tail=e),e}first(e){e!==this.head&&(this._remove(e),this.unshift(e))}pop(){return this._remove(this.tail)}_remove(e){const{next:t,prev:r}=e;return t.prev=r,r&&(r.next=t),e===this.tail&&(this.tail=t),e.prev=null,e.next=null,e}}},8160:(e,t,r)=>{"use strict";const s=r(375),n=r(7916),a=r(5934);let i,o;const l={isoDate:/^(?:[-+]\d{2})?(?:\d{4}(?!\d{2}\b))(?:(-?)(?:(?:0[1-9]|1[0-2])(?:\1(?:[12]\d|0[1-9]|3[01]))?|W(?:[0-4]\d|5[0-2])(?:-?[1-7])?|(?:00[1-9]|0[1-9]\d|[12]\d{2}|3(?:[0-5]\d|6[1-6])))(?![T]$|[T][\d]+Z$)(?:[T\s](?:(?:(?:[01]\d|2[0-3])(?:(:?)[0-5]\d)?|24\:?00)(?:[.,]\d+(?!:))?)(?:\2[0-5]\d(?:[.,]\d+)?)?(?:[Z]|(?:[+-])(?:[01]\d|2[0-3])(?::?[0-5]\d)?)?)?)?$/};t.version=a.version,t.defaults={abortEarly:!0,allowUnknown:!1,artifacts:!1,cache:!0,context:null,convert:!0,dateFormat:"iso",errors:{escapeHtml:!1,label:"path",language:null,render:!0,stack:!1,wrap:{label:'"',array:"[]"}},externals:!0,messages:{},nonEnumerables:!1,noDefaults:!1,presence:"optional",skipFunctions:!1,stripUnknown:!1,warnings:!1},t.symbols={any:Symbol.for("@hapi/joi/schema"),arraySingle:Symbol("arraySingle"),deepDefault:Symbol("deepDefault"),errors:Symbol("errors"),literal:Symbol("literal"),override:Symbol("override"),parent:Symbol("parent"),prefs:Symbol("prefs"),ref:Symbol("ref"),template:Symbol("template"),values:Symbol("values")},t.assertOptions=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"Options";s(e&&"object"==typeof e&&!Array.isArray(e),"Options must be of type object");const n=Object.keys(e).filter((e=>!t.includes(e)));s(0===n.length,`${r} contain unknown keys: ${n}`)},t.checkPreferences=function(e){o=o||r(3378);const t=o.preferences.validate(e);if(t.error)throw new n([t.error.details[0].message])},t.compare=function(e,t,r){switch(r){case"=":return e===t;case">":return e>t;case"<":return e<t;case">=":return e>=t;case"<=":return e<=t}},t.default=function(e,t){return void 0===e?t:e},t.isIsoDate=function(e){return l.isoDate.test(e)},t.isNumber=function(e){return"number"==typeof e&&!isNaN(e)},t.isResolvable=function(e){return!!e&&(e[t.symbols.ref]||e[t.symbols.template])},t.isSchema=function(e){let r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};const n=e&&e[t.symbols.any];return!!n&&(s(r.legacy||n.version===t.version,"Cannot mix different versions of joi schemas"),!0)},t.isValues=function(e){return e[t.symbols.values]},t.limit=function(e){return Number.isSafeInteger(e)&&e>=0},t.preferences=function(e,s){i=i||r(6914),e=e||{},s=s||{};const n=Object.assign({},e,s);return s.errors&&e.errors&&(n.errors=Object.assign({},e.errors,s.errors),n.errors.wrap=Object.assign({},e.errors.wrap,s.errors.wrap)),s.messages&&(n.messages=i.compile(s.messages,e.messages)),delete n[t.symbols.prefs],n},t.tryWithPath=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};try{return e()}catch(e){throw void 0!==e.path?e.path=t+"."+e.path:e.path=t,r.append&&(e.message=`${e.message} (${e.path})`),e}},t.validateArg=function(e,r,s){let{assert:n,message:a}=s;if(t.isSchema(n)){const t=n.validate(e);if(!t.error)return;return t.error.message}if(!n(e))return r?`${r} ${a}`:a},t.verifyFlat=function(e,t){for(const r of e)s(!Array.isArray(r),"Method no longer accepts array arguments:",t)}},3292:(e,t,r)=>{"use strict";const s=r(375),n=r(8160),a=r(6133),i={};t.schema=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};n.assertOptions(r,["appendPath","override"]);try{return i.schema(e,t,r)}catch(e){throw r.appendPath&&void 0!==e.path&&(e.message=`${e.message} (${e.path})`),e}},i.schema=function(e,t,r){s(void 0!==t,"Invalid undefined schema"),Array.isArray(t)&&(s(t.length,"Invalid empty array schema"),1===t.length&&(t=t[0]));const a=function(t){for(var s=arguments.length,n=new Array(s>1?s-1:0),a=1;a<s;a++)n[a-1]=arguments[a];return!1!==r.override?t.valid(e.override,...n):t.valid(...n)};if(i.simple(t))return a(e,t);if("function"==typeof t)return e.custom(t);if(s("object"==typeof t,"Invalid schema content:",typeof t),n.isResolvable(t))return a(e,t);if(n.isSchema(t))return t;if(Array.isArray(t)){for(const r of t)if(!i.simple(r))return e.alternatives().try(...t);return a(e,...t)}return t instanceof RegExp?e.string().regex(t):t instanceof Date?a(e.date(),t):(s(Object.getPrototypeOf(t)===Object.getPrototypeOf({}),"Schema can only contain plain objects"),e.object().keys(t))},t.ref=function(e,t){return a.isRef(e)?e:a.create(e,t)},t.compile=function(e,r){let a=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};n.assertOptions(a,["legacy"]);const o=r&&r[n.symbols.any];if(o)return s(a.legacy||o.version===n.version,"Cannot mix different versions of joi schemas:",o.version,n.version),r;if("object"!=typeof r||!a.legacy)return t.schema(e,r,{appendPath:!0});const l=i.walk(r);return l?l.compile(l.root,r):t.schema(e,r,{appendPath:!0})},i.walk=function(e){if("object"!=typeof e)return null;if(Array.isArray(e)){for(const t of e){const e=i.walk(t);if(e)return e}return null}const t=e[n.symbols.any];if(t)return{root:e[t.root],compile:t.compile};s(Object.getPrototypeOf(e)===Object.getPrototypeOf({}),"Schema can only contain plain objects");for(const t in e){const r=i.walk(e[t]);if(r)return r}return null},i.simple=function(e){return null===e||["boolean","string","number"].includes(typeof e)},t.when=function(e,r,o){if(void 0===o&&(s(r&&"object"==typeof r,"Missing options"),o=r,r=a.create(".")),Array.isArray(o)&&(o={switch:o}),n.assertOptions(o,["is","not","then","otherwise","switch","break"]),n.isSchema(r))return s(void 0===o.is,'"is" can not be used with a schema condition'),s(void 0===o.not,'"not" can not be used with a schema condition'),s(void 0===o.switch,'"switch" can not be used with a schema condition'),i.condition(e,{is:r,then:o.then,otherwise:o.otherwise,break:o.break});if(s(a.isRef(r)||"string"==typeof r,"Invalid condition:",r),s(void 0===o.not||void 0===o.is,'Cannot combine "is" with "not"'),void 0===o.switch){let l=o;void 0!==o.not&&(l={is:o.not,then:o.otherwise,otherwise:o.then,break:o.break});let c=void 0!==l.is?e.$_compile(l.is):e.$_root.invalid(null,!1,0,"").required();return s(void 0!==l.then||void 0!==l.otherwise,'options must have at least one of "then", "otherwise", or "switch"'),s(void 0===l.break||void 0===l.then||void 0===l.otherwise,"Cannot specify then, otherwise, and break all together"),void 0===o.is||a.isRef(o.is)||n.isSchema(o.is)||(c=c.required()),i.condition(e,{ref:t.ref(r),is:c,then:l.then,otherwise:l.otherwise,break:l.break})}s(Array.isArray(o.switch),'"switch" must be an array'),s(void 0===o.is,'Cannot combine "switch" with "is"'),s(void 0===o.not,'Cannot combine "switch" with "not"'),s(void 0===o.then,'Cannot combine "switch" with "then"');const l={ref:t.ref(r),switch:[],break:o.break};for(let t=0;t<o.switch.length;++t){const r=o.switch[t],i=t===o.switch.length-1;n.assertOptions(r,i?["is","then","otherwise"]:["is","then"]),s(void 0!==r.is,'Switch statement missing "is"'),s(void 0!==r.then,'Switch statement missing "then"');const c={is:e.$_compile(r.is),then:e.$_compile(r.then)};if(a.isRef(r.is)||n.isSchema(r.is)||(c.is=c.is.required()),i){s(void 0===o.otherwise||void 0===r.otherwise,'Cannot specify "otherwise" inside and outside a "switch"');const t=void 0!==o.otherwise?o.otherwise:r.otherwise;void 0!==t&&(s(void 0===l.break,"Cannot specify both otherwise and break"),c.otherwise=e.$_compile(t))}l.switch.push(c)}return l},i.condition=function(e,t){for(const r of["then","otherwise"])void 0===t[r]?delete t[r]:t[r]=e.$_compile(t[r]);return t}},6354:(e,t,r)=>{"use strict";const s=r(5688),n=r(8160),a=r(3328);t.Report=class{constructor(e,r,s,n,a,i,o){if(this.code=e,this.flags=n,this.messages=a,this.path=i.path,this.prefs=o,this.state=i,this.value=r,this.message=null,this.template=null,this.local=s||{},this.local.label=t.label(this.flags,this.state,this.prefs,this.messages),void 0===this.value||this.local.hasOwnProperty("value")||(this.local.value=this.value),this.path.length){const e=this.path[this.path.length-1];"object"!=typeof e&&(this.local.key=e)}}_setTemplate(e){if(this.template=e,!this.flags.label&&0===this.path.length){const e=this._template(this.template,"root");e&&(this.local.label=e)}}toString(){if(this.message)return this.message;const e=this.code;if(!this.prefs.errors.render)return this.code;const t=this._template(this.template)||this._template(this.prefs.messages)||this._template(this.messages);return void 0===t?`Error code "${e}" is not defined, your custom type is missing the correct messages definition`:(this.message=t.render(this.value,this.state,this.prefs,this.local,{errors:this.prefs.errors,messages:[this.prefs.messages,this.messages]}),this.prefs.errors.label||(this.message=this.message.replace(/^"" /,"").trim()),this.message)}_template(e,r){return t.template(this.value,e,r||this.code,this.state,this.prefs)}},t.path=function(e){let t="";for(const r of e)"object"!=typeof r&&("string"==typeof r?(t&&(t+="."),t+=r):t+=`[${r}]`);return t},t.template=function(e,t,r,s,i){if(!t)return;if(a.isTemplate(t))return"root"!==r?t:null;let o=i.errors.language;if(n.isResolvable(o)&&(o=o.resolve(e,s,i)),o&&t[o]){if(void 0!==t[o][r])return t[o][r];if(void 0!==t[o]["*"])return t[o]["*"]}return t[r]?t[r]:t["*"]},t.label=function(e,r,s,n){if(e.label)return e.label;if(!s.errors.label)return"";let a=r.path;"key"===s.errors.label&&r.path.length>1&&(a=r.path.slice(-1));return t.path(a)||t.template(null,s.messages,"root",r,s)||n&&t.template(null,n,"root",r,s)||"value"},t.process=function(e,r,s){if(!e)return null;const{override:n,message:a,details:i}=t.details(e);if(n)return n;if(s.errors.stack)return new t.ValidationError(a,i,r);const o=Error.stackTraceLimit;Error.stackTraceLimit=0;const l=new t.ValidationError(a,i,r);return Error.stackTraceLimit=o,l},t.details=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=[];const s=[];for(const n of e){if(n instanceof Error){if(!1!==t.override)return{override:n};const e=n.toString();r.push(e),s.push({message:e,type:"override",context:{error:n}});continue}const e=n.toString();r.push(e),s.push({message:e,path:n.path.filter((e=>"object"!=typeof e)),type:n.code,context:n.local})}return r.length>1&&(r=[...new Set(r)]),{message:r.join(". "),details:s}},t.ValidationError=class extends Error{constructor(e,t,r){super(e),this._original=r,this.details=t}static isError(e){return e instanceof t.ValidationError}},t.ValidationError.prototype.isJoi=!0,t.ValidationError.prototype.name="ValidationError",t.ValidationError.prototype.annotate=s.error},8901:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(8160),i=r(6914),o={};t.type=function(e,t){const r=Object.getPrototypeOf(e),l=n(r),c=e._assign(Object.create(l)),u=Object.assign({},t);delete u.base,l._definition=u;const f=r._definition||{};u.messages=i.merge(f.messages,u.messages),u.properties=Object.assign({},f.properties,u.properties),c.type=u.type,u.flags=Object.assign({},f.flags,u.flags);const h=Object.assign({},f.terms);if(u.terms)for(const e in u.terms){const t=u.terms[e];s(void 0===c.$_terms[e],"Invalid term override for",u.type,e),c.$_terms[e]=t.init,h[e]=t}u.terms=h,u.args||(u.args=f.args),u.prepare=o.prepare(u.prepare,f.prepare),u.coerce&&("function"==typeof u.coerce&&(u.coerce={method:u.coerce}),u.coerce.from&&!Array.isArray(u.coerce.from)&&(u.coerce={method:u.coerce.method,from:[].concat(u.coerce.from)})),u.coerce=o.coerce(u.coerce,f.coerce),u.validate=o.validate(u.validate,f.validate);const m=Object.assign({},f.rules);if(u.rules)for(const e in u.rules){const t=u.rules[e];s("object"==typeof t,"Invalid rule definition for",u.type,e);let r=t.method;if(void 0===r&&(r=function(){return this.$_addRule(e)}),r&&(s(!l[e],"Rule conflict in",u.type,e),l[e]=r),s(!m[e],"Rule conflict in",u.type,e),m[e]=t,t.alias){const e=[].concat(t.alias);for(const r of e)l[r]=t.method}t.args&&(t.argsByName=new Map,t.args=t.args.map((e=>("string"==typeof e&&(e={name:e}),s(!t.argsByName.has(e.name),"Duplicated argument name",e.name),a.isSchema(e.assert)&&(e.assert=e.assert.strict().label(e.name)),t.argsByName.set(e.name,e),e))))}u.rules=m;const d=Object.assign({},f.modifiers);if(u.modifiers)for(const e in u.modifiers){s(!l[e],"Rule conflict in",u.type,e);const t=u.modifiers[e];s("function"==typeof t,"Invalid modifier definition for",u.type,e);const r=function(t){return this.rule({[e]:t})};l[e]=r,d[e]=t}if(u.modifiers=d,u.overrides){l._super=r,c.$_super={};for(const e in u.overrides)s(r[e],"Cannot override missing",e),u.overrides[e][a.symbols.parent]=r[e],c.$_super[e]=r[e].bind(c);Object.assign(l,u.overrides)}u.cast=Object.assign({},f.cast,u.cast);const p=Object.assign({},f.manifest,u.manifest);return p.build=o.build(u.manifest&&u.manifest.build,f.manifest&&f.manifest.build),u.manifest=p,u.rebuild=o.rebuild(u.rebuild,f.rebuild),c},o.build=function(e,t){return e&&t?function(r,s){return t(e(r,s),s)}:e||t},o.coerce=function(e,t){return e&&t?{from:e.from&&t.from?[...new Set([...e.from,...t.from])]:null,method(r,s){let n;if((!t.from||t.from.includes(typeof r))&&(n=t.method(r,s),n)){if(n.errors||void 0===n.value)return n;r=n.value}if(!e.from||e.from.includes(typeof r)){const t=e.method(r,s);if(t)return t}return n}}:e||t},o.prepare=function(e,t){return e&&t?function(r,s){const n=e(r,s);if(n){if(n.errors||void 0===n.value)return n;r=n.value}return t(r,s)||n}:e||t},o.rebuild=function(e,t){return e&&t?function(r){t(r),e(r)}:e||t},o.validate=function(e,t){return e&&t?function(r,s){const n=t(r,s);if(n){if(n.errors&&(!Array.isArray(n.errors)||n.errors.length))return n;r=n.value}return e(r,s)||n}:e||t}},5107:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(8652),i=r(8160),o=r(3292),l=r(6354),c=r(8901),u=r(9708),f=r(6133),h=r(3328),m=r(1152);let d;const p={types:{alternatives:r(4946),any:r(8068),array:r(546),boolean:r(4937),date:r(7500),function:r(390),link:r(8785),number:r(3832),object:r(8966),string:r(7417),symbol:r(8826)},aliases:{alt:"alternatives",bool:"boolean",func:"function"},root:function(){const e={_types:new Set(Object.keys(p.types))};for(const t of e._types)e[t]=function(){for(var e=arguments.length,r=new Array(e),n=0;n<e;n++)r[n]=arguments[n];return s(!r.length||["alternatives","link","object"].includes(t),"The",t,"type does not allow arguments"),p.generate(this,p.types[t],r)};for(const t of["allow","custom","disallow","equal","exist","forbidden","invalid","not","only","optional","options","prefs","preferences","required","strip","valid","when"])e[t]=function(){return this.any()[t](...arguments)};Object.assign(e,p.methods);for(const t in p.aliases){const r=p.aliases[t];e[t]=e[r]}return e.x=e.expression,m.setup&&m.setup(e),e}};p.methods={ValidationError:l.ValidationError,version:i.version,cache:a.provider,assert(e,t){for(var r=arguments.length,s=new Array(r>2?r-2:0),n=2;n<r;n++)s[n-2]=arguments[n];p.assert(e,t,!0,s)},attempt(e,t){for(var r=arguments.length,s=new Array(r>2?r-2:0),n=2;n<r;n++)s[n-2]=arguments[n];return p.assert(e,t,!1,s)},build(e){return s("function"==typeof u.build,"Manifest functionality disabled"),u.build(this,e)},checkPreferences(e){i.checkPreferences(e)},compile(e,t){return o.compile(this,e,t)},defaults(e){s("function"==typeof e,"modifier must be a function");const t=Object.assign({},this);for(const r of t._types){const n=e(t[r]());s(i.isSchema(n),"modifier must return a valid schema object"),t[r]=function(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return p.generate(this,n,t)}}return t},expression(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return new h(...t)},extend(){for(var e=arguments.length,t=new Array(e),n=0;n<e;n++)t[n]=arguments[n];i.verifyFlat(t,"extend"),d=d||r(3378),s(t.length,"You need to provide at least one extension"),this.assert(t,d.extensions);const a=Object.assign({},this);a._types=new Set(a._types);for(let e of t){"function"==typeof e&&(e=e(a)),this.assert(e,d.extension);const t=p.expandExtension(e,a);for(const e of t){s(void 0===a[e.type]||a._types.has(e.type),"Cannot override name",e.type);const t=e.base||this.any(),r=c.type(t,e);a._types.add(e.type),a[e.type]=function(){for(var e=arguments.length,t=new Array(e),s=0;s<e;s++)t[s]=arguments[s];return p.generate(this,r,t)}}}return a},isError:l.ValidationError.isError,isExpression:h.isTemplate,isRef:f.isRef,isSchema:i.isSchema,in(){return f.in(...arguments)},override:i.symbols.override,ref(){return f.create(...arguments)},types(){const e={};for(const t of this._types)e[t]=this[t]();for(const t in p.aliases)e[t]=this[t]();return e}},p.assert=function(e,t,r,s){const a=s[0]instanceof Error||"string"==typeof s[0]?s[0]:null,o=null!==a?s[1]:s[0],c=t.validate(e,i.preferences({errors:{stack:!0}},o||{}));let u=c.error;if(!u)return c.value;if(a instanceof Error)throw a;const f=r&&"function"==typeof u.annotate?u.annotate():u.message;throw u instanceof l.ValidationError==0&&(u=n(u)),u.message=a?`${a} ${f}`:f,u},p.generate=function(e,t,r){return s(e,"Must be invoked on a Joi instance."),t.$_root=e,t._definition.args&&r.length?t._definition.args(t,...r):t},p.expandExtension=function(e,t){if("string"==typeof e.type)return[e];const r=[];for(const s of t._types)if(e.type.test(s)){const n=Object.assign({},e);n.type=s,n.base=t[s](),r.push(n)}return r},e.exports=p.root()},6914:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(3328);t.compile=function(e,t){if("string"==typeof e)return s(!t,"Cannot set single message string"),new a(e);if(a.isTemplate(e))return s(!t,"Cannot set single message template"),e;s("object"==typeof e&&!Array.isArray(e),"Invalid message options"),t=t?n(t):{};for(let r in e){const n=e[r];if("root"===r||a.isTemplate(n)){t[r]=n;continue}if("string"==typeof n){t[r]=new a(n);continue}s("object"==typeof n&&!Array.isArray(n),"Invalid message for",r);const i=r;for(r in t[i]=t[i]||{},n){const e=n[r];"root"===r||a.isTemplate(e)?t[i][r]=e:(s("string"==typeof e,"Invalid message for",r,"in",i),t[i][r]=new a(e))}}return t},t.decompile=function(e){const t={};for(let r in e){const s=e[r];if("root"===r){t.root=s;continue}if(a.isTemplate(s)){t[r]=s.describe({compact:!0});continue}const n=r;for(r in t[n]={},s){const e=s[r];"root"!==r?t[n][r]=e.describe({compact:!0}):t[n].root=e}}return t},t.merge=function(e,r){if(!e)return t.compile(r);if(!r)return e;if("string"==typeof r)return new a(r);if(a.isTemplate(r))return r;const i=n(e);for(let e in r){const t=r[e];if("root"===e||a.isTemplate(t)){i[e]=t;continue}if("string"==typeof t){i[e]=new a(t);continue}s("object"==typeof t&&!Array.isArray(t),"Invalid message for",e);const n=e;for(e in i[n]=i[n]||{},t){const r=t[e];"root"===e||a.isTemplate(r)?i[n][e]=r:(s("string"==typeof r,"Invalid message for",e,"in",n),i[n][e]=new a(r))}}return i}},2294:(e,t,r)=>{"use strict";const s=r(375),n=r(8160),a=r(6133),i={};t.Ids=i.Ids=class{constructor(){this._byId=new Map,this._byKey=new Map,this._schemaChain=!1}clone(){const e=new i.Ids;return e._byId=new Map(this._byId),e._byKey=new Map(this._byKey),e._schemaChain=this._schemaChain,e}concat(e){e._schemaChain&&(this._schemaChain=!0);for(const[t,r]of e._byId.entries())s(!this._byKey.has(t),"Schema id conflicts with existing key:",t),this._byId.set(t,r);for(const[t,r]of e._byKey.entries())s(!this._byId.has(t),"Schema key conflicts with existing id:",t),this._byKey.set(t,r)}fork(e,t,r){const a=this._collect(e);a.push({schema:r});const o=a.shift();let l={id:o.id,schema:t(o.schema)};s(n.isSchema(l.schema),"adjuster function failed to return a joi schema type");for(const e of a)l={id:e.id,schema:i.fork(e.schema,l.id,l.schema)};return l.schema}labels(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[];const r=e[0],s=this._get(r);if(!s)return[...t,...e].join(".");const n=e.slice(1);return t=[...t,s.schema._flags.label||r],n.length?s.schema._ids.labels(n,t):t.join(".")}reach(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[];const r=e[0],n=this._get(r);s(n,"Schema does not contain path",[...t,...e].join("."));const a=e.slice(1);return a.length?n.schema._ids.reach(a,[...t,r]):n.schema}register(e){let{key:t}=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!e||!n.isSchema(e))return;(e.$_property("schemaChain")||e._ids._schemaChain)&&(this._schemaChain=!0);const r=e._flags.id;if(r){const t=this._byId.get(r);s(!t||t.schema===e,"Cannot add different schemas with the same id:",r),s(!this._byKey.has(r),"Schema id conflicts with existing key:",r),this._byId.set(r,{schema:e,id:r})}t&&(s(!this._byKey.has(t),"Schema already contains key:",t),s(!this._byId.has(t),"Schema key conflicts with existing id:",t),this._byKey.set(t,{schema:e,id:t}))}reset(){this._byId=new Map,this._byKey=new Map,this._schemaChain=!1}_collect(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[],r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[];const n=e[0],a=this._get(n);s(a,"Schema does not contain path",[...t,...e].join(".")),r=[a,...r];const i=e.slice(1);return i.length?a.schema._ids._collect(i,[...t,n],r):r}_get(e){return this._byId.get(e)||this._byKey.get(e)}},i.fork=function(e,r,s){const n=t.schema(e,{each:(e,t)=>{let{key:n}=t;if(r===(e._flags.id||n))return s},ref:!1});return n?n.$_mutateRebuild():e},t.schema=function(e,t){let r;for(const s in e._flags){if("_"===s[0])continue;const n=i.scan(e._flags[s],{source:"flags",name:s},t);void 0!==n&&(r=r||e.clone(),r._flags[s]=n)}for(let s=0;s<e._rules.length;++s){const n=e._rules[s],a=i.scan(n.args,{source:"rules",name:n.name},t);if(void 0!==a){r=r||e.clone();const t=Object.assign({},n);t.args=a,r._rules[s]=t,r._singleRules.get(n.name)===n&&r._singleRules.set(n.name,t)}}for(const s in e.$_terms){if("_"===s[0])continue;const n=i.scan(e.$_terms[s],{source:"terms",name:s},t);void 0!==n&&(r=r||e.clone(),r.$_terms[s]=n)}return r},i.scan=function(e,t,r,s,o){const l=s||[];if(null===e||"object"!=typeof e)return;let c;if(Array.isArray(e)){for(let s=0;s<e.length;++s){const n="terms"===t.source&&"keys"===t.name&&e[s].key,a=i.scan(e[s],t,r,[s,...l],n);void 0!==a&&(c=c||e.slice(),c[s]=a)}return c}if(!1!==r.schema&&n.isSchema(e)||!1!==r.ref&&a.isRef(e)){const s=r.each(e,{...t,path:l,key:o});if(s===e)return;return s}for(const s in e){if("_"===s[0])continue;const n=i.scan(e[s],t,r,[s,...l],o);void 0!==n&&(c=c||Object.assign({},e),c[s]=n)}return c}},6133:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(9621),i=r(8160);let o;const l={symbol:Symbol("ref"),defaults:{adjust:null,in:!1,iterables:null,map:null,separator:".",type:"value"}};t.create=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};s("string"==typeof e,"Invalid reference key:",e),i.assertOptions(t,["adjust","ancestor","in","iterables","map","prefix","render","separator"]),s(!t.prefix||"object"==typeof t.prefix,"options.prefix must be of type object");const r=Object.assign({},l.defaults,t);delete r.prefix;const n=r.separator,a=l.context(e,n,t.prefix);if(r.type=a.type,e=a.key,"value"===r.type)if(a.root&&(s(!n||e[0]!==n,"Cannot specify relative path with root prefix"),r.ancestor="root",e||(e=null)),n&&n===e)e=null,r.ancestor=0;else if(void 0!==r.ancestor)s(!n||!e||e[0]!==n,"Cannot combine prefix with ancestor option");else{const[t,s]=l.ancestor(e,n);s&&""===(e=e.slice(s))&&(e=null),r.ancestor=t}return r.path=n?null===e?[]:e.split(n):[e],new l.Ref(r)},t.in=function(e){let r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};return t.create(e,{...r,in:!0})},t.isRef=function(e){return!!e&&!!e[i.symbols.ref]},l.Ref=class{constructor(e){s("object"==typeof e,"Invalid reference construction"),i.assertOptions(e,["adjust","ancestor","in","iterables","map","path","render","separator","type","depth","key","root","display"]),s([!1,void 0].includes(e.separator)||"string"==typeof e.separator&&1===e.separator.length,"Invalid separator"),s(!e.adjust||"function"==typeof e.adjust,"options.adjust must be a function"),s(!e.map||Array.isArray(e.map),"options.map must be an array"),s(!e.map||!e.adjust,"Cannot set both map and adjust options"),Object.assign(this,l.defaults,e),s("value"===this.type||void 0===this.ancestor,"Non-value references cannot reference ancestors"),Array.isArray(this.map)&&(this.map=new Map(this.map)),this.depth=this.path.length,this.key=this.path.length?this.path.join(this.separator):null,this.root=this.path[0],this.updateDisplay()}resolve(e,t,r,n){let a=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{};return s(!this.in||a.in,"Invalid in() reference usage"),"global"===this.type?this._resolve(r.context,t,a):"local"===this.type?this._resolve(n,t,a):this.ancestor?"root"===this.ancestor?this._resolve(t.ancestors[t.ancestors.length-1],t,a):(s(this.ancestor<=t.ancestors.length,"Invalid reference exceeds the schema root:",this.display),this._resolve(t.ancestors[this.ancestor-1],t,a)):this._resolve(e,t,a)}_resolve(e,t,r){let s;if("value"===this.type&&t.mainstay.shadow&&!1!==r.shadow&&(s=t.mainstay.shadow.get(this.absolute(t))),void 0===s&&(s=a(e,this.path,{iterables:this.iterables,functions:!0})),this.adjust&&(s=this.adjust(s)),this.map){const e=this.map.get(s);void 0!==e&&(s=e)}return t.mainstay&&t.mainstay.tracer.resolve(t,this,s),s}toString(){return this.display}absolute(e){return[...e.path.slice(0,-this.ancestor),...this.path]}clone(){return new l.Ref(this)}describe(){const e={path:this.path};"value"!==this.type&&(e.type=this.type),"."!==this.separator&&(e.separator=this.separator),"value"===this.type&&1!==this.ancestor&&(e.ancestor=this.ancestor),this.map&&(e.map=[...this.map]);for(const t of["adjust","iterables","render"])null!==this[t]&&void 0!==this[t]&&(e[t]=this[t]);return!1!==this.in&&(e.in=!0),{ref:e}}updateDisplay(){const e=null!==this.key?this.key:"";if("value"!==this.type)return void(this.display=`ref:${this.type}:${e}`);if(!this.separator)return void(this.display=`ref:${e}`);if(!this.ancestor)return void(this.display=`ref:${this.separator}${e}`);if("root"===this.ancestor)return void(this.display=`ref:root:${e}`);if(1===this.ancestor)return void(this.display=`ref:${e||".."}`);const t=new Array(this.ancestor+1).fill(this.separator).join("");this.display=`ref:${t}${e||""}`}},l.Ref.prototype[i.symbols.ref]=!0,t.build=function(e){return"value"===(e=Object.assign({},l.defaults,e)).type&&void 0===e.ancestor&&(e.ancestor=1),new l.Ref(e)},l.context=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if(e=e.trim(),r){const s=void 0===r.global?"$":r.global;if(s!==t&&e.startsWith(s))return{key:e.slice(s.length),type:"global"};const n=void 0===r.local?"#":r.local;if(n!==t&&e.startsWith(n))return{key:e.slice(n.length),type:"local"};const a=void 0===r.root?"/":r.root;if(a!==t&&e.startsWith(a))return{key:e.slice(a.length),type:"value",root:!0}}return{key:e,type:"value"}},l.ancestor=function(e,t){if(!t)return[1,0];if(e[0]!==t)return[1,0];if(e[1]!==t)return[0,1];let r=2;for(;e[r]===t;)++r;return[r-1,r]},t.toSibling=0,t.toParent=1,t.Manager=class{constructor(){this.refs=[]}register(e,s){if(e)if(s=void 0===s?t.toParent:s,Array.isArray(e))for(const t of e)this.register(t,s);else if(i.isSchema(e))for(const t of e._refs.refs)t.ancestor-s>=0&&this.refs.push({ancestor:t.ancestor-s,root:t.root});else t.isRef(e)&&"value"===e.type&&e.ancestor-s>=0&&this.refs.push({ancestor:e.ancestor-s,root:e.root}),o=o||r(3328),o.isTemplate(e)&&this.register(e.refs(),s)}get length(){return this.refs.length}clone(){const e=new t.Manager;return e.refs=n(this.refs),e}reset(){this.refs=[]}roots(){return this.refs.filter((e=>!e.ancestor)).map((e=>e.root))}}},3378:(e,t,r)=>{"use strict";const s=r(5107),n={};n.wrap=s.string().min(1).max(2).allow(!1),t.preferences=s.object({allowUnknown:s.boolean(),abortEarly:s.boolean(),artifacts:s.boolean(),cache:s.boolean(),context:s.object(),convert:s.boolean(),dateFormat:s.valid("date","iso","string","time","utc"),debug:s.boolean(),errors:{escapeHtml:s.boolean(),label:s.valid("path","key",!1),language:[s.string(),s.object().ref()],render:s.boolean(),stack:s.boolean(),wrap:{label:n.wrap,array:n.wrap,string:n.wrap}},externals:s.boolean(),messages:s.object(),noDefaults:s.boolean(),nonEnumerables:s.boolean(),presence:s.valid("required","optional","forbidden"),skipFunctions:s.boolean(),stripUnknown:s.object({arrays:s.boolean(),objects:s.boolean()}).or("arrays","objects").allow(!0,!1),warnings:s.boolean()}).strict(),n.nameRx=/^[a-zA-Z0-9]\w*$/,n.rule=s.object({alias:s.array().items(s.string().pattern(n.nameRx)).single(),args:s.array().items(s.string(),s.object({name:s.string().pattern(n.nameRx).required(),ref:s.boolean(),assert:s.alternatives([s.function(),s.object().schema()]).conditional("ref",{is:!0,then:s.required()}),normalize:s.function(),message:s.string().when("assert",{is:s.function(),then:s.required()})})),convert:s.boolean(),manifest:s.boolean(),method:s.function().allow(!1),multi:s.boolean(),validate:s.function()}),t.extension=s.object({type:s.alternatives([s.string(),s.object().regex()]).required(),args:s.function(),cast:s.object().pattern(n.nameRx,s.object({from:s.function().maxArity(1).required(),to:s.function().minArity(1).maxArity(2).required()})),base:s.object().schema().when("type",{is:s.object().regex(),then:s.forbidden()}),coerce:[s.function().maxArity(3),s.object({method:s.function().maxArity(3).required(),from:s.array().items(s.string()).single()})],flags:s.object().pattern(n.nameRx,s.object({setter:s.string(),default:s.any()})),manifest:{build:s.function().arity(2)},messages:[s.object(),s.string()],modifiers:s.object().pattern(n.nameRx,s.function().minArity(1).maxArity(2)),overrides:s.object().pattern(n.nameRx,s.function()),prepare:s.function().maxArity(3),rebuild:s.function().arity(1),rules:s.object().pattern(n.nameRx,n.rule),terms:s.object().pattern(n.nameRx,s.object({init:s.array().allow(null).required(),manifest:s.object().pattern(/.+/,[s.valid("schema","single"),s.object({mapped:s.object({from:s.string().required(),to:s.string().required()}).required()})])})),validate:s.function().maxArity(3)}).strict(),t.extensions=s.array().items(s.object(),s.function().arity(1)).strict(),n.desc={buffer:s.object({buffer:s.string()}),func:s.object({function:s.function().required(),options:{literal:!0}}),override:s.object({override:!0}),ref:s.object({ref:s.object({type:s.valid("value","global","local"),path:s.array().required(),separator:s.string().length(1).allow(!1),ancestor:s.number().min(0).integer().allow("root"),map:s.array().items(s.array().length(2)).min(1),adjust:s.function(),iterables:s.boolean(),in:s.boolean(),render:s.boolean()}).required()}),regex:s.object({regex:s.string().min(3)}),special:s.object({special:s.valid("deep").required()}),template:s.object({template:s.string().required(),options:s.object()}),value:s.object({value:s.alternatives([s.object(),s.array()]).required()})},n.desc.entity=s.alternatives([s.array().items(s.link("...")),s.boolean(),s.function(),s.number(),s.string(),n.desc.buffer,n.desc.func,n.desc.ref,n.desc.regex,n.desc.special,n.desc.template,n.desc.value,s.link("/")]),n.desc.values=s.array().items(null,s.boolean(),s.function(),s.number().allow(1/0,-1/0),s.string().allow(""),s.symbol(),n.desc.buffer,n.desc.func,n.desc.override,n.desc.ref,n.desc.regex,n.desc.template,n.desc.value),n.desc.messages=s.object().pattern(/.+/,[s.string(),n.desc.template,s.object().pattern(/.+/,[s.string(),n.desc.template])]),t.description=s.object({type:s.string().required(),flags:s.object({cast:s.string(),default:s.any(),description:s.string(),empty:s.link("/"),failover:n.desc.entity,id:s.string(),label:s.string(),only:!0,presence:["optional","required","forbidden"],result:["raw","strip"],strip:s.boolean(),unit:s.string()}).unknown(),preferences:{allowUnknown:s.boolean(),abortEarly:s.boolean(),artifacts:s.boolean(),cache:s.boolean(),convert:s.boolean(),dateFormat:["date","iso","string","time","utc"],errors:{escapeHtml:s.boolean(),label:["path","key"],language:[s.string(),n.desc.ref],wrap:{label:n.wrap,array:n.wrap}},externals:s.boolean(),messages:n.desc.messages,noDefaults:s.boolean(),nonEnumerables:s.boolean(),presence:["required","optional","forbidden"],skipFunctions:s.boolean(),stripUnknown:s.object({arrays:s.boolean(),objects:s.boolean()}).or("arrays","objects").allow(!0,!1),warnings:s.boolean()},allow:n.desc.values,invalid:n.desc.values,rules:s.array().min(1).items({name:s.string().required(),args:s.object().min(1),keep:s.boolean(),message:[s.string(),n.desc.messages],warn:s.boolean()}),keys:s.object().pattern(/.*/,s.link("/")),link:n.desc.ref}).pattern(/^[a-z]\w*$/,s.any())},493:(e,t,r)=>{"use strict";const s=r(8571),n=r(9621),a=r(8160),i={value:Symbol("value")};e.exports=i.State=class{constructor(e,t,r){this.path=e,this.ancestors=t,this.mainstay=r.mainstay,this.schemas=r.schemas,this.debug=null}localize(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null,r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:null;const s=new i.State(e,t,this);return r&&s.schemas&&(s.schemas=[i.schemas(r),...s.schemas]),s}nest(e,t){const r=new i.State(this.path,this.ancestors,this);return r.schemas=r.schemas&&[i.schemas(e),...r.schemas],r.debug=t,r}shadow(e,t){this.mainstay.shadow=this.mainstay.shadow||new i.Shadow,this.mainstay.shadow.set(this.path,e,t)}snapshot(){this.mainstay.shadow&&(this._snapshot=s(this.mainstay.shadow.node(this.path)))}restore(){this.mainstay.shadow&&(this.mainstay.shadow.override(this.path,this._snapshot),this._snapshot=void 0)}},i.schemas=function(e){return a.isSchema(e)?{schema:e}:e},i.Shadow=class{constructor(){this._values=null}set(e,t,r){if(!e.length)return;if("strip"===r&&"number"==typeof e[e.length-1])return;this._values=this._values||new Map;let s=this._values;for(let t=0;t<e.length;++t){const r=e[t];let n=s.get(r);n||(n=new Map,s.set(r,n)),s=n}s[i.value]=t}get(e){const t=this.node(e);if(t)return t[i.value]}node(e){if(this._values)return n(this._values,e,{iterables:!0})}override(e,t){if(!this._values)return;const r=e.slice(0,-1),s=e[e.length-1],a=n(this._values,r,{iterables:!0});t?a.set(s,t):a&&a.delete(s)}}},3328:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(5277),i=r(1447),o=r(8160),l=r(6354),c=r(6133),u={symbol:Symbol("template"),opens:new Array(1e3).join("\0"),closes:new Array(1e3).join(""),dateFormat:{date:Date.prototype.toDateString,iso:Date.prototype.toISOString,string:Date.prototype.toString,time:Date.prototype.toTimeString,utc:Date.prototype.toUTCString}};e.exports=u.Template=class{constructor(e,t){s("string"==typeof e,"Template source must be a string"),s(!e.includes("\0")&&!e.includes(""),"Template source cannot contain reserved control characters"),this.source=e,this.rendered=e,this._template=null,this._settings=n(t),this._parse()}_parse(){if(!this.source.includes("{"))return;const e=u.encode(this.source),t=u.split(e);let r=!1;const s=[],n=t.shift();n&&s.push(n);for(const e of t){const t="{"!==e[0],n=t?"}":"}}",a=e.indexOf(n);if(-1===a||"{"===e[1]){s.push(`{${u.decode(e)}`);continue}let i=e.slice(t?0:1,a);const o=":"===i[0];o&&(i=i.slice(1));const l=this._ref(u.decode(i),{raw:t,wrapped:o});s.push(l),"string"!=typeof l&&(r=!0);const c=e.slice(a+n.length);c&&s.push(u.decode(c))}r?this._template=s:this.rendered=s.join("")}static date(e,t){return u.dateFormat[t.dateFormat].call(e)}describe(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};if(!this._settings&&e.compact)return this.source;const t={template:this.source};return this._settings&&(t.options=this._settings),t}static build(e){return new u.Template(e.template,e.options)}isDynamic(){return!!this._template}static isTemplate(e){return!!e&&!!e[o.symbols.template]}refs(){if(!this._template)return;const e=[];for(const t of this._template)"string"!=typeof t&&e.push(...t.refs);return e}resolve(e,t,r,s){return this._template&&1===this._template.length?this._part(this._template[0],e,t,r,s,{}):this.render(e,t,r,s)}_part(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),s=1;s<t;s++)r[s-1]=arguments[s];return e.ref?e.ref.resolve(...r):e.formula.evaluate(r)}render(e,t,r,s){let n=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{};if(!this.isDynamic())return this.rendered;const i=[];for(const o of this._template)if("string"==typeof o)i.push(o);else{const l=this._part(o,e,t,r,s,n),c=u.stringify(l,e,t,r,s,n);if(void 0!==c){const e=o.raw||!1===(n.errors&&n.errors.escapeHtml)?c:a(c);i.push(u.wrap(e,o.wrapped&&r.errors.wrap.label))}}return i.join("")}_ref(e,t){let{raw:r,wrapped:s}=t;const n=[],a=e=>{const t=c.create(e,this._settings);return n.push(t),e=>t.resolve(...e)};try{var o=new i.Parser(e,{reference:a,functions:u.functions,constants:u.constants})}catch(t){throw t.message=`Invalid template variable "${e}" fails due to: ${t.message}`,t}if(o.single){if("reference"===o.single.type){const e=n[0];return{ref:e,raw:r,refs:n,wrapped:s||"local"===e.type&&"label"===e.key}}return u.stringify(o.single.value)}return{formula:o,raw:r,refs:n}}toString(){return this.source}},u.Template.prototype[o.symbols.template]=!0,u.Template.prototype.isImmutable=!0,u.encode=function(e){return e.replace(/\\(\{+)/g,((e,t)=>u.opens.slice(0,t.length))).replace(/\\(\}+)/g,((e,t)=>u.closes.slice(0,t.length)))},u.decode=function(e){return e.replace(/\u0000/g,"{").replace(/\u0001/g,"}")},u.split=function(e){const t=[];let r="";for(let s=0;s<e.length;++s){const n=e[s];if("{"===n){let n="";for(;s+1<e.length&&"{"===e[s+1];)n+="{",++s;t.push(r),r=n}else r+=n}return t.push(r),t},u.wrap=function(e,t){return t?1===t.length?`${t}${e}${t}`:`${t[0]}${e}${t[1]}`:e},u.stringify=function(e,t,r,s,n){let a=arguments.length>5&&void 0!==arguments[5]?arguments[5]:{};const i=typeof e,o=s&&s.errors&&s.errors.wrap||{};let l=!1;if(c.isRef(e)&&e.render&&(l=e.in,e=e.resolve(t,r,s,n,{in:e.in,...a})),null===e)return"null";if("string"===i)return u.wrap(e,a.arrayItems&&o.string);if("number"===i||"function"===i||"symbol"===i)return e.toString();if("object"!==i)return JSON.stringify(e);if(e instanceof Date)return u.Template.date(e,s);if(e instanceof Map){const t=[];for(const[r,s]of e.entries())t.push(`${r.toString()} -> ${s.toString()}`);e=t}if(!Array.isArray(e))return e.toString();const f=[];for(const i of e)f.push(u.stringify(i,t,r,s,n,{arrayItems:!0,...a}));return u.wrap(f.join(", "),!l&&o.array)},u.constants={true:!0,false:!1,null:null,second:1e3,minute:6e4,hour:36e5,day:864e5},u.functions={if:(e,t,r)=>e?t:r,length:e=>"string"==typeof e?e.length:e&&"object"==typeof e?Array.isArray(e)?e.length:Object.keys(e).length:null,msg(e){const[t,r,s,n,a]=this,i=a.messages;if(!i)return"";const o=l.template(t,i[0],e,r,s)||l.template(t,i[1],e,r,s);return o?o.render(t,r,s,n,a):""},number:e=>"number"==typeof e?e:"string"==typeof e?parseFloat(e):"boolean"==typeof e?e?1:0:e instanceof Date?e.getTime():null}},4946:(e,t,r)=>{"use strict";const s=r(375),n=r(1687),a=r(8068),i=r(8160),o=r(3292),l=r(6354),c=r(6133),u={};e.exports=a.extend({type:"alternatives",flags:{match:{default:"any"}},terms:{matches:{init:[],register:c.toSibling}},args(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),s=1;s<t;s++)r[s-1]=arguments[s];return 1===r.length&&Array.isArray(r[0])?e.try(...r[0]):e.try(...r)},validate(e,t){const{schema:r,error:s,state:a,prefs:i}=t;if(r._flags.match){const t=[],o=[];for(let s=0;s<r.$_terms.matches.length;++s){const n=r.$_terms.matches[s],l=a.nest(n.schema,`match.${s}`);l.snapshot();const c=n.schema.$_validate(e,l,i);c.errors?(o.push(c.errors),l.restore()):t.push(c.value)}if(0===t.length)return{errors:s("alternatives.any",{details:o.map((e=>l.details(e,{override:!1})))})};if("one"===r._flags.match)return 1===t.length?{value:t[0]}:{errors:s("alternatives.one")};if(t.length!==r.$_terms.matches.length)return{errors:s("alternatives.all",{details:o.map((e=>l.details(e,{override:!1})))})};const c=e=>e.$_terms.matches.some((e=>"object"===e.schema.type||"alternatives"===e.schema.type&&c(e.schema)));return c(r)?{value:t.reduce(((e,t)=>n(e,t,{mergeArrays:!1})))}:{value:t[t.length-1]}}const o=[];for(let t=0;t<r.$_terms.matches.length;++t){const s=r.$_terms.matches[t];if(s.schema){const r=a.nest(s.schema,`match.${t}`);r.snapshot();const n=s.schema.$_validate(e,r,i);if(!n.errors)return n;r.restore(),o.push({schema:s.schema,reports:n.errors});continue}const n=s.ref?s.ref.resolve(e,a,i):e,l=s.is?[s]:s.switch;for(let r=0;r<l.length;++r){const o=l[r],{is:c,then:u,otherwise:f}=o,h=`match.${t}${s.switch?"."+r:""}`;if(c.$_match(n,a.nest(c,`${h}.is`),i)){if(u)return u.$_validate(e,a.nest(u,`${h}.then`),i)}else if(f)return f.$_validate(e,a.nest(f,`${h}.otherwise`),i)}}return u.errors(o,t)},rules:{conditional:{method(e,t){s(!this._flags._endedSwitch,"Unreachable condition"),s(!this._flags.match,"Cannot combine match mode",this._flags.match,"with conditional rule"),s(void 0===t.break,"Cannot use break option with alternatives conditional");const r=this.clone(),n=o.when(r,e,t),a=n.is?[n]:n.switch;for(const e of a)if(e.then&&e.otherwise){r.$_setFlag("_endedSwitch",!0,{clone:!1});break}return r.$_terms.matches.push(n),r.$_mutateRebuild()}},match:{method(e){if(s(["any","one","all"].includes(e),"Invalid alternatives match mode",e),"any"!==e)for(const t of this.$_terms.matches)s(t.schema,"Cannot combine match mode",e,"with conditional rules");return this.$_setFlag("match",e)}},try:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];s(t.length,"Missing alternative schemas"),i.verifyFlat(t,"try"),s(!this._flags._endedSwitch,"Unreachable condition");const n=this.clone();for(const e of t)n.$_terms.matches.push({schema:n.$_compile(e)});return n.$_mutateRebuild()}}},overrides:{label(e){return this.$_parent("label",e).$_modify({each:(t,r)=>"is"!==r.path[0]?t.label(e):void 0,ref:!1})}},rebuild(e){e.$_modify({each:t=>{i.isSchema(t)&&"array"===t.type&&e.$_setFlag("_arrayItems",!0,{clone:!1})}})},manifest:{build(e,t){if(t.matches)for(const r of t.matches){const{schema:t,ref:s,is:n,not:a,then:i,otherwise:o}=r;e=t?e.try(t):s?e.conditional(s,{is:n,then:i,not:a,otherwise:o,switch:r.switch}):e.conditional(n,{then:i,otherwise:o})}return e}},messages:{"alternatives.all":"{{#label}} does not match all of the required types","alternatives.any":"{{#label}} does not match any of the allowed types","alternatives.match":"{{#label}} does not match any of the allowed types","alternatives.one":"{{#label}} matches more than one allowed type","alternatives.types":"{{#label}} must be one of {{#types}}"}}),u.errors=function(e,t){let{error:r,state:s}=t;if(!e.length)return{errors:r("alternatives.any")};if(1===e.length)return{errors:e[0].reports};const n=new Set,a=[];for(const{reports:t,schema:i}of e){if(t.length>1)return u.unmatched(e,r);const o=t[0];if(o instanceof l.Report==0)return u.unmatched(e,r);if(o.state.path.length!==s.path.length){a.push({type:i.type,report:o});continue}if("any.only"===o.code){for(const e of o.local.valids)n.add(e);continue}const[c,f]=o.code.split(".");"base"===f?n.add(c):a.push({type:i.type,report:o})}return a.length?1===a.length?{errors:a[0].report}:u.unmatched(e,r):{errors:r("alternatives.types",{types:[...n]})}},u.unmatched=function(e,t){const r=[];for(const t of e)r.push(...t.reports);return{errors:t("alternatives.match",l.details(r,{override:!1}))}}},8068:(e,t,r)=>{"use strict";const s=r(375),n=r(7629),a=r(8160),i=r(6914);e.exports=n.extend({type:"any",flags:{only:{default:!1}},terms:{alterations:{init:null},examples:{init:null},externals:{init:null},metas:{init:[]},notes:{init:[]},shared:{init:null},tags:{init:[]},whens:{init:null}},rules:{custom:{method(e,t){return s("function"==typeof e,"Method must be a function"),s(void 0===t||t&&"string"==typeof t,"Description must be a non-empty string"),this.$_addRule({name:"custom",args:{method:e,description:t}})},validate(e,t,r){let{method:s}=r;try{return s(e,t)}catch(e){return t.error("any.custom",{error:e})}},args:["method","description"],multi:!0},messages:{method(e){return this.prefs({messages:e})}},shared:{method(e){s(a.isSchema(e)&&e._flags.id,"Schema must be a schema with an id");const t=this.clone();return t.$_terms.shared=t.$_terms.shared||[],t.$_terms.shared.push(e),t.$_mutateRegister(e),t}},warning:{method(e,t){return s(e&&"string"==typeof e,"Invalid warning code"),this.$_addRule({name:"warning",args:{code:e,local:t},warn:!0})},validate(e,t,r){let{code:s,local:n}=r;return t.error(s,n)},args:["code","local"],multi:!0}},modifiers:{keep(e){let t=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];e.keep=t},message(e,t){e.message=i.compile(t)},warn(e){let t=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];e.warn=t}},manifest:{build(e,t){for(const r in t){const s=t[r];if(["examples","externals","metas","notes","tags"].includes(r))for(const t of s)e=e[r.slice(0,-1)](t);else if("alterations"!==r)if("whens"!==r){if("shared"===r)for(const t of s)e=e.shared(t)}else for(const t of s){const{ref:r,is:s,not:n,then:a,otherwise:i,concat:o}=t;e=o?e.concat(o):r?e.when(r,{is:s,not:n,then:a,otherwise:i,switch:t.switch,break:t.break}):e.when(s,{then:a,otherwise:i,break:t.break})}else{const t={};for(const{target:e,adjuster:r}of s)t[e]=r;e=e.alter(t)}}return e}},messages:{"any.custom":"{{#label}} failed custom validation because {{#error.message}}","any.default":"{{#label}} threw an error when running default method","any.failover":"{{#label}} threw an error when running failover method","any.invalid":"{{#label}} contains an invalid value","any.only":'{{#label}} must be {if(#valids.length == 1, "", "one of ")}{{#valids}}',"any.ref":"{{#label}} {{#arg}} references {{:#ref}} which {{#reason}}","any.required":"{{#label}} is required","any.unknown":"{{#label}} is not allowed"}})},546:(e,t,r)=>{"use strict";const s=r(375),n=r(9474),a=r(9621),i=r(8068),o=r(8160),l=r(3292),c={};e.exports=i.extend({type:"array",flags:{single:{default:!1},sparse:{default:!1}},terms:{items:{init:[],manifest:"schema"},ordered:{init:[],manifest:"schema"},_exclusions:{init:[]},_inclusions:{init:[]},_requireds:{init:[]}},coerce:{from:"object",method(e,t){let{schema:r,state:s,prefs:n}=t;if(!Array.isArray(e))return;const a=r.$_getRule("sort");return a?c.sort(r,e,a.args.options,s,n):void 0}},validate(e,t){let{schema:r,error:s}=t;if(!Array.isArray(e)){if(r._flags.single){const t=[e];return t[o.symbols.arraySingle]=!0,{value:t}}return{errors:s("array.base")}}if(r.$_getRule("items")||r.$_terms.externals)return{value:e.slice()}},rules:{has:{method(e){e=this.$_compile(e,{appendPath:!0});const t=this.$_addRule({name:"has",args:{schema:e}});return t.$_mutateRegister(e),t},validate(e,t,r){let{state:s,prefs:n,error:a}=t,{schema:i}=r;const o=[e,...s.ancestors];for(let t=0;t<e.length;++t){const r=s.localize([...s.path,t],o,i);if(i.$_match(e[t],r,n))return e}const l=i._flags.label;return l?a("array.hasKnown",{patternLabel:l}):a("array.hasUnknown",null)},multi:!0},items:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];o.verifyFlat(t,"items");const s=this.$_addRule("items");for(let e=0;e<t.length;++e){const r=o.tryWithPath((()=>this.$_compile(t[e])),e,{append:!0});s.$_terms.items.push(r)}return s.$_mutateRebuild()},validate(e,t){let{schema:r,error:s,state:n,prefs:a,errorsArray:i}=t;const l=r.$_terms._requireds.slice(),u=r.$_terms.ordered.slice(),f=[...r.$_terms._inclusions,...l],h=!e[o.symbols.arraySingle];delete e[o.symbols.arraySingle];const m=i();let d=e.length;for(let t=0;t<d;++t){const i=e[t];let o=!1,p=!1;const g=h?t:new Number(t),y=[...n.path,g];if(!r._flags.sparse&&void 0===i){if(m.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),a.abortEarly)return m;u.shift();continue}const b=[e,...n.ancestors];for(const e of r.$_terms._exclusions)if(e.$_match(i,n.localize(y,b,e),a,{presence:"ignore"})){if(m.push(s("array.excludes",{pos:t,value:i},n.localize(y))),a.abortEarly)return m;o=!0,u.shift();break}if(o)continue;if(r.$_terms.ordered.length){if(u.length){const o=u.shift(),l=o.$_validate(i,n.localize(y,b,o),a);if(l.errors){if(m.push(...l.errors),a.abortEarly)return m}else if("strip"===o._flags.result)c.fastSplice(e,t),--t,--d;else{if(!r._flags.sparse&&void 0===l.value){if(m.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),a.abortEarly)return m;continue}e[t]=l.value}continue}if(!r.$_terms.items.length){if(m.push(s("array.orderedLength",{pos:t,limit:r.$_terms.ordered.length})),a.abortEarly)return m;break}}const v=[];let _=l.length;for(let o=0;o<_;++o){const u=n.localize(y,b,l[o]);u.snapshot();const f=l[o].$_validate(i,u,a);if(v[o]=f,!f.errors){if(e[t]=f.value,p=!0,c.fastSplice(l,o),--o,--_,!r._flags.sparse&&void 0===f.value&&(m.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),a.abortEarly))return m;break}u.restore()}if(p)continue;const w=a.stripUnknown&&!!a.stripUnknown.arrays||!1;_=f.length;for(const u of f){let f;const h=l.indexOf(u);if(-1!==h)f=v[h];else{const l=n.localize(y,b,u);if(l.snapshot(),f=u.$_validate(i,l,a),!f.errors){"strip"===u._flags.result?(c.fastSplice(e,t),--t,--d):r._flags.sparse||void 0!==f.value?e[t]=f.value:(m.push(s("array.sparse",{key:g,path:y,pos:t,value:void 0},n.localize(y))),o=!0),p=!0;break}l.restore()}if(1===_){if(w){c.fastSplice(e,t),--t,--d,p=!0;break}if(m.push(...f.errors),a.abortEarly)return m;o=!0;break}}if(!o&&(r.$_terms._inclusions.length||r.$_terms._requireds.length)&&!p){if(w){c.fastSplice(e,t),--t,--d;continue}if(m.push(s("array.includes",{pos:t,value:i},n.localize(y))),a.abortEarly)return m}}return l.length&&c.fillMissedErrors(r,m,l,e,n,a),u.length&&(c.fillOrderedErrors(r,m,u,e,n,a),m.length||c.fillDefault(u,e,n,a)),m.length?m:e},priority:!0,manifest:!1},length:{method(e){return this.$_addRule({name:"length",args:{limit:e},operator:"="})},validate(e,t,r,s){let{limit:n}=r,{name:a,operator:i,args:l}=s;return o.compare(e.length,n,i)?e:t.error("array."+a,{limit:l.limit,value:e})},args:[{name:"limit",ref:!0,assert:o.limit,message:"must be a positive integer"}]},max:{method(e){return this.$_addRule({name:"max",method:"length",args:{limit:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"length",args:{limit:e},operator:">="})}},ordered:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];o.verifyFlat(t,"ordered");const s=this.$_addRule("items");for(let e=0;e<t.length;++e){const r=o.tryWithPath((()=>this.$_compile(t[e])),e,{append:!0});c.validateSingle(r,s),s.$_mutateRegister(r),s.$_terms.ordered.push(r)}return s.$_mutateRebuild()}},single:{method(e){const t=void 0===e||!!e;return s(!t||!this._flags._arrayItems,"Cannot specify single rule when array has array items"),this.$_setFlag("single",t)}},sort:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};o.assertOptions(e,["by","order"]);const t={order:e.order||"ascending"};return e.by&&(t.by=l.ref(e.by,{ancestor:0}),s(!t.by.ancestor,"Cannot sort by ancestor")),this.$_addRule({name:"sort",args:{options:t}})},validate(e,t,r){let{error:s,state:n,prefs:a,schema:i}=t,{options:o}=r;const{value:l,errors:u}=c.sort(i,e,o,n,a);if(u)return u;for(let t=0;t<e.length;++t)if(e[t]!==l[t])return s("array.sort",{order:o.order,by:o.by?o.by.key:"value"});return e},convert:!0},sparse:{method(e){const t=void 0===e||!!e;return this._flags.sparse===t?this:(t?this.clone():this.$_addRule("items")).$_setFlag("sparse",t,{clone:!1})}},unique:{method(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};s(!e||"function"==typeof e||"string"==typeof e,"comparator must be a function or a string"),o.assertOptions(t,["ignoreUndefined","separator"]);const r={name:"unique",args:{options:t,comparator:e}};if(e)if("string"==typeof e){const s=o.default(t.separator,".");r.path=s?e.split(s):[e]}else r.comparator=e;return this.$_addRule(r)},validate(e,t,r,i){let{state:o,error:l,schema:c}=t,{comparator:u,options:f}=r,{comparator:h,path:m}=i;const d={string:Object.create(null),number:Object.create(null),undefined:Object.create(null),boolean:Object.create(null),object:new Map,function:new Map,custom:new Map},p=h||n,g=f.ignoreUndefined;for(let t=0;t<e.length;++t){const r=m?a(e[t],m):e[t],n=h?d.custom:d[typeof r];if(s(n,"Failed to find unique map container for type",typeof r),n instanceof Map){const s=n.entries();let a;for(;!(a=s.next()).done;)if(p(a.value[0],r)){const r=o.localize([...o.path,t],[e,...o.ancestors]),s={pos:t,value:e[t],dupePos:a.value[1],dupeValue:e[a.value[1]]};return m&&(s.path=u),l("array.unique",s,r)}n.set(r,t)}else{if((!g||void 0!==r)&&void 0!==n[r]){const s={pos:t,value:e[t],dupePos:n[r],dupeValue:e[n[r]]};return m&&(s.path=u),l("array.unique",s,o.localize([...o.path,t],[e,...o.ancestors]))}n[r]=t}}return e},args:["comparator","options"],multi:!0}},cast:{set:{from:Array.isArray,to:(e,t)=>new Set(e)}},rebuild(e){e.$_terms._inclusions=[],e.$_terms._exclusions=[],e.$_terms._requireds=[];for(const t of e.$_terms.items)c.validateSingle(t,e),"required"===t._flags.presence?e.$_terms._requireds.push(t):"forbidden"===t._flags.presence?e.$_terms._exclusions.push(t):e.$_terms._inclusions.push(t);for(const t of e.$_terms.ordered)c.validateSingle(t,e)},manifest:{build:(e,t)=>(t.items&&(e=e.items(...t.items)),t.ordered&&(e=e.ordered(...t.ordered)),e)},messages:{"array.base":"{{#label}} must be an array","array.excludes":"{{#label}} contains an excluded value","array.hasKnown":"{{#label}} does not contain at least one required match for type {:#patternLabel}","array.hasUnknown":"{{#label}} does not contain at least one required match","array.includes":"{{#label}} does not match any of the allowed types","array.includesRequiredBoth":"{{#label}} does not contain {{#knownMisses}} and {{#unknownMisses}} other required value(s)","array.includesRequiredKnowns":"{{#label}} does not contain {{#knownMisses}}","array.includesRequiredUnknowns":"{{#label}} does not contain {{#unknownMisses}} required value(s)","array.length":"{{#label}} must contain {{#limit}} items","array.max":"{{#label}} must contain less than or equal to {{#limit}} items","array.min":"{{#label}} must contain at least {{#limit}} items","array.orderedLength":"{{#label}} must contain at most {{#limit}} items","array.sort":"{{#label}} must be sorted in {#order} order by {{#by}}","array.sort.mismatching":"{{#label}} cannot be sorted due to mismatching types","array.sort.unsupported":"{{#label}} cannot be sorted due to unsupported type {#type}","array.sparse":"{{#label}} must not be a sparse array item","array.unique":"{{#label}} contains a duplicate value"}}),c.fillMissedErrors=function(e,t,r,s,n,a){const i=[];let o=0;for(const e of r){const t=e._flags.label;t?i.push(t):++o}i.length?o?t.push(e.$_createError("array.includesRequiredBoth",s,{knownMisses:i,unknownMisses:o},n,a)):t.push(e.$_createError("array.includesRequiredKnowns",s,{knownMisses:i},n,a)):t.push(e.$_createError("array.includesRequiredUnknowns",s,{unknownMisses:o},n,a))},c.fillOrderedErrors=function(e,t,r,s,n,a){const i=[];for(const e of r)"required"===e._flags.presence&&i.push(e);i.length&&c.fillMissedErrors(e,t,i,s,n,a)},c.fillDefault=function(e,t,r,s){const n=[];let a=!0;for(let i=e.length-1;i>=0;--i){const o=e[i],l=[t,...r.ancestors],c=o.$_validate(void 0,r.localize(r.path,l,o),s).value;if(a){if(void 0===c)continue;a=!1}n.unshift(c)}n.length&&t.push(...n)},c.fastSplice=function(e,t){let r=t;for(;r<e.length;)e[r++]=e[r];--e.length},c.validateSingle=function(e,t){("array"===e.type||e._flags._arrayItems)&&(s(!t._flags.single,"Cannot specify array item with single rule enabled"),t.$_setFlag("_arrayItems",!0,{clone:!1}))},c.sort=function(e,t,r,s,n){const a="ascending"===r.order?1:-1,i=-1*a,o=a,l=(l,u)=>{let f=c.compare(l,u,i,o);if(null!==f)return f;if(r.by&&(l=r.by.resolve(l,s,n),u=r.by.resolve(u,s,n)),f=c.compare(l,u,i,o),null!==f)return f;const h=typeof l;if(h!==typeof u)throw e.$_createError("array.sort.mismatching",t,null,s,n);if("number"!==h&&"string"!==h)throw e.$_createError("array.sort.unsupported",t,{type:h},s,n);return"number"===h?(l-u)*a:l<u?i:o};try{return{value:t.slice().sort(l)}}catch(e){return{errors:e}}},c.compare=function(e,t,r,s){return e===t?0:void 0===e?1:void 0===t?-1:null===e?s:null===t?r:null}},4937:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i=r(2036),o={isBool:function(e){return"boolean"==typeof e}};e.exports=n.extend({type:"boolean",flags:{sensitive:{default:!1}},terms:{falsy:{init:null,manifest:"values"},truthy:{init:null,manifest:"values"}},coerce(e,t){let{schema:r}=t;if("boolean"!=typeof e){if("string"==typeof e){const t=r._flags.sensitive?e:e.toLowerCase();e="true"===t||"false"!==t&&e}return"boolean"!=typeof e&&(e=r.$_terms.truthy&&r.$_terms.truthy.has(e,null,null,!r._flags.sensitive)||(!r.$_terms.falsy||!r.$_terms.falsy.has(e,null,null,!r._flags.sensitive))&&e),{value:e}}},validate(e,t){let{error:r}=t;if("boolean"!=typeof e)return{value:e,errors:r("boolean.base")}},rules:{truthy:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];a.verifyFlat(t,"truthy");const n=this.clone();n.$_terms.truthy=n.$_terms.truthy||new i;for(let e=0;e<t.length;++e){const r=t[e];s(void 0!==r,"Cannot call truthy with undefined"),n.$_terms.truthy.add(r)}return n}},falsy:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];a.verifyFlat(t,"falsy");const n=this.clone();n.$_terms.falsy=n.$_terms.falsy||new i;for(let e=0;e<t.length;++e){const r=t[e];s(void 0!==r,"Cannot call falsy with undefined"),n.$_terms.falsy.add(r)}return n}},sensitive:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("sensitive",e)}}},cast:{number:{from:o.isBool,to:(e,t)=>e?1:0},string:{from:o.isBool,to:(e,t)=>e?"true":"false"}},manifest:{build:(e,t)=>(t.truthy&&(e=e.truthy(...t.truthy)),t.falsy&&(e=e.falsy(...t.falsy)),e)},messages:{"boolean.base":"{{#label}} must be a boolean"}})},7500:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i=r(3328),o={isDate:function(e){return e instanceof Date}};e.exports=n.extend({type:"date",coerce:{from:["number","string"],method(e,t){let{schema:r}=t;return{value:o.parse(e,r._flags.format)||e}}},validate(e,t){let{schema:r,error:s,prefs:n}=t;if(e instanceof Date&&!isNaN(e.getTime()))return;const a=r._flags.format;return n.convert&&a&&"string"==typeof e?{value:e,errors:s("date.format",{format:a})}:{value:e,errors:s("date.base")}},rules:{compare:{method:!1,validate(e,t,r,s){let{date:n}=r,{name:i,operator:o,args:l}=s;const c="now"===n?Date.now():n.getTime();return a.compare(e.getTime(),c,o)?e:t.error("date."+i,{limit:l.date,value:e})},args:[{name:"date",ref:!0,normalize:e=>"now"===e?e:o.parse(e),assert:e=>null!==e,message:"must have a valid date format"}]},format:{method(e){return s(["iso","javascript","unix"].includes(e),"Unknown date format",e),this.$_setFlag("format",e)}},greater:{method(e){return this.$_addRule({name:"greater",method:"compare",args:{date:e},operator:">"})}},iso:{method(){return this.format("iso")}},less:{method(e){return this.$_addRule({name:"less",method:"compare",args:{date:e},operator:"<"})}},max:{method(e){return this.$_addRule({name:"max",method:"compare",args:{date:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"compare",args:{date:e},operator:">="})}},timestamp:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"javascript";return s(["javascript","unix"].includes(e),'"type" must be one of "javascript, unix"'),this.format(e)}}},cast:{number:{from:o.isDate,to:(e,t)=>e.getTime()},string:{from:o.isDate,to(e,t){let{prefs:r}=t;return i.date(e,r)}}},messages:{"date.base":"{{#label}} must be a valid date","date.format":'{{#label}} must be in {msg("date.format." + #format) || #format} format',"date.greater":"{{#label}} must be greater than {{:#limit}}","date.less":"{{#label}} must be less than {{:#limit}}","date.max":"{{#label}} must be less than or equal to {{:#limit}}","date.min":"{{#label}} must be greater than or equal to {{:#limit}}","date.format.iso":"ISO 8601 date","date.format.javascript":"timestamp or number of milliseconds","date.format.unix":"timestamp or number of seconds"}}),o.parse=function(e,t){if(e instanceof Date)return e;if("string"!=typeof e&&(isNaN(e)||!isFinite(e)))return null;if(/^\s*$/.test(e))return null;if("iso"===t)return a.isIsoDate(e)?o.date(e.toString()):null;const r=e;if("string"==typeof e&&/^[+-]?\d+(\.\d+)?$/.test(e)&&(e=parseFloat(e)),t){if("javascript"===t)return o.date(1*e);if("unix"===t)return o.date(1e3*e);if("string"==typeof r)return null}return o.date(e)},o.date=function(e){const t=new Date(e);return isNaN(t.getTime())?null:t}},390:(e,t,r)=>{"use strict";const s=r(375),n=r(7824);e.exports=n.extend({type:"function",properties:{typeof:"function"},rules:{arity:{method(e){return s(Number.isSafeInteger(e)&&e>=0,"n must be a positive integer"),this.$_addRule({name:"arity",args:{n:e}})},validate(e,t,r){let{n:s}=r;return e.length===s?e:t.error("function.arity",{n:s})}},class:{method(){return this.$_addRule("class")},validate:(e,t)=>/^\s*class\s/.test(e.toString())?e:t.error("function.class",{value:e})},minArity:{method(e){return s(Number.isSafeInteger(e)&&e>0,"n must be a strict positive integer"),this.$_addRule({name:"minArity",args:{n:e}})},validate(e,t,r){let{n:s}=r;return e.length>=s?e:t.error("function.minArity",{n:s})}},maxArity:{method(e){return s(Number.isSafeInteger(e)&&e>=0,"n must be a positive integer"),this.$_addRule({name:"maxArity",args:{n:e}})},validate(e,t,r){let{n:s}=r;return e.length<=s?e:t.error("function.maxArity",{n:s})}}},messages:{"function.arity":"{{#label}} must have an arity of {{#n}}","function.class":"{{#label}} must be a class","function.maxArity":"{{#label}} must have an arity lesser or equal to {{#n}}","function.minArity":"{{#label}} must have an arity greater or equal to {{#n}}"}})},7824:(e,t,r)=>{"use strict";const s=r(978),n=r(375),a=r(8571),i=r(3652),o=r(8068),l=r(8160),c=r(3292),u=r(6354),f=r(6133),h=r(3328),m={renameDefaults:{alias:!1,multiple:!1,override:!1}};e.exports=o.extend({type:"_keys",properties:{typeof:"object"},flags:{unknown:{default:!1}},terms:{dependencies:{init:null},keys:{init:null,manifest:{mapped:{from:"schema",to:"key"}}},patterns:{init:null},renames:{init:null}},args:(e,t)=>e.keys(t),validate(e,t){let{schema:r,error:s,state:n,prefs:a}=t;if(!e||typeof e!==r.$_property("typeof")||Array.isArray(e))return{value:e,errors:s("object.base",{type:r.$_property("typeof")})};if(!(r.$_terms.renames||r.$_terms.dependencies||r.$_terms.keys||r.$_terms.patterns||r.$_terms.externals))return;e=m.clone(e,a);const i=[];if(r.$_terms.renames&&!m.rename(r,e,n,a,i))return{value:e,errors:i};if(!r.$_terms.keys&&!r.$_terms.patterns&&!r.$_terms.dependencies)return{value:e,errors:i};const o=new Set(Object.keys(e));if(r.$_terms.keys){const t=[e,...n.ancestors];for(const s of r.$_terms.keys){const r=s.key,l=e[r];o.delete(r);const c=n.localize([...n.path,r],t,s),u=s.schema.$_validate(l,c,a);if(u.errors){if(a.abortEarly)return{value:e,errors:u.errors};void 0!==u.value&&(e[r]=u.value),i.push(...u.errors)}else"strip"===s.schema._flags.result||void 0===u.value&&void 0!==l?delete e[r]:void 0!==u.value&&(e[r]=u.value)}}if(o.size||r._flags._hasPatternMatch){const t=m.unknown(r,e,o,i,n,a);if(t)return t}if(r.$_terms.dependencies)for(const t of r.$_terms.dependencies){if(null!==t.key&&!1===m.isPresent(t.options)(t.key.resolve(e,n,a,null,{shadow:!1})))continue;const s=m.dependencies[t.rel](r,t,e,n,a);if(s){const t=r.$_createError(s.code,e,s.context,n,a);if(a.abortEarly)return{value:e,errors:t};i.push(t)}}return{value:e,errors:i}},rules:{and:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"and"),m.dependency(this,"and",null,t)}},append:{method(e){return null==e||0===Object.keys(e).length?this:this.keys(e)}},assert:{method(e,t,r){h.isTemplate(e)||(e=c.ref(e)),n(void 0===r||"string"==typeof r,"Message must be a string"),t=this.$_compile(t,{appendPath:!0});const s=this.$_addRule({name:"assert",args:{subject:e,schema:t,message:r}});return s.$_mutateRegister(e),s.$_mutateRegister(t),s},validate(e,t,r){let{error:s,prefs:n,state:a}=t,{subject:i,schema:o,message:l}=r;const c=i.resolve(e,a,n),u=f.isRef(i)?i.absolute(a):[];return o.$_match(c,a.localize(u,[e,...a.ancestors],o),n)?e:s("object.assert",{subject:i,message:l})},args:["subject","schema","message"],multi:!0},instance:{method(e,t){return n("function"==typeof e,"constructor must be a function"),t=t||e.name,this.$_addRule({name:"instance",args:{constructor:e,name:t}})},validate(e,t,r){let{constructor:s,name:n}=r;return e instanceof s?e:t.error("object.instance",{type:n,value:e})},args:["constructor","name"]},keys:{method(e){n(void 0===e||"object"==typeof e,"Object schema must be a valid object"),n(!l.isSchema(e),"Object schema cannot be a joi schema");const t=this.clone();if(e)if(Object.keys(e).length){t.$_terms.keys=t.$_terms.keys?t.$_terms.keys.filter((t=>!e.hasOwnProperty(t.key))):new m.Keys;for(const r in e)l.tryWithPath((()=>t.$_terms.keys.push({key:r,schema:this.$_compile(e[r])})),r)}else t.$_terms.keys=new m.Keys;else t.$_terms.keys=null;return t.$_mutateRebuild()}},length:{method(e){return this.$_addRule({name:"length",args:{limit:e},operator:"="})},validate(e,t,r,s){let{limit:n}=r,{name:a,operator:i,args:o}=s;return l.compare(Object.keys(e).length,n,i)?e:t.error("object."+a,{limit:o.limit,value:e})},args:[{name:"limit",ref:!0,assert:l.limit,message:"must be a positive integer"}]},max:{method(e){return this.$_addRule({name:"max",method:"length",args:{limit:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"length",args:{limit:e},operator:">="})}},nand:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"nand"),m.dependency(this,"nand",null,t)}},or:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"or"),m.dependency(this,"or",null,t)}},oxor:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return m.dependency(this,"oxor",null,t)}},pattern:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};const s=e instanceof RegExp;s||(e=this.$_compile(e,{appendPath:!0})),n(void 0!==t,"Invalid rule"),l.assertOptions(r,["fallthrough","matches"]),s&&n(!e.flags.includes("g")&&!e.flags.includes("y"),"pattern should not use global or sticky mode"),t=this.$_compile(t,{appendPath:!0});const a=this.clone();a.$_terms.patterns=a.$_terms.patterns||[];const i={[s?"regex":"schema"]:e,rule:t};return r.matches&&(i.matches=this.$_compile(r.matches),"array"!==i.matches.type&&(i.matches=i.matches.$_root.array().items(i.matches)),a.$_mutateRegister(i.matches),a.$_setFlag("_hasPatternMatch",!0,{clone:!1})),r.fallthrough&&(i.fallthrough=!0),a.$_terms.patterns.push(i),a.$_mutateRegister(t),a}},ref:{method(){return this.$_addRule("ref")},validate:(e,t)=>f.isRef(e)?e:t.error("object.refType",{value:e})},regex:{method(){return this.$_addRule("regex")},validate:(e,t)=>e instanceof RegExp?e:t.error("object.regex",{value:e})},rename:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};n("string"==typeof e||e instanceof RegExp,"Rename missing the from argument"),n("string"==typeof t||t instanceof h,"Invalid rename to argument"),n(t!==e,"Cannot rename key to same name:",e),l.assertOptions(r,["alias","ignoreUndefined","override","multiple"]);const a=this.clone();a.$_terms.renames=a.$_terms.renames||[];for(const t of a.$_terms.renames)n(t.from!==e,"Cannot rename the same key multiple times");return t instanceof h&&a.$_mutateRegister(t),a.$_terms.renames.push({from:e,to:t,options:s(m.renameDefaults,r)}),a}},schema:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"any";return this.$_addRule({name:"schema",args:{type:e}})},validate(e,t,r){let{type:s}=r;return!l.isSchema(e)||"any"!==s&&e.type!==s?t.error("object.schema",{type:s}):e}},unknown:{method(e){return this.$_setFlag("unknown",!1!==e)}},with:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};return m.dependency(this,"with",e,t,r)}},without:{method(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};return m.dependency(this,"without",e,t,r)}},xor:{method(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];return l.verifyFlat(t,"xor"),m.dependency(this,"xor",null,t)}}},overrides:{default(e,t){return void 0===e&&(e=l.symbols.deepDefault),this.$_parent("default",e,t)}},rebuild(e){if(e.$_terms.keys){const t=new i.Sorter;for(const r of e.$_terms.keys)l.tryWithPath((()=>t.add(r,{after:r.schema.$_rootReferences(),group:r.key})),r.key);e.$_terms.keys=new m.Keys(...t.nodes)}},manifest:{build(e,t){if(t.keys&&(e=e.keys(t.keys)),t.dependencies)for(const{rel:r,key:s=null,peers:n,options:a}of t.dependencies)e=m.dependency(e,r,s,n,a);if(t.patterns)for(const{regex:r,schema:s,rule:n,fallthrough:a,matches:i}of t.patterns)e=e.pattern(r||s,n,{fallthrough:a,matches:i});if(t.renames)for(const{from:r,to:s,options:n}of t.renames)e=e.rename(r,s,n);return e}},messages:{"object.and":"{{#label}} contains {{#presentWithLabels}} without its required peers {{#missingWithLabels}}","object.assert":'{{#label}} is invalid because {if(#subject.key, `"` + #subject.key + `" failed to ` + (#message || "pass the assertion test"), #message || "the assertion failed")}',"object.base":"{{#label}} must be of type {{#type}}","object.instance":"{{#label}} must be an instance of {{:#type}}","object.length":'{{#label}} must have {{#limit}} key{if(#limit == 1, "", "s")}',"object.max":'{{#label}} must have less than or equal to {{#limit}} key{if(#limit == 1, "", "s")}',"object.min":'{{#label}} must have at least {{#limit}} key{if(#limit == 1, "", "s")}',"object.missing":"{{#label}} must contain at least one of {{#peersWithLabels}}","object.nand":"{{:#mainWithLabel}} must not exist simultaneously with {{#peersWithLabels}}","object.oxor":"{{#label}} contains a conflict between optional exclusive peers {{#peersWithLabels}}","object.pattern.match":"{{#label}} keys failed to match pattern requirements","object.refType":"{{#label}} must be a Joi reference","object.regex":"{{#label}} must be a RegExp object","object.rename.multiple":"{{#label}} cannot rename {{:#from}} because multiple renames are disabled and another key was already renamed to {{:#to}}","object.rename.override":"{{#label}} cannot rename {{:#from}} because override is disabled and target {{:#to}} exists","object.schema":"{{#label}} must be a Joi schema of {{#type}} type","object.unknown":"{{#label}} is not allowed","object.with":"{{:#mainWithLabel}} missing required peer {{:#peerWithLabel}}","object.without":"{{:#mainWithLabel}} conflict with forbidden peer {{:#peerWithLabel}}","object.xor":"{{#label}} contains a conflict between exclusive peers {{#peersWithLabels}}"}}),m.clone=function(e,t){if("object"==typeof e){if(t.nonEnumerables)return a(e,{shallow:!0});const r=Object.create(Object.getPrototypeOf(e));return Object.assign(r,e),r}const r=function(){for(var t=arguments.length,r=new Array(t),s=0;s<t;s++)r[s]=arguments[s];return e.apply(this,r)};return r.prototype=a(e.prototype),Object.defineProperty(r,"name",{value:e.name,writable:!1}),Object.defineProperty(r,"length",{value:e.length,writable:!1}),Object.assign(r,e),r},m.dependency=function(e,t,r,s,a){n(null===r||"string"==typeof r,t,"key must be a strings"),a||(a=s.length>1&&"object"==typeof s[s.length-1]?s.pop():{}),l.assertOptions(a,["separator","isPresent"]),s=[].concat(s);const i=l.default(a.separator,"."),o=[];for(const e of s)n("string"==typeof e,t,"peers must be strings"),o.push(c.ref(e,{separator:i,ancestor:0,prefix:!1}));null!==r&&(r=c.ref(r,{separator:i,ancestor:0,prefix:!1}));const u=e.clone();return u.$_terms.dependencies=u.$_terms.dependencies||[],u.$_terms.dependencies.push(new m.Dependency(t,r,o,s,a)),u},m.dependencies={and(e,t,r,s,n){const a=[],i=[],o=t.peers.length,l=m.isPresent(t.options);for(const e of t.peers)!1===l(e.resolve(r,s,n,null,{shadow:!1}))?a.push(e.key):i.push(e.key);if(a.length!==o&&i.length!==o)return{code:"object.and",context:{present:i,presentWithLabels:m.keysToLabels(e,i),missing:a,missingWithLabels:m.keysToLabels(e,a)}}},nand(e,t,r,s,n){const a=[],i=m.isPresent(t.options);for(const e of t.peers)i(e.resolve(r,s,n,null,{shadow:!1}))&&a.push(e.key);if(a.length!==t.peers.length)return;const o=t.paths[0],l=t.paths.slice(1);return{code:"object.nand",context:{main:o,mainWithLabel:m.keysToLabels(e,o),peers:l,peersWithLabels:m.keysToLabels(e,l)}}},or(e,t,r,s,n){const a=m.isPresent(t.options);for(const e of t.peers)if(a(e.resolve(r,s,n,null,{shadow:!1})))return;return{code:"object.missing",context:{peers:t.paths,peersWithLabels:m.keysToLabels(e,t.paths)}}},oxor(e,t,r,s,n){const a=[],i=m.isPresent(t.options);for(const e of t.peers)i(e.resolve(r,s,n,null,{shadow:!1}))&&a.push(e.key);if(!a.length||1===a.length)return;const o={peers:t.paths,peersWithLabels:m.keysToLabels(e,t.paths)};return o.present=a,o.presentWithLabels=m.keysToLabels(e,a),{code:"object.oxor",context:o}},with(e,t,r,s,n){const a=m.isPresent(t.options);for(const i of t.peers)if(!1===a(i.resolve(r,s,n,null,{shadow:!1})))return{code:"object.with",context:{main:t.key.key,mainWithLabel:m.keysToLabels(e,t.key.key),peer:i.key,peerWithLabel:m.keysToLabels(e,i.key)}}},without(e,t,r,s,n){const a=m.isPresent(t.options);for(const i of t.peers)if(a(i.resolve(r,s,n,null,{shadow:!1})))return{code:"object.without",context:{main:t.key.key,mainWithLabel:m.keysToLabels(e,t.key.key),peer:i.key,peerWithLabel:m.keysToLabels(e,i.key)}}},xor(e,t,r,s,n){const a=[],i=m.isPresent(t.options);for(const e of t.peers)i(e.resolve(r,s,n,null,{shadow:!1}))&&a.push(e.key);if(1===a.length)return;const o={peers:t.paths,peersWithLabels:m.keysToLabels(e,t.paths)};return 0===a.length?{code:"object.missing",context:o}:(o.present=a,o.presentWithLabels=m.keysToLabels(e,a),{code:"object.xor",context:o})}},m.keysToLabels=function(e,t){return Array.isArray(t)?t.map((t=>e.$_mapLabels(t))):e.$_mapLabels(t)},m.isPresent=function(e){return"function"==typeof e.isPresent?e.isPresent:e=>void 0!==e},m.rename=function(e,t,r,s,n){const a={};for(const i of e.$_terms.renames){const o=[],l="string"!=typeof i.from;if(l)for(const e in t){if(void 0===t[e]&&i.options.ignoreUndefined)continue;if(e===i.to)continue;const r=i.from.exec(e);r&&o.push({from:e,to:i.to,match:r})}else!Object.prototype.hasOwnProperty.call(t,i.from)||void 0===t[i.from]&&i.options.ignoreUndefined||o.push(i);for(const c of o){const o=c.from;let u=c.to;if(u instanceof h&&(u=u.render(t,r,s,c.match)),o!==u){if(!i.options.multiple&&a[u]&&(n.push(e.$_createError("object.rename.multiple",t,{from:o,to:u,pattern:l},r,s)),s.abortEarly))return!1;if(Object.prototype.hasOwnProperty.call(t,u)&&!i.options.override&&!a[u]&&(n.push(e.$_createError("object.rename.override",t,{from:o,to:u,pattern:l},r,s)),s.abortEarly))return!1;void 0===t[o]?delete t[u]:t[u]=t[o],a[u]=!0,i.options.alias||delete t[o]}}}return!0},m.unknown=function(e,t,r,s,n,a){if(e.$_terms.patterns){let i=!1;const o=e.$_terms.patterns.map((e=>{if(e.matches)return i=!0,[]})),l=[t,...n.ancestors];for(const i of r){const c=t[i],u=[...n.path,i];for(let f=0;f<e.$_terms.patterns.length;++f){const h=e.$_terms.patterns[f];if(h.regex){const e=h.regex.test(i);if(n.mainstay.tracer.debug(n,"rule",`pattern.${f}`,e?"pass":"error"),!e)continue}else if(!h.schema.$_match(i,n.nest(h.schema,`pattern.${f}`),a))continue;r.delete(i);const m=n.localize(u,l,{schema:h.rule,key:i}),d=h.rule.$_validate(c,m,a);if(d.errors){if(a.abortEarly)return{value:t,errors:d.errors};s.push(...d.errors)}if(h.matches&&o[f].push(i),t[i]=d.value,!h.fallthrough)break}}if(i)for(let r=0;r<o.length;++r){const i=o[r];if(!i)continue;const c=e.$_terms.patterns[r].matches,f=n.localize(n.path,l,c),h=c.$_validate(i,f,a);if(h.errors){const r=u.details(h.errors,{override:!1});r.matches=i;const o=e.$_createError("object.pattern.match",t,r,n,a);if(a.abortEarly)return{value:t,errors:o};s.push(o)}}}if(r.size&&(e.$_terms.keys||e.$_terms.patterns)){if(a.stripUnknown&&!e._flags.unknown||a.skipFunctions){const e=!(!a.stripUnknown||!0!==a.stripUnknown&&!a.stripUnknown.objects);for(const s of r)e?(delete t[s],r.delete(s)):"function"==typeof t[s]&&r.delete(s)}if(!l.default(e._flags.unknown,a.allowUnknown))for(const i of r){const r=n.localize([...n.path,i],[]),o=e.$_createError("object.unknown",t[i],{child:i},r,a,{flags:!1});if(a.abortEarly)return{value:t,errors:o};s.push(o)}}},m.Dependency=class{constructor(e,t,r,s,n){this.rel=e,this.key=t,this.peers=r,this.paths=s,this.options=n}describe(){const e={rel:this.rel,peers:this.paths};return null!==this.key&&(e.key=this.key.key),"."!==this.peers[0].separator&&(e.options={...e.options,separator:this.peers[0].separator}),this.options.isPresent&&(e.options={...e.options,isPresent:this.options.isPresent}),e}},m.Keys=class extends Array{concat(e){const t=this.slice(),r=new Map;for(let e=0;e<t.length;++e)r.set(t[e].key,e);for(const s of e){const e=s.key,n=r.get(e);void 0!==n?t[n]={key:e,schema:t[n].schema.concat(s.schema)}:t.push(s)}return t}}},8785:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i=r(3292),o=r(6354),l={};e.exports=n.extend({type:"link",properties:{schemaChain:!0},terms:{link:{init:null,manifest:"single",register:!1}},args:(e,t)=>e.ref(t),validate(e,t){let{schema:r,state:n,prefs:a}=t;s(r.$_terms.link,"Uninitialized link schema");const i=l.generate(r,e,n,a),o=r.$_terms.link[0].ref;return i.$_validate(e,n.nest(i,`link:${o.display}:${i.type}`),a)},generate:(e,t,r,s)=>l.generate(e,t,r,s),rules:{ref:{method(e){s(!this.$_terms.link,"Cannot reinitialize schema"),e=i.ref(e),s("value"===e.type||"local"===e.type,"Invalid reference type:",e.type),s("local"===e.type||"root"===e.ancestor||e.ancestor>0,"Link cannot reference itself");const t=this.clone();return t.$_terms.link=[{ref:e}],t}},relative:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.$_setFlag("relative",e)}}},overrides:{concat(e){s(this.$_terms.link,"Uninitialized link schema"),s(a.isSchema(e),"Invalid schema object"),s("link"!==e.type,"Cannot merge type link with another link");const t=this.clone();return t.$_terms.whens||(t.$_terms.whens=[]),t.$_terms.whens.push({concat:e}),t.$_mutateRebuild()}},manifest:{build:(e,t)=>(s(t.link,"Invalid link description missing link"),e.ref(t.link))}}),l.generate=function(e,t,r,s){let n=r.mainstay.links.get(e);if(n)return n._generate(t,r,s).schema;const a=e.$_terms.link[0].ref,{perspective:i,path:o}=l.perspective(a,r);l.assert(i,"which is outside of schema boundaries",a,e,r,s);try{n=o.length?i.$_reach(o):i}catch(t){l.assert(!1,"to non-existing schema",a,e,r,s)}return l.assert("link"!==n.type,"which is another link",a,e,r,s),e._flags.relative||r.mainstay.links.set(e,n),n._generate(t,r,s).schema},l.perspective=function(e,t){if("local"===e.type){for(const{schema:r,key:s}of t.schemas){if((r._flags.id||s)===e.path[0])return{perspective:r,path:e.path.slice(1)};if(r.$_terms.shared)for(const t of r.$_terms.shared)if(t._flags.id===e.path[0])return{perspective:t,path:e.path.slice(1)}}return{perspective:null,path:null}}return"root"===e.ancestor?{perspective:t.schemas[t.schemas.length-1].schema,path:e.path}:{perspective:t.schemas[e.ancestor]&&t.schemas[e.ancestor].schema,path:e.path}},l.assert=function(e,t,r,n,a,i){e||s(!1,`"${o.label(n._flags,a,i)}" contains link reference "${r.display}" ${t}`)}},3832:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a=r(8160),i={numberRx:/^\s*[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:e([+-]?\d+))?\s*$/i,precisionRx:/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/,exponentialPartRegex:/[eE][+-]?\d+$/,leadingSignAndZerosRegex:/^[+-]?(0*)?/,dotRegex:/\./,trailingZerosRegex:/0+$/};e.exports=n.extend({type:"number",flags:{unsafe:{default:!1}},coerce:{from:"string",method(e,t){let{schema:r,error:s}=t;if(!e.match(i.numberRx))return;e=e.trim();const n={value:parseFloat(e)};if(0===n.value&&(n.value=0),!r._flags.unsafe)if(e.match(/e/i)){if(i.extractSignificantDigits(e)!==i.extractSignificantDigits(String(n.value)))return n.errors=s("number.unsafe"),n}else{const t=n.value.toString();if(t.match(/e/i))return n;if(t!==i.normalizeDecimal(e))return n.errors=s("number.unsafe"),n}return n}},validate(e,t){let{schema:r,error:s,prefs:n}=t;if(e===1/0||e===-1/0)return{value:e,errors:s("number.infinity")};if(!a.isNumber(e))return{value:e,errors:s("number.base")};const i={value:e};if(n.convert){const e=r.$_getRule("precision");if(e){const t=Math.pow(10,e.args.limit);i.value=Math.round(i.value*t)/t}}return 0===i.value&&(i.value=0),!r._flags.unsafe&&(e>Number.MAX_SAFE_INTEGER||e<Number.MIN_SAFE_INTEGER)&&(i.errors=s("number.unsafe")),i},rules:{compare:{method:!1,validate(e,t,r,s){let{limit:n}=r,{name:i,operator:o,args:l}=s;return a.compare(e,n,o)?e:t.error("number."+i,{limit:l.limit,value:e})},args:[{name:"limit",ref:!0,assert:a.isNumber,message:"must be a number"}]},greater:{method(e){return this.$_addRule({name:"greater",method:"compare",args:{limit:e},operator:">"})}},integer:{method(){return this.$_addRule("integer")},validate:(e,t)=>Math.trunc(e)-e==0?e:t.error("number.integer")},less:{method(e){return this.$_addRule({name:"less",method:"compare",args:{limit:e},operator:"<"})}},max:{method(e){return this.$_addRule({name:"max",method:"compare",args:{limit:e},operator:"<="})}},min:{method(e){return this.$_addRule({name:"min",method:"compare",args:{limit:e},operator:">="})}},multiple:{method(e){return this.$_addRule({name:"multiple",args:{base:e}})},validate(e,t,r,s){let{base:n}=r;return e*(1/n)%1==0?e:t.error("number.multiple",{multiple:s.args.base,value:e})},args:[{name:"base",ref:!0,assert:e=>"number"==typeof e&&isFinite(e)&&e>0,message:"must be a positive number"}],multi:!0},negative:{method(){return this.sign("negative")}},port:{method(){return this.$_addRule("port")},validate:(e,t)=>Number.isSafeInteger(e)&&e>=0&&e<=65535?e:t.error("number.port")},positive:{method(){return this.sign("positive")}},precision:{method(e){return s(Number.isSafeInteger(e),"limit must be an integer"),this.$_addRule({name:"precision",args:{limit:e}})},validate(e,t,r){let{limit:s}=r;const n=e.toString().match(i.precisionRx);return Math.max((n[1]?n[1].length:0)-(n[2]?parseInt(n[2],10):0),0)<=s?e:t.error("number.precision",{limit:s,value:e})},convert:!0},sign:{method(e){return s(["negative","positive"].includes(e),"Invalid sign",e),this.$_addRule({name:"sign",args:{sign:e}})},validate(e,t,r){let{sign:s}=r;return"negative"===s&&e<0||"positive"===s&&e>0?e:t.error(`number.${s}`)}},unsafe:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"enabled must be a boolean"),this.$_setFlag("unsafe",e)}}},cast:{string:{from:e=>"number"==typeof e,to:(e,t)=>e.toString()}},messages:{"number.base":"{{#label}} must be a number","number.greater":"{{#label}} must be greater than {{#limit}}","number.infinity":"{{#label}} cannot be infinity","number.integer":"{{#label}} must be an integer","number.less":"{{#label}} must be less than {{#limit}}","number.max":"{{#label}} must be less than or equal to {{#limit}}","number.min":"{{#label}} must be greater than or equal to {{#limit}}","number.multiple":"{{#label}} must be a multiple of {{#multiple}}","number.negative":"{{#label}} must be a negative number","number.port":"{{#label}} must be a valid port","number.positive":"{{#label}} must be a positive number","number.precision":"{{#label}} must have no more than {{#limit}} decimal places","number.unsafe":"{{#label}} must be a safe number"}}),i.extractSignificantDigits=function(e){return e.replace(i.exponentialPartRegex,"").replace(i.dotRegex,"").replace(i.trailingZerosRegex,"").replace(i.leadingSignAndZerosRegex,"")},i.normalizeDecimal=function(e){return(e=e.replace(/^\+/,"").replace(/\.0*$/,"").replace(/^(-?)\.([^\.]*)$/,"$10.$2").replace(/^(-?)0+([0-9])/,"$1$2")).includes(".")&&e.endsWith("0")&&(e=e.replace(/0+$/,"")),"-0"===e?"0":e}},8966:(e,t,r)=>{"use strict";const s=r(7824);e.exports=s.extend({type:"object",cast:{map:{from:e=>e&&"object"==typeof e,to:(e,t)=>new Map(Object.entries(e))}}})},7417:(e,t,r)=>{"use strict";const s=r(375),n=r(5380),a=r(1745),i=r(9959),o=r(6064),l=r(9926),c=r(5752),u=r(8068),f=r(8160),h={tlds:l instanceof Set&&{tlds:{allow:l,deny:null}},base64Regex:{true:{true:/^(?:[\w\-]{2}[\w\-]{2})*(?:[\w\-]{2}==|[\w\-]{3}=)?$/,false:/^(?:[A-Za-z0-9+\/]{2}[A-Za-z0-9+\/]{2})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/},false:{true:/^(?:[\w\-]{2}[\w\-]{2})*(?:[\w\-]{2}(==)?|[\w\-]{3}=?)?$/,false:/^(?:[A-Za-z0-9+\/]{2}[A-Za-z0-9+\/]{2})*(?:[A-Za-z0-9+\/]{2}(==)?|[A-Za-z0-9+\/]{3}=?)?$/}},dataUriRegex:/^data:[\w+.-]+\/[\w+.-]+;((charset=[\w-]+|base64),)?(.*)$/,hexRegex:/^[a-f0-9]+$/i,ipRegex:i.regex({cidr:"forbidden"}).regex,isoDurationRegex:/^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/,guidBrackets:{"{":"}","[":"]","(":")","":""},guidVersions:{uuidv1:"1",uuidv2:"2",uuidv3:"3",uuidv4:"4",uuidv5:"5"},guidSeparators:new Set([void 0,!0,!1,"-",":"]),normalizationForms:["NFC","NFD","NFKC","NFKD"]};e.exports=u.extend({type:"string",flags:{insensitive:{default:!1},truncate:{default:!1}},terms:{replacements:{init:null}},coerce:{from:"string",method(e,t){let{schema:r,state:s,prefs:n}=t;const a=r.$_getRule("normalize");a&&(e=e.normalize(a.args.form));const i=r.$_getRule("case");i&&(e="upper"===i.args.direction?e.toLocaleUpperCase():e.toLocaleLowerCase());const o=r.$_getRule("trim");if(o&&o.args.enabled&&(e=e.trim()),r.$_terms.replacements)for(const t of r.$_terms.replacements)e=e.replace(t.pattern,t.replacement);const l=r.$_getRule("hex");if(l&&l.args.options.byteAligned&&e.length%2!=0&&(e=`0${e}`),r.$_getRule("isoDate")){const t=h.isoDate(e);t&&(e=t)}if(r._flags.truncate){const t=r.$_getRule("max");if(t){let a=t.args.limit;if(f.isResolvable(a)&&(a=a.resolve(e,s,n),!f.limit(a)))return{value:e,errors:r.$_createError("any.ref",a,{ref:t.args.limit,arg:"limit",reason:"must be a positive integer"},s,n)};e=e.slice(0,a)}}return{value:e}}},validate(e,t){let{schema:r,error:s}=t;if("string"!=typeof e)return{value:e,errors:s("string.base")};if(""===e){const t=r.$_getRule("min");if(t&&0===t.args.limit)return;return{value:e,errors:s("string.empty")}}},rules:{alphanum:{method(){return this.$_addRule("alphanum")},validate:(e,t)=>/^[a-zA-Z0-9]+$/.test(e)?e:t.error("string.alphanum")},base64:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return f.assertOptions(e,["paddingRequired","urlSafe"]),e={urlSafe:!1,paddingRequired:!0,...e},s("boolean"==typeof e.paddingRequired,"paddingRequired must be boolean"),s("boolean"==typeof e.urlSafe,"urlSafe must be boolean"),this.$_addRule({name:"base64",args:{options:e}})},validate(e,t,r){let{options:s}=r;return h.base64Regex[s.paddingRequired][s.urlSafe].test(e)?e:t.error("string.base64")}},case:{method(e){return s(["lower","upper"].includes(e),"Invalid case:",e),this.$_addRule({name:"case",args:{direction:e}})},validate(e,t,r){let{direction:s}=r;return"lower"===s&&e===e.toLocaleLowerCase()||"upper"===s&&e===e.toLocaleUpperCase()?e:t.error(`string.${s}case`)},convert:!0},creditCard:{method(){return this.$_addRule("creditCard")},validate(e,t){let r=e.length,s=0,n=1;for(;r--;){const t=e.charAt(r)*n;s+=t-9*(t>9),n^=3}return s>0&&s%10==0?e:t.error("string.creditCard")}},dataUri:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return f.assertOptions(e,["paddingRequired"]),e={paddingRequired:!0,...e},s("boolean"==typeof e.paddingRequired,"paddingRequired must be boolean"),this.$_addRule({name:"dataUri",args:{options:e}})},validate(e,t,r){let{options:s}=r;const n=e.match(h.dataUriRegex);if(n){if(!n[2])return e;if("base64"!==n[2])return e;if(h.base64Regex[s.paddingRequired].false.test(n[3]))return e}return t.error("string.dataUri")}},domain:{method(e){e&&f.assertOptions(e,["allowFullyQualified","allowUnicode","maxDomainSegments","minDomainSegments","tlds"]);const t=h.addressOptions(e);return this.$_addRule({name:"domain",args:{options:e},address:t})},validate(e,t,r,s){let{address:a}=s;return n.isValid(e,a)?e:t.error("string.domain")}},email:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["allowFullyQualified","allowUnicode","ignoreLength","maxDomainSegments","minDomainSegments","multiple","separator","tlds"]),s(void 0===e.multiple||"boolean"==typeof e.multiple,"multiple option must be an boolean");const t=h.addressOptions(e),r=new RegExp(`\\s*[${e.separator?o(e.separator):","}]\\s*`);return this.$_addRule({name:"email",args:{options:e},regex:r,address:t})},validate(e,t,r,s){let{options:n}=r,{regex:i,address:o}=s;const l=n.multiple?e.split(i):[e],c=[];for(const e of l)a.isValid(e,o)||c.push(e);return c.length?t.error("string.email",{value:e,invalids:c}):e}},guid:{alias:"uuid",method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["version","separator"]);let t="";if(e.version){const r=[].concat(e.version);s(r.length>=1,"version must have at least 1 valid version specified");const n=new Set;for(let e=0;e<r.length;++e){const a=r[e];s("string"==typeof a,"version at position "+e+" must be a string");const i=h.guidVersions[a.toLowerCase()];s(i,"version at position "+e+" must be one of "+Object.keys(h.guidVersions).join(", ")),s(!n.has(i),"version at position "+e+" must not be a duplicate"),t+=i,n.add(i)}}s(h.guidSeparators.has(e.separator),'separator must be one of true, false, "-", or ":"');const r=void 0===e.separator?"[:-]?":!0===e.separator?"[:-]":!1===e.separator?"[]?":`\\${e.separator}`,n=new RegExp(`^([\\[{\\(]?)[0-9A-F]{8}(${r})[0-9A-F]{4}\\2?[${t||"0-9A-F"}][0-9A-F]{3}\\2?[${t?"89AB":"0-9A-F"}][0-9A-F]{3}\\2?[0-9A-F]{12}([\\]}\\)]?)$`,"i");return this.$_addRule({name:"guid",args:{options:e},regex:n})},validate(e,t,r,s){let{regex:n}=s;const a=n.exec(e);return a?h.guidBrackets[a[1]]!==a[a.length-1]?t.error("string.guid"):e:t.error("string.guid")}},hex:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return f.assertOptions(e,["byteAligned"]),e={byteAligned:!1,...e},s("boolean"==typeof e.byteAligned,"byteAligned must be boolean"),this.$_addRule({name:"hex",args:{options:e}})},validate(e,t,r){let{options:s}=r;return h.hexRegex.test(e)?s.byteAligned&&e.length%2!=0?t.error("string.hexAlign"):e:t.error("string.hex")}},hostname:{method(){return this.$_addRule("hostname")},validate:(e,t)=>n.isValid(e,{minDomainSegments:1})||h.ipRegex.test(e)?e:t.error("string.hostname")},insensitive:{method(){return this.$_setFlag("insensitive",!0)}},ip:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["cidr","version"]);const{cidr:t,versions:r,regex:s}=i.regex(e),n=e.version?r:void 0;return this.$_addRule({name:"ip",args:{options:{cidr:t,version:n}},regex:s})},validate(e,t,r,s){let{options:n}=r,{regex:a}=s;return a.test(e)?e:n.version?t.error("string.ipVersion",{value:e,cidr:n.cidr,version:n.version}):t.error("string.ip",{value:e,cidr:n.cidr})}},isoDate:{method(){return this.$_addRule("isoDate")},validate(e,t){let{error:r}=t;return h.isoDate(e)?e:r("string.isoDate")}},isoDuration:{method(){return this.$_addRule("isoDuration")},validate:(e,t)=>h.isoDurationRegex.test(e)?e:t.error("string.isoDuration")},length:{method(e,t){return h.length(this,"length",e,"=",t)},validate(e,t,r,s){let{limit:n,encoding:a}=r,{name:i,operator:o,args:l}=s;const c=!a&&e.length;return f.compare(c,n,o)?e:t.error("string."+i,{limit:l.limit,value:e,encoding:a})},args:[{name:"limit",ref:!0,assert:f.limit,message:"must be a positive integer"},"encoding"]},lowercase:{method(){return this.case("lower")}},max:{method(e,t){return h.length(this,"max",e,"<=",t)},args:["limit","encoding"]},min:{method(e,t){return h.length(this,"min",e,">=",t)},args:["limit","encoding"]},normalize:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"NFC";return s(h.normalizationForms.includes(e),"normalization form must be one of "+h.normalizationForms.join(", ")),this.$_addRule({name:"normalize",args:{form:e}})},validate(e,t,r){let{error:s}=t,{form:n}=r;return e===e.normalize(n)?e:s("string.normalize",{value:e,form:n})},convert:!0},pattern:{alias:"regex",method(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};s(e instanceof RegExp,"regex must be a RegExp"),s(!e.flags.includes("g")&&!e.flags.includes("y"),"regex should not use global or sticky mode"),"string"==typeof t&&(t={name:t}),f.assertOptions(t,["invert","name"]);const r=["string.pattern",t.invert?".invert":"",t.name?".name":".base"].join("");return this.$_addRule({name:"pattern",args:{regex:e,options:t},errorCode:r})},validate(e,t,r,s){let{regex:n,options:a}=r,{errorCode:i}=s;return n.test(e)^a.invert?e:t.error(i,{name:a.name,regex:n,value:e})},args:["regex","options"],multi:!0},replace:{method(e,t){"string"==typeof e&&(e=new RegExp(o(e),"g")),s(e instanceof RegExp,"pattern must be a RegExp"),s("string"==typeof t,"replacement must be a String");const r=this.clone();return r.$_terms.replacements||(r.$_terms.replacements=[]),r.$_terms.replacements.push({pattern:e,replacement:t}),r}},token:{method(){return this.$_addRule("token")},validate:(e,t)=>/^\w+$/.test(e)?e:t.error("string.token")},trim:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"enabled must be a boolean"),this.$_addRule({name:"trim",args:{enabled:e}})},validate(e,t,r){let{enabled:s}=r;return s&&e!==e.trim()?t.error("string.trim"):e},convert:!0},truncate:{method(){let e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return s("boolean"==typeof e,"enabled must be a boolean"),this.$_setFlag("truncate",e)}},uppercase:{method(){return this.case("upper")}},uri:{method(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};f.assertOptions(e,["allowRelative","allowQuerySquareBrackets","domain","relativeOnly","scheme"]),e.domain&&f.assertOptions(e.domain,["allowFullyQualified","allowUnicode","maxDomainSegments","minDomainSegments","tlds"]);const{regex:t,scheme:r}=c.regex(e),s=e.domain?h.addressOptions(e.domain):null;return this.$_addRule({name:"uri",args:{options:e},regex:t,domain:s,scheme:r})},validate(e,t,r,s){let{options:a}=r,{regex:i,domain:o,scheme:l}=s;if(["http:/","https:/"].includes(e))return t.error("string.uri");const c=i.exec(e);if(c){const r=c[1]||c[2];return!o||a.allowRelative&&!r||n.isValid(r,o)?e:t.error("string.domain",{value:r})}return a.relativeOnly?t.error("string.uriRelativeOnly"):a.scheme?t.error("string.uriCustomScheme",{scheme:l,value:e}):t.error("string.uri")}}},manifest:{build(e,t){if(t.replacements)for(const{pattern:r,replacement:s}of t.replacements)e=e.replace(r,s);return e}},messages:{"string.alphanum":"{{#label}} must only contain alpha-numeric characters","string.base":"{{#label}} must be a string","string.base64":"{{#label}} must be a valid base64 string","string.creditCard":"{{#label}} must be a credit card","string.dataUri":"{{#label}} must be a valid dataUri string","string.domain":"{{#label}} must contain a valid domain name","string.email":"{{#label}} must be a valid email","string.empty":"{{#label}} is not allowed to be empty","string.guid":"{{#label}} must be a valid GUID","string.hex":"{{#label}} must only contain hexadecimal characters","string.hexAlign":"{{#label}} hex decoded representation must be byte aligned","string.hostname":"{{#label}} must be a valid hostname","string.ip":"{{#label}} must be a valid ip address with a {{#cidr}} CIDR","string.ipVersion":"{{#label}} must be a valid ip address of one of the following versions {{#version}} with a {{#cidr}} CIDR","string.isoDate":"{{#label}} must be in iso format","string.isoDuration":"{{#label}} must be a valid ISO 8601 duration","string.length":"{{#label}} length must be {{#limit}} characters long","string.lowercase":"{{#label}} must only contain lowercase characters","string.max":"{{#label}} length must be less than or equal to {{#limit}} characters long","string.min":"{{#label}} length must be at least {{#limit}} characters long","string.normalize":"{{#label}} must be unicode normalized in the {{#form}} form","string.token":"{{#label}} must only contain alpha-numeric and underscore characters","string.pattern.base":"{{#label}} with value {:[.]} fails to match the required pattern: {{#regex}}","string.pattern.name":"{{#label}} with value {:[.]} fails to match the {{#name}} pattern","string.pattern.invert.base":"{{#label}} with value {:[.]} matches the inverted pattern: {{#regex}}","string.pattern.invert.name":"{{#label}} with value {:[.]} matches the inverted {{#name}} pattern","string.trim":"{{#label}} must not have leading or trailing whitespace","string.uri":"{{#label}} must be a valid uri","string.uriCustomScheme":"{{#label}} must be a valid uri with a scheme matching the {{#scheme}} pattern","string.uriRelativeOnly":"{{#label}} must be a valid relative uri","string.uppercase":"{{#label}} must only contain uppercase characters"}}),h.addressOptions=function(e){if(!e)return e;if(s(void 0===e.minDomainSegments||Number.isSafeInteger(e.minDomainSegments)&&e.minDomainSegments>0,"minDomainSegments must be a positive integer"),s(void 0===e.maxDomainSegments||Number.isSafeInteger(e.maxDomainSegments)&&e.maxDomainSegments>0,"maxDomainSegments must be a positive integer"),!1===e.tlds)return e;if(!0===e.tlds||void 0===e.tlds)return s(h.tlds,"Built-in TLD list disabled"),Object.assign({},e,h.tlds);s("object"==typeof e.tlds,"tlds must be true, false, or an object");const t=e.tlds.deny;if(t)return Array.isArray(t)&&(e=Object.assign({},e,{tlds:{deny:new Set(t)}})),s(e.tlds.deny instanceof Set,"tlds.deny must be an array, Set, or boolean"),s(!e.tlds.allow,"Cannot specify both tlds.allow and tlds.deny lists"),h.validateTlds(e.tlds.deny,"tlds.deny"),e;const r=e.tlds.allow;return r?!0===r?(s(h.tlds,"Built-in TLD list disabled"),Object.assign({},e,h.tlds)):(Array.isArray(r)&&(e=Object.assign({},e,{tlds:{allow:new Set(r)}})),s(e.tlds.allow instanceof Set,"tlds.allow must be an array, Set, or boolean"),h.validateTlds(e.tlds.allow,"tlds.allow"),e):e},h.validateTlds=function(e,t){for(const r of e)s(n.isValid(r,{minDomainSegments:1,maxDomainSegments:1}),`${t} must contain valid top level domain names`)},h.isoDate=function(e){if(!f.isIsoDate(e))return null;/.*T.*[+-]\d\d$/.test(e)&&(e+="00");const t=new Date(e);return isNaN(t.getTime())?null:t.toISOString()},h.length=function(e,t,r,n,a){return s(!a||!1,"Invalid encoding:",a),e.$_addRule({name:t,method:"length",args:{limit:r,encoding:a},operator:n})}},8826:(e,t,r)=>{"use strict";const s=r(375),n=r(8068),a={};a.Map=class extends Map{slice(){return new a.Map(this)}},e.exports=n.extend({type:"symbol",terms:{map:{init:new a.Map}},coerce:{method(e,t){let{schema:r,error:s}=t;const n=r.$_terms.map.get(e);return n&&(e=n),r._flags.only&&"symbol"!=typeof e?{value:e,errors:s("symbol.map",{map:r.$_terms.map})}:{value:e}}},validate(e,t){let{error:r}=t;if("symbol"!=typeof e)return{value:e,errors:r("symbol.base")}},rules:{map:{method(e){e&&!e[Symbol.iterator]&&"object"==typeof e&&(e=Object.entries(e)),s(e&&e[Symbol.iterator],"Iterable must be an iterable or object");const t=this.clone(),r=[];for(const n of e){s(n&&n[Symbol.iterator],"Entry must be an iterable");const[e,a]=n;s("object"!=typeof e&&"function"!=typeof e&&"symbol"!=typeof e,"Key must not be of type object, function, or Symbol"),s("symbol"==typeof a,"Value must be a Symbol"),t.$_terms.map.set(e,a),r.push(a)}return t.valid(...r)}}},manifest:{build:(e,t)=>(t.map&&(e=e.map(t.map)),e)},messages:{"symbol.base":"{{#label}} must be a symbol","symbol.map":"{{#label}} must be one of {{#map}}"}})},8863:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(738),i=r(9621),o=r(8160),l=r(6354),c=r(493),u={result:Symbol("result")};t.entry=function(e,t,r){let n=o.defaults;r&&(s(void 0===r.warnings,"Cannot override warnings preference in synchronous validation"),s(void 0===r.artifacts,"Cannot override artifacts preference in synchronous validation"),n=o.preferences(o.defaults,r));const a=u.entry(e,t,n);s(!a.mainstay.externals.length,"Schema with external rules must use validateAsync()");const i={value:a.value};return a.error&&(i.error=a.error),a.mainstay.warnings.length&&(i.warning=l.details(a.mainstay.warnings)),a.mainstay.debug&&(i.debug=a.mainstay.debug),a.mainstay.artifacts&&(i.artifacts=a.mainstay.artifacts),i},t.entryAsync=async function(e,t,r){let s=o.defaults;r&&(s=o.preferences(o.defaults,r));const n=u.entry(e,t,s),a=n.mainstay;if(n.error)throw a.debug&&(n.error.debug=a.debug),n.error;if(a.externals.length){let e=n.value;for(const{method:t,path:n,label:o}of a.externals){let a,l,c=e;n.length&&(a=n[n.length-1],l=i(e,n.slice(0,-1)),c=l[a]);try{const s=await t(c,{prefs:r});if(void 0===s||s===c)continue;l?l[a]=s:e=s}catch(e){throw s.errors.label&&(e.message+=` (${o})`),e}}n.value=e}if(!s.warnings&&!s.debug&&!s.artifacts)return n.value;const c={value:n.value};return a.warnings.length&&(c.warning=l.details(a.warnings)),a.debug&&(c.debug=a.debug),a.artifacts&&(c.artifacts=a.artifacts),c},u.entry=function(e,r,s){const{tracer:n,cleanup:a}=u.tracer(r,s),i={externals:[],warnings:[],tracer:n,debug:s.debug?[]:null,links:r._ids._schemaChain?new Map:null},o=r._ids._schemaChain?[{schema:r}]:null,f=new c([],[],{mainstay:i,schemas:o}),h=t.validate(e,r,f,s);a&&r.$_root.untrace();const m=l.process(h.errors,e,s);return{value:h.value,error:m,mainstay:i}},u.tracer=function(e,t){return e.$_root._tracer?{tracer:e.$_root._tracer._register(e)}:t.debug?(s(e.$_root.trace,"Debug mode not supported"),{tracer:e.$_root.trace()._register(e),cleanup:!0}):{tracer:u.ignore}},t.validate=function(e,t,r,s){let n=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{};if(t.$_terms.whens&&(t=t._generate(e,r,s).schema),t._preferences&&(s=u.prefs(t,s)),t._cache&&s.cache){const s=t._cache.get(e);if(r.mainstay.tracer.debug(r,"validate","cached",!!s),s)return s}const a=(n,a,i)=>t.$_createError(n,e,a,i||r,s),i={original:e,prefs:s,schema:t,state:r,error:a,errorsArray:u.errorsArray,warn:(e,t,s)=>r.mainstay.warnings.push(a(e,t,s)),message:(n,a)=>t.$_createError("custom",e,a,r,s,{messages:n})};r.mainstay.tracer.entry(t,r);const l=t._definition;if(l.prepare&&void 0!==e&&s.convert){const t=l.prepare(e,i);if(t){if(r.mainstay.tracer.value(r,"prepare",e,t.value),t.errors)return u.finalize(t.value,[].concat(t.errors),i);e=t.value}}if(l.coerce&&void 0!==e&&s.convert&&(!l.coerce.from||l.coerce.from.includes(typeof e))){const t=l.coerce.method(e,i);if(t){if(r.mainstay.tracer.value(r,"coerced",e,t.value),t.errors)return u.finalize(t.value,[].concat(t.errors),i);e=t.value}}const c=t._flags.empty;c&&c.$_match(u.trim(e,t),r.nest(c),o.defaults)&&(r.mainstay.tracer.value(r,"empty",e,void 0),e=void 0);const f=n.presence||t._flags.presence||(t._flags._endedSwitch?null:s.presence);if(void 0===e){if("forbidden"===f)return u.finalize(e,null,i);if("required"===f)return u.finalize(e,[t.$_createError("any.required",e,null,r,s)],i);if("optional"===f){if(t._flags.default!==o.symbols.deepDefault)return u.finalize(e,null,i);r.mainstay.tracer.value(r,"default",e,{}),e={}}}else if("forbidden"===f)return u.finalize(e,[t.$_createError("any.unknown",e,null,r,s)],i);const h=[];if(t._valids){const n=t._valids.get(e,r,s,t._flags.insensitive);if(n)return s.convert&&(r.mainstay.tracer.value(r,"valids",e,n.value),e=n.value),r.mainstay.tracer.filter(t,r,"valid",n),u.finalize(e,null,i);if(t._flags.only){const n=t.$_createError("any.only",e,{valids:t._valids.values({display:!0})},r,s);if(s.abortEarly)return u.finalize(e,[n],i);h.push(n)}}if(t._invalids){const n=t._invalids.get(e,r,s,t._flags.insensitive);if(n){r.mainstay.tracer.filter(t,r,"invalid",n);const a=t.$_createError("any.invalid",e,{invalids:t._invalids.values({display:!0})},r,s);if(s.abortEarly)return u.finalize(e,[a],i);h.push(a)}}if(l.validate){const t=l.validate(e,i);if(t&&(r.mainstay.tracer.value(r,"base",e,t.value),e=t.value,t.errors)){if(!Array.isArray(t.errors))return h.push(t.errors),u.finalize(e,h,i);if(t.errors.length)return h.push(...t.errors),u.finalize(e,h,i)}}return t._rules.length?u.rules(e,h,i):u.finalize(e,h,i)},u.rules=function(e,t,r){const{schema:s,state:n,prefs:a}=r;for(const i of s._rules){const l=s._definition.rules[i.method];if(l.convert&&a.convert){n.mainstay.tracer.log(s,n,"rule",i.name,"full");continue}let c,f=i.args;if(i._resolve.length){f=Object.assign({},f);for(const t of i._resolve){const r=l.argsByName.get(t),i=f[t].resolve(e,n,a),u=r.normalize?r.normalize(i):i,h=o.validateArg(u,null,r);if(h){c=s.$_createError("any.ref",i,{arg:t,ref:f[t],reason:h},n,a);break}f[t]=u}}c=c||l.validate(e,r,f,i);const h=u.rule(c,i);if(h.errors){if(n.mainstay.tracer.log(s,n,"rule",i.name,"error"),i.warn){n.mainstay.warnings.push(...h.errors);continue}if(a.abortEarly)return u.finalize(e,h.errors,r);t.push(...h.errors)}else n.mainstay.tracer.log(s,n,"rule",i.name,"pass"),n.mainstay.tracer.value(n,"rule",e,h.value,i.name),e=h.value}return u.finalize(e,t,r)},u.rule=function(e,t){return e instanceof l.Report?(u.error(e,t),{errors:[e],value:null}):Array.isArray(e)&&e[o.symbols.errors]?(e.forEach((e=>u.error(e,t))),{errors:e,value:null}):{errors:null,value:e}},u.error=function(e,t){return t.message&&e._setTemplate(t.message),e},u.finalize=function(e,t,r){t=t||[];const{schema:n,state:a,prefs:i}=r;if(t.length){const s=u.default("failover",void 0,t,r);void 0!==s&&(a.mainstay.tracer.value(a,"failover",e,s),e=s,t=[])}if(t.length&&n._flags.error)if("function"==typeof n._flags.error){t=n._flags.error(t),Array.isArray(t)||(t=[t]);for(const e of t)s(e instanceof Error||e instanceof l.Report,"error() must return an Error object")}else t=[n._flags.error];if(void 0===e){const s=u.default("default",e,t,r);a.mainstay.tracer.value(a,"default",e,s),e=s}if(n._flags.cast&&void 0!==e){const t=n._definition.cast[n._flags.cast];if(t.from(e)){const s=t.to(e,r);a.mainstay.tracer.value(a,"cast",e,s,n._flags.cast),e=s}}if(n.$_terms.externals&&i.externals&&!1!==i._externals)for(const{method:e}of n.$_terms.externals)a.mainstay.externals.push({method:e,path:a.path,label:l.label(n._flags,a,i)});const o={value:e,errors:t.length?t:null};return n._flags.result&&(o.value="strip"===n._flags.result?void 0:r.original,a.mainstay.tracer.value(a,n._flags.result,e,o.value),a.shadow(e,n._flags.result)),n._cache&&!1!==i.cache&&!n._refs.length&&n._cache.set(r.original,o),void 0===e||o.errors||void 0===n._flags.artifact||(a.mainstay.artifacts=a.mainstay.artifacts||new Map,a.mainstay.artifacts.has(n._flags.artifact)||a.mainstay.artifacts.set(n._flags.artifact,[]),a.mainstay.artifacts.get(n._flags.artifact).push(a.path)),o},u.prefs=function(e,t){const r=t===o.defaults;return r&&e._preferences[o.symbols.prefs]?e._preferences[o.symbols.prefs]:(t=o.preferences(t,e._preferences),r&&(e._preferences[o.symbols.prefs]=t),t)},u.default=function(e,t,r,s){const{schema:a,state:i,prefs:l}=s,c=a._flags[e];if(l.noDefaults||void 0===c)return t;if(i.mainstay.tracer.log(a,i,"rule",e,"full"),!c)return c;if("function"==typeof c){const t=c.length?[n(i.ancestors[0]),s]:[];try{return c(...t)}catch(t){return void r.push(a.$_createError(`any.${e}`,null,{error:t},i,l))}}return"object"!=typeof c?c:c[o.symbols.literal]?c.literal:o.isResolvable(c)?c.resolve(t,i,l):n(c)},u.trim=function(e,t){if("string"!=typeof e)return e;const r=t.$_getRule("trim");return r&&r.args.enabled?e.trim():e},u.ignore={active:!1,debug:a,entry:a,filter:a,log:a,resolve:a,value:a},u.errorsArray=function(){const e=[];return e[o.symbols.errors]=!0,e}},2036:(e,t,r)=>{"use strict";const s=r(375),n=r(9474),a=r(8160),i={};e.exports=i.Values=class{constructor(e,t){this._values=new Set(e),this._refs=new Set(t),this._lowercase=i.lowercases(e),this._override=!1}get length(){return this._values.size+this._refs.size}add(e,t){a.isResolvable(e)?this._refs.has(e)||(this._refs.add(e),t&&t.register(e)):this.has(e,null,null,!1)||(this._values.add(e),"string"==typeof e&&this._lowercase.set(e.toLowerCase(),e))}static merge(e,t,r){if(e=e||new i.Values,t){if(t._override)return t.clone();for(const r of[...t._values,...t._refs])e.add(r)}if(r)for(const t of[...r._values,...r._refs])e.remove(t);return e.length?e:null}remove(e){a.isResolvable(e)?this._refs.delete(e):(this._values.delete(e),"string"==typeof e&&this._lowercase.delete(e.toLowerCase()))}has(e,t,r,s){return!!this.get(e,t,r,s)}get(e,t,r,s){if(!this.length)return!1;if(this._values.has(e))return{value:e};if("string"==typeof e&&e&&s){const t=this._lowercase.get(e.toLowerCase());if(t)return{value:t}}if(!this._refs.size&&"object"!=typeof e)return!1;if("object"==typeof e)for(const t of this._values)if(n(t,e))return{value:t};if(t)for(const a of this._refs){const i=a.resolve(e,t,r,null,{in:!0});if(void 0===i)continue;const o=a.in&&"object"==typeof i?Array.isArray(i)?i:Object.keys(i):[i];for(const t of o)if(typeof t==typeof e)if(s&&e&&"string"==typeof e){if(t.toLowerCase()===e.toLowerCase())return{value:t,ref:a}}else if(n(t,e))return{value:t,ref:a}}return!1}override(){this._override=!0}values(e){if(e&&e.display){const e=[];for(const t of[...this._values,...this._refs])void 0!==t&&e.push(t);return e}return Array.from([...this._values,...this._refs])}clone(){const e=new i.Values(this._values,this._refs);return e._override=this._override,e}concat(e){s(!e._override,"Cannot concat override set of values");const t=new i.Values([...this._values,...e._values],[...this._refs,...e._refs]);return t._override=this._override,t}describe(){const e=[];this._override&&e.push({override:!0});for(const t of this._values.values())e.push(t&&"object"==typeof t?{value:t}:t);for(const t of this._refs.values())e.push(t.describe());return e}},i.Values.prototype[a.symbols.values]=!0,i.Values.prototype.slice=i.Values.prototype.clone,i.lowercases=function(e){const t=new Map;if(e)for(const r of e)"string"==typeof r&&t.set(r.toLowerCase(),r);return t}},978:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(1687),i=r(9621),o={};e.exports=function(e,t){let r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if(s(e&&"object"==typeof e,"Invalid defaults value: must be an object"),s(!t||!0===t||"object"==typeof t,"Invalid source value: must be true, falsy or an object"),s("object"==typeof r,"Invalid options: must be an object"),!t)return null;if(r.shallow)return o.applyToDefaultsWithShallow(e,t,r);const i=n(e);if(!0===t)return i;const l=void 0!==r.nullOverride&&r.nullOverride;return a(i,t,{nullOverride:l,mergeArrays:!1})},o.applyToDefaultsWithShallow=function(e,t,r){const l=r.shallow;s(Array.isArray(l),"Invalid keys");const c=new Map,u=!0===t?null:new Set;for(let r of l){r=Array.isArray(r)?r:r.split(".");const s=i(e,r);s&&"object"==typeof s?c.set(s,u&&i(t,r)||s):u&&u.add(r)}const f=n(e,{},c);if(!u)return f;for(const e of u)o.reachCopy(f,t,e);const h=void 0!==r.nullOverride&&r.nullOverride;return a(f,t,{nullOverride:h,mergeArrays:!1})},o.reachCopy=function(e,t,r){for(const e of r){if(!(e in t))return;const r=t[e];if("object"!=typeof r||null===r)return;t=r}const s=t;let n=e;for(let e=0;e<r.length-1;++e){const t=r[e];"object"!=typeof n[t]&&(n[t]={}),n=n[t]}n[r[r.length-1]]=s}},375:(e,t,r)=>{"use strict";const s=r(7916);e.exports=function(e){if(!e){for(var t=arguments.length,r=new Array(t>1?t-1:0),n=1;n<t;n++)r[n-1]=arguments[n];if(1===r.length&&r[0]instanceof Error)throw r[0];throw new s(r)}}},8571:(e,t,r)=>{"use strict";const s=r(9621),n=r(4277),a=r(7043),i={needsProtoHack:new Set([n.set,n.map,n.weakSet,n.weakMap])};e.exports=i.clone=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:null;if("object"!=typeof e||null===e)return e;let s=i.clone,o=r;if(t.shallow){if(!0!==t.shallow)return i.cloneWithShallow(e,t);s=e=>e}else if(o){const t=o.get(e);if(t)return t}else o=new Map;const l=n.getInternalProto(e);if(l===n.buffer)return!1;if(l===n.date)return new Date(e.getTime());if(l===n.regex)return new RegExp(e);const c=i.base(e,l,t);if(c===e)return e;if(o&&o.set(e,c),l===n.set)for(const r of e)c.add(s(r,t,o));else if(l===n.map)for(const[r,n]of e)c.set(r,s(n,t,o));const u=a.keys(e,t);for(const r of u){if("__proto__"===r)continue;if(l===n.array&&"length"===r){c.length=e.length;continue}const a=Object.getOwnPropertyDescriptor(e,r);a?a.get||a.set?Object.defineProperty(c,r,a):a.enumerable?c[r]=s(e[r],t,o):Object.defineProperty(c,r,{enumerable:!1,writable:!0,configurable:!0,value:s(e[r],t,o)}):Object.defineProperty(c,r,{enumerable:!0,writable:!0,configurable:!0,value:s(e[r],t,o)})}return c},i.cloneWithShallow=function(e,t){const r=t.shallow;(t=Object.assign({},t)).shallow=!1;const n=new Map;for(const t of r){const r=s(e,t);"object"!=typeof r&&"function"!=typeof r||n.set(r,r)}return i.clone(e,t,n)},i.base=function(e,t,r){if(!1===r.prototype)return i.needsProtoHack.has(t)?new t.constructor:t===n.array?[]:{};const s=Object.getPrototypeOf(e);if(s&&s.isImmutable)return e;if(t===n.array){const e=[];return s!==t&&Object.setPrototypeOf(e,s),e}if(i.needsProtoHack.has(t)){const e=new s.constructor;return s!==t&&Object.setPrototypeOf(e,s),e}return Object.create(s)}},9474:(e,t,r)=>{"use strict";const s=r(4277),n={mismatched:null};e.exports=function(e,t,r){return r=Object.assign({prototype:!0},r),!!n.isDeepEqual(e,t,r,[])},n.isDeepEqual=function(e,t,r,a){if(e===t)return 0!==e||1/e==1/t;const i=typeof e;if(i!==typeof t)return!1;if(null===e||null===t)return!1;if("function"===i){if(!r.deepFunction||e.toString()!==t.toString())return!1}else if("object"!==i)return e!=e&&t!=t;const o=n.getSharedType(e,t,!!r.prototype);switch(o){case s.buffer:return!1;case s.promise:return e===t;case s.regex:return e.toString()===t.toString();case n.mismatched:return!1}for(let r=a.length-1;r>=0;--r)if(a[r].isSame(e,t))return!0;a.push(new n.SeenEntry(e,t));try{return!!n.isDeepEqualObj(o,e,t,r,a)}finally{a.pop()}},n.getSharedType=function(e,t,r){if(r)return Object.getPrototypeOf(e)!==Object.getPrototypeOf(t)?n.mismatched:s.getInternalProto(e);const a=s.getInternalProto(e);return a!==s.getInternalProto(t)?n.mismatched:a},n.valueOf=function(e){const t=e.valueOf;if(void 0===t)return e;try{return t.call(e)}catch(e){return e}},n.hasOwnEnumerableProperty=function(e,t){return Object.prototype.propertyIsEnumerable.call(e,t)},n.isSetSimpleEqual=function(e,t){for(const r of Set.prototype.values.call(e))if(!Set.prototype.has.call(t,r))return!1;return!0},n.isDeepEqualObj=function(e,t,r,a,i){const{isDeepEqual:o,valueOf:l,hasOwnEnumerableProperty:c}=n,{keys:u,getOwnPropertySymbols:f}=Object;if(e===s.array){if(!a.part){if(t.length!==r.length)return!1;for(let e=0;e<t.length;++e)if(!o(t[e],r[e],a,i))return!1;return!0}for(const e of t)for(const t of r)if(o(e,t,a,i))return!0}else if(e===s.set){if(t.size!==r.size)return!1;if(!n.isSetSimpleEqual(t,r)){const e=new Set(Set.prototype.values.call(r));for(const r of Set.prototype.values.call(t)){if(e.delete(r))continue;let t=!1;for(const s of e)if(o(r,s,a,i)){e.delete(s),t=!0;break}if(!t)return!1}}}else if(e===s.map){if(t.size!==r.size)return!1;for(const[e,s]of Map.prototype.entries.call(t)){if(void 0===s&&!Map.prototype.has.call(r,e))return!1;if(!o(s,Map.prototype.get.call(r,e),a,i))return!1}}else if(e===s.error&&(t.name!==r.name||t.message!==r.message))return!1;const h=l(t),m=l(r);if((t!==h||r!==m)&&!o(h,m,a,i))return!1;const d=u(t);if(!a.part&&d.length!==u(r).length&&!a.skip)return!1;let p=0;for(const e of d)if(a.skip&&a.skip.includes(e))void 0===r[e]&&++p;else{if(!c(r,e))return!1;if(!o(t[e],r[e],a,i))return!1}if(!a.part&&d.length-p!==u(r).length)return!1;if(!1!==a.symbols){const e=f(t),s=new Set(f(r));for(const n of e){if(!a.skip||!a.skip.includes(n))if(c(t,n)){if(!c(r,n))return!1;if(!o(t[n],r[n],a,i))return!1}else if(c(r,n))return!1;s.delete(n)}for(const e of s)if(c(r,e))return!1}return!0},n.SeenEntry=class{constructor(e,t){this.obj=e,this.ref=t}isSame(e,t){return this.obj===e&&this.ref===t}}},7916:(e,t,r)=>{"use strict";const s=r(8761);e.exports=class extends Error{constructor(e){super(e.filter((e=>""!==e)).map((e=>"string"==typeof e?e:e instanceof Error?e.message:s(e))).join(" ")||"Unknown error"),"function"==typeof Error.captureStackTrace&&Error.captureStackTrace(this,t.assert)}}},5277:e=>{"use strict";const t={};e.exports=function(e){if(!e)return"";let r="";for(let s=0;s<e.length;++s){const n=e.charCodeAt(s);t.isSafe(n)?r+=e[s]:r+=t.escapeHtmlChar(n)}return r},t.escapeHtmlChar=function(e){return t.namedHtml.get(e)||(e>=256?"&#"+e+";":`&#x${e.toString(16).padStart(2,"0")};`)},t.isSafe=function(e){return t.safeCharCodes.has(e)},t.namedHtml=new Map([[38,"&amp;"],[60,"&lt;"],[62,"&gt;"],[34,"&quot;"],[160,"&nbsp;"],[162,"&cent;"],[163,"&pound;"],[164,"&curren;"],[169,"&copy;"],[174,"&reg;"]]),t.safeCharCodes=function(){const e=new Set;for(let t=32;t<123;++t)(t>=97||t>=65&&t<=90||t>=48&&t<=57||32===t||46===t||44===t||45===t||58===t||95===t)&&e.add(t);return e}()},6064:e=>{"use strict";e.exports=function(e){return e.replace(/[\^\$\.\*\+\-\?\=\!\:\|\\\/\(\)\[\]\{\}\,]/g,"\\$&")}},738:e=>{"use strict";e.exports=function(){}},1687:(e,t,r)=>{"use strict";const s=r(375),n=r(8571),a=r(7043),i={};e.exports=i.merge=function(e,t,r){if(s(e&&"object"==typeof e,"Invalid target value: must be an object"),s(null==t||"object"==typeof t,"Invalid source value: must be null, undefined, or an object"),!t)return e;if(r=Object.assign({nullOverride:!0,mergeArrays:!0},r),Array.isArray(t)){s(Array.isArray(e),"Cannot merge array onto an object"),r.mergeArrays||(e.length=0);for(let s=0;s<t.length;++s)e.push(n(t[s],{symbols:r.symbols}));return e}const o=a.keys(t,r);for(let s=0;s<o.length;++s){const a=o[s];if("__proto__"===a||!Object.prototype.propertyIsEnumerable.call(t,a))continue;const l=t[a];if(l&&"object"==typeof l){if(e[a]===l)continue;!e[a]||"object"!=typeof e[a]||Array.isArray(e[a])!==Array.isArray(l)||l instanceof Date||l instanceof RegExp?e[a]=n(l,{symbols:r.symbols}):i.merge(e[a],l,r)}else(null!=l||r.nullOverride)&&(e[a]=l)}return e}},9621:(e,t,r)=>{"use strict";const s=r(375),n={};e.exports=function(e,t,r){if(!1===t||null==t)return e;"string"==typeof(r=r||{})&&(r={separator:r});const a=Array.isArray(t);s(!a||!r.separator,"Separator option is not valid for array-based chain");const i=a?t:t.split(r.separator||".");let o=e;for(let e=0;e<i.length;++e){let a=i[e];const l=r.iterables&&n.iterables(o);if(Array.isArray(o)||"set"===l){const e=Number(a);Number.isInteger(e)&&(a=e<0?o.length+e:e)}if(!o||"function"==typeof o&&!1===r.functions||!l&&void 0===o[a]){s(!r.strict||e+1===i.length,"Missing segment",a,"in reach path ",t),s("object"==typeof o||!0===r.functions||"function"!=typeof o,"Invalid segment",a,"in reach path ",t),o=r.default;break}o=l?"set"===l?[...o][a]:o.get(a):o[a]}return o},n.iterables=function(e){return e instanceof Set?"set":e instanceof Map?"map":void 0}},8761:e=>{"use strict";e.exports=function(){try{return JSON.stringify(...arguments)}catch(e){return"[Cannot display object: "+e.message+"]"}}},4277:(e,t)=>{"use strict";const r={};t=e.exports={array:Array.prototype,buffer:!1,date:Date.prototype,error:Error.prototype,generic:Object.prototype,map:Map.prototype,promise:Promise.prototype,regex:RegExp.prototype,set:Set.prototype,weakMap:WeakMap.prototype,weakSet:WeakSet.prototype},r.typeMap=new Map([["[object Error]",t.error],["[object Map]",t.map],["[object Promise]",t.promise],["[object Set]",t.set],["[object WeakMap]",t.weakMap],["[object WeakSet]",t.weakSet]]),t.getInternalProto=function(e){if(Array.isArray(e))return t.array;if(e instanceof Date)return t.date;if(e instanceof RegExp)return t.regex;if(e instanceof Error)return t.error;const s=Object.prototype.toString.call(e);return r.typeMap.get(s)||t.generic}},7043:(e,t)=>{"use strict";t.keys=function(e){return!1!==(arguments.length>1&&void 0!==arguments[1]?arguments[1]:{}).symbols?Reflect.ownKeys(e):Object.getOwnPropertyNames(e)}},3652:(e,t,r)=>{"use strict";const s=r(375),n={};t.Sorter=class{constructor(){this._items=[],this.nodes=[]}add(e,t){const r=[].concat((t=t||{}).before||[]),n=[].concat(t.after||[]),a=t.group||"?",i=t.sort||0;s(!r.includes(a),`Item cannot come before itself: ${a}`),s(!r.includes("?"),"Item cannot come before unassociated items"),s(!n.includes(a),`Item cannot come after itself: ${a}`),s(!n.includes("?"),"Item cannot come after unassociated items"),Array.isArray(e)||(e=[e]);for(const t of e){const e={seq:this._items.length,sort:i,before:r,after:n,group:a,node:t};this._items.push(e)}if(!t.manual){const e=this._sort();s(e,"item","?"!==a?`added into group ${a}`:"","created a dependencies error")}return this.nodes}merge(e){Array.isArray(e)||(e=[e]);for(const t of e)if(t)for(const e of t._items)this._items.push(Object.assign({},e));this._items.sort(n.mergeSort);for(let e=0;e<this._items.length;++e)this._items[e].seq=e;const t=this._sort();return s(t,"merge created a dependencies error"),this.nodes}sort(){const e=this._sort();return s(e,"sort created a dependencies error"),this.nodes}_sort(){const e={},t=Object.create(null),r=Object.create(null);for(const s of this._items){const n=s.seq,a=s.group;r[a]=r[a]||[],r[a].push(n),e[n]=s.before;for(const e of s.after)t[e]=t[e]||[],t[e].push(n)}for(const t in e){const s=[];for(const n in e[t]){const a=e[t][n];r[a]=r[a]||[],s.push(...r[a])}e[t]=s}for(const s in t)if(r[s])for(const n of r[s])e[n].push(...t[s]);const s={};for(const t in e){const r=e[t];for(const e of r)s[e]=s[e]||[],s[e].push(t)}const n={},a=[];for(let e=0;e<this._items.length;++e){let t=e;if(s[e]){t=null;for(let e=0;e<this._items.length;++e){if(!0===n[e])continue;s[e]||(s[e]=[]);const r=s[e].length;let a=0;for(let t=0;t<r;++t)n[s[e][t]]&&++a;if(a===r){t=e;break}}}null!==t&&(n[t]=!0,a.push(t))}if(a.length!==this._items.length)return!1;const i={};for(const e of this._items)i[e.seq]=e;this._items=[],this.nodes=[];for(const e of a){const t=i[e];this.nodes.push(t.node),this._items.push(t)}return!0}},n.mergeSort=(e,t)=>e.sort===t.sort?0:e.sort<t.sort?-1:1},5380:(e,t,r)=>{"use strict";const s=r(443),n=r(2178),a={minDomainSegments:2,nonAsciiRx:/[^\x00-\x7f]/,domainControlRx:/[\x00-\x20@\:\/\\#!\$&\'\(\)\*\+,;=\?]/,tldSegmentRx:/^[a-zA-Z](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$/,domainSegmentRx:/^[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$/,URL:s.URL||URL};t.analyze=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!e)return n.code("DOMAIN_NON_EMPTY_STRING");if("string"!=typeof e)throw new Error("Invalid input: domain must be a string");if(e.length>256)return n.code("DOMAIN_TOO_LONG");if(a.nonAsciiRx.test(e)){if(!1===t.allowUnicode)return n.code("DOMAIN_INVALID_UNICODE_CHARS");e=e.normalize("NFC")}if(a.domainControlRx.test(e))return n.code("DOMAIN_INVALID_CHARS");e=a.punycode(e),t.allowFullyQualified&&"."===e[e.length-1]&&(e=e.slice(0,-1));const r=t.minDomainSegments||a.minDomainSegments,s=e.split(".");if(s.length<r)return n.code("DOMAIN_SEGMENTS_COUNT");if(t.maxDomainSegments&&s.length>t.maxDomainSegments)return n.code("DOMAIN_SEGMENTS_COUNT_MAX");const i=t.tlds;if(i){const e=s[s.length-1].toLowerCase();if(i.deny&&i.deny.has(e)||i.allow&&!i.allow.has(e))return n.code("DOMAIN_FORBIDDEN_TLDS")}for(let e=0;e<s.length;++e){const t=s[e];if(!t.length)return n.code("DOMAIN_EMPTY_SEGMENT");if(t.length>63)return n.code("DOMAIN_LONG_SEGMENT");if(e<s.length-1){if(!a.domainSegmentRx.test(t))return n.code("DOMAIN_INVALID_CHARS")}else if(!a.tldSegmentRx.test(t))return n.code("DOMAIN_INVALID_TLDS_CHARS")}return null},t.isValid=function(e,r){return!t.analyze(e,r)},a.punycode=function(e){e.includes("%")&&(e=e.replace(/%/g,"%25"));try{return new a.URL(`http://${e}`).host}catch(t){return e}}},1745:(e,t,r)=>{"use strict";const s=r(9848),n=r(5380),a=r(2178),i={nonAsciiRx:/[^\x00-\x7f]/,encoder:new(s.TextEncoder||TextEncoder)};t.analyze=function(e,t){return i.email(e,t)},t.isValid=function(e,t){return!i.email(e,t)},i.email=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if("string"!=typeof e)throw new Error("Invalid input: email must be a string");if(!e)return a.code("EMPTY_STRING");const r=!i.nonAsciiRx.test(e);if(!r){if(!1===t.allowUnicode)return a.code("FORBIDDEN_UNICODE");e=e.normalize("NFC")}const s=e.split("@");if(2!==s.length)return s.length>2?a.code("MULTIPLE_AT_CHAR"):a.code("MISSING_AT_CHAR");const[o,l]=s;if(!o)return a.code("EMPTY_LOCAL");if(!t.ignoreLength){if(e.length>254)return a.code("ADDRESS_TOO_LONG");if(i.encoder.encode(o).length>64)return a.code("LOCAL_TOO_LONG")}return i.local(o,r)||n.analyze(l,t)},i.local=function(e,t){const r=e.split(".");for(const e of r){if(!e.length)return a.code("EMPTY_LOCAL_SEGMENT");if(t){if(!i.atextRx.test(e))return a.code("INVALID_LOCAL_CHARS")}else for(const t of e){if(i.atextRx.test(t))continue;const e=i.binary(t);if(!i.atomRx.test(e))return a.code("INVALID_LOCAL_CHARS")}}},i.binary=function(e){return Array.from(i.encoder.encode(e)).map((e=>String.fromCharCode(e))).join("")},i.atextRx=/^[\w!#\$%&'\*\+\-/=\?\^`\{\|\}~]+$/,i.atomRx=new RegExp(["(?:[\\xc2-\\xdf][\\x80-\\xbf])","(?:\\xe0[\\xa0-\\xbf][\\x80-\\xbf])|(?:[\\xe1-\\xec][\\x80-\\xbf]{2})|(?:\\xed[\\x80-\\x9f][\\x80-\\xbf])|(?:[\\xee-\\xef][\\x80-\\xbf]{2})","(?:\\xf0[\\x90-\\xbf][\\x80-\\xbf]{2})|(?:[\\xf1-\\xf3][\\x80-\\xbf]{3})|(?:\\xf4[\\x80-\\x8f][\\x80-\\xbf]{2})"].join("|"))},2178:(e,t)=>{"use strict";t.codes={EMPTY_STRING:"Address must be a non-empty string",FORBIDDEN_UNICODE:"Address contains forbidden Unicode characters",MULTIPLE_AT_CHAR:"Address cannot contain more than one @ character",MISSING_AT_CHAR:"Address must contain one @ character",EMPTY_LOCAL:"Address local part cannot be empty",ADDRESS_TOO_LONG:"Address too long",LOCAL_TOO_LONG:"Address local part too long",EMPTY_LOCAL_SEGMENT:"Address local part contains empty dot-separated segment",INVALID_LOCAL_CHARS:"Address local part contains invalid character",DOMAIN_NON_EMPTY_STRING:"Domain must be a non-empty string",DOMAIN_TOO_LONG:"Domain too long",DOMAIN_INVALID_UNICODE_CHARS:"Domain contains forbidden Unicode characters",DOMAIN_INVALID_CHARS:"Domain contains invalid character",DOMAIN_INVALID_TLDS_CHARS:"Domain contains invalid tld character",DOMAIN_SEGMENTS_COUNT:"Domain lacks the minimum required number of segments",DOMAIN_SEGMENTS_COUNT_MAX:"Domain contains too many segments",DOMAIN_FORBIDDEN_TLDS:"Domain uses forbidden TLD",DOMAIN_EMPTY_SEGMENT:"Domain contains empty dot-separated segment",DOMAIN_LONG_SEGMENT:"Domain contains dot-separated segment that is too long"},t.code=function(e){return{code:e,error:t.codes[e]}}},9959:(e,t,r)=>{"use strict";const s=r(375),n=r(5752);t.regex=function(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};s(void 0===e.cidr||"string"==typeof e.cidr,"options.cidr must be a string");const t=e.cidr?e.cidr.toLowerCase():"optional";s(["required","optional","forbidden"].includes(t),"options.cidr must be one of required, optional, forbidden"),s(void 0===e.version||"string"==typeof e.version||Array.isArray(e.version),"options.version must be a string or an array of string");let r=e.version||["ipv4","ipv6","ipvfuture"];Array.isArray(r)||(r=[r]),s(r.length>=1,"options.version must have at least 1 version specified");for(let e=0;e<r.length;++e)s("string"==typeof r[e],"options.version must only contain strings"),r[e]=r[e].toLowerCase(),s(["ipv4","ipv6","ipvfuture"].includes(r[e]),"options.version contains unknown version "+r[e]+" - must be one of ipv4, ipv6, ipvfuture");r=Array.from(new Set(r));const a=`(?:${r.map((e=>{if("forbidden"===t)return n.ip[e];const r=`\\/${"ipv4"===e?n.ip.v4Cidr:n.ip.v6Cidr}`;return"required"===t?`${n.ip[e]}${r}`:`${n.ip[e]}(?:${r})?`})).join("|")})`,i=new RegExp(`^${a}$`);return{cidr:t,versions:r,regex:i,raw:a}}},5752:(e,t,r)=>{"use strict";const s=r(375),n=r(6064),a={generate:function(){const e={},t="\\dA-Fa-f",r="["+t+"]",s="\\w-\\.~",n="!\\$&'\\(\\)\\*\\+,;=",a="%"+t,i=s+a+n+":@",o="["+i+"]",l="(?:0{0,2}\\d|0?[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])";e.ipv4address="(?:"+l+"\\.){3}"+l;const c=r+"{1,4}",u="(?:"+c+":"+c+"|"+e.ipv4address+")",f="(?:"+c+":){6}"+u,h="::(?:"+c+":){5}"+u,m="(?:"+c+")?::(?:"+c+":){4}"+u,d="(?:(?:"+c+":){0,1}"+c+")?::(?:"+c+":){3}"+u,p="(?:(?:"+c+":){0,2}"+c+")?::(?:"+c+":){2}"+u,g="(?:(?:"+c+":){0,3}"+c+")?::"+c+":"+u,y="(?:(?:"+c+":){0,4}"+c+")?::"+u,b="(?:(?:"+c+":){0,5}"+c+")?::"+c,v="(?:(?:"+c+":){0,6}"+c+")?::";e.ipv4Cidr="(?:\\d|[1-2]\\d|3[0-2])",e.ipv6Cidr="(?:0{0,2}\\d|0?[1-9]\\d|1[01]\\d|12[0-8])",e.ipv6address="(?:"+f+"|"+h+"|"+m+"|"+d+"|"+p+"|"+g+"|"+y+"|"+b+"|"+v+")",e.ipvFuture="v"+r+"+\\.["+s+n+":]+",e.scheme="[a-zA-Z][a-zA-Z\\d+-\\.]*",e.schemeRegex=new RegExp(e.scheme);const _="["+s+a+n+":]*",w="["+s+a+n+"]{1,255}",$="(?:\\[(?:"+e.ipv6address+"|"+e.ipvFuture+")\\]|"+e.ipv4address+"|"+w+")",x="(?:"+_+"@)?"+$+"(?::\\d*)?",j="(?:"+_+"@)?("+$+")(?::\\d*)?",k=o+"*",R=o+"+",A="(?:\\/"+k+")*",S="\\/(?:"+R+A+")?",O=R+A,E="["+s+a+n+"@]+"+A,D="(?:\\/\\/\\/"+k+A+")";return e.hierPart="(?:(?:\\/\\/"+x+A+")|"+S+"|"+O+"|"+D+")",e.hierPartCapture="(?:(?:\\/\\/"+j+A+")|"+S+"|"+O+")",e.relativeRef="(?:(?:\\/\\/"+x+A+")|"+S+"|"+E+"|)",e.relativeRefCapture="(?:(?:\\/\\/"+j+A+")|"+S+"|"+E+"|)",e.query="["+i+"\\/\\?]*(?=#|$)",e.queryWithSquareBrackets="["+i+"\\[\\]\\/\\?]*(?=#|$)",e.fragment="["+i+"\\/\\?]*",e}};a.rfc3986=a.generate(),t.ip={v4Cidr:a.rfc3986.ipv4Cidr,v6Cidr:a.rfc3986.ipv6Cidr,ipv4:a.rfc3986.ipv4address,ipv6:a.rfc3986.ipv6address,ipvfuture:a.rfc3986.ipvFuture},a.createRegex=function(e){const t=a.rfc3986,r="(?:\\?"+(e.allowQuerySquareBrackets?t.queryWithSquareBrackets:t.query)+")?(?:#"+t.fragment+")?",i=e.domain?t.relativeRefCapture:t.relativeRef;if(e.relativeOnly)return a.wrap(i+r);let o="";if(e.scheme){s(e.scheme instanceof RegExp||"string"==typeof e.scheme||Array.isArray(e.scheme),"scheme must be a RegExp, String, or Array");const r=[].concat(e.scheme);s(r.length>=1,"scheme must have at least 1 scheme specified");const a=[];for(let e=0;e<r.length;++e){const i=r[e];s(i instanceof RegExp||"string"==typeof i,"scheme at position "+e+" must be a RegExp or String"),i instanceof RegExp?a.push(i.source.toString()):(s(t.schemeRegex.test(i),"scheme at position "+e+" must be a valid scheme"),a.push(n(i)))}o=a.join("|")}const l="(?:"+(o?"(?:"+o+")":t.scheme)+":"+(e.domain?t.hierPartCapture:t.hierPart)+")",c=e.allowRelative?"(?:"+l+"|"+i+")":l;return a.wrap(c+r,o)},a.wrap=function(e,t){return{raw:e=`(?=.)(?!https?:/(?:$|[^/]))(?!https?:///)(?!https?:[^/])${e}`,regex:new RegExp(`^${e}$`),scheme:t}},a.uriRegex=a.createRegex({}),t.regex=function(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return e.scheme||e.allowRelative||e.relativeOnly||e.allowQuerySquareBrackets||e.domain?a.createRegex(e):a.uriRegex}},1447:(e,t)=>{"use strict";const r={operators:["!","^","*","/","%","+","-","<","<=",">",">=","==","!=","&&","||","??"],operatorCharacters:["!","^","*","/","%","+","-","<","=",">","&","|","?"],operatorsOrder:[["^"],["*","/","%"],["+","-"],["<","<=",">",">="],["==","!="],["&&"],["||","??"]],operatorsPrefix:["!","n"],literals:{'"':'"',"`":"`","'":"'","[":"]"},numberRx:/^(?:[0-9]*(\.[0-9]*)?){1}$/,tokenRx:/^[\w\$\#\.\@\:\{\}]+$/,symbol:Symbol("formula"),settings:Symbol("settings")};t.Parser=class{constructor(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if(!t[r.settings]&&t.constants)for(const e in t.constants){const r=t.constants[e];if(null!==r&&!["boolean","number","string"].includes(typeof r))throw new Error(`Formula constant ${e} contains invalid ${typeof r} value type`)}this.settings=t[r.settings]?t:Object.assign({[r.settings]:!0,constants:{},functions:{}},t),this.single=null,this._parts=null,this._parse(e)}_parse(e){let s=[],n="",a=0,i=!1;const o=e=>{if(a)throw new Error("Formula missing closing parenthesis");const o=s.length?s[s.length-1]:null;if(i||n||e){if(o&&"reference"===o.type&&")"===e)return o.type="function",o.value=this._subFormula(n,o.value),void(n="");if(")"===e){const e=new t.Parser(n,this.settings);s.push({type:"segment",value:e})}else if(i){if("]"===i)return s.push({type:"reference",value:n}),void(n="");s.push({type:"literal",value:n})}else if(r.operatorCharacters.includes(n))o&&"operator"===o.type&&r.operators.includes(o.value+n)?o.value+=n:s.push({type:"operator",value:n});else if(n.match(r.numberRx))s.push({type:"constant",value:parseFloat(n)});else if(void 0!==this.settings.constants[n])s.push({type:"constant",value:this.settings.constants[n]});else{if(!n.match(r.tokenRx))throw new Error(`Formula contains invalid token: ${n}`);s.push({type:"reference",value:n})}n=""}};for(const t of e)i?t===i?(o(),i=!1):n+=t:a?"("===t?(n+=t,++a):")"===t?(--a,a?n+=t:o(t)):n+=t:t in r.literals?i=r.literals[t]:"("===t?(o(),++a):r.operatorCharacters.includes(t)?(o(),n=t,o()):" "!==t?n+=t:o();o(),s=s.map(((e,t)=>"operator"!==e.type||"-"!==e.value||t&&"operator"!==s[t-1].type?e:{type:"operator",value:"n"}));let l=!1;for(const e of s){if("operator"===e.type){if(r.operatorsPrefix.includes(e.value))continue;if(!l)throw new Error("Formula contains an operator in invalid position");if(!r.operators.includes(e.value))throw new Error(`Formula contains an unknown operator ${e.value}`)}else if(l)throw new Error("Formula missing expected operator");l=!l}if(!l)throw new Error("Formula contains invalid trailing operator");1===s.length&&["reference","literal","constant"].includes(s[0].type)&&(this.single={type:"reference"===s[0].type?"reference":"value",value:s[0].value}),this._parts=s.map((e=>{if("operator"===e.type)return r.operatorsPrefix.includes(e.value)?e:e.value;if("reference"!==e.type)return e.value;if(this.settings.tokenRx&&!this.settings.tokenRx.test(e.value))throw new Error(`Formula contains invalid reference ${e.value}`);return this.settings.reference?this.settings.reference(e.value):r.reference(e.value)}))}_subFormula(e,s){const n=this.settings.functions[s];if("function"!=typeof n)throw new Error(`Formula contains unknown function ${s}`);let a=[];if(e){let t="",n=0,i=!1;const o=()=>{if(!t)throw new Error(`Formula contains function ${s} with invalid arguments ${e}`);a.push(t),t=""};for(let s=0;s<e.length;++s){const a=e[s];i?(t+=a,a===i&&(i=!1)):a in r.literals&&!n?(t+=a,i=r.literals[a]):","!==a||n?(t+=a,"("===a?++n:")"===a&&--n):o()}o()}return a=a.map((e=>new t.Parser(e,this.settings))),function(e){const t=[];for(const r of a)t.push(r.evaluate(e));return n.call(e,...t)}}evaluate(e){const t=this._parts.slice();for(let s=t.length-2;s>=0;--s){const n=t[s];if(n&&"operator"===n.type){const a=t[s+1];t.splice(s+1,1);const i=r.evaluate(a,e);t[s]=r.single(n.value,i)}}return r.operatorsOrder.forEach((s=>{for(let n=1;n<t.length-1;)if(s.includes(t[n])){const s=t[n],a=r.evaluate(t[n-1],e),i=r.evaluate(t[n+1],e);t.splice(n,2);const o=r.calculate(s,a,i);t[n-1]=0===o?0:o}else n+=2})),r.evaluate(t[0],e)}},t.Parser.prototype[r.symbol]=!0,r.reference=function(e){return function(t){return t&&void 0!==t[e]?t[e]:null}},r.evaluate=function(e,t){return null===e?null:"function"==typeof e?e(t):e[r.symbol]?e.evaluate(t):e},r.single=function(e,t){if("!"===e)return!t;const r=-t;return 0===r?0:r},r.calculate=function(e,t,s){if("??"===e)return r.exists(t)?t:s;if("string"==typeof t||"string"==typeof s){if("+"===e)return(t=r.exists(t)?t:"")+(r.exists(s)?s:"")}else switch(e){case"^":return Math.pow(t,s);case"*":return t*s;case"/":return t/s;case"%":return t%s;case"+":return t+s;case"-":return t-s}switch(e){case"<":return t<s;case"<=":return t<=s;case">":return t>s;case">=":return t>=s;case"==":return t===s;case"!=":return t!==s;case"&&":return t&&s;case"||":return t||s}return null},r.exists=function(e){return null!=e}},9926:()=>{},5688:()=>{},9708:()=>{},1152:()=>{},443:()=>{},9848:()=>{},5934:e=>{"use strict";e.exports={version:"17.8.3"}}},t={},function r(s){var n=t[s];if(void 0!==n)return n.exports;var a=t[s]={exports:{}};return e[s](a,a.exports,r),a.exports}(5107);var e,t}));
 
 /***/ }),
 
@@ -65355,8 +62778,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "initializeConnect": () => (/* binding */ initializeConnect)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/extends.js");
-/* harmony import */ var _babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectWithoutPropertiesLoose */ "./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js");
+/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/@babel/runtime/helpers/esm/extends.js");
+/* harmony import */ var _babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectWithoutPropertiesLoose */ "./node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js");
 /* harmony import */ var hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! hoist-non-react-statics */ "./node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js");
 /* harmony import */ var hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
@@ -65866,7 +63289,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "mergePropsFactory": () => (/* binding */ mergePropsFactory),
 /* harmony export */   "wrapMergePropsFunc": () => (/* binding */ wrapMergePropsFunc)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/extends.js");
+/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/@babel/runtime/helpers/esm/extends.js");
 /* harmony import */ var _utils_verifyPlainObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/verifyPlainObject */ "./node_modules/react-redux/es/utils/verifyPlainObject.js");
 /* harmony import */ var _invalidArgFactory__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./invalidArgFactory */ "./node_modules/react-redux/es/connect/invalidArgFactory.js");
 
@@ -65916,7 +63339,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ finalPropsSelectorFactory),
 /* harmony export */   "pureFinalPropsSelectorFactory": () => (/* binding */ pureFinalPropsSelectorFactory)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectWithoutPropertiesLoose */ "./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js");
+/* harmony import */ var _babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectWithoutPropertiesLoose */ "./node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js");
 /* harmony import */ var _verifySubselectors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./verifySubselectors */ "./node_modules/react-redux/es/connect/verifySubselectors.js");
 
 const _excluded = ["initMapStateToProps", "initMapDispatchToProps", "initMergeProps"];
@@ -67110,89 +64533,59 @@ if (false) {} else {
 
 /***/ }),
 
-/***/ "./node_modules/react-router-dom/dist/index.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/react-router-dom/dist/index.js ***!
-  \*****************************************************/
+/***/ "./node_modules/react-router-dom/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/react-router-dom/index.js ***!
+  \************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AbortedDeferredError": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.AbortedDeferredError),
-/* harmony export */   "Await": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Await),
 /* harmony export */   "BrowserRouter": () => (/* binding */ BrowserRouter),
-/* harmony export */   "Form": () => (/* binding */ Form),
 /* harmony export */   "HashRouter": () => (/* binding */ HashRouter),
 /* harmony export */   "Link": () => (/* binding */ Link),
-/* harmony export */   "MemoryRouter": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.MemoryRouter),
+/* harmony export */   "MemoryRouter": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.MemoryRouter),
 /* harmony export */   "NavLink": () => (/* binding */ NavLink),
-/* harmony export */   "Navigate": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Navigate),
-/* harmony export */   "NavigationType": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Action),
-/* harmony export */   "Outlet": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Outlet),
-/* harmony export */   "Route": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Route),
-/* harmony export */   "Router": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Router),
-/* harmony export */   "RouterProvider": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.RouterProvider),
-/* harmony export */   "Routes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Routes),
-/* harmony export */   "ScrollRestoration": () => (/* binding */ ScrollRestoration),
-/* harmony export */   "UNSAFE_DataRouterContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_DataRouterContext),
-/* harmony export */   "UNSAFE_DataRouterStateContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_DataRouterStateContext),
-/* harmony export */   "UNSAFE_DataStaticRouterContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_DataStaticRouterContext),
-/* harmony export */   "UNSAFE_LocationContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_LocationContext),
-/* harmony export */   "UNSAFE_NavigationContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_NavigationContext),
-/* harmony export */   "UNSAFE_RouteContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_RouteContext),
-/* harmony export */   "UNSAFE_enhanceManualRouteObjects": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_enhanceManualRouteObjects),
-/* harmony export */   "createBrowserRouter": () => (/* binding */ createBrowserRouter),
-/* harmony export */   "createHashRouter": () => (/* binding */ createHashRouter),
-/* harmony export */   "createMemoryRouter": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.createMemoryRouter),
-/* harmony export */   "createPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.createPath),
-/* harmony export */   "createRoutesFromChildren": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.createRoutesFromChildren),
-/* harmony export */   "createRoutesFromElements": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.createRoutesFromElements),
+/* harmony export */   "Navigate": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Navigate),
+/* harmony export */   "NavigationType": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Action),
+/* harmony export */   "Outlet": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Outlet),
+/* harmony export */   "Route": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Route),
+/* harmony export */   "Router": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Router),
+/* harmony export */   "Routes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Routes),
+/* harmony export */   "UNSAFE_LocationContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.UNSAFE_LocationContext),
+/* harmony export */   "UNSAFE_NavigationContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.UNSAFE_NavigationContext),
+/* harmony export */   "UNSAFE_RouteContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.UNSAFE_RouteContext),
+/* harmony export */   "createPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.createPath),
+/* harmony export */   "createRoutesFromChildren": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.createRoutesFromChildren),
 /* harmony export */   "createSearchParams": () => (/* binding */ createSearchParams),
-/* harmony export */   "defer": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.defer),
 /* harmony export */   "generatePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.generatePath),
-/* harmony export */   "isRouteErrorResponse": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.isRouteErrorResponse),
-/* harmony export */   "json": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.json),
 /* harmony export */   "matchPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.matchPath),
 /* harmony export */   "matchRoutes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.matchRoutes),
-/* harmony export */   "parsePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.parsePath),
-/* harmony export */   "redirect": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.redirect),
-/* harmony export */   "renderMatches": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.renderMatches),
+/* harmony export */   "parsePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.parsePath),
+/* harmony export */   "renderMatches": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.renderMatches),
 /* harmony export */   "resolvePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.resolvePath),
 /* harmony export */   "unstable_HistoryRouter": () => (/* binding */ HistoryRouter),
-/* harmony export */   "useActionData": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useActionData),
-/* harmony export */   "useAsyncError": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useAsyncError),
-/* harmony export */   "useAsyncValue": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useAsyncValue),
-/* harmony export */   "useFetcher": () => (/* binding */ useFetcher),
-/* harmony export */   "useFetchers": () => (/* binding */ useFetchers),
-/* harmony export */   "useFormAction": () => (/* binding */ useFormAction),
-/* harmony export */   "useHref": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useHref),
-/* harmony export */   "useInRouterContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useInRouterContext),
+/* harmony export */   "useHref": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useHref),
+/* harmony export */   "useInRouterContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useInRouterContext),
 /* harmony export */   "useLinkClickHandler": () => (/* binding */ useLinkClickHandler),
-/* harmony export */   "useLoaderData": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useLoaderData),
-/* harmony export */   "useLocation": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useLocation),
-/* harmony export */   "useMatch": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useMatch),
-/* harmony export */   "useMatches": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useMatches),
-/* harmony export */   "useNavigate": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useNavigate),
-/* harmony export */   "useNavigation": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useNavigation),
-/* harmony export */   "useNavigationType": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useNavigationType),
-/* harmony export */   "useOutlet": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useOutlet),
-/* harmony export */   "useOutletContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useOutletContext),
-/* harmony export */   "useParams": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useParams),
-/* harmony export */   "useResolvedPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useResolvedPath),
-/* harmony export */   "useRevalidator": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useRevalidator),
-/* harmony export */   "useRouteError": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useRouteError),
-/* harmony export */   "useRouteLoaderData": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useRouteLoaderData),
-/* harmony export */   "useRoutes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.useRoutes),
-/* harmony export */   "useSearchParams": () => (/* binding */ useSearchParams),
-/* harmony export */   "useSubmit": () => (/* binding */ useSubmit)
+/* harmony export */   "useLocation": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useLocation),
+/* harmony export */   "useMatch": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useMatch),
+/* harmony export */   "useNavigate": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useNavigate),
+/* harmony export */   "useNavigationType": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useNavigationType),
+/* harmony export */   "useOutlet": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useOutlet),
+/* harmony export */   "useOutletContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useOutletContext),
+/* harmony export */   "useParams": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useParams),
+/* harmony export */   "useResolvedPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useResolvedPath),
+/* harmony export */   "useRoutes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useRoutes),
+/* harmony export */   "useSearchParams": () => (/* binding */ useSearchParams)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-router */ "./node_modules/react-router/dist/index.js");
-/* harmony import */ var react_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @remix-run/router */ "./node_modules/@remix-run/router/dist/router.js");
+/* harmony import */ var react_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-router */ "./node_modules/history/index.js");
+/* harmony import */ var react_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router */ "./node_modules/react-router/index.js");
 /**
- * React Router DOM v6.4.4
+ * React Router DOM v6.3.0
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -67207,7 +64600,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
+  _extends = Object.assign || function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
 
@@ -67220,6 +64613,7 @@ function _extends() {
 
     return target;
   };
+
   return _extends.apply(this, arguments);
 }
 
@@ -67238,31 +64632,294 @@ function _objectWithoutPropertiesLoose(source, excluded) {
   return target;
 }
 
-const defaultMethod = "get";
-const defaultEncType = "application/x-www-form-urlencoded";
-function isHtmlElement(object) {
-  return object != null && typeof object.tagName === "string";
+const _excluded = ["onClick", "reloadDocument", "replace", "state", "target", "to"],
+      _excluded2 = ["aria-current", "caseSensitive", "className", "end", "style", "to", "children"];
+
+function warning(cond, message) {
+  if (!cond) {
+    // eslint-disable-next-line no-console
+    if (typeof console !== "undefined") console.warn(message);
+
+    try {
+      // Welcome to debugging React Router!
+      //
+      // This error is thrown as a convenience so you can more easily
+      // find the source for a warning that appears in the console by
+      // enabling "pause on exceptions" in your JavaScript debugger.
+      throw new Error(message); // eslint-disable-next-line no-empty
+    } catch (e) {}
+  }
+} ////////////////////////////////////////////////////////////////////////////////
+// COMPONENTS
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * A `<Router>` for use in web browsers. Provides the cleanest URLs.
+ */
+function BrowserRouter(_ref) {
+  let {
+    basename,
+    children,
+    window
+  } = _ref;
+  let historyRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
+
+  if (historyRef.current == null) {
+    historyRef.current = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createBrowserHistory)({
+      window
+    });
+  }
+
+  let history = historyRef.current;
+  let [state, setState] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+    action: history.action,
+    location: history.location
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect)(() => history.listen(setState), [history]);
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_router__WEBPACK_IMPORTED_MODULE_1__.Router, {
+    basename: basename,
+    children: children,
+    location: state.location,
+    navigationType: state.action,
+    navigator: history
+  });
 }
-function isButtonElement(object) {
-  return isHtmlElement(object) && object.tagName.toLowerCase() === "button";
+
+/**
+ * A `<Router>` for use in web browsers. Stores the location in the hash
+ * portion of the URL so it is not sent to the server.
+ */
+function HashRouter(_ref2) {
+  let {
+    basename,
+    children,
+    window
+  } = _ref2;
+  let historyRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
+
+  if (historyRef.current == null) {
+    historyRef.current = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createHashHistory)({
+      window
+    });
+  }
+
+  let history = historyRef.current;
+  let [state, setState] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+    action: history.action,
+    location: history.location
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect)(() => history.listen(setState), [history]);
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_router__WEBPACK_IMPORTED_MODULE_1__.Router, {
+    basename: basename,
+    children: children,
+    location: state.location,
+    navigationType: state.action,
+    navigator: history
+  });
 }
-function isFormElement(object) {
-  return isHtmlElement(object) && object.tagName.toLowerCase() === "form";
+
+/**
+ * A `<Router>` that accepts a pre-instantiated history object. It's important
+ * to note that using your own history object is highly discouraged and may add
+ * two versions of the history library to your bundles unless you use the same
+ * version of the history library that React Router uses internally.
+ */
+function HistoryRouter(_ref3) {
+  let {
+    basename,
+    children,
+    history
+  } = _ref3;
+  const [state, setState] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+    action: history.action,
+    location: history.location
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect)(() => history.listen(setState), [history]);
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react_router__WEBPACK_IMPORTED_MODULE_1__.Router, {
+    basename: basename,
+    children: children,
+    location: state.location,
+    navigationType: state.action,
+    navigator: history
+  });
 }
-function isInputElement(object) {
-  return isHtmlElement(object) && object.tagName.toLowerCase() === "input";
+
+if (true) {
+  HistoryRouter.displayName = "unstable_HistoryRouter";
 }
 
 function isModifiedEvent(event) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
-function shouldProcessLinkClick(event, target) {
-  return event.button === 0 && ( // Ignore everything but left clicks
-  !target || target === "_self") && // Let browser handle "target=_blank" etc.
-  !isModifiedEvent(event) // Ignore clicks with modifier keys
-  ;
+/**
+ * The public API for rendering a history-aware <a>.
+ */
+const Link = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function LinkWithRef(_ref4, ref) {
+  let {
+    onClick,
+    reloadDocument,
+    replace = false,
+    state,
+    target,
+    to
+  } = _ref4,
+      rest = _objectWithoutPropertiesLoose(_ref4, _excluded);
+
+  let href = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useHref)(to);
+  let internalOnClick = useLinkClickHandler(to, {
+    replace,
+    state,
+    target
+  });
+
+  function handleClick(event) {
+    if (onClick) onClick(event);
+
+    if (!event.defaultPrevented && !reloadDocument) {
+      internalOnClick(event);
+    }
+  }
+
+  return (
+    /*#__PURE__*/
+    // eslint-disable-next-line jsx-a11y/anchor-has-content
+    (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", _extends({}, rest, {
+      href: href,
+      onClick: handleClick,
+      ref: ref,
+      target: target
+    }))
+  );
+});
+
+if (true) {
+  Link.displayName = "Link";
 }
+
+/**
+ * A <Link> wrapper that knows if it's "active" or not.
+ */
+const NavLink = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function NavLinkWithRef(_ref5, ref) {
+  let {
+    "aria-current": ariaCurrentProp = "page",
+    caseSensitive = false,
+    className: classNameProp = "",
+    end = false,
+    style: styleProp,
+    to,
+    children
+  } = _ref5,
+      rest = _objectWithoutPropertiesLoose(_ref5, _excluded2);
+
+  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useLocation)();
+  let path = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useResolvedPath)(to);
+  let locationPathname = location.pathname;
+  let toPathname = path.pathname;
+
+  if (!caseSensitive) {
+    locationPathname = locationPathname.toLowerCase();
+    toPathname = toPathname.toLowerCase();
+  }
+
+  let isActive = locationPathname === toPathname || !end && locationPathname.startsWith(toPathname) && locationPathname.charAt(toPathname.length) === "/";
+  let ariaCurrent = isActive ? ariaCurrentProp : undefined;
+  let className;
+
+  if (typeof classNameProp === "function") {
+    className = classNameProp({
+      isActive
+    });
+  } else {
+    // If the className prop is not a function, we use a default `active`
+    // class for <NavLink />s that are active. In v5 `active` was the default
+    // value for `activeClassName`, but we are removing that API and can still
+    // use the old default behavior for a cleaner upgrade path and keep the
+    // simple styling rules working as they currently do.
+    className = [classNameProp, isActive ? "active" : null].filter(Boolean).join(" ");
+  }
+
+  let style = typeof styleProp === "function" ? styleProp({
+    isActive
+  }) : styleProp;
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Link, _extends({}, rest, {
+    "aria-current": ariaCurrent,
+    className: className,
+    ref: ref,
+    style: style,
+    to: to
+  }), typeof children === "function" ? children({
+    isActive
+  }) : children);
+});
+
+if (true) {
+  NavLink.displayName = "NavLink";
+} ////////////////////////////////////////////////////////////////////////////////
+// HOOKS
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Handles the click behavior for router `<Link>` components. This is useful if
+ * you need to create custom `<Link>` components with the same click behavior we
+ * use in our exported `<Link>`.
+ */
+
+
+function useLinkClickHandler(to, _temp) {
+  let {
+    target,
+    replace: replaceProp,
+    state
+  } = _temp === void 0 ? {} : _temp;
+  let navigate = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useNavigate)();
+  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useLocation)();
+  let path = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useResolvedPath)(to);
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(event => {
+    if (event.button === 0 && ( // Ignore everything but left clicks
+    !target || target === "_self") && // Let browser handle "target=_blank" etc.
+    !isModifiedEvent(event) // Ignore clicks with modifier keys
+    ) {
+      event.preventDefault(); // If the URL hasn't changed, a regular <a> will do a replace instead of
+      // a push, so do the same here.
+
+      let replace = !!replaceProp || (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createPath)(location) === (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createPath)(path);
+      navigate(to, {
+        replace,
+        state
+      });
+    }
+  }, [location, navigate, path, replaceProp, state, target, to]);
+}
+/**
+ * A convenient wrapper for reading and writing search parameters via the
+ * URLSearchParams interface.
+ */
+
+function useSearchParams(defaultInit) {
+   true ? warning(typeof URLSearchParams !== "undefined", "You cannot use the `useSearchParams` hook in a browser that does not " + "support the URLSearchParams API. If you need to support Internet " + "Explorer 11, we recommend you load a polyfill such as " + "https://github.com/ungap/url-search-params\n\n" + "If you're unsure how to load polyfills, we recommend you check out " + "https://polyfill.io/v3/ which provides some recommendations about how " + "to load polyfills only for users that need them, instead of for every " + "user.") : 0;
+  let defaultSearchParamsRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(createSearchParams(defaultInit));
+  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useLocation)();
+  let searchParams = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => {
+    let searchParams = createSearchParams(location.search);
+
+    for (let key of defaultSearchParamsRef.current.keys()) {
+      if (!searchParams.has(key)) {
+        defaultSearchParamsRef.current.getAll(key).forEach(value => {
+          searchParams.append(key, value);
+        });
+      }
+    }
+
+    return searchParams;
+  }, [location.search]);
+  let navigate = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.useNavigate)();
+  let setSearchParams = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((nextInit, navigateOptions) => {
+    navigate("?" + createSearchParams(nextInit), navigateOptions);
+  }, [navigate]);
+  return [searchParams, setSearchParams];
+}
+
 /**
  * Creates a URLSearchParams object using the given initializer.
  *
@@ -67284,7 +64941,6 @@ function shouldProcessLinkClick(event, target) {
  *     sort: ['name', 'price']
  *   });
  */
-
 function createSearchParams(init) {
   if (init === void 0) {
     init = "";
@@ -67295,811 +64951,93 @@ function createSearchParams(init) {
     return memo.concat(Array.isArray(value) ? value.map(v => [key, v]) : [[key, value]]);
   }, []));
 }
-function getSearchParamsForLocation(locationSearch, defaultSearchParams) {
-  let searchParams = createSearchParams(locationSearch);
-
-  for (let key of defaultSearchParams.keys()) {
-    if (!searchParams.has(key)) {
-      defaultSearchParams.getAll(key).forEach(value => {
-        searchParams.append(key, value);
-      });
-    }
-  }
-
-  return searchParams;
-}
-function getFormSubmissionInfo(target, defaultAction, options) {
-  let method;
-  let action;
-  let encType;
-  let formData;
-
-  if (isFormElement(target)) {
-    let submissionTrigger = options.submissionTrigger;
-    method = options.method || target.getAttribute("method") || defaultMethod;
-    action = options.action || target.getAttribute("action") || defaultAction;
-    encType = options.encType || target.getAttribute("enctype") || defaultEncType;
-    formData = new FormData(target);
-
-    if (submissionTrigger && submissionTrigger.name) {
-      formData.append(submissionTrigger.name, submissionTrigger.value);
-    }
-  } else if (isButtonElement(target) || isInputElement(target) && (target.type === "submit" || target.type === "image")) {
-    let form = target.form;
-
-    if (form == null) {
-      throw new Error("Cannot submit a <button> or <input type=\"submit\"> without a <form>");
-    } // <button>/<input type="submit"> may override attributes of <form>
 
 
-    method = options.method || target.getAttribute("formmethod") || form.getAttribute("method") || defaultMethod;
-    action = options.action || target.getAttribute("formaction") || form.getAttribute("action") || defaultAction;
-    encType = options.encType || target.getAttribute("formenctype") || form.getAttribute("enctype") || defaultEncType;
-    formData = new FormData(form); // Include name + value from a <button>, appending in case the button name
-    // matches an existing input name
+//# sourceMappingURL=index.js.map
 
-    if (target.name) {
-      formData.append(target.name, target.value);
-    }
-  } else if (isHtmlElement(target)) {
-    throw new Error("Cannot submit element that is not <form>, <button>, or " + "<input type=\"submit|image\">");
-  } else {
-    method = options.method || defaultMethod;
-    action = options.action || defaultAction;
-    encType = options.encType || defaultEncType;
 
-    if (target instanceof FormData) {
-      formData = target;
-    } else {
-      formData = new FormData();
+/***/ }),
 
-      if (target instanceof URLSearchParams) {
-        for (let [name, value] of target) {
-          formData.append(name, value);
-        }
-      } else if (target != null) {
-        for (let name of Object.keys(target)) {
-          formData.append(name, target[name]);
-        }
-      }
-    }
-  }
+/***/ "./node_modules/react-router/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/react-router/index.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-  let {
-    protocol,
-    host
-  } = window.location;
-  let url = new URL(action, protocol + "//" + host);
-  return {
-    url,
-    method,
-    encType,
-    formData
-  };
-}
-
-const _excluded = ["onClick", "relative", "reloadDocument", "replace", "state", "target", "to", "preventScrollReset"],
-      _excluded2 = ["aria-current", "caseSensitive", "className", "end", "style", "to", "children"],
-      _excluded3 = ["reloadDocument", "replace", "method", "action", "onSubmit", "fetcherKey", "routeId", "relative"];
-//#region Routers
-////////////////////////////////////////////////////////////////////////////////
-
-function createBrowserRouter(routes, opts) {
-  return (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createRouter)({
-    basename: opts == null ? void 0 : opts.basename,
-    history: (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createBrowserHistory)({
-      window: opts == null ? void 0 : opts.window
-    }),
-    hydrationData: (opts == null ? void 0 : opts.hydrationData) || parseHydrationData(),
-    routes: (0,react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_enhanceManualRouteObjects)(routes)
-  }).initialize();
-}
-function createHashRouter(routes, opts) {
-  return (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createRouter)({
-    basename: opts == null ? void 0 : opts.basename,
-    history: (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createHashHistory)({
-      window: opts == null ? void 0 : opts.window
-    }),
-    hydrationData: (opts == null ? void 0 : opts.hydrationData) || parseHydrationData(),
-    routes: (0,react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_enhanceManualRouteObjects)(routes)
-  }).initialize();
-}
-
-function parseHydrationData() {
-  var _window;
-
-  let state = (_window = window) == null ? void 0 : _window.__staticRouterHydrationData;
-
-  if (state && state.errors) {
-    state = _extends({}, state, {
-      errors: deserializeErrors(state.errors)
-    });
-  }
-
-  return state;
-}
-
-function deserializeErrors(errors) {
-  if (!errors) return null;
-  let entries = Object.entries(errors);
-  let serialized = {};
-
-  for (let [key, val] of entries) {
-    // Hey you!  If you change this, please change the corresponding logic in
-    // serializeErrors in react-router-dom/server.tsx :)
-    if (val && val.__type === "RouteErrorResponse") {
-      serialized[key] = new react_router__WEBPACK_IMPORTED_MODULE_1__.ErrorResponse(val.status, val.statusText, val.data, val.internal === true);
-    } else {
-      serialized[key] = val;
-    }
-  }
-
-  return serialized;
-}
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MemoryRouter": () => (/* binding */ MemoryRouter),
+/* harmony export */   "Navigate": () => (/* binding */ Navigate),
+/* harmony export */   "NavigationType": () => (/* reexport safe */ history__WEBPACK_IMPORTED_MODULE_0__.Action),
+/* harmony export */   "Outlet": () => (/* binding */ Outlet),
+/* harmony export */   "Route": () => (/* binding */ Route),
+/* harmony export */   "Router": () => (/* binding */ Router),
+/* harmony export */   "Routes": () => (/* binding */ Routes),
+/* harmony export */   "UNSAFE_LocationContext": () => (/* binding */ LocationContext),
+/* harmony export */   "UNSAFE_NavigationContext": () => (/* binding */ NavigationContext),
+/* harmony export */   "UNSAFE_RouteContext": () => (/* binding */ RouteContext),
+/* harmony export */   "createPath": () => (/* reexport safe */ history__WEBPACK_IMPORTED_MODULE_0__.createPath),
+/* harmony export */   "createRoutesFromChildren": () => (/* binding */ createRoutesFromChildren),
+/* harmony export */   "generatePath": () => (/* binding */ generatePath),
+/* harmony export */   "matchPath": () => (/* binding */ matchPath),
+/* harmony export */   "matchRoutes": () => (/* binding */ matchRoutes),
+/* harmony export */   "parsePath": () => (/* reexport safe */ history__WEBPACK_IMPORTED_MODULE_0__.parsePath),
+/* harmony export */   "renderMatches": () => (/* binding */ renderMatches),
+/* harmony export */   "resolvePath": () => (/* binding */ resolvePath),
+/* harmony export */   "useHref": () => (/* binding */ useHref),
+/* harmony export */   "useInRouterContext": () => (/* binding */ useInRouterContext),
+/* harmony export */   "useLocation": () => (/* binding */ useLocation),
+/* harmony export */   "useMatch": () => (/* binding */ useMatch),
+/* harmony export */   "useNavigate": () => (/* binding */ useNavigate),
+/* harmony export */   "useNavigationType": () => (/* binding */ useNavigationType),
+/* harmony export */   "useOutlet": () => (/* binding */ useOutlet),
+/* harmony export */   "useOutletContext": () => (/* binding */ useOutletContext),
+/* harmony export */   "useParams": () => (/* binding */ useParams),
+/* harmony export */   "useResolvedPath": () => (/* binding */ useResolvedPath),
+/* harmony export */   "useRoutes": () => (/* binding */ useRoutes)
+/* harmony export */ });
+/* harmony import */ var history__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! history */ "./node_modules/history/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 /**
- * A `<Router>` for use in web browsers. Provides the cleanest URLs.
+ * React Router v6.3.0
+ *
+ * Copyright (c) Remix Software Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE.md file in the root directory of this source tree.
+ *
+ * @license MIT
  */
 
 
-function BrowserRouter(_ref) {
-  let {
-    basename,
-    children,
-    window
-  } = _ref;
-  let historyRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef();
 
-  if (historyRef.current == null) {
-    historyRef.current = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createBrowserHistory)({
-      window,
-      v5Compat: true
-    });
-  }
 
-  let history = historyRef.current;
-  let [state, setState] = react__WEBPACK_IMPORTED_MODULE_0__.useState({
-    action: history.action,
-    location: history.location
-  });
-  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => history.listen(setState), [history]);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router__WEBPACK_IMPORTED_MODULE_2__.Router, {
-    basename: basename,
-    children: children,
-    location: state.location,
-    navigationType: state.action,
-    navigator: history
-  });
-}
-/**
- * A `<Router>` for use in web browsers. Stores the location in the hash
- * portion of the URL so it is not sent to the server.
- */
-
-function HashRouter(_ref2) {
-  let {
-    basename,
-    children,
-    window
-  } = _ref2;
-  let historyRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef();
-
-  if (historyRef.current == null) {
-    historyRef.current = (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createHashHistory)({
-      window,
-      v5Compat: true
-    });
-  }
-
-  let history = historyRef.current;
-  let [state, setState] = react__WEBPACK_IMPORTED_MODULE_0__.useState({
-    action: history.action,
-    location: history.location
-  });
-  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => history.listen(setState), [history]);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router__WEBPACK_IMPORTED_MODULE_2__.Router, {
-    basename: basename,
-    children: children,
-    location: state.location,
-    navigationType: state.action,
-    navigator: history
-  });
-}
-/**
- * A `<Router>` that accepts a pre-instantiated history object. It's important
- * to note that using your own history object is highly discouraged and may add
- * two versions of the history library to your bundles unless you use the same
- * version of the history library that React Router uses internally.
- */
-
-function HistoryRouter(_ref3) {
-  let {
-    basename,
-    children,
-    history
-  } = _ref3;
-  const [state, setState] = react__WEBPACK_IMPORTED_MODULE_0__.useState({
-    action: history.action,
-    location: history.location
-  });
-  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => history.listen(setState), [history]);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react_router__WEBPACK_IMPORTED_MODULE_2__.Router, {
-    basename: basename,
-    children: children,
-    location: state.location,
-    navigationType: state.action,
-    navigator: history
-  });
-}
+const NavigationContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)(null);
 
 if (true) {
-  HistoryRouter.displayName = "unstable_HistoryRouter";
+  NavigationContext.displayName = "Navigation";
 }
-/**
- * The public API for rendering a history-aware <a>.
- */
 
-const Link = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.forwardRef(function LinkWithRef(_ref4, ref) {
-  let {
-    onClick,
-    relative,
-    reloadDocument,
-    replace,
-    state,
-    target,
-    to,
-    preventScrollReset
-  } = _ref4,
-      rest = _objectWithoutPropertiesLoose(_ref4, _excluded);
+const LocationContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)(null);
 
-  let href = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useHref)(to, {
-    relative
-  });
-  let internalOnClick = useLinkClickHandler(to, {
-    replace,
-    state,
-    target,
-    preventScrollReset,
-    relative
-  });
+if (true) {
+  LocationContext.displayName = "Location";
+}
 
-  function handleClick(event) {
-    if (onClick) onClick(event);
-
-    if (!event.defaultPrevented) {
-      internalOnClick(event);
-    }
-  }
-
-  return (
-    /*#__PURE__*/
-    // eslint-disable-next-line jsx-a11y/anchor-has-content
-    react__WEBPACK_IMPORTED_MODULE_0__.createElement("a", _extends({}, rest, {
-      href: href,
-      onClick: reloadDocument ? onClick : handleClick,
-      ref: ref,
-      target: target
-    }))
-  );
+const RouteContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)({
+  outlet: null,
+  matches: []
 });
 
 if (true) {
-  Link.displayName = "Link";
-}
-/**
- * A <Link> wrapper that knows if it's "active" or not.
- */
-
-
-const NavLink = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.forwardRef(function NavLinkWithRef(_ref5, ref) {
-  let {
-    "aria-current": ariaCurrentProp = "page",
-    caseSensitive = false,
-    className: classNameProp = "",
-    end = false,
-    style: styleProp,
-    to,
-    children
-  } = _ref5,
-      rest = _objectWithoutPropertiesLoose(_ref5, _excluded2);
-
-  let path = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useResolvedPath)(to, {
-    relative: rest.relative
-  });
-  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useLocation)();
-  let routerState = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_DataRouterStateContext);
-  let {
-    navigator
-  } = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_NavigationContext);
-  let toPathname = navigator.encodeLocation ? navigator.encodeLocation(path).pathname : path.pathname;
-  let locationPathname = location.pathname;
-  let nextLocationPathname = routerState && routerState.navigation && routerState.navigation.location ? routerState.navigation.location.pathname : null;
-
-  if (!caseSensitive) {
-    locationPathname = locationPathname.toLowerCase();
-    nextLocationPathname = nextLocationPathname ? nextLocationPathname.toLowerCase() : null;
-    toPathname = toPathname.toLowerCase();
-  }
-
-  let isActive = locationPathname === toPathname || !end && locationPathname.startsWith(toPathname) && locationPathname.charAt(toPathname.length) === "/";
-  let isPending = nextLocationPathname != null && (nextLocationPathname === toPathname || !end && nextLocationPathname.startsWith(toPathname) && nextLocationPathname.charAt(toPathname.length) === "/");
-  let ariaCurrent = isActive ? ariaCurrentProp : undefined;
-  let className;
-
-  if (typeof classNameProp === "function") {
-    className = classNameProp({
-      isActive,
-      isPending
-    });
-  } else {
-    // If the className prop is not a function, we use a default `active`
-    // class for <NavLink />s that are active. In v5 `active` was the default
-    // value for `activeClassName`, but we are removing that API and can still
-    // use the old default behavior for a cleaner upgrade path and keep the
-    // simple styling rules working as they currently do.
-    className = [classNameProp, isActive ? "active" : null, isPending ? "pending" : null].filter(Boolean).join(" ");
-  }
-
-  let style = typeof styleProp === "function" ? styleProp({
-    isActive,
-    isPending
-  }) : styleProp;
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(Link, _extends({}, rest, {
-    "aria-current": ariaCurrent,
-    className: className,
-    ref: ref,
-    style: style,
-    to: to
-  }), typeof children === "function" ? children({
-    isActive,
-    isPending
-  }) : children);
-});
-
-if (true) {
-  NavLink.displayName = "NavLink";
-}
-/**
- * A `@remix-run/router`-aware `<form>`. It behaves like a normal form except
- * that the interaction with the server is with `fetch` instead of new document
- * requests, allowing components to add nicer UX to the page as the form is
- * submitted and returns with data.
- */
-
-
-const Form = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.forwardRef((props, ref) => {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(FormImpl, _extends({}, props, {
-    ref: ref
-  }));
-});
-
-if (true) {
-  Form.displayName = "Form";
+  RouteContext.displayName = "Route";
 }
 
-const FormImpl = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.forwardRef((_ref6, forwardedRef) => {
-  let {
-    reloadDocument,
-    replace,
-    method = defaultMethod,
-    action,
-    onSubmit,
-    fetcherKey,
-    routeId,
-    relative
-  } = _ref6,
-      props = _objectWithoutPropertiesLoose(_ref6, _excluded3);
-
-  let submit = useSubmitImpl(fetcherKey, routeId);
-  let formMethod = method.toLowerCase() === "get" ? "get" : "post";
-  let formAction = useFormAction(action, {
-    relative
-  });
-
-  let submitHandler = event => {
-    onSubmit && onSubmit(event);
-    if (event.defaultPrevented) return;
-    event.preventDefault();
-    let submitter = event.nativeEvent.submitter;
-    submit(submitter || event.currentTarget, {
-      method,
-      replace,
-      relative
-    });
-  };
-
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", _extends({
-    ref: forwardedRef,
-    method: formMethod,
-    action: formAction,
-    onSubmit: reloadDocument ? onSubmit : submitHandler
-  }, props));
-});
-
-if (true) {
-  FormImpl.displayName = "FormImpl";
+function invariant(cond, message) {
+  if (!cond) throw new Error(message);
 }
-/**
- * This component will emulate the browser's scroll restoration on location
- * changes.
- */
-
-
-function ScrollRestoration(_ref7) {
-  let {
-    getKey,
-    storageKey
-  } = _ref7;
-  useScrollRestoration({
-    getKey,
-    storageKey
-  });
-  return null;
-}
-
-if (true) {
-  ScrollRestoration.displayName = "ScrollRestoration";
-} //#endregion
-////////////////////////////////////////////////////////////////////////////////
-//#region Hooks
-////////////////////////////////////////////////////////////////////////////////
-
-
-var DataRouterHook;
-
-(function (DataRouterHook) {
-  DataRouterHook["UseScrollRestoration"] = "useScrollRestoration";
-  DataRouterHook["UseSubmitImpl"] = "useSubmitImpl";
-  DataRouterHook["UseFetcher"] = "useFetcher";
-})(DataRouterHook || (DataRouterHook = {}));
-
-var DataRouterStateHook;
-
-(function (DataRouterStateHook) {
-  DataRouterStateHook["UseFetchers"] = "useFetchers";
-  DataRouterStateHook["UseScrollRestoration"] = "useScrollRestoration";
-})(DataRouterStateHook || (DataRouterStateHook = {}));
-
-function getDataRouterConsoleError(hookName) {
-  return hookName + " must be used within a data router.  See https://reactrouter.com/en/main/routers/picking-a-router.";
-}
-
-function useDataRouterContext(hookName) {
-  let ctx = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_DataRouterContext);
-  !ctx ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, getDataRouterConsoleError(hookName)) : 0 : void 0;
-  return ctx;
-}
-
-function useDataRouterState(hookName) {
-  let state = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_DataRouterStateContext);
-  !state ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, getDataRouterConsoleError(hookName)) : 0 : void 0;
-  return state;
-}
-/**
- * Handles the click behavior for router `<Link>` components. This is useful if
- * you need to create custom `<Link>` components with the same click behavior we
- * use in our exported `<Link>`.
- */
-
-
-function useLinkClickHandler(to, _temp) {
-  let {
-    target,
-    replace: replaceProp,
-    state,
-    preventScrollReset,
-    relative
-  } = _temp === void 0 ? {} : _temp;
-  let navigate = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useNavigate)();
-  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useLocation)();
-  let path = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useResolvedPath)(to, {
-    relative
-  });
-  return react__WEBPACK_IMPORTED_MODULE_0__.useCallback(event => {
-    if (shouldProcessLinkClick(event, target)) {
-      event.preventDefault(); // If the URL hasn't changed, a regular <a> will do a replace instead of
-      // a push, so do the same here unless the replace prop is explicitly set
-
-      let replace = replaceProp !== undefined ? replaceProp : (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createPath)(location) === (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createPath)(path);
-      navigate(to, {
-        replace,
-        state,
-        preventScrollReset,
-        relative
-      });
-    }
-  }, [location, navigate, path, replaceProp, state, target, to, preventScrollReset, relative]);
-}
-/**
- * A convenient wrapper for reading and writing search parameters via the
- * URLSearchParams interface.
- */
-
-function useSearchParams(defaultInit) {
-   true ? warning(typeof URLSearchParams !== "undefined", "You cannot use the `useSearchParams` hook in a browser that does not " + "support the URLSearchParams API. If you need to support Internet " + "Explorer 11, we recommend you load a polyfill such as " + "https://github.com/ungap/url-search-params\n\n" + "If you're unsure how to load polyfills, we recommend you check out " + "https://polyfill.io/v3/ which provides some recommendations about how " + "to load polyfills only for users that need them, instead of for every " + "user.") : 0;
-  let defaultSearchParamsRef = react__WEBPACK_IMPORTED_MODULE_0__.useRef(createSearchParams(defaultInit));
-  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useLocation)();
-  let searchParams = react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => getSearchParamsForLocation(location.search, defaultSearchParamsRef.current), [location.search]);
-  let navigate = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useNavigate)();
-  let setSearchParams = react__WEBPACK_IMPORTED_MODULE_0__.useCallback((nextInit, navigateOptions) => {
-    const newSearchParams = createSearchParams(typeof nextInit === "function" ? nextInit(searchParams) : nextInit);
-    navigate("?" + newSearchParams, navigateOptions);
-  }, [navigate, searchParams]);
-  return [searchParams, setSearchParams];
-}
-/**
- * Returns a function that may be used to programmatically submit a form (or
- * some arbitrary data) to the server.
- */
-
-function useSubmit() {
-  return useSubmitImpl();
-}
-
-function useSubmitImpl(fetcherKey, routeId) {
-  let {
-    router
-  } = useDataRouterContext(DataRouterHook.UseSubmitImpl);
-  let defaultAction = useFormAction();
-  return react__WEBPACK_IMPORTED_MODULE_0__.useCallback(function (target, options) {
-    if (options === void 0) {
-      options = {};
-    }
-
-    if (typeof document === "undefined") {
-      throw new Error("You are calling submit during the server render. " + "Try calling submit within a `useEffect` or callback instead.");
-    }
-
-    let {
-      method,
-      encType,
-      formData,
-      url
-    } = getFormSubmissionInfo(target, defaultAction, options);
-    let href = url.pathname + url.search;
-    let opts = {
-      replace: options.replace,
-      formData,
-      formMethod: method,
-      formEncType: encType
-    };
-
-    if (fetcherKey) {
-      !(routeId != null) ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "No routeId available for useFetcher()") : 0 : void 0;
-      router.fetch(fetcherKey, routeId, href, opts);
-    } else {
-      router.navigate(href, opts);
-    }
-  }, [defaultAction, router, fetcherKey, routeId]);
-}
-
-function useFormAction(action, _temp2) {
-  let {
-    relative
-  } = _temp2 === void 0 ? {} : _temp2;
-  let {
-    basename
-  } = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_NavigationContext);
-  let routeContext = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_RouteContext);
-  !routeContext ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "useFormAction must be used inside a RouteContext") : 0 : void 0;
-  let [match] = routeContext.matches.slice(-1);
-  let resolvedAction = action != null ? action : "."; // Shallow clone path so we can modify it below, otherwise we modify the
-  // object referenced by useMemo inside useResolvedPath
-
-  let path = _extends({}, (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useResolvedPath)(resolvedAction, {
-    relative
-  })); // Previously we set the default action to ".". The problem with this is that
-  // `useResolvedPath(".")` excludes search params and the hash of the resolved
-  // URL. This is the intended behavior of when "." is specifically provided as
-  // the form action, but inconsistent w/ browsers when the action is omitted.
-  // https://github.com/remix-run/remix/issues/927
-
-
-  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useLocation)();
-
-  if (action == null) {
-    // Safe to write to these directly here since if action was undefined, we
-    // would have called useResolvedPath(".") which will never include a search
-    // or hash
-    path.search = location.search;
-    path.hash = location.hash; // When grabbing search params from the URL, remove the automatically
-    // inserted ?index param so we match the useResolvedPath search behavior
-    // which would not include ?index
-
-    if (match.route.index) {
-      let params = new URLSearchParams(path.search);
-      params.delete("index");
-      path.search = params.toString() ? "?" + params.toString() : "";
-    }
-  }
-
-  if ((!action || action === ".") && match.route.index) {
-    path.search = path.search ? path.search.replace(/^\?/, "?index&") : "?index";
-  } // If we're operating within a basename, prepend it to the pathname prior
-  // to creating the form action.  If this is a root navigation, then just use
-  // the raw basename which allows the basename to have full control over the
-  // presence of a trailing slash on root actions
-
-
-  if (basename !== "/") {
-    path.pathname = path.pathname === "/" ? basename : (0,react_router__WEBPACK_IMPORTED_MODULE_1__.joinPaths)([basename, path.pathname]);
-  }
-
-  return (0,react_router__WEBPACK_IMPORTED_MODULE_1__.createPath)(path);
-}
-
-function createFetcherForm(fetcherKey, routeId) {
-  let FetcherForm = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.forwardRef((props, ref) => {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(FormImpl, _extends({}, props, {
-      ref: ref,
-      fetcherKey: fetcherKey,
-      routeId: routeId
-    }));
-  });
-
-  if (true) {
-    FetcherForm.displayName = "fetcher.Form";
-  }
-
-  return FetcherForm;
-}
-
-let fetcherId = 0;
-/**
- * Interacts with route loaders and actions without causing a navigation. Great
- * for any interaction that stays on the same page.
- */
-
-function useFetcher() {
-  var _route$matches;
-
-  let {
-    router
-  } = useDataRouterContext(DataRouterHook.UseFetcher);
-  let route = react__WEBPACK_IMPORTED_MODULE_0__.useContext(react_router__WEBPACK_IMPORTED_MODULE_2__.UNSAFE_RouteContext);
-  !route ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "useFetcher must be used inside a RouteContext") : 0 : void 0;
-  let routeId = (_route$matches = route.matches[route.matches.length - 1]) == null ? void 0 : _route$matches.route.id;
-  !(routeId != null) ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "useFetcher can only be used on routes that contain a unique \"id\"") : 0 : void 0;
-  let [fetcherKey] = react__WEBPACK_IMPORTED_MODULE_0__.useState(() => String(++fetcherId));
-  let [Form] = react__WEBPACK_IMPORTED_MODULE_0__.useState(() => {
-    !routeId ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "No routeId available for fetcher.Form()") : 0 : void 0;
-    return createFetcherForm(fetcherKey, routeId);
-  });
-  let [load] = react__WEBPACK_IMPORTED_MODULE_0__.useState(() => href => {
-    !router ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "No router available for fetcher.load()") : 0 : void 0;
-    !routeId ?  true ? (0,react_router__WEBPACK_IMPORTED_MODULE_1__.invariant)(false, "No routeId available for fetcher.load()") : 0 : void 0;
-    router.fetch(fetcherKey, routeId, href);
-  });
-  let submit = useSubmitImpl(fetcherKey, routeId);
-  let fetcher = router.getFetcher(fetcherKey);
-  let fetcherWithComponents = react__WEBPACK_IMPORTED_MODULE_0__.useMemo(() => _extends({
-    Form,
-    submit,
-    load
-  }, fetcher), [fetcher, Form, submit, load]);
-  react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
-    // Is this busted when the React team gets real weird and calls effects
-    // twice on mount?  We really just need to garbage collect here when this
-    // fetcher is no longer around.
-    return () => {
-      if (!router) {
-        console.warn("No fetcher available to clean up from useFetcher()");
-        return;
-      }
-
-      router.deleteFetcher(fetcherKey);
-    };
-  }, [router, fetcherKey]);
-  return fetcherWithComponents;
-}
-/**
- * Provides all fetchers currently on the page. Useful for layouts and parent
- * routes that need to provide pending/optimistic UI regarding the fetch.
- */
-
-function useFetchers() {
-  let state = useDataRouterState(DataRouterStateHook.UseFetchers);
-  return [...state.fetchers.values()];
-}
-const SCROLL_RESTORATION_STORAGE_KEY = "react-router-scroll-positions";
-let savedScrollPositions = {};
-/**
- * When rendered inside a RouterProvider, will restore scroll positions on navigations
- */
-
-function useScrollRestoration(_temp3) {
-  let {
-    getKey,
-    storageKey
-  } = _temp3 === void 0 ? {} : _temp3;
-  let {
-    router
-  } = useDataRouterContext(DataRouterHook.UseScrollRestoration);
-  let {
-    restoreScrollPosition,
-    preventScrollReset
-  } = useDataRouterState(DataRouterStateHook.UseScrollRestoration);
-  let location = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useLocation)();
-  let matches = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useMatches)();
-  let navigation = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.useNavigation)(); // Trigger manual scroll restoration while we're active
-
-  react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
-    window.history.scrollRestoration = "manual";
-    return () => {
-      window.history.scrollRestoration = "auto";
-    };
-  }, []); // Save positions on unload
-
-  useBeforeUnload(react__WEBPACK_IMPORTED_MODULE_0__.useCallback(() => {
-    if (navigation.state === "idle") {
-      let key = (getKey ? getKey(location, matches) : null) || location.key;
-      savedScrollPositions[key] = window.scrollY;
-    }
-
-    sessionStorage.setItem(storageKey || SCROLL_RESTORATION_STORAGE_KEY, JSON.stringify(savedScrollPositions));
-    window.history.scrollRestoration = "auto";
-  }, [storageKey, getKey, navigation.state, location, matches])); // Read in any saved scroll locations
-
-  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
-    try {
-      let sessionPositions = sessionStorage.getItem(storageKey || SCROLL_RESTORATION_STORAGE_KEY);
-
-      if (sessionPositions) {
-        savedScrollPositions = JSON.parse(sessionPositions);
-      }
-    } catch (e) {// no-op, use default empty object
-    }
-  }, [storageKey]); // Enable scroll restoration in the router
-
-  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
-    let disableScrollRestoration = router == null ? void 0 : router.enableScrollRestoration(savedScrollPositions, () => window.scrollY, getKey);
-    return () => disableScrollRestoration && disableScrollRestoration();
-  }, [router, getKey]); // Restore scrolling when state.restoreScrollPosition changes
-
-  react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect(() => {
-    // Explicit false means don't do anything (used for submissions)
-    if (restoreScrollPosition === false) {
-      return;
-    } // been here before, scroll to it
-
-
-    if (typeof restoreScrollPosition === "number") {
-      window.scrollTo(0, restoreScrollPosition);
-      return;
-    } // try to scroll to the hash
-
-
-    if (location.hash) {
-      let el = document.getElementById(location.hash.slice(1));
-
-      if (el) {
-        el.scrollIntoView();
-        return;
-      }
-    } // Opt out of scroll reset if this link requested it
-
-
-    if (preventScrollReset === true) {
-      return;
-    } // otherwise go to the top on new locations
-
-
-    window.scrollTo(0, 0);
-  }, [location, restoreScrollPosition, preventScrollReset]);
-}
-
-function useBeforeUnload(callback) {
-  react__WEBPACK_IMPORTED_MODULE_0__.useEffect(() => {
-    window.addEventListener("beforeunload", callback);
-    return () => {
-      window.removeEventListener("beforeunload", callback);
-    };
-  }, [callback]);
-} //#endregion
-////////////////////////////////////////////////////////////////////////////////
-//#region Utils
-////////////////////////////////////////////////////////////////////////////////
-
-
 function warning(cond, message) {
   if (!cond) {
     // eslint-disable-next-line no-console
@@ -68114,371 +65052,413 @@ function warning(cond, message) {
       throw new Error(message); // eslint-disable-next-line no-empty
     } catch (e) {}
   }
-} //#endregion
-
-
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ "./node_modules/react-router/dist/index.js":
-/*!*************************************************!*\
-  !*** ./node_modules/react-router/dist/index.js ***!
-  \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AbortedDeferredError": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.AbortedDeferredError),
-/* harmony export */   "Await": () => (/* binding */ Await),
-/* harmony export */   "MemoryRouter": () => (/* binding */ MemoryRouter),
-/* harmony export */   "Navigate": () => (/* binding */ Navigate),
-/* harmony export */   "NavigationType": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.Action),
-/* harmony export */   "Outlet": () => (/* binding */ Outlet),
-/* harmony export */   "Route": () => (/* binding */ Route),
-/* harmony export */   "Router": () => (/* binding */ Router),
-/* harmony export */   "RouterProvider": () => (/* binding */ RouterProvider),
-/* harmony export */   "Routes": () => (/* binding */ Routes),
-/* harmony export */   "UNSAFE_DataRouterContext": () => (/* binding */ DataRouterContext),
-/* harmony export */   "UNSAFE_DataRouterStateContext": () => (/* binding */ DataRouterStateContext),
-/* harmony export */   "UNSAFE_DataStaticRouterContext": () => (/* binding */ DataStaticRouterContext),
-/* harmony export */   "UNSAFE_LocationContext": () => (/* binding */ LocationContext),
-/* harmony export */   "UNSAFE_NavigationContext": () => (/* binding */ NavigationContext),
-/* harmony export */   "UNSAFE_RouteContext": () => (/* binding */ RouteContext),
-/* harmony export */   "UNSAFE_enhanceManualRouteObjects": () => (/* binding */ enhanceManualRouteObjects),
-/* harmony export */   "createMemoryRouter": () => (/* binding */ createMemoryRouter),
-/* harmony export */   "createPath": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.createPath),
-/* harmony export */   "createRoutesFromChildren": () => (/* binding */ createRoutesFromChildren),
-/* harmony export */   "createRoutesFromElements": () => (/* binding */ createRoutesFromChildren),
-/* harmony export */   "defer": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.defer),
-/* harmony export */   "generatePath": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.generatePath),
-/* harmony export */   "isRouteErrorResponse": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.isRouteErrorResponse),
-/* harmony export */   "json": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.json),
-/* harmony export */   "matchPath": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.matchPath),
-/* harmony export */   "matchRoutes": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.matchRoutes),
-/* harmony export */   "parsePath": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.parsePath),
-/* harmony export */   "redirect": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.redirect),
-/* harmony export */   "renderMatches": () => (/* binding */ renderMatches),
-/* harmony export */   "resolvePath": () => (/* reexport safe */ _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.resolvePath),
-/* harmony export */   "useActionData": () => (/* binding */ useActionData),
-/* harmony export */   "useAsyncError": () => (/* binding */ useAsyncError),
-/* harmony export */   "useAsyncValue": () => (/* binding */ useAsyncValue),
-/* harmony export */   "useHref": () => (/* binding */ useHref),
-/* harmony export */   "useInRouterContext": () => (/* binding */ useInRouterContext),
-/* harmony export */   "useLoaderData": () => (/* binding */ useLoaderData),
-/* harmony export */   "useLocation": () => (/* binding */ useLocation),
-/* harmony export */   "useMatch": () => (/* binding */ useMatch),
-/* harmony export */   "useMatches": () => (/* binding */ useMatches),
-/* harmony export */   "useNavigate": () => (/* binding */ useNavigate),
-/* harmony export */   "useNavigation": () => (/* binding */ useNavigation),
-/* harmony export */   "useNavigationType": () => (/* binding */ useNavigationType),
-/* harmony export */   "useOutlet": () => (/* binding */ useOutlet),
-/* harmony export */   "useOutletContext": () => (/* binding */ useOutletContext),
-/* harmony export */   "useParams": () => (/* binding */ useParams),
-/* harmony export */   "useResolvedPath": () => (/* binding */ useResolvedPath),
-/* harmony export */   "useRevalidator": () => (/* binding */ useRevalidator),
-/* harmony export */   "useRouteError": () => (/* binding */ useRouteError),
-/* harmony export */   "useRouteLoaderData": () => (/* binding */ useRouteLoaderData),
-/* harmony export */   "useRoutes": () => (/* binding */ useRoutes)
-/* harmony export */ });
-/* harmony import */ var _remix_run_router__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @remix-run/router */ "./node_modules/@remix-run/router/dist/router.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/**
- * React Router v6.4.4
- *
- * Copyright (c) Remix Software Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.md file in the root directory of this source tree.
- *
- * @license MIT
- */
-
-
-
-
-function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-  return _extends.apply(this, arguments);
 }
-
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-/**
- * inlined Object.is polyfill to avoid requiring consumers ship their own
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
- */
-
-function isPolyfill(x, y) {
-  return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y // eslint-disable-line no-self-compare
-  ;
-}
-
-const is = typeof Object.is === "function" ? Object.is : isPolyfill; // Intentionally not using named imports because Rollup uses dynamic
-// dispatch for CommonJS interop named imports.
-
-const {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useDebugValue
-} = react__WEBPACK_IMPORTED_MODULE_1__;
-let didWarnOld18Alpha = false;
-let didWarnUncachedGetSnapshot = false; // Disclaimer: This shim breaks many of the rules of React, and only works
-// because of a very particular set of implementation details and assumptions
-// -- change any one of them and it will break. The most important assumption
-// is that updates are always synchronous, because concurrent rendering is
-// only available in versions of React that also have a built-in
-// useSyncExternalStore API. And we only use this shim when the built-in API
-// does not exist.
-//
-// Do not assume that the clever hacks used by this hook also work in general.
-// The point of this shim is to replace the need for hacks by other libraries.
-
-function useSyncExternalStore$2(subscribe, getSnapshot, // Note: The shim does not use getServerSnapshot, because pre-18 versions of
-// React do not expose a way to check if we're hydrating. So users of the shim
-// will need to track that themselves and return the correct value
-// from `getSnapshot`.
-getServerSnapshot) {
-  if (true) {
-    if (!didWarnOld18Alpha) {
-      if ("startTransition" in react__WEBPACK_IMPORTED_MODULE_1__) {
-        didWarnOld18Alpha = true;
-        console.error("You are using an outdated, pre-release alpha of React 18 that " + "does not support useSyncExternalStore. The " + "use-sync-external-store shim will not work correctly. Upgrade " + "to a newer pre-release.");
-      }
-    }
-  } // Read the current snapshot from the store on every render. Again, this
-  // breaks the rules of React, and only works here because of specific
-  // implementation details, most importantly that updates are
-  // always synchronous.
-
-
-  const value = getSnapshot();
-
-  if (true) {
-    if (!didWarnUncachedGetSnapshot) {
-      const cachedValue = getSnapshot();
-
-      if (!is(value, cachedValue)) {
-        console.error("The result of getSnapshot should be cached to avoid an infinite loop");
-        didWarnUncachedGetSnapshot = true;
-      }
-    }
-  } // Because updates are synchronous, we don't queue them. Instead we force a
-  // re-render whenever the subscribed state changes by updating an some
-  // arbitrary useState hook. Then, during render, we call getSnapshot to read
-  // the current value.
-  //
-  // Because we don't actually use the state returned by the useState hook, we
-  // can save a bit of memory by storing other stuff in that slot.
-  //
-  // To implement the early bailout, we need to track some things on a mutable
-  // object. Usually, we would put that in a useRef hook, but we can stash it in
-  // our useState hook instead.
-  //
-  // To force a re-render, we call forceUpdate({inst}). That works because the
-  // new object always fails an equality check.
-
-
-  const [{
-    inst
-  }, forceUpdate] = useState({
-    inst: {
-      value,
-      getSnapshot
-    }
-  }); // Track the latest getSnapshot function with a ref. This needs to be updated
-  // in the layout phase so we can access it during the tearing check that
-  // happens on subscribe.
-
-  useLayoutEffect(() => {
-    inst.value = value;
-    inst.getSnapshot = getSnapshot; // Whenever getSnapshot or subscribe changes, we need to check in the
-    // commit phase if there was an interleaved mutation. In concurrent mode
-    // this can happen all the time, but even in synchronous mode, an earlier
-    // effect may have mutated the store.
-
-    if (checkIfSnapshotChanged(inst)) {
-      // Force a re-render.
-      forceUpdate({
-        inst
-      });
-    } // eslint-disable-next-line react-hooks/exhaustive-deps
-
-  }, [subscribe, value, getSnapshot]);
-  useEffect(() => {
-    // Check for changes right before subscribing. Subsequent changes will be
-    // detected in the subscription handler.
-    if (checkIfSnapshotChanged(inst)) {
-      // Force a re-render.
-      forceUpdate({
-        inst
-      });
-    }
-
-    const handleStoreChange = () => {
-      // TODO: Because there is no cross-renderer API for batching updates, it's
-      // up to the consumer of this library to wrap their subscription event
-      // with unstable_batchedUpdates. Should we try to detect when this isn't
-      // the case and print a warning in development?
-      // The store changed. Check if the snapshot changed since the last time we
-      // read from the store.
-      if (checkIfSnapshotChanged(inst)) {
-        // Force a re-render.
-        forceUpdate({
-          inst
-        });
-      }
-    }; // Subscribe to the store and return a clean-up function.
-
-
-    return subscribe(handleStoreChange); // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscribe]);
-  useDebugValue(value);
-  return value;
-}
-
-function checkIfSnapshotChanged(inst) {
-  const latestGetSnapshot = inst.getSnapshot;
-  const prevValue = inst.value;
-
-  try {
-    const nextValue = latestGetSnapshot();
-    return !is(prevValue, nextValue);
-  } catch (error) {
-    return true;
+const alreadyWarned = {};
+function warningOnce(key, cond, message) {
+  if (!cond && !alreadyWarned[key]) {
+    alreadyWarned[key] = true;
+     true ? warning(false, message) : 0;
   }
 }
 
 /**
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Returns a path with params interpolated.
  *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @flow
+ * @see https://reactrouter.com/docs/en/v6/api#generatepath
  */
-function useSyncExternalStore$1(subscribe, getSnapshot, getServerSnapshot) {
-  // Note: The shim does not use getServerSnapshot, because pre-18 versions of
-  // React do not expose a way to check if we're hydrating. So users of the shim
-  // will need to track that themselves and return the correct value
-  // from `getSnapshot`.
-  return getSnapshot();
+function generatePath(path, params) {
+  if (params === void 0) {
+    params = {};
+  }
+
+  return path.replace(/:(\w+)/g, (_, key) => {
+    !(params[key] != null) ?  true ? invariant(false, "Missing \":" + key + "\" param") : 0 : void 0;
+    return params[key];
+  }).replace(/\/*\*$/, _ => params["*"] == null ? "" : params["*"].replace(/^\/*/, "/"));
 }
+/**
+ * A RouteMatch contains info about how a route matched a URL.
+ */
 
 /**
- * Inlined into the react-router repo since use-sync-external-store does not
- * provide a UMD-compatible package, so we need this to be able to distribute
- * UMD react-router bundles
+ * Matches the given routes to a location and returns the match data.
+ *
+ * @see https://reactrouter.com/docs/en/v6/api#matchroutes
  */
-const canUseDOM = !!(typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined");
-const isServerEnvironment = !canUseDOM;
-const shim = isServerEnvironment ? useSyncExternalStore$1 : useSyncExternalStore$2;
-const useSyncExternalStore = "useSyncExternalStore" in react__WEBPACK_IMPORTED_MODULE_1__ ? (module => module.useSyncExternalStore)(react__WEBPACK_IMPORTED_MODULE_1__) : shim;
+function matchRoutes(routes, locationArg, basename) {
+  if (basename === void 0) {
+    basename = "/";
+  }
 
-// Contexts for data routers
-const DataStaticRouterContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
+  let location = typeof locationArg === "string" ? (0,history__WEBPACK_IMPORTED_MODULE_0__.parsePath)(locationArg) : locationArg;
+  let pathname = stripBasename(location.pathname || "/", basename);
 
-if (true) {
-  DataStaticRouterContext.displayName = "DataStaticRouterContext";
+  if (pathname == null) {
+    return null;
+  }
+
+  let branches = flattenRoutes(routes);
+  rankRouteBranches(branches);
+  let matches = null;
+
+  for (let i = 0; matches == null && i < branches.length; ++i) {
+    matches = matchRouteBranch(branches[i], pathname);
+  }
+
+  return matches;
 }
 
-const DataRouterContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
+function flattenRoutes(routes, branches, parentsMeta, parentPath) {
+  if (branches === void 0) {
+    branches = [];
+  }
 
-if (true) {
-  DataRouterContext.displayName = "DataRouter";
+  if (parentsMeta === void 0) {
+    parentsMeta = [];
+  }
+
+  if (parentPath === void 0) {
+    parentPath = "";
+  }
+
+  routes.forEach((route, index) => {
+    let meta = {
+      relativePath: route.path || "",
+      caseSensitive: route.caseSensitive === true,
+      childrenIndex: index,
+      route
+    };
+
+    if (meta.relativePath.startsWith("/")) {
+      !meta.relativePath.startsWith(parentPath) ?  true ? invariant(false, "Absolute route path \"" + meta.relativePath + "\" nested under path " + ("\"" + parentPath + "\" is not valid. An absolute child route path ") + "must start with the combined path of all its parent routes.") : 0 : void 0;
+      meta.relativePath = meta.relativePath.slice(parentPath.length);
+    }
+
+    let path = joinPaths([parentPath, meta.relativePath]);
+    let routesMeta = parentsMeta.concat(meta); // Add the children before adding this route to the array so we traverse the
+    // route tree depth-first and child routes appear before their parents in
+    // the "flattened" version.
+
+    if (route.children && route.children.length > 0) {
+      !(route.index !== true) ?  true ? invariant(false, "Index routes must not have child routes. Please remove " + ("all child routes from route path \"" + path + "\".")) : 0 : void 0;
+      flattenRoutes(route.children, branches, routesMeta, path);
+    } // Routes without a path shouldn't ever match by themselves unless they are
+    // index routes, so don't add them to the list of possible branches.
+
+
+    if (route.path == null && !route.index) {
+      return;
+    }
+
+    branches.push({
+      path,
+      score: computeScore(path, route.index),
+      routesMeta
+    });
+  });
+  return branches;
 }
 
-const DataRouterStateContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
-
-if (true) {
-  DataRouterStateContext.displayName = "DataRouterState";
+function rankRouteBranches(branches) {
+  branches.sort((a, b) => a.score !== b.score ? b.score - a.score // Higher score first
+  : compareIndexes(a.routesMeta.map(meta => meta.childrenIndex), b.routesMeta.map(meta => meta.childrenIndex)));
 }
 
-const AwaitContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
+const paramRe = /^:\w+$/;
+const dynamicSegmentValue = 3;
+const indexRouteValue = 2;
+const emptySegmentValue = 1;
+const staticSegmentValue = 10;
+const splatPenalty = -2;
 
-if (true) {
-  AwaitContext.displayName = "Await";
+const isSplat = s => s === "*";
+
+function computeScore(path, index) {
+  let segments = path.split("/");
+  let initialScore = segments.length;
+
+  if (segments.some(isSplat)) {
+    initialScore += splatPenalty;
+  }
+
+  if (index) {
+    initialScore += indexRouteValue;
+  }
+
+  return segments.filter(s => !isSplat(s)).reduce((score, segment) => score + (paramRe.test(segment) ? dynamicSegmentValue : segment === "" ? emptySegmentValue : staticSegmentValue), initialScore);
 }
 
-const NavigationContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
-
-if (true) {
-  NavigationContext.displayName = "Navigation";
+function compareIndexes(a, b) {
+  let siblings = a.length === b.length && a.slice(0, -1).every((n, i) => n === b[i]);
+  return siblings ? // If two routes are siblings, we should try to match the earlier sibling
+  // first. This allows people to have fine-grained control over the matching
+  // behavior by simply putting routes with identical paths in the order they
+  // want them tried.
+  a[a.length - 1] - b[b.length - 1] : // Otherwise, it doesn't really make sense to rank non-siblings by index,
+  // so they sort equally.
+  0;
 }
 
-const LocationContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
+function matchRouteBranch(branch, pathname) {
+  let {
+    routesMeta
+  } = branch;
+  let matchedParams = {};
+  let matchedPathname = "/";
+  let matches = [];
 
-if (true) {
-  LocationContext.displayName = "Location";
+  for (let i = 0; i < routesMeta.length; ++i) {
+    let meta = routesMeta[i];
+    let end = i === routesMeta.length - 1;
+    let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
+    let match = matchPath({
+      path: meta.relativePath,
+      caseSensitive: meta.caseSensitive,
+      end
+    }, remainingPathname);
+    if (!match) return null;
+    Object.assign(matchedParams, match.params);
+    let route = meta.route;
+    matches.push({
+      params: matchedParams,
+      pathname: joinPaths([matchedPathname, match.pathname]),
+      pathnameBase: normalizePathname(joinPaths([matchedPathname, match.pathnameBase])),
+      route
+    });
+
+    if (match.pathnameBase !== "/") {
+      matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
+    }
+  }
+
+  return matches;
+}
+/**
+ * A PathPattern is used to match on some portion of a URL pathname.
+ */
+
+
+/**
+ * Performs pattern matching on a URL pathname and returns information about
+ * the match.
+ *
+ * @see https://reactrouter.com/docs/en/v6/api#matchpath
+ */
+function matchPath(pattern, pathname) {
+  if (typeof pattern === "string") {
+    pattern = {
+      path: pattern,
+      caseSensitive: false,
+      end: true
+    };
+  }
+
+  let [matcher, paramNames] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
+  let match = pathname.match(matcher);
+  if (!match) return null;
+  let matchedPathname = match[0];
+  let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
+  let captureGroups = match.slice(1);
+  let params = paramNames.reduce((memo, paramName, index) => {
+    // We need to compute the pathnameBase here using the raw splat value
+    // instead of using params["*"] later because it will be decoded then
+    if (paramName === "*") {
+      let splatValue = captureGroups[index] || "";
+      pathnameBase = matchedPathname.slice(0, matchedPathname.length - splatValue.length).replace(/(.)\/+$/, "$1");
+    }
+
+    memo[paramName] = safelyDecodeURIComponent(captureGroups[index] || "", paramName);
+    return memo;
+  }, {});
+  return {
+    params,
+    pathname: matchedPathname,
+    pathnameBase,
+    pattern
+  };
 }
 
-const RouteContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext({
-  outlet: null,
-  matches: []
-});
+function compilePath(path, caseSensitive, end) {
+  if (caseSensitive === void 0) {
+    caseSensitive = false;
+  }
 
-if (true) {
-  RouteContext.displayName = "Route";
+  if (end === void 0) {
+    end = true;
+  }
+
+   true ? warning(path === "*" || !path.endsWith("*") || path.endsWith("/*"), "Route path \"" + path + "\" will be treated as if it were " + ("\"" + path.replace(/\*$/, "/*") + "\" because the `*` character must ") + "always follow a `/` in the pattern. To get rid of this warning, " + ("please change the route path to \"" + path.replace(/\*$/, "/*") + "\".")) : 0;
+  let paramNames = [];
+  let regexpSource = "^" + path.replace(/\/*\*?$/, "") // Ignore trailing / and /*, we'll handle it below
+  .replace(/^\/*/, "/") // Make sure it has a leading /
+  .replace(/[\\.*+^$?{}|()[\]]/g, "\\$&") // Escape special regex chars
+  .replace(/:(\w+)/g, (_, paramName) => {
+    paramNames.push(paramName);
+    return "([^\\/]+)";
+  });
+
+  if (path.endsWith("*")) {
+    paramNames.push("*");
+    regexpSource += path === "*" || path === "/*" ? "(.*)$" // Already matched the initial /, just match the rest
+    : "(?:\\/(.+)|\\/*)$"; // Don't include the / in params["*"]
+  } else {
+    regexpSource += end ? "\\/*$" // When matching to the end, ignore trailing slashes
+    : // Otherwise, match a word boundary or a proceeding /. The word boundary restricts
+    // parent routes to matching only their own words and nothing more, e.g. parent
+    // route "/home" should not match "/home2".
+    // Additionally, allow paths starting with `.`, `-`, `~`, and url-encoded entities,
+    // but do not consume the character in the matched path so they can match against
+    // nested paths.
+    "(?:(?=[.~-]|%[0-9A-F]{2})|\\b|\\/|$)";
+  }
+
+  let matcher = new RegExp(regexpSource, caseSensitive ? undefined : "i");
+  return [matcher, paramNames];
 }
 
-const RouteErrorContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
-
-if (true) {
-  RouteErrorContext.displayName = "RouteError";
+function safelyDecodeURIComponent(value, paramName) {
+  try {
+    return decodeURIComponent(value);
+  } catch (error) {
+     true ? warning(false, "The value for the URL param \"" + paramName + "\" will not be decoded because" + (" the string \"" + value + "\" is a malformed URL segment. This is probably") + (" due to a bad percent encoding (" + error + ").")) : 0;
+    return value;
+  }
 }
+/**
+ * Returns a resolved path object relative to the given pathname.
+ *
+ * @see https://reactrouter.com/docs/en/v6/api#resolvepath
+ */
+
+
+function resolvePath(to, fromPathname) {
+  if (fromPathname === void 0) {
+    fromPathname = "/";
+  }
+
+  let {
+    pathname: toPathname,
+    search = "",
+    hash = ""
+  } = typeof to === "string" ? (0,history__WEBPACK_IMPORTED_MODULE_0__.parsePath)(to) : to;
+  let pathname = toPathname ? toPathname.startsWith("/") ? toPathname : resolvePathname(toPathname, fromPathname) : fromPathname;
+  return {
+    pathname,
+    search: normalizeSearch(search),
+    hash: normalizeHash(hash)
+  };
+}
+
+function resolvePathname(relativePath, fromPathname) {
+  let segments = fromPathname.replace(/\/+$/, "").split("/");
+  let relativeSegments = relativePath.split("/");
+  relativeSegments.forEach(segment => {
+    if (segment === "..") {
+      // Keep the root "" segment so the pathname starts at /
+      if (segments.length > 1) segments.pop();
+    } else if (segment !== ".") {
+      segments.push(segment);
+    }
+  });
+  return segments.length > 1 ? segments.join("/") : "/";
+}
+
+function resolveTo(toArg, routePathnames, locationPathname) {
+  let to = typeof toArg === "string" ? (0,history__WEBPACK_IMPORTED_MODULE_0__.parsePath)(toArg) : toArg;
+  let toPathname = toArg === "" || to.pathname === "" ? "/" : to.pathname; // If a pathname is explicitly provided in `to`, it should be relative to the
+  // route context. This is explained in `Note on `<Link to>` values` in our
+  // migration guide from v5 as a means of disambiguation between `to` values
+  // that begin with `/` and those that do not. However, this is problematic for
+  // `to` values that do not provide a pathname. `to` can simply be a search or
+  // hash string, in which case we should assume that the navigation is relative
+  // to the current location's pathname and *not* the route pathname.
+
+  let from;
+
+  if (toPathname == null) {
+    from = locationPathname;
+  } else {
+    let routePathnameIndex = routePathnames.length - 1;
+
+    if (toPathname.startsWith("..")) {
+      let toSegments = toPathname.split("/"); // Each leading .. segment means "go up one route" instead of "go up one
+      // URL segment".  This is a key difference from how <a href> works and a
+      // major reason we call this a "to" value instead of a "href".
+
+      while (toSegments[0] === "..") {
+        toSegments.shift();
+        routePathnameIndex -= 1;
+      }
+
+      to.pathname = toSegments.join("/");
+    } // If there are more ".." segments than parent routes, resolve relative to
+    // the root / URL.
+
+
+    from = routePathnameIndex >= 0 ? routePathnames[routePathnameIndex] : "/";
+  }
+
+  let path = resolvePath(to, from); // Ensure the pathname has a trailing slash if the original to value had one.
+
+  if (toPathname && toPathname !== "/" && toPathname.endsWith("/") && !path.pathname.endsWith("/")) {
+    path.pathname += "/";
+  }
+
+  return path;
+}
+function getToPathname(to) {
+  // Empty strings should be treated the same as / paths
+  return to === "" || to.pathname === "" ? "/" : typeof to === "string" ? (0,history__WEBPACK_IMPORTED_MODULE_0__.parsePath)(to).pathname : to.pathname;
+}
+function stripBasename(pathname, basename) {
+  if (basename === "/") return pathname;
+
+  if (!pathname.toLowerCase().startsWith(basename.toLowerCase())) {
+    return null;
+  }
+
+  let nextChar = pathname.charAt(basename.length);
+
+  if (nextChar && nextChar !== "/") {
+    // pathname does not start with basename/
+    return null;
+  }
+
+  return pathname.slice(basename.length) || "/";
+}
+const joinPaths = paths => paths.join("/").replace(/\/\/+/g, "/");
+const normalizePathname = pathname => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
+
+const normalizeSearch = search => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
+
+const normalizeHash = hash => !hash || hash === "#" ? "" : hash.startsWith("#") ? hash : "#" + hash;
 
 /**
  * Returns the full href for the given "to" value. This is useful for building
  * custom links that are also accessible and preserve right-click behavior.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-href
+ * @see https://reactrouter.com/docs/en/v6/api#usehref
  */
 
-function useHref(to, _temp) {
-  let {
-    relative
-  } = _temp === void 0 ? {} : _temp;
-  !useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, // TODO: This error is probably because they somehow have 2 versions of the
+function useHref(to) {
+  !useInRouterContext() ?  true ? invariant(false, // TODO: This error is probably because they somehow have 2 versions of the
   // router loaded. We can help them understand how to avoid that.
   "useHref() may be used only in the context of a <Router> component.") : 0 : void 0;
   let {
     basename,
     navigator
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(NavigationContext);
+  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(NavigationContext);
   let {
     hash,
     pathname,
     search
-  } = useResolvedPath(to, {
-    relative
-  });
-  let joinedPathname = pathname; // If we're operating within a basename, prepend it to the pathname prior
-  // to creating the href.  If this is a root navigation, then just use the raw
-  // basename which allows the basename to have full control over the presence
-  // of a trailing slash on root links
+  } = useResolvedPath(to);
+  let joinedPathname = pathname;
 
   if (basename !== "/") {
-    joinedPathname = pathname === "/" ? basename : (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.joinPaths)([basename, pathname]);
+    let toPathname = getToPathname(to);
+    let endsWithSlash = toPathname != null && toPathname.endsWith("/");
+    joinedPathname = pathname === "/" ? basename + (endsWithSlash ? "/" : "") : joinPaths([basename, pathname]);
   }
 
   return navigator.createHref({
@@ -68490,11 +65470,11 @@ function useHref(to, _temp) {
 /**
  * Returns true if this component is a descendant of a <Router>.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-in-router-context
+ * @see https://reactrouter.com/docs/en/v6/api#useinroutercontext
  */
 
 function useInRouterContext() {
-  return react__WEBPACK_IMPORTED_MODULE_1__.useContext(LocationContext) != null;
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(LocationContext) != null;
 }
 /**
  * Returns the current location object, which represents the current URL in web
@@ -68504,41 +65484,41 @@ function useInRouterContext() {
  * "routing" in your app, and we'd like to know what your use case is. We may
  * be able to provide something higher-level to better suit your needs.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-location
+ * @see https://reactrouter.com/docs/en/v6/api#uselocation
  */
 
 function useLocation() {
-  !useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, // TODO: This error is probably because they somehow have 2 versions of the
+  !useInRouterContext() ?  true ? invariant(false, // TODO: This error is probably because they somehow have 2 versions of the
   // router loaded. We can help them understand how to avoid that.
   "useLocation() may be used only in the context of a <Router> component.") : 0 : void 0;
-  return react__WEBPACK_IMPORTED_MODULE_1__.useContext(LocationContext).location;
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(LocationContext).location;
 }
 /**
  * Returns the current navigation action which describes how the router came to
  * the current location, either by a pop, push, or replace on the history stack.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-navigation-type
+ * @see https://reactrouter.com/docs/en/v6/api#usenavigationtype
  */
 
 function useNavigationType() {
-  return react__WEBPACK_IMPORTED_MODULE_1__.useContext(LocationContext).navigationType;
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(LocationContext).navigationType;
 }
 /**
- * Returns a PathMatch object if the given pattern matches the current URL.
+ * Returns true if the URL for the given "to" value matches the current URL.
  * This is useful for components that need to know "active" state, e.g.
  * <NavLink>.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-match
+ * @see https://reactrouter.com/docs/en/v6/api#usematch
  */
 
 function useMatch(pattern) {
-  !useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, // TODO: This error is probably because they somehow have 2 versions of the
+  !useInRouterContext() ?  true ? invariant(false, // TODO: This error is probably because they somehow have 2 versions of the
   // router loaded. We can help them understand how to avoid that.
   "useMatch() may be used only in the context of a <Router> component.") : 0 : void 0;
   let {
     pathname
   } = useLocation();
-  return react__WEBPACK_IMPORTED_MODULE_1__.useMemo(() => (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.matchPath)(pattern, pathname), [pathname, pattern]);
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(() => matchPath(pattern, pathname), [pathname, pattern]);
 }
 /**
  * The interface for the navigate() function returned from useNavigate().
@@ -68548,33 +65528,33 @@ function useMatch(pattern) {
  * Returns an imperative method for changing the location. Used by <Link>s, but
  * may also be used by other elements to change the location.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-navigate
+ * @see https://reactrouter.com/docs/en/v6/api#usenavigate
  */
 function useNavigate() {
-  !useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, // TODO: This error is probably because they somehow have 2 versions of the
+  !useInRouterContext() ?  true ? invariant(false, // TODO: This error is probably because they somehow have 2 versions of the
   // router loaded. We can help them understand how to avoid that.
   "useNavigate() may be used only in the context of a <Router> component.") : 0 : void 0;
   let {
     basename,
     navigator
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(NavigationContext);
+  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(NavigationContext);
   let {
     matches
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
+  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(RouteContext);
   let {
     pathname: locationPathname
   } = useLocation();
-  let routePathnamesJson = JSON.stringify((0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.UNSAFE_getPathContributingMatches)(matches).map(match => match.pathnameBase));
-  let activeRef = react__WEBPACK_IMPORTED_MODULE_1__.useRef(false);
-  react__WEBPACK_IMPORTED_MODULE_1__.useEffect(() => {
+  let routePathnamesJson = JSON.stringify(matches.map(match => match.pathnameBase));
+  let activeRef = (0,react__WEBPACK_IMPORTED_MODULE_1__.useRef)(false);
+  (0,react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
     activeRef.current = true;
   });
-  let navigate = react__WEBPACK_IMPORTED_MODULE_1__.useCallback(function (to, options) {
+  let navigate = (0,react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(function (to, options) {
     if (options === void 0) {
       options = {};
     }
 
-     true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.warning)(activeRef.current, "You should call navigate() in a React.useEffect(), not when " + "your component is first rendered.") : 0;
+     true ? warning(activeRef.current, "You should call navigate() in a React.useEffect(), not when " + "your component is first rendered.") : 0;
     if (!activeRef.current) return;
 
     if (typeof to === "number") {
@@ -68582,41 +65562,38 @@ function useNavigate() {
       return;
     }
 
-    let path = (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.resolveTo)(to, JSON.parse(routePathnamesJson), locationPathname, options.relative === "path"); // If we're operating within a basename, prepend it to the pathname prior
-    // to handing off to history.  If this is a root navigation, then we
-    // navigate to the raw basename which allows the basename to have full
-    // control over the presence of a trailing slash on root links
+    let path = resolveTo(to, JSON.parse(routePathnamesJson), locationPathname);
 
     if (basename !== "/") {
-      path.pathname = path.pathname === "/" ? basename : (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.joinPaths)([basename, path.pathname]);
+      path.pathname = joinPaths([basename, path.pathname]);
     }
 
-    (!!options.replace ? navigator.replace : navigator.push)(path, options.state, options);
+    (!!options.replace ? navigator.replace : navigator.push)(path, options.state);
   }, [basename, navigator, routePathnamesJson, locationPathname]);
   return navigate;
 }
-const OutletContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(null);
+const OutletContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)(null);
 /**
  * Returns the context (if provided) for the child route at this level of the route
  * hierarchy.
- * @see https://reactrouter.com/docs/en/v6/hooks/use-outlet-context
+ * @see https://reactrouter.com/docs/en/v6/api#useoutletcontext
  */
 
 function useOutletContext() {
-  return react__WEBPACK_IMPORTED_MODULE_1__.useContext(OutletContext);
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(OutletContext);
 }
 /**
  * Returns the element for the child route at this level of the route
  * hierarchy. Used internally by <Outlet> to render child routes.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-outlet
+ * @see https://reactrouter.com/docs/en/v6/api#useoutlet
  */
 
 function useOutlet(context) {
-  let outlet = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext).outlet;
+  let outlet = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(RouteContext).outlet;
 
   if (outlet) {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(OutletContext.Provider, {
+    return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(OutletContext.Provider, {
       value: context
     }, outlet);
   }
@@ -68627,34 +65604,31 @@ function useOutlet(context) {
  * Returns an object of key/value pairs of the dynamic params from the current
  * URL that were matched by the route path.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-params
+ * @see https://reactrouter.com/docs/en/v6/api#useparams
  */
 
 function useParams() {
   let {
     matches
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
+  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(RouteContext);
   let routeMatch = matches[matches.length - 1];
   return routeMatch ? routeMatch.params : {};
 }
 /**
  * Resolves the pathname of the given `to` value against the current location.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-resolved-path
+ * @see https://reactrouter.com/docs/en/v6/api#useresolvedpath
  */
 
-function useResolvedPath(to, _temp2) {
-  let {
-    relative
-  } = _temp2 === void 0 ? {} : _temp2;
+function useResolvedPath(to) {
   let {
     matches
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
+  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(RouteContext);
   let {
     pathname: locationPathname
   } = useLocation();
-  let routePathnamesJson = JSON.stringify((0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.UNSAFE_getPathContributingMatches)(matches).map(match => match.pathnameBase));
-  return react__WEBPACK_IMPORTED_MODULE_1__.useMemo(() => (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.resolveTo)(to, JSON.parse(routePathnamesJson), locationPathname, relative === "path"), [to, routePathnamesJson, locationPathname, relative]);
+  let routePathnamesJson = JSON.stringify(matches.map(match => match.pathnameBase));
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(() => resolveTo(to, JSON.parse(routePathnamesJson), locationPathname), [to, routePathnamesJson, locationPathname]);
 }
 /**
  * Returns the element of the route that matched the current location, prepared
@@ -68662,20 +65636,16 @@ function useResolvedPath(to, _temp2) {
  * elements in the tree must render an <Outlet> to render their child route's
  * element.
  *
- * @see https://reactrouter.com/docs/en/v6/hooks/use-routes
+ * @see https://reactrouter.com/docs/en/v6/api#useroutes
  */
 
 function useRoutes(routes, locationArg) {
-  !useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, // TODO: This error is probably because they somehow have 2 versions of the
+  !useInRouterContext() ?  true ? invariant(false, // TODO: This error is probably because they somehow have 2 versions of the
   // router loaded. We can help them understand how to avoid that.
   "useRoutes() may be used only in the context of a <Router> component.") : 0 : void 0;
   let {
-    navigator
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(NavigationContext);
-  let dataRouterStateContext = react__WEBPACK_IMPORTED_MODULE_1__.useContext(DataRouterStateContext);
-  let {
     matches: parentMatches
-  } = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
+  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(RouteContext);
   let routeMatch = parentMatches[parentMatches.length - 1];
   let parentParams = routeMatch ? routeMatch.params : {};
   let parentPathname = routeMatch ? routeMatch.pathname : "/";
@@ -68713,8 +65683,8 @@ function useRoutes(routes, locationArg) {
   if (locationArg) {
     var _parsedLocationArg$pa;
 
-    let parsedLocationArg = typeof locationArg === "string" ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.parsePath)(locationArg) : locationArg;
-    !(parentPathnameBase === "/" || ((_parsedLocationArg$pa = parsedLocationArg.pathname) == null ? void 0 : _parsedLocationArg$pa.startsWith(parentPathnameBase))) ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "When overriding the location using `<Routes location>` or `useRoutes(routes, location)`, " + "the location pathname must begin with the portion of the URL pathname that was " + ("matched by all parent routes. The current pathname base is \"" + parentPathnameBase + "\" ") + ("but pathname \"" + parsedLocationArg.pathname + "\" was given in the `location` prop.")) : 0 : void 0;
+    let parsedLocationArg = typeof locationArg === "string" ? (0,history__WEBPACK_IMPORTED_MODULE_0__.parsePath)(locationArg) : locationArg;
+    !(parentPathnameBase === "/" || ((_parsedLocationArg$pa = parsedLocationArg.pathname) == null ? void 0 : _parsedLocationArg$pa.startsWith(parentPathnameBase))) ?  true ? invariant(false, "When overriding the location using `<Routes location>` or `useRoutes(routes, location)`, " + "the location pathname must begin with the portion of the URL pathname that was " + ("matched by all parent routes. The current pathname base is \"" + parentPathnameBase + "\" ") + ("but pathname \"" + parsedLocationArg.pathname + "\" was given in the `location` prop.")) : 0 : void 0;
     location = parsedLocationArg;
   } else {
     location = locationFromContext;
@@ -68722,430 +65692,66 @@ function useRoutes(routes, locationArg) {
 
   let pathname = location.pathname || "/";
   let remainingPathname = parentPathnameBase === "/" ? pathname : pathname.slice(parentPathnameBase.length) || "/";
-  let matches = (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.matchRoutes)(routes, {
+  let matches = matchRoutes(routes, {
     pathname: remainingPathname
   });
 
   if (true) {
-     true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.warning)(parentRoute || matches != null, "No routes matched location \"" + location.pathname + location.search + location.hash + "\" ") : 0;
-     true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.warning)(matches == null || matches[matches.length - 1].route.element !== undefined, "Matched leaf route at location \"" + location.pathname + location.search + location.hash + "\" does not have an element. " + "This means it will render an <Outlet /> with a null value by default resulting in an \"empty\" page.") : 0;
+     true ? warning(parentRoute || matches != null, "No routes matched location \"" + location.pathname + location.search + location.hash + "\" ") : 0;
+     true ? warning(matches == null || matches[matches.length - 1].route.element !== undefined, "Matched leaf route at location \"" + location.pathname + location.search + location.hash + "\" does not have an element. " + "This means it will render an <Outlet /> with a null value by default resulting in an \"empty\" page.") : 0;
   }
 
-  let renderedMatches = _renderMatches(matches && matches.map(match => Object.assign({}, match, {
+  return _renderMatches(matches && matches.map(match => Object.assign({}, match, {
     params: Object.assign({}, parentParams, match.params),
-    pathname: (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.joinPaths)([parentPathnameBase, // Re-encode pathnames that were decoded inside matchRoutes
-    navigator.encodeLocation ? navigator.encodeLocation(match.pathname).pathname : match.pathname]),
-    pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.joinPaths)([parentPathnameBase, // Re-encode pathnames that were decoded inside matchRoutes
-    navigator.encodeLocation ? navigator.encodeLocation(match.pathnameBase).pathname : match.pathnameBase])
-  })), parentMatches, dataRouterStateContext || undefined); // When a user passes in a `locationArg`, the associated routes need to
-  // be wrapped in a new `LocationContext.Provider` in order for `useLocation`
-  // to use the scoped location instead of the global location.
-
-
-  if (locationArg && renderedMatches) {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(LocationContext.Provider, {
-      value: {
-        location: _extends({
-          pathname: "/",
-          search: "",
-          hash: "",
-          state: null,
-          key: "default"
-        }, location),
-        navigationType: _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.Action.Pop
-      }
-    }, renderedMatches);
-  }
-
-  return renderedMatches;
+    pathname: joinPaths([parentPathnameBase, match.pathname]),
+    pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : joinPaths([parentPathnameBase, match.pathnameBase])
+  })), parentMatches);
 }
-
-function DefaultErrorElement() {
-  let error = useRouteError();
-  let message = (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.isRouteErrorResponse)(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
-  let stack = error instanceof Error ? error.stack : null;
-  let lightgrey = "rgba(200,200,200, 0.5)";
-  let preStyles = {
-    padding: "0.5rem",
-    backgroundColor: lightgrey
-  };
-  let codeStyles = {
-    padding: "2px 4px",
-    backgroundColor: lightgrey
-  };
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(react__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("h2", null, "Unhandled Thrown Error!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("h3", {
-    style: {
-      fontStyle: "italic"
-    }
-  }, message), stack ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("pre", {
-    style: preStyles
-  }, stack) : null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("p", null, "\uD83D\uDCBF Hey developer \uD83D\uDC4B"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("p", null, "You can provide a way better UX than this when your app throws errors by providing your own\xA0", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("code", {
-    style: codeStyles
-  }, "errorElement"), " props on\xA0", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("code", {
-    style: codeStyles
-  }, "<Route>")));
-}
-
-class RenderErrorBoundary extends react__WEBPACK_IMPORTED_MODULE_1__.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      location: props.location,
-      error: props.error
-    };
-  }
-
-  static getDerivedStateFromError(error) {
-    return {
-      error: error
-    };
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    // When we get into an error state, the user will likely click "back" to the
-    // previous page that didn't have an error. Because this wraps the entire
-    // application, that will have no effect--the error page continues to display.
-    // This gives us a mechanism to recover from the error when the location changes.
-    //
-    // Whether we're in an error state or not, we update the location in state
-    // so that when we are in an error state, it gets reset when a new location
-    // comes in and the user recovers from the error.
-    if (state.location !== props.location) {
-      return {
-        error: props.error,
-        location: props.location
-      };
-    } // If we're not changing locations, preserve the location but still surface
-    // any new errors that may come through. We retain the existing error, we do
-    // this because the error provided from the app state may be cleared without
-    // the location changing.
-
-
-    return {
-      error: props.error || state.error,
-      location: state.location
-    };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("React Router caught the following error during render", error, errorInfo);
-  }
-
-  render() {
-    return this.state.error ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(RouteErrorContext.Provider, {
-      value: this.state.error,
-      children: this.props.component
-    }) : this.props.children;
-  }
-
-}
-
-function RenderedRoute(_ref) {
-  let {
-    routeContext,
-    match,
-    children
-  } = _ref;
-  let dataStaticRouterContext = react__WEBPACK_IMPORTED_MODULE_1__.useContext(DataStaticRouterContext); // Track how deep we got in our render pass to emulate SSR componentDidCatch
-  // in a DataStaticRouter
-
-  if (dataStaticRouterContext && match.route.errorElement) {
-    dataStaticRouterContext._deepestRenderedBoundaryId = match.route.id;
-  }
-
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(RouteContext.Provider, {
-    value: routeContext
-  }, children);
-}
-
-function _renderMatches(matches, parentMatches, dataRouterState) {
+function _renderMatches(matches, parentMatches) {
   if (parentMatches === void 0) {
     parentMatches = [];
   }
 
-  if (matches == null) {
-    if (dataRouterState != null && dataRouterState.errors) {
-      // Don't bail if we have data router errors so we can render them in the
-      // boundary.  Use the pre-matched (or shimmed) matches
-      matches = dataRouterState.matches;
-    } else {
-      return null;
-    }
-  }
-
-  let renderedMatches = matches; // If we have data errors, trim matches to the highest error boundary
-
-  let errors = dataRouterState == null ? void 0 : dataRouterState.errors;
-
-  if (errors != null) {
-    let errorIndex = renderedMatches.findIndex(m => m.route.id && (errors == null ? void 0 : errors[m.route.id]));
-    !(errorIndex >= 0) ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "Could not find a matching route for the current errors: " + errors) : 0 : void 0;
-    renderedMatches = renderedMatches.slice(0, Math.min(renderedMatches.length, errorIndex + 1));
-  }
-
-  return renderedMatches.reduceRight((outlet, match, index) => {
-    let error = match.route.id ? errors == null ? void 0 : errors[match.route.id] : null; // Only data routers handle errors
-
-    let errorElement = dataRouterState ? match.route.errorElement || /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(DefaultErrorElement, null) : null;
-
-    let getChildren = () => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(RenderedRoute, {
-      match: match,
-      routeContext: {
+  if (matches == null) return null;
+  return matches.reduceRight((outlet, match, index) => {
+    return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(RouteContext.Provider, {
+      children: match.route.element !== undefined ? match.route.element : outlet,
+      value: {
         outlet,
-        matches: parentMatches.concat(renderedMatches.slice(0, index + 1))
+        matches: parentMatches.concat(matches.slice(0, index + 1))
       }
-    }, error ? errorElement : match.route.element !== undefined ? match.route.element : outlet); // Only wrap in an error boundary within data router usages when we have an
-    // errorElement on this route.  Otherwise let it bubble up to an ancestor
-    // errorElement
-
-
-    return dataRouterState && (match.route.errorElement || index === 0) ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(RenderErrorBoundary, {
-      location: dataRouterState.location,
-      component: errorElement,
-      error: error,
-      children: getChildren()
-    }) : getChildren();
+    });
   }, null);
-}
-var DataRouterHook;
-
-(function (DataRouterHook) {
-  DataRouterHook["UseRevalidator"] = "useRevalidator";
-})(DataRouterHook || (DataRouterHook = {}));
-
-var DataRouterStateHook;
-
-(function (DataRouterStateHook) {
-  DataRouterStateHook["UseLoaderData"] = "useLoaderData";
-  DataRouterStateHook["UseActionData"] = "useActionData";
-  DataRouterStateHook["UseRouteError"] = "useRouteError";
-  DataRouterStateHook["UseNavigation"] = "useNavigation";
-  DataRouterStateHook["UseRouteLoaderData"] = "useRouteLoaderData";
-  DataRouterStateHook["UseMatches"] = "useMatches";
-  DataRouterStateHook["UseRevalidator"] = "useRevalidator";
-})(DataRouterStateHook || (DataRouterStateHook = {}));
-
-function getDataRouterConsoleError(hookName) {
-  return hookName + " must be used within a data router.  See https://reactrouter.com/en/main/routers/picking-a-router.";
-}
-
-function useDataRouterContext(hookName) {
-  let ctx = react__WEBPACK_IMPORTED_MODULE_1__.useContext(DataRouterContext);
-  !ctx ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, getDataRouterConsoleError(hookName)) : 0 : void 0;
-  return ctx;
-}
-
-function useDataRouterState(hookName) {
-  let state = react__WEBPACK_IMPORTED_MODULE_1__.useContext(DataRouterStateContext);
-  !state ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, getDataRouterConsoleError(hookName)) : 0 : void 0;
-  return state;
-}
-/**
- * Returns the current navigation, defaulting to an "idle" navigation when
- * no navigation is in progress
- */
-
-
-function useNavigation() {
-  let state = useDataRouterState(DataRouterStateHook.UseNavigation);
-  return state.navigation;
-}
-/**
- * Returns a revalidate function for manually triggering revalidation, as well
- * as the current state of any manual revalidations
- */
-
-function useRevalidator() {
-  let dataRouterContext = useDataRouterContext(DataRouterHook.UseRevalidator);
-  let state = useDataRouterState(DataRouterStateHook.UseRevalidator);
-  return {
-    revalidate: dataRouterContext.router.revalidate,
-    state: state.revalidation
-  };
-}
-/**
- * Returns the active route matches, useful for accessing loaderData for
- * parent/child routes or the route "handle" property
- */
-
-function useMatches() {
-  let {
-    matches,
-    loaderData
-  } = useDataRouterState(DataRouterStateHook.UseMatches);
-  return react__WEBPACK_IMPORTED_MODULE_1__.useMemo(() => matches.map(match => {
-    let {
-      pathname,
-      params
-    } = match; // Note: This structure matches that created by createUseMatchesMatch
-    // in the @remix-run/router , so if you change this please also change
-    // that :)  Eventually we'll DRY this up
-
-    return {
-      id: match.route.id,
-      pathname,
-      params,
-      data: loaderData[match.route.id],
-      handle: match.route.handle
-    };
-  }), [matches, loaderData]);
-}
-/**
- * Returns the loader data for the nearest ancestor Route loader
- */
-
-function useLoaderData() {
-  let state = useDataRouterState(DataRouterStateHook.UseLoaderData);
-  let route = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
-  !route ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "useLoaderData must be used inside a RouteContext") : 0 : void 0;
-  let thisRoute = route.matches[route.matches.length - 1];
-  !thisRoute.route.id ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "useLoaderData can only be used on routes that contain a unique \"id\"") : 0 : void 0;
-  return state.loaderData[thisRoute.route.id];
-}
-/**
- * Returns the loaderData for the given routeId
- */
-
-function useRouteLoaderData(routeId) {
-  let state = useDataRouterState(DataRouterStateHook.UseRouteLoaderData);
-  return state.loaderData[routeId];
-}
-/**
- * Returns the action data for the nearest ancestor Route action
- */
-
-function useActionData() {
-  let state = useDataRouterState(DataRouterStateHook.UseActionData);
-  let route = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
-  !route ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "useActionData must be used inside a RouteContext") : 0 : void 0;
-  return Object.values((state == null ? void 0 : state.actionData) || {})[0];
-}
-/**
- * Returns the nearest ancestor Route error, which could be a loader/action
- * error or a render error.  This is intended to be called from your
- * errorElement to display a proper error message.
- */
-
-function useRouteError() {
-  var _state$errors;
-
-  let error = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteErrorContext);
-  let state = useDataRouterState(DataRouterStateHook.UseRouteError);
-  let route = react__WEBPACK_IMPORTED_MODULE_1__.useContext(RouteContext);
-  let thisRoute = route.matches[route.matches.length - 1]; // If this was a render error, we put it in a RouteError context inside
-  // of RenderErrorBoundary
-
-  if (error) {
-    return error;
-  }
-
-  !route ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "useRouteError must be used inside a RouteContext") : 0 : void 0;
-  !thisRoute.route.id ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "useRouteError can only be used on routes that contain a unique \"id\"") : 0 : void 0; // Otherwise look for errors from our data router state
-
-  return (_state$errors = state.errors) == null ? void 0 : _state$errors[thisRoute.route.id];
-}
-/**
- * Returns the happy-path data from the nearest ancestor <Await /> value
- */
-
-function useAsyncValue() {
-  let value = react__WEBPACK_IMPORTED_MODULE_1__.useContext(AwaitContext);
-  return value == null ? void 0 : value._data;
-}
-/**
- * Returns the error from the nearest ancestor <Await /> value
- */
-
-function useAsyncError() {
-  let value = react__WEBPACK_IMPORTED_MODULE_1__.useContext(AwaitContext);
-  return value == null ? void 0 : value._error;
-}
-const alreadyWarned = {};
-
-function warningOnce(key, cond, message) {
-  if (!cond && !alreadyWarned[key]) {
-    alreadyWarned[key] = true;
-     true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.warning)(false, message) : 0;
-  }
-}
-
-/**
- * Given a Remix Router instance, render the appropriate UI
- */
-function RouterProvider(_ref) {
-  let {
-    fallbackElement,
-    router
-  } = _ref;
-  // Sync router state to our component state to force re-renders
-  let state = useSyncExternalStore(router.subscribe, () => router.state, // We have to provide this so React@18 doesn't complain during hydration,
-  // but we pass our serialized hydration data into the router so state here
-  // is already synced with what the server saw
-  () => router.state);
-  let navigator = react__WEBPACK_IMPORTED_MODULE_1__.useMemo(() => {
-    return {
-      createHref: router.createHref,
-      encodeLocation: router.encodeLocation,
-      go: n => router.navigate(n),
-      push: (to, state, opts) => router.navigate(to, {
-        state,
-        preventScrollReset: opts == null ? void 0 : opts.preventScrollReset
-      }),
-      replace: (to, state, opts) => router.navigate(to, {
-        replace: true,
-        state,
-        preventScrollReset: opts == null ? void 0 : opts.preventScrollReset
-      })
-    };
-  }, [router]);
-  let basename = router.basename || "/";
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(DataRouterContext.Provider, {
-    value: {
-      router,
-      navigator,
-      static: false,
-      // Do we need this?
-      basename
-    }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(DataRouterStateContext.Provider, {
-    value: state
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(Router, {
-    basename: router.basename,
-    location: router.state.location,
-    navigationType: router.state.historyAction,
-    navigator: navigator
-  }, router.state.initialized ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(Routes, null) : fallbackElement)));
 }
 
 /**
  * A <Router> that stores all entries in memory.
  *
- * @see https://reactrouter.com/docs/en/v6/routers/memory-router
+ * @see https://reactrouter.com/docs/en/v6/api#memoryrouter
  */
-function MemoryRouter(_ref2) {
+function MemoryRouter(_ref) {
   let {
     basename,
     children,
     initialEntries,
     initialIndex
-  } = _ref2;
-  let historyRef = react__WEBPACK_IMPORTED_MODULE_1__.useRef();
+  } = _ref;
+  let historyRef = (0,react__WEBPACK_IMPORTED_MODULE_1__.useRef)();
 
   if (historyRef.current == null) {
-    historyRef.current = (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.createMemoryHistory)({
+    historyRef.current = (0,history__WEBPACK_IMPORTED_MODULE_0__.createMemoryHistory)({
       initialEntries,
-      initialIndex,
-      v5Compat: true
+      initialIndex
     });
   }
 
   let history = historyRef.current;
-  let [state, setState] = react__WEBPACK_IMPORTED_MODULE_1__.useState({
+  let [state, setState] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)({
     action: history.action,
     location: history.location
   });
-  react__WEBPACK_IMPORTED_MODULE_1__.useLayoutEffect(() => history.listen(setState), [history]);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(Router, {
+  (0,react__WEBPACK_IMPORTED_MODULE_1__.useLayoutEffect)(() => history.listen(setState), [history]);
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Router, {
     basename: basename,
     children: children,
     location: state.location,
@@ -69161,33 +65767,23 @@ function MemoryRouter(_ref2) {
  * able to use hooks. In functional components, we recommend you use the
  * `useNavigate` hook instead.
  *
- * @see https://reactrouter.com/docs/en/v6/components/navigate
+ * @see https://reactrouter.com/docs/en/v6/api#navigate
  */
-function Navigate(_ref3) {
+function Navigate(_ref2) {
   let {
     to,
     replace,
-    state,
-    relative
-  } = _ref3;
-  !useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, // TODO: This error is probably because they somehow have 2 versions of
+    state
+  } = _ref2;
+  !useInRouterContext() ?  true ? invariant(false, // TODO: This error is probably because they somehow have 2 versions of
   // the router loaded. We can help them understand how to avoid that.
   "<Navigate> may be used only in the context of a <Router> component.") : 0 : void 0;
-   true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.warning)(!react__WEBPACK_IMPORTED_MODULE_1__.useContext(NavigationContext).static, "<Navigate> must not be used on the initial render in a <StaticRouter>. " + "This is a no-op, but you should modify your code so the <Navigate> is " + "only ever rendered in response to some user interaction or state change.") : 0;
-  let dataRouterState = react__WEBPACK_IMPORTED_MODULE_1__.useContext(DataRouterStateContext);
+   true ? warning(!(0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(NavigationContext).static, "<Navigate> must not be used on the initial render in a <StaticRouter>. " + "This is a no-op, but you should modify your code so the <Navigate> is " + "only ever rendered in response to some user interaction or state change.") : 0;
   let navigate = useNavigate();
-  react__WEBPACK_IMPORTED_MODULE_1__.useEffect(() => {
-    // Avoid kicking off multiple navigations if we're in the middle of a
-    // data-router navigation, since components get re-rendered when we enter
-    // a submitting/loading state
-    if (dataRouterState && dataRouterState.navigation.state !== "idle") {
-      return;
-    }
-
+  (0,react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(() => {
     navigate(to, {
       replace,
-      state,
-      relative
+      state
     });
   });
   return null;
@@ -69196,7 +65792,7 @@ function Navigate(_ref3) {
 /**
  * Renders the child route's element, if there is one.
  *
- * @see https://reactrouter.com/docs/en/v6/components/outlet
+ * @see https://reactrouter.com/docs/en/v6/api#outlet
  */
 function Outlet(props) {
   return useOutlet(props.context);
@@ -69205,10 +65801,10 @@ function Outlet(props) {
 /**
  * Declares an element that should be rendered at a certain URL path.
  *
- * @see https://reactrouter.com/docs/en/v6/components/route
+ * @see https://reactrouter.com/docs/en/v6/api#route
  */
 function Route(_props) {
-   true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "A <Route> is only ever to be used as the child of <Routes> element, " + "never rendered directly. Please wrap your <Route> in a <Routes>.") : 0 ;
+    true ? invariant(false, "A <Route> is only ever to be used as the child of <Routes> element, " + "never rendered directly. Please wrap your <Route> in a <Routes>.") : 0 ;
 }
 
 /**
@@ -69218,29 +65814,27 @@ function Route(_props) {
  * router that is more specific to your environment such as a <BrowserRouter>
  * in web browsers or a <StaticRouter> for server rendering.
  *
- * @see https://reactrouter.com/docs/en/v6/routers/router
+ * @see https://reactrouter.com/docs/en/v6/api#router
  */
-function Router(_ref4) {
+function Router(_ref3) {
   let {
     basename: basenameProp = "/",
     children = null,
     location: locationProp,
-    navigationType = _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.Action.Pop,
+    navigationType = history__WEBPACK_IMPORTED_MODULE_0__.Action.Pop,
     navigator,
     static: staticProp = false
-  } = _ref4;
-  !!useInRouterContext() ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "You cannot render a <Router> inside another <Router>." + " You should never have more than one in your app.") : 0 : void 0; // Preserve trailing slashes on basename, so we can let the user control
-  // the enforcement of trailing slashes throughout the app
-
-  let basename = basenameProp.replace(/^\/*/, "/");
-  let navigationContext = react__WEBPACK_IMPORTED_MODULE_1__.useMemo(() => ({
+  } = _ref3;
+  !!useInRouterContext() ?  true ? invariant(false, "You cannot render a <Router> inside another <Router>." + " You should never have more than one in your app.") : 0 : void 0;
+  let basename = normalizePathname(basenameProp);
+  let navigationContext = (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(() => ({
     basename,
     navigator,
     static: staticProp
   }), [basename, navigator, staticProp]);
 
   if (typeof locationProp === "string") {
-    locationProp = (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.parsePath)(locationProp);
+    locationProp = (0,history__WEBPACK_IMPORTED_MODULE_0__.parsePath)(locationProp);
   }
 
   let {
@@ -69250,8 +65844,8 @@ function Router(_ref4) {
     state = null,
     key = "default"
   } = locationProp;
-  let location = react__WEBPACK_IMPORTED_MODULE_1__.useMemo(() => {
-    let trailingPathname = (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.stripBasename)(pathname, basename);
+  let location = (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(() => {
+    let trailingPathname = stripBasename(pathname, basename);
 
     if (trailingPathname == null) {
       return null;
@@ -69265,15 +65859,15 @@ function Router(_ref4) {
       key
     };
   }, [basename, pathname, search, hash, state, key]);
-   true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.warning)(location != null, "<Router basename=\"" + basename + "\"> is not able to match the URL " + ("\"" + pathname + search + hash + "\" because it does not start with the ") + "basename, so the <Router> won't render anything.") : 0;
+   true ? warning(location != null, "<Router basename=\"" + basename + "\"> is not able to match the URL " + ("\"" + pathname + search + hash + "\" because it does not start with the ") + "basename, so the <Router> won't render anything.") : 0;
 
   if (location == null) {
     return null;
   }
 
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(NavigationContext.Provider, {
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(NavigationContext.Provider, {
     value: navigationContext
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(LocationContext.Provider, {
+  }, /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(LocationContext.Provider, {
     children: children,
     value: {
       location,
@@ -69286,160 +65880,14 @@ function Router(_ref4) {
  * A container for a nested tree of <Route> elements that renders the branch
  * that best matches the current location.
  *
- * @see https://reactrouter.com/docs/en/v6/components/routes
+ * @see https://reactrouter.com/docs/en/v6/api#routes
  */
-function Routes(_ref5) {
+function Routes(_ref4) {
   let {
     children,
     location
-  } = _ref5;
-  let dataRouterContext = react__WEBPACK_IMPORTED_MODULE_1__.useContext(DataRouterContext); // When in a DataRouterContext _without_ children, we use the router routes
-  // directly.  If we have children, then we're in a descendant tree and we
-  // need to use child routes.
-
-  let routes = dataRouterContext && !children ? dataRouterContext.router.routes : createRoutesFromChildren(children);
-  return useRoutes(routes, location);
-}
-
-/**
- * Component to use for rendering lazily loaded data from returning defer()
- * in a loader function
- */
-function Await(_ref6) {
-  let {
-    children,
-    errorElement,
-    resolve
-  } = _ref6;
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(AwaitErrorBoundary, {
-    resolve: resolve,
-    errorElement: errorElement
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(ResolveAwait, null, children));
-}
-var AwaitRenderStatus;
-
-(function (AwaitRenderStatus) {
-  AwaitRenderStatus[AwaitRenderStatus["pending"] = 0] = "pending";
-  AwaitRenderStatus[AwaitRenderStatus["success"] = 1] = "success";
-  AwaitRenderStatus[AwaitRenderStatus["error"] = 2] = "error";
-})(AwaitRenderStatus || (AwaitRenderStatus = {}));
-
-const neverSettledPromise = new Promise(() => {});
-
-class AwaitErrorBoundary extends react__WEBPACK_IMPORTED_MODULE_1__.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      error: null
-    };
-  }
-
-  static getDerivedStateFromError(error) {
-    return {
-      error
-    };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("<Await> caught the following error during render", error, errorInfo);
-  }
-
-  render() {
-    let {
-      children,
-      errorElement,
-      resolve
-    } = this.props;
-    let promise = null;
-    let status = AwaitRenderStatus.pending;
-
-    if (!(resolve instanceof Promise)) {
-      // Didn't get a promise - provide as a resolved promise
-      status = AwaitRenderStatus.success;
-      promise = Promise.resolve();
-      Object.defineProperty(promise, "_tracked", {
-        get: () => true
-      });
-      Object.defineProperty(promise, "_data", {
-        get: () => resolve
-      });
-    } else if (this.state.error) {
-      // Caught a render error, provide it as a rejected promise
-      status = AwaitRenderStatus.error;
-      let renderError = this.state.error;
-      promise = Promise.reject().catch(() => {}); // Avoid unhandled rejection warnings
-
-      Object.defineProperty(promise, "_tracked", {
-        get: () => true
-      });
-      Object.defineProperty(promise, "_error", {
-        get: () => renderError
-      });
-    } else if (resolve._tracked) {
-      // Already tracked promise - check contents
-      promise = resolve;
-      status = promise._error !== undefined ? AwaitRenderStatus.error : promise._data !== undefined ? AwaitRenderStatus.success : AwaitRenderStatus.pending;
-    } else {
-      // Raw (untracked) promise - track it
-      status = AwaitRenderStatus.pending;
-      Object.defineProperty(resolve, "_tracked", {
-        get: () => true
-      });
-      promise = resolve.then(data => Object.defineProperty(resolve, "_data", {
-        get: () => data
-      }), error => Object.defineProperty(resolve, "_error", {
-        get: () => error
-      }));
-    }
-
-    if (status === AwaitRenderStatus.error && promise._error instanceof _remix_run_router__WEBPACK_IMPORTED_MODULE_0__.AbortedDeferredError) {
-      // Freeze the UI by throwing a never resolved promise
-      throw neverSettledPromise;
-    }
-
-    if (status === AwaitRenderStatus.error && !errorElement) {
-      // No errorElement, throw to the nearest route-level error boundary
-      throw promise._error;
-    }
-
-    if (status === AwaitRenderStatus.error) {
-      // Render via our errorElement
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(AwaitContext.Provider, {
-        value: promise,
-        children: errorElement
-      });
-    }
-
-    if (status === AwaitRenderStatus.success) {
-      // Render children with resolved value
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(AwaitContext.Provider, {
-        value: promise,
-        children: children
-      });
-    } // Throw to the suspense boundary
-
-
-    throw promise;
-  }
-
-}
-/**
- * @private
- * Indirection to leverage useAsyncValue for a render-prop API on <Await>
- */
-
-
-function ResolveAwait(_ref7) {
-  let {
-    children
-  } = _ref7;
-  let data = useAsyncValue();
-
-  if (typeof children === "function") {
-    return children(data);
-  }
-
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(react__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, children);
+  } = _ref4;
+  return useRoutes(createRoutesFromChildren(children), location);
 } ///////////////////////////////////////////////////////////////////////////////
 // UTILS
 ///////////////////////////////////////////////////////////////////////////////
@@ -69449,18 +65897,13 @@ function ResolveAwait(_ref7) {
  * either a `<Route>` element or an array of them. Used internally by
  * `<Routes>` to create a route config from its children.
  *
- * @see https://reactrouter.com/docs/en/v6/utils/create-routes-from-children
+ * @see https://reactrouter.com/docs/en/v6/api#createroutesfromchildren
  */
 
-
-function createRoutesFromChildren(children, parentPath) {
-  if (parentPath === void 0) {
-    parentPath = [];
-  }
-
+function createRoutesFromChildren(children) {
   let routes = [];
-  react__WEBPACK_IMPORTED_MODULE_1__.Children.forEach(children, (element, index) => {
-    if (! /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.isValidElement(element)) {
+  react__WEBPACK_IMPORTED_MODULE_1__.Children.forEach(children, element => {
+    if (! /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(element)) {
       // Ignore non-elements. This allows people to more easily inline
       // conditionals in their route config.
       return;
@@ -69468,29 +65911,20 @@ function createRoutesFromChildren(children, parentPath) {
 
     if (element.type === react__WEBPACK_IMPORTED_MODULE_1__.Fragment) {
       // Transparently support React.Fragment and its children.
-      routes.push.apply(routes, createRoutesFromChildren(element.props.children, parentPath));
+      routes.push.apply(routes, createRoutesFromChildren(element.props.children));
       return;
     }
 
-    !(element.type === Route) ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "[" + (typeof element.type === "string" ? element.type : element.type.name) + "] is not a <Route> component. All component children of <Routes> must be a <Route> or <React.Fragment>") : 0 : void 0;
-    !(!element.props.index || !element.props.children) ?  true ? (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.invariant)(false, "An index route cannot have child routes.") : 0 : void 0;
-    let treePath = [...parentPath, index];
+    !(element.type === Route) ?  true ? invariant(false, "[" + (typeof element.type === "string" ? element.type : element.type.name) + "] is not a <Route> component. All component children of <Routes> must be a <Route> or <React.Fragment>") : 0 : void 0;
     let route = {
-      id: element.props.id || treePath.join("-"),
       caseSensitive: element.props.caseSensitive,
       element: element.props.element,
       index: element.props.index,
-      path: element.props.path,
-      loader: element.props.loader,
-      action: element.props.action,
-      errorElement: element.props.errorElement,
-      hasErrorBoundary: element.props.errorElement != null,
-      shouldRevalidate: element.props.shouldRevalidate,
-      handle: element.props.handle
+      path: element.props.path
     };
 
     if (element.props.children) {
-      route.children = createRoutesFromChildren(element.props.children, treePath);
+      route.children = createRoutesFromChildren(element.props.children);
     }
 
     routes.push(route);
@@ -69504,39 +65938,6 @@ function createRoutesFromChildren(children, parentPath) {
 function renderMatches(matches) {
   return _renderMatches(matches);
 }
-/**
- * @private
- * Walk the route tree and add hasErrorBoundary if it's not provided, so that
- * users providing manual route arrays can just specify errorElement
- */
-
-function enhanceManualRouteObjects(routes) {
-  return routes.map(route => {
-    let routeClone = _extends({}, route);
-
-    if (routeClone.hasErrorBoundary == null) {
-      routeClone.hasErrorBoundary = routeClone.errorElement != null;
-    }
-
-    if (routeClone.children) {
-      routeClone.children = enhanceManualRouteObjects(routeClone.children);
-    }
-
-    return routeClone;
-  });
-}
-
-function createMemoryRouter(routes, opts) {
-  return (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.createRouter)({
-    basename: opts == null ? void 0 : opts.basename,
-    history: (0,_remix_run_router__WEBPACK_IMPORTED_MODULE_0__.createMemoryHistory)({
-      initialEntries: opts == null ? void 0 : opts.initialEntries,
-      initialIndex: opts == null ? void 0 : opts.initialIndex
-    }),
-    hydrationData: opts == null ? void 0 : opts.hydrationData,
-    routes: enhanceManualRouteObjects(routes)
-  }).initialize();
-} ///////////////////////////////////////////////////////////////////////////////
 
 
 //# sourceMappingURL=index.js.map
@@ -72374,7 +68775,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "createStore": () => (/* binding */ createStore),
 /* harmony export */   "legacy_createStore": () => (/* binding */ legacy_createStore)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_esm_objectSpread2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectSpread2 */ "./node_modules/redux/node_modules/@babel/runtime/helpers/esm/objectSpread2.js");
+/* harmony import */ var _babel_runtime_helpers_esm_objectSpread2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectSpread2 */ "./node_modules/@babel/runtime/helpers/esm/objectSpread2.js");
 
 
 /**
@@ -75008,6 +71409,134 @@ module.exports = LOCALIZE_SCRIPT_VARIABLES;
 
 /***/ }),
 
+/***/ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/esm/defineProperty.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ _defineProperty)
+/* harmony export */ });
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+/***/ }),
+
+/***/ "./node_modules/@babel/runtime/helpers/esm/extends.js":
+/*!************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/esm/extends.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ _extends)
+/* harmony export */ });
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+
+/***/ }),
+
+/***/ "./node_modules/@babel/runtime/helpers/esm/objectSpread2.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/esm/objectSpread2.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ _objectSpread2)
+/* harmony export */ });
+/* harmony import */ var _defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./defineProperty.js */ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    enumerableOnly && (symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    })), keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = null != arguments[i] ? arguments[i] : {};
+    i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
+      (0,_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(target, key, source[key]);
+    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
+      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+    });
+  }
+
+  return target;
+}
+
+/***/ }),
+
+/***/ "./node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ _objectWithoutPropertiesLoose)
+/* harmony export */ });
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+/***/ }),
+
 /***/ "./node_modules/@hookform/resolvers/dist/resolvers.mjs":
 /*!*************************************************************!*\
   !*** ./node_modules/@hookform/resolvers/dist/resolvers.mjs ***!
@@ -75043,6 +71572,36 @@ __webpack_require__.r(__webpack_exports__);
 var n=function(n,o,a){return void 0===o&&(o={abortEarly:!1}),void 0===a&&(a={}),function(i,s,u){try{var c=function(){return l.error?{values:{},errors:(0,_hookform_resolvers__WEBPACK_IMPORTED_MODULE_0__.toNestError)((n=l.error,o=!u.shouldUseNativeValidation&&"all"===u.criteriaMode,n.details.length?n.details.reduce(function(r,t){var n=t.path.join(".");if(r[n]||(r[n]={message:t.message,type:t.type}),o){var a=r[n].types,i=a&&a[t.type];r[n]=(0,react_hook_form__WEBPACK_IMPORTED_MODULE_1__.appendErrors)(n,o,r,t.type,i?[].concat(i,t.message):t.message)}return r},{}):{}),u)}:(u.shouldUseNativeValidation&&(0,_hookform_resolvers__WEBPACK_IMPORTED_MODULE_0__.validateFieldsNatively)({},u),{errors:{},values:l.value});var n,o},v=Object.assign({},o,{context:s}),l={},f=function(){if("sync"===a.mode)l=n.validate(i,v);else{var e=function(e,r){try{var t=e()}catch(e){return r(e)}return t&&t.then?t.then(void 0,r):t}(function(){return Promise.resolve(n.validateAsync(i,v)).then(function(e){l.value=e})},function(e){l.error=e});if(e&&e.then)return e.then(function(){})}}();return Promise.resolve(f&&f.then?f.then(c):c())}catch(e){return Promise.reject(e)}}};
 //# sourceMappingURL=joi.module.js.map
 
+
+/***/ }),
+
+/***/ "./node_modules/history/node_modules/@babel/runtime/helpers/esm/extends.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/history/node_modules/@babel/runtime/helpers/esm/extends.js ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ _extends)
+/* harmony export */ });
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
 
 /***/ }),
 
@@ -75232,7 +71791,7 @@ const useFormContext = () => react__WEBPACK_IMPORTED_MODULE_0__.useContext(HookF
  */
 const FormProvider = (props) => {
     const { children, ...data } = props;
-    return (react__WEBPACK_IMPORTED_MODULE_0__.createElement(HookFormContext.Provider, { value: data }, props.children));
+    return (react__WEBPACK_IMPORTED_MODULE_0__.createElement(HookFormContext.Provider, { value: data }, children));
 };
 
 var getProxyFormState = (formState, _proxyFormState, localProxyFormState, isRoot = true) => {
@@ -75517,6 +72076,7 @@ function useController(props) {
                 if (elm && field && elm.focus) {
                     field._f.ref = {
                         focus: () => elm.focus(),
+                        select: () => elm.select(),
                         setCustomValidity: (message) => elm.setCustomValidity(message),
                         reportValidity: () => elm.reportValidity(),
                     };
@@ -75830,7 +72390,7 @@ function useFieldArray(props) {
     _name.current = name;
     _fieldIds.current = fields;
     control._names.array.add(name);
-    const callback = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(({ values, name: fieldArrayName }) => {
+    const callback = react__WEBPACK_IMPORTED_MODULE_0__.useCallback(({ values, name: fieldArrayName, }) => {
         if (fieldArrayName === _name.current || !fieldArrayName) {
             const fieldValues = get(values, _name.current, []);
             setFields(fieldValues);
@@ -77201,7 +73761,8 @@ function createFormControl(props = {}) {
     const setFocus = (name, options = {}) => {
         const field = get(_fields, name)._f;
         const fieldRef = field.refs ? field.refs[0] : field.ref;
-        options.shouldSelect ? fieldRef.select() : fieldRef.focus();
+        fieldRef.focus();
+        options.shouldSelect && fieldRef.select();
     };
     return {
         control: {
@@ -77354,134 +73915,6 @@ function useForm(props = {}) {
 
 //# sourceMappingURL=index.esm.mjs.map
 
-
-/***/ }),
-
-/***/ "./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/extends.js":
-/*!*************************************************************************************!*\
-  !*** ./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/extends.js ***!
-  \*************************************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ _extends)
-/* harmony export */ });
-function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-  return _extends.apply(this, arguments);
-}
-
-/***/ }),
-
-/***/ "./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js":
-/*!**********************************************************************************************************!*\
-  !*** ./node_modules/react-redux/node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js ***!
-  \**********************************************************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ _objectWithoutPropertiesLoose)
-/* harmony export */ });
-function _objectWithoutPropertiesLoose(source, excluded) {
-  if (source == null) return {};
-  var target = {};
-  var sourceKeys = Object.keys(source);
-  var key, i;
-
-  for (i = 0; i < sourceKeys.length; i++) {
-    key = sourceKeys[i];
-    if (excluded.indexOf(key) >= 0) continue;
-    target[key] = source[key];
-  }
-
-  return target;
-}
-
-/***/ }),
-
-/***/ "./node_modules/redux/node_modules/@babel/runtime/helpers/esm/defineProperty.js":
-/*!**************************************************************************************!*\
-  !*** ./node_modules/redux/node_modules/@babel/runtime/helpers/esm/defineProperty.js ***!
-  \**************************************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ _defineProperty)
-/* harmony export */ });
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
-
-/***/ }),
-
-/***/ "./node_modules/redux/node_modules/@babel/runtime/helpers/esm/objectSpread2.js":
-/*!*************************************************************************************!*\
-  !*** ./node_modules/redux/node_modules/@babel/runtime/helpers/esm/objectSpread2.js ***!
-  \*************************************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ _objectSpread2)
-/* harmony export */ });
-/* harmony import */ var _defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./defineProperty.js */ "./node_modules/redux/node_modules/@babel/runtime/helpers/esm/defineProperty.js");
-
-
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
-
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
-    enumerableOnly && (symbols = symbols.filter(function (sym) {
-      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-    })), keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = null != arguments[i] ? arguments[i] : {};
-    i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
-      (0,_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(target, key, source[key]);
-    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
-      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-    });
-  }
-
-  return target;
-}
 
 /***/ })
 

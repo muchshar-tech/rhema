@@ -13,8 +13,12 @@ declare( strict_types = 1 );
 
 namespace Rhema\App\General;
 
+use WP_Error;
+use WP_Query;
+
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
+use Rhema\Common\Constants;
 
 /**
  * Main function class for external uses
@@ -65,18 +69,34 @@ final class Options extends Base {
 		] ) );
 	}
 
-	public function checkRewriteIsEmpty( string $bible_entry_path ): bool {
+	public function checkRewriteIsEmpty( string $bible_entry_path ): bool | WP_Error {
 		global $wp_rewrite;
 
-		$permastruct = $wp_rewrite->get_extra_permastruct( 'post' );
+		$new_rule = Constants::REWRITE_RULES;
+
 		$rewrite_rules = get_option( 'rewrite_rules' );
 
-		// 檢查新的 rewrite rule 是否已經存在
-		foreach ( $new_rule as $pattern => $query ) {
-			if ( array_key_exists( $pattern, $rewrite_rules ) ) {
-				return false;
+		foreach ( $new_rule as $rule_pattern => $query ) {
+			$rule_string = strtr( $rule_pattern, [ '$bible_entry_path' => $bible_entry_path ] );
+			if ( array_key_exists( $rule_string, $rewrite_rules ) ) {
+				return new WP_Error( 500, Constants::init()->error_message['system/app/general/options/rewrite_rules_exsited'] );
 			}
 		}
+
+		$args = [
+			's'              => $bible_entry_path,
+			'post_type'      => [ 'post', 'page', 'my_custom_post_type' ],
+			'post_status'    => [ 'publish', 'draft', 'future' ],
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		$query_result = new WP_Query( $args );
+
+		if ( $query_result->have_posts() ) {
+			return new WP_Error( 500, Constants::init()->error_message['system/app/general/options/rewrite_rules_exsited'] );
+		}
+
 		return false;
 	}
 }

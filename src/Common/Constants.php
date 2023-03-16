@@ -28,6 +28,13 @@ final class Constants extends Base {
 	 */
 	use Singleton;
 	/**
+	 * Rewrite rules
+	 */
+	public const REWRITE_RULES = [
+		'($bible_entry_path)\/?$' => 'index.php?is_bible=1',
+		'($bible_entry_path)\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?' => 'index.php?is_bible=1&bible_from=$matches[2]&bible_to=$matches[7]',
+	];
+	/**
 	 * Bible question type data
 	 */
 	public const BIBLE_QUESTION_TYPE = [
@@ -596,6 +603,7 @@ final class Constants extends Base {
 			'unknown_error' => __( 'Unknown error.', 'rhema' ),
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
 			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
+			'system/app/general/options/rewrite_rules_exsited' => __( 'Entry path cant use.', 'rhema' ),
 			'system/app/rest/options/field_is_wrong' => __( 'Your request field is wrong.', 'rhema' ),
 			'system/app/rest/bible/response_wrong' => __( 'Response wrong.', 'rhema' ),
 			'system/app/rest/permission_denied' => __( 'Permission denied.', 'rhema' ),

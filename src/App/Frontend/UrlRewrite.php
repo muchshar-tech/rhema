@@ -14,6 +14,7 @@ declare( strict_types = 1 );
 namespace Rhema\App\Frontend;
 
 use Rhema\Common\Abstracts\Base;
+use Rhema\Common\Constants;
 
 /**
  * UrlRewrite
@@ -44,8 +45,11 @@ class UrlRewrite extends Base {
 			if ( isset( $general['bible_entry'] ) ) {
 				$bible_entry_path = $general['bible_entry'];
 			}
-			add_rewrite_rule( "($bible_entry_path)\/?$", 'index.php?is_bible=1', 'top' );
-			add_rewrite_rule( "($bible_entry_path)\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?", 'index.php?is_bible=1&bible_from=$matches[2]&bible_to=$matches[7]', 'top' );
+
+			foreach ( Constants::REWRITE_RULES as $rule_pattern => $url ) {
+				add_rewrite_rule( strtr( $rule_pattern, [ '$bible_entry_path' => $bible_entry_path ] ), $url, 'top' );
+			}
+
 			flush_rewrite_rules();
 		}, 0 );
 
@@ -61,10 +65,11 @@ class UrlRewrite extends Base {
 			return rhema()->templates()->get( 'entry-template', null, null, false );
 		}, 0 );
 	}
+
 	public function retrieveRewriteRule() {
-		return array(
+		return [
 			"($bible_entry_path)\/?$" => 'index.php?is_bible=1',
 			"($bible_entry_path)\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?" => 'index.php?is_bible=1&bible_from=$matches[2]&bible_to=$matches[7]',
-		);
+		];
 	}
 }

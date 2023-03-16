@@ -1,5 +1,5 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { __ } from '@wordpress/i18n'
 
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
@@ -40,34 +40,54 @@ export const Account = () => {
         signin,
         { data: signinResponse, error: signinError, isLoading: isSigning },
     ] = useSigninMutation()
-    const isSignined = false
+    const isSignined = useSelector((state) => {
+        if (!state?.account?.token) {
+            return false
+        }
+        if (typeof state?.account?.token !== 'string') {
+            return false
+        }
+        if (state?.account?.token.length <= 0) {
+            return false
+        }
+        return true
+    })
     return (
         <>
-            <div className="flex justify-center">
-                <LoginCard
-                    className="max-w-sm"
-                    onClickSigin={async (data) => {
-                        const { identity_type, ...body } = data
-                        const payload = await signin(body)
-                        const {
-                            data: { data: response },
-                        } = payload
-                        const { token } = response
-                        console.log(token)
-                        dispatch(addSigninToken({ token }))
-                    }}
-                    onClickForgotPw={() => {
-                        console.log('onClickForgotPw')
-                    }}
-                    onClickRegister={() => {
-                        console.log('onClickRegister')
-                    }}
-                    signinData={{ signinResponse, signinError, isSigning }}
-                />
-            </div>
-            <div className="flex justify-center">
-                <OrdersListing />
-            </div>
+            {!isSignined ? (
+                <div className="flex justify-center">
+                    <LoginCard
+                        className="max-w-sm"
+                        onClickSigin={async (data) => {
+                            const { identity_type, ...body } = data
+                            const payload = await signin(body)
+                            const {
+                                data: { data: response },
+                            } = payload
+                            const { token } = response
+                            console.log(token)
+                            dispatch(addSigninToken({ token }))
+                        }}
+                        onClickForgotPw={() => {
+                            console.log('onClickForgotPw')
+                        }}
+                        onClickRegister={() => {
+                            console.log('onClickRegister')
+                        }}
+                        signinData={{ signinResponse, signinError, isSigning }}
+                    />
+                </div>
+            ) : (
+                <div className="flex justify-center">
+                    <div>
+                        {__(
+                            `Welcome to Logos. You can check your information related to Logos here after logging in.`,
+                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+                        )}
+                    </div>
+                    <OrdersListing />
+                </div>
+            )}
         </>
     )
 }

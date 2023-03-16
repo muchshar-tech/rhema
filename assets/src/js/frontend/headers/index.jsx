@@ -1,11 +1,16 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useForm } from 'react-hook-form'
+import { joiResolver } from '@hookform/resolvers/joi'
 import { BiChevronLeft, BiFontSize } from 'react-icons/bi'
 import { BsLayoutTextSidebarReverse } from 'react-icons/bs'
 
+import * as FieldSchama from '@components/schema'
 import {
     switchHeadersMain,
     toggleDrawer,
+    switchHeadersSearch,
+    inputSearchKeywords,
 } from '@assets/js/frontend/states/generalSlice'
 import { queryStringModifier } from '@assets/js/frontend/utilities'
 import * as Layout from '@components/frontend/layouts'
@@ -17,34 +22,76 @@ const Main = () => {
     const showMainHeader = useSelector(
         (state) => state.general.headersSwitch.main
     )
+    const showSearchHeader = useSelector(
+        (state) => state.general.headersSwitch.search
+    )
     const queryString = useSelector((state) => state.data.queryString)
     const classNames = [
-        ...(showMainHeader ? ['flex'] : ['hidden']),
+        ...(showMainHeader || showSearchHeader ? ['flex'] : ['hidden']),
+        'ralative',
         'py-11px',
         'px-12px',
         'md:py-10px',
         'justify-between',
     ].join(' ')
+
+    const searchFormMethods = useForm({
+        defaultValues: {
+            words: '',
+        },
+        resolver: joiResolver(FieldSchama.searchBibleRawsByKeyword),
+    })
+
+    const { register, formState, handleSubmit } = searchFormMethods
+    const { isSubmitting: isSearching, errors } = formState
+
+    const onSubmit = async (data) => {
+        console.log(data)
+        dispatch(inputSearchKeywords(data.words))
+        dispatch(switchHeadersSearch())
+    }
+
     return (
         <Layout.Top.Row className={classNames}>
             <Layout.Top.LeftSide>
-                <Tools.BooksSelectorButton
-                    range={queryStringModifier(queryString)}
-                />
+                {showMainHeader ? (
+                    <Tools.BooksSelectorButton
+                        range={queryStringModifier(queryString)}
+                    />
+                ) : (
+                    <Tools.Borderless
+                        onClick={() => dispatch(switchHeadersMain())}
+                    >
+                        <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
+                    </Tools.Borderless>
+                )}
             </Layout.Top.LeftSide>
             <Layout.Top.RightSide>
-                <Tools.SearchBar />
-                <Tools.FullScreenToggle />
-                <Tools.Borderless>
-                    <BiFontSize className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
-                </Tools.Borderless>
-                <Tools.Borderless
-                    onClick={() =>
-                        dispatch(toggleDrawer({ name: 'relative-posts' }))
-                    }
-                >
-                    <BsLayoutTextSidebarReverse className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
-                </Tools.Borderless>
+                <Tools.SearchBar
+                    expand={showSearchHeader}
+                    onSubmit={handleSubmit(onSubmit)}
+                    {...register('words', {
+                        required: true,
+                    })}
+                />
+
+                {!showSearchHeader ? (
+                    <>
+                        <Tools.FullScreenToggle />
+                        <Tools.Borderless>
+                            <BiFontSize className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
+                        </Tools.Borderless>
+                        <Tools.Borderless
+                            onClick={() =>
+                                dispatch(
+                                    toggleDrawer({ name: 'relative-posts' })
+                                )
+                            }
+                        >
+                            <BsLayoutTextSidebarReverse className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
+                        </Tools.Borderless>
+                    </>
+                ) : null}
             </Layout.Top.RightSide>
         </Layout.Top.Row>
     )

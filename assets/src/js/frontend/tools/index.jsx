@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import intersection from 'lodash/intersection'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
@@ -13,6 +13,7 @@ import {
     toggleDrawer,
     switchHeadersBooks,
 } from '@assets/js/frontend/states/generalSlice'
+import { Form } from '@components/frontend/forms'
 
 const Bordered = ({ children }) => {
     return (
@@ -37,21 +38,32 @@ const Borderless = ({ onClick, children }) => {
     )
 }
 
-const SearchBar = () => {
+const SearchBar = forwardRef(({ expand, onSubmit, ...otherprops }, ref) => {
+    const inputClassNames = [
+        'w-0',
+        'h-24px',
+        'outline-0',
+        'group-hover:w-auto',
+        ...(expand ? ['w-auto'] : []),
+    ].join(' ')
     return (
         <Ripples>
-            <div className="relative flex items-center justify-center overflow-hidden bg-white border border-gray-300 rounded-sm py-2px pl-5px pr-23px md:pl-9px md:pr-29px md:py-7px group">
-                <input
-                    placeholder="輸入關鍵字進行搜尋"
-                    type="text"
-                    autoComplete="off"
-                    className="w-0 h-24px outline-0 group-hover:w-auto"
-                />
-                <HiOutlineSearch className="absolute h-20px w-20px right-4px md:right-10px text-neutral-600" />
-            </div>
+            <Form onSubmit={onSubmit}>
+                <div className="relative flex items-center justify-center overflow-hidden bg-white border border-gray-300 rounded-sm py-2px pl-5px pr-23px md:pl-9px md:pr-29px md:py-7px group">
+                    <input
+                        placeholder="輸入關鍵字進行搜尋"
+                        type="text"
+                        autoComplete="off"
+                        className={inputClassNames}
+                        {...(!!ref ? { ref } : {})}
+                        {...(!!otherprops ? otherprops : {})}
+                    />
+                    <HiOutlineSearch className="absolute h-20px w-20px right-4px md:right-10px text-neutral-600" />
+                </div>
+            </Form>
         </Ripples>
     )
-}
+})
 
 const FullScreenToggle = () => {
     const fullscreen = useSelector((state) => state.general.fullscreen)
@@ -170,7 +182,9 @@ const CurrentRawsSelected = () => {
         <Ripples>
             <div
                 className="flex items-center overflow-hidden bg-white border border-dashed border-gray-300 rounded-sm cursor-pointer"
-                onClick={() => dispatch(toggleDrawer({ name: 'selected-raws' }))}
+                onClick={() =>
+                    dispatch(toggleDrawer({ name: 'selected-raws' }))
+                }
             >
                 {displayCurrentSelected.length > 0 &&
                 !!displayCurrentSelected[0] ? (

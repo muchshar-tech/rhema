@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
+import { retrieveLogosSignedToken } from '@components/common'
 import {
     PRODUCT_SLUG_REST_NAME_MAP,
     PRODUCT_SLUGS,
@@ -8,7 +9,9 @@ import {
 import { retrieveChapterByParamString } from '@components/frontend/utilities'
 
 const prepareHeaders = (headers) => {
-    const nonce = RHEMA_LOCALIZE.RHEMA_BACKEND.NONCE
+    const nonce =
+        RHEMA_LOCALIZE?.RHEMA_BACKEND?.NONCE ||
+        RHEMA_LOCALIZE?.RHEMA_INITAIL_DATA?.NONCE
 
     if (nonce) {
         headers.set('X-WP-Nonce', nonce)
@@ -31,12 +34,10 @@ export const optionsApi = createApi({
                     body,
                 }
             },
-            transformResponse: (response, meta, arg) => {
-                console.log(meta, arg)
+            transformResponse: (response) => {
                 return response
             },
-            transformErrorResponse: (response, meta, arg) => {
-                console.log(meta, arg)
+            transformErrorResponse: (response) => {
                 return response
             },
         }),
@@ -90,10 +91,21 @@ export const bibleApi = createApi({
                 return returnConverted
             },
         }),
+        searchBibleRaws: builder.query({
+            query: ({ words }) => {
+                return words
+            },
+            transformResponse: (response) => {
+                return response
+            },
+            transformErrorResponse: (response) => {
+                return response
+            },
+        }),
     }),
 })
 
-export const { useGetBibleRawQuery } = bibleApi
+export const { useGetBibleRawQuery, useSearchBibleRawsQuery } = bibleApi
 
 export const activateApi = createApi({
     reducerPath: 'api.activate',
@@ -116,12 +128,10 @@ export const activateApi = createApi({
                     body,
                 }
             },
-            transformResponse: (response, meta, arg) => {
-                console.log(meta, arg)
+            transformResponse: (response) => {
                 return response
             },
-            transformErrorResponse: (response, meta, arg) => {
-                console.log(meta, arg)
+            transformErrorResponse: (response) => {
                 return response
             },
         }),
@@ -168,12 +178,12 @@ export const deactivateApi = createApi({
                     },
                 }
             },
-            transformResponse: (response, meta, arg) => {
-                console.log(response, meta, arg)
+            transformResponse: (response) => {
+                console.log(response)
                 return response
             },
-            transformErrorResponse: (response, meta, arg) => {
-                console.log(response, meta, arg)
+            transformErrorResponse: (response) => {
+                console.log(response)
                 return response
             },
         }),
@@ -197,12 +207,10 @@ export const signinApi = createApi({
                     body,
                 }
             },
-            transformResponse: (response, meta, arg) => {
-                console.log(meta, arg)
+            transformResponse: (response) => {
                 return response
             },
-            transformErrorResponse: (response, meta, arg) => {
-                console.log(meta, arg)
+            transformErrorResponse: (response) => {
                 return response
             },
         }),
@@ -210,3 +218,38 @@ export const signinApi = createApi({
 })
 
 export const { useSigninMutation } = signinApi
+
+export const ordersApi = createApi({
+    reducerPath: 'api.orders',
+    baseQuery: fetchBaseQuery({
+        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.orders,
+        prepareHeaders: (headers) => {
+            const nonce = RHEMA_LOCALIZE.RHEMA_BACKEND.NONCE
+
+            if (nonce) {
+                headers.set('X-WP-Nonce', nonce)
+            }
+
+            const token = retrieveLogosSignedToken(sessionStorage)
+
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`)
+            }
+
+            return headers
+        },
+    }),
+    endpoints: (builder) => ({
+        orders: builder.query({
+            query: () => ({}),
+            transformResponse: (response) => {
+                return response
+            },
+            transformErrorResponse: (response) => {
+                return response
+            },
+        }),
+    }),
+})
+
+export const { useOrdersQuery } = ordersApi

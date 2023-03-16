@@ -13,7 +13,7 @@ import {
 } from '@components/constants'
 import * as FormTable from '@components/backend/form-table'
 import * as Components from '@components/backend/components'
-import * as FieldSchama from '@components/backend/schema'
+import * as FieldSchama from '@components/schema'
 import {
     useActivateCoreMutation,
     useActivateByLicenseMutation,

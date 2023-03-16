@@ -92,6 +92,7 @@ class Enqueue extends Base {
 			}
 
 			$initial_data = [
+				'NONCE' => $this->plugin->createNonce(),
 				'UI' => rhema()->ui(),
 				'RAW' => $initial_raw,
 				'TRANSLATION' => [

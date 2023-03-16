@@ -80,7 +80,7 @@ const Body = ({ children }) => {
 }
 
 const Content = ({ children }) => {
-    const showBooks = useSelector((state) => state.general.headersSwitch.books)
+    const showMain = useSelector((state) => state.general.headersSwitch.main)
     const [movePercentage, setMovePercentage] = useState(0)
     const [pagePos, setPagePos] = useState(0)
     const onSwipeStart = (event) => {
@@ -111,7 +111,7 @@ const Content = ({ children }) => {
     }
 
     const classNames = [
-        ...(!showBooks ? ['flex'] : ['hidden']),
+        ...(showMain ? ['flex'] : ['hidden']),
         'relative',
         'flex',
         'min-h-full',

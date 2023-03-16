@@ -6,7 +6,7 @@ import Ripples from 'react-ripples'
 
 import { toggleDrawer } from '@assets/js/frontend/states/generalSlice'
 
-const Form = ({ onSubmit, children }) => {
+export const Form = ({ onSubmit, children }) => {
     return (
         <form onSubmit={onSubmit} className="w-full flex flex-col">
             {children}

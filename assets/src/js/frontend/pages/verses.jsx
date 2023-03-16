@@ -7,6 +7,7 @@ import * as Layout from '@components/frontend/layouts'
 import * as Headers from '@components/frontend/headers'
 import * as Paragraph from '@components/frontend/paragraph'
 import * as Books from '@components/frontend/books'
+import * as Search from '@components/frontend/search'
 import * as Forms from '@components/frontend/forms'
 import { DrawerTitle } from '@components/frontend/components'
 import { useGetBibleRawQuery } from '@components/services'
@@ -14,7 +15,6 @@ import { generateRestRangeParam } from '@assets/js/frontend/utilities'
 import { loadRaws } from '@assets/js/frontend/states/dataSlice'
 
 const Container = ({ raws, selected, isFetching, loadingLine }) => {
-    // console.log('Run Memo', raws, loadingLine)
     const isLoading = isFetching && loadingLine > 0
     return (
         <Layout.AppContainer>
@@ -25,6 +25,7 @@ const Container = ({ raws, selected, isFetching, loadingLine }) => {
             </Layout.Top>
             <Layout.Body>
                 <Books.List />
+                <Search.Results />
                 <Layout.Content>
                     <Layout.Page>
                         <Paragraph.Block>

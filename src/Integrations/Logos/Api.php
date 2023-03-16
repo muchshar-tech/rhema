@@ -216,7 +216,7 @@ final class Api extends Base {
 	 * @return array|WP_Error
 	 */
 	public function getTranslationList(): array | WP_Error {
-		$remote_query = $this->remote( "bible/translates" );
+		$remote_query = $this->remote( 'bible/translates' );
 		$translation_list_res = wp_remote_get( $remote_query );
 		if ( is_wp_error( $translation_list_res ) ) {
 			return $translation_list_res;
@@ -226,7 +226,7 @@ final class Api extends Base {
 		if ( 200 !== $status_code ) {
 			return new WP_Error( $status_code, $response['message'] );
 		}
-		
+
 		if ( empty( $translation_list_res['body'] ) ) {
 			return [];
 		}
@@ -313,7 +313,13 @@ final class Api extends Base {
 		wp_cache_add( 'fetched_bible', $json_parsed, $this->plugin->name() );
 		return $json_parsed;
 	}
-
+	/**
+	 * Signin function
+	 *
+	 * @param string $username
+	 * @param string $pw
+	 * @return array|WP_Error
+	 */
 	public function signin( string $username, string $pw ): array|WP_Error {
 		if ( empty( $username ) ) {
 			return new WP_Error( 400, 'Bad request.' );
@@ -338,6 +344,44 @@ final class Api extends Base {
 			],
 		] );
 		return $response;
+	}
+	/**
+	 * Orders listing
+	 *
+	 * @param string $token
+	 * @return array|WP_Error
+	 */
+	public function orders( string $token ): array|WP_Error {
+		if ( empty( $token ) ) {
+			return new WP_Error( 400, 'Bad request.' );
+		}
+		if ( ! empty( wp_cache_get( 'fetched_logos_orders', $this->plugin->name() ) ) ) {
+			return wp_cache_get( 'fetched_logos_orders', $this->plugin->name() );
+		}
+		$remote_host = $this->remote();
+		$remote = "$remote_host/orders";
+		$response = wp_remote_get( $remote, [
+			'headers' => [
+				'Authorization' => "Bearer $token",
+			],
+		] );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( 200 !== $response['response']['code'] ) {
+			$error_message = ! empty( $response['body'] ) ? $response['body'] : 'Get orders wrong.';
+			return new WP_Error( $response['response']['code'], $error_message );
+		}
+
+		if ( empty( $response['body'] ) ) {
+			return [];
+		}
+
+		$json_parsed = json_decode( $response['body'], true );
+		wp_cache_add( 'fetched_logos_orders', $json_parsed, $this->plugin->name() );
+		return $json_parsed;
 	}
 	/**
 	 * Get core transient

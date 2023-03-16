@@ -74,7 +74,9 @@ class Account extends Base {
 						'required' => true,
 					],
 				],
-				'permission_callback' => '__return_true',
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
 			]
 		);
 		register_rest_route(
@@ -84,7 +86,9 @@ class Account extends Base {
 				'methods'  => \WP_REST_Server::CREATABLE,
 				'callback' => [ $this, 'orders' ],
 				'args'     => [],
-				'permission_callback' => '__return_true',
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
 			]
 		);
 	}
@@ -94,7 +98,7 @@ class Account extends Base {
 	 * @param WP_REST_Request $request
 	 * @return array
 	 */
-	public function signin( WP_REST_Request $request ): array {
+	public function signin( WP_REST_Request $request ) {
 		$body = $request->get_json_params();
 
 		/** @var Logos\Api */
@@ -112,12 +116,9 @@ class Account extends Base {
 
 		$response_body = json_decode( $signin['body'], true );
 
-		return [
-			'response' => [
-				'code' => $signin['response']['code'],
-			],
-			'data' => $response_body,
-		];
+		wp_send_json_success( [
+			'token' => $response_body['token'],
+		], 200 );
 	}
 	/**
 	 * Orders

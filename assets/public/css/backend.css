@@ -222,6 +222,9 @@
     .tailwind .mb-10px {
         margin-bottom: 10px;;
 }
+    .tailwind .mt-2 {
+        margin-top: 0.5rem;
+}
     .tailwind .box-border {
         box-sizing: border-box;
 }
@@ -239,6 +242,9 @@
 }
     .tailwind .table {
         display: table;
+}
+    .tailwind .\!table {
+        display: table !important;
 }
     .tailwind .hidden {
         display: none;
@@ -333,6 +339,12 @@
     .tailwind .w-40px {
         width: 40px;;
 }
+    .tailwind .w-16 {
+        width: 4rem;
+}
+    .tailwind .w-auto {
+        width: auto;
+}
     .tailwind .min-w-200px {
         min-width: 200px;;
 }
@@ -419,6 +431,12 @@
     .tailwind .cursor-pointer {
         cursor: pointer;
 }
+    .tailwind .select-none {
+        -webkit-user-select: none;
+           -moz-user-select: none;
+            -ms-user-select: none;
+                user-select: none;
+}
     .tailwind .flex-row {
         flex-direction: row;
 }
@@ -452,6 +470,12 @@
     .tailwind .justify-around {
         justify-content: space-around;
 }
+    .tailwind .gap-2 {
+        gap: 0.5rem;
+}
+    .tailwind .gap-1 {
+        gap: 0.25rem;
+}
     .tailwind .space-x-4 > :not([hidden]) ~ :not([hidden]) {
         --tw-space-x-reverse: 0;
         margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -474,6 +498,9 @@
 }
     .tailwind .overflow-y-hidden {
         overflow-y: hidden;
+}
+    .tailwind .text-ellipsis {
+        text-overflow: ellipsis;
 }
     .tailwind .whitespace-nowrap {
         white-space: nowrap;
@@ -974,6 +1001,14 @@
 }
     .tailwind .after\:content-\[\'\'\]::after {
         --tw-content: '';
+        content: var(--tw-content);
+}
+    .tailwind .after\:content-\[\'\:\'\]::after {
+        --tw-content: ':';
+        content: var(--tw-content);
+}
+    .tailwind .after\:content-\[\'\:_\'\]::after {
+        --tw-content: ': ';
         content: var(--tw-content);
 }
     .tailwind .checked\:before\:bg-none:checked::before {

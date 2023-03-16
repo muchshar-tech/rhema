@@ -6,6 +6,7 @@ const initialState = {
         main: true,
         books: false,
         selection: false,
+        search: false,
     },
     booksSelector: {
         books: true,
@@ -17,7 +18,17 @@ const initialState = {
         chapters: '',
         verses: '',
     },
+    searchKeywords: {
+        current: '',
+        history: [],
+    },
     drawer: {},
+}
+
+const disableAllHeader = (headersSwitch) => {
+    Object.keys(headersSwitch).forEach((key) => {
+        headersSwitch[key] = false
+    })
 }
 
 export const generalSlice = createSlice({
@@ -38,19 +49,23 @@ export const generalSlice = createSlice({
             }
         },
         switchHeadersMain: (state) => {
+            disableAllHeader(state.headersSwitch)
             state.headersSwitch.main = true
-            state.headersSwitch.books = false
-            state.headersSwitch.selection = false
+            Object.keys(state.drawer).forEach((key) => {
+                state.drawer[key] = false
+            })
         },
         switchHeadersBooks: (state) => {
-            state.headersSwitch.main = false
+            disableAllHeader(state.headersSwitch)
             state.headersSwitch.books = true
-            state.headersSwitch.selection = false
         },
         switchHeadersSelection: (state) => {
-            state.headersSwitch.main = false
-            state.headersSwitch.books = false
+            disableAllHeader(state.headersSwitch)
             state.headersSwitch.selection = true
+        },
+        switchHeadersSearch: (state) => {
+            disableAllHeader(state.headersSwitch)
+            state.headersSwitch.search = true
         },
         booksSelectorToggle: (state) => {
             state.headersSwitch.books = !state.headersSwitch.books
@@ -106,6 +121,17 @@ export const generalSlice = createSlice({
             }
             state.currentSelection = { ...state.currentSelection, ...payload }
         },
+        inputSearchKeywords: (state, action) => {
+            const { payload } = action
+            if (
+                !!state.searchKeywords.current &&
+                state.searchKeywords.current.length > 0 &&
+                payload !== state.searchKeywords.current
+            ) {
+                state.searchKeywords.history.push(state.searchKeywords.current)
+            }
+            state.searchKeywords.current = payload
+        },
         incrementByAmount: (state, action) => {
             state.value += action.payload
         },
@@ -119,10 +145,12 @@ export const {
     switchHeadersMain,
     switchHeadersBooks,
     switchHeadersSelection,
+    switchHeadersSearch,
     booksSelectorBooks,
     booksSelectorChapters,
     booksSelectorVerses,
     currentSelection,
+    inputSearchKeywords,
     incrementByAmount,
 } = generalSlice.actions
 

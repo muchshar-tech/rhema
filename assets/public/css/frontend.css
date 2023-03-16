@@ -1,5 +1,5 @@
 /*
-! tailwindcss v3.1.8 | MIT License | https://tailwindcss.com
+! tailwindcss v3.1.5 | MIT License | https://tailwindcss.com
 *//*
 1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
 2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
@@ -314,6 +314,11 @@ textarea {
 */
 
 input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+input:-ms-input-placeholder, textarea:-ms-input-placeholder {
   opacity: 1; /* 1 */
   color: #9ca3af; /* 2 */
 }
@@ -729,6 +734,9 @@ video {
 .mb-10px {
   margin-bottom: 10px;;
 }
+.mt-2 {
+  margin-top: 0.5rem;
+}
 .box-border {
   box-sizing: border-box;
 }
@@ -746,6 +754,9 @@ video {
 }
 .table {
   display: table;
+}
+.\!table {
+  display: table !important;
 }
 .hidden {
   display: none;
@@ -840,6 +851,12 @@ video {
 .w-40px {
   width: 40px;;
 }
+.w-16 {
+  width: 4rem;
+}
+.w-auto {
+  width: auto;
+}
 .min-w-200px {
   min-width: 200px;;
 }
@@ -926,6 +943,12 @@ video {
 .cursor-pointer {
   cursor: pointer;
 }
+.select-none {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
 .flex-row {
   flex-direction: row;
 }
@@ -959,6 +982,12 @@ video {
 .justify-around {
   justify-content: space-around;
 }
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -981,6 +1010,9 @@ video {
 }
 .overflow-y-hidden {
   overflow-y: hidden;
+}
+.text-ellipsis {
+  text-overflow: ellipsis;
 }
 .whitespace-nowrap {
   white-space: nowrap;
@@ -1481,6 +1513,14 @@ video {
 }
 .after\:content-\[\'\'\]::after {
   --tw-content: '';
+  content: var(--tw-content);
+}
+.after\:content-\[\'\:\'\]::after {
+  --tw-content: ':';
+  content: var(--tw-content);
+}
+.after\:content-\[\'\:_\'\]::after {
+  --tw-content: ': ';
   content: var(--tw-content);
 }
 .checked\:before\:bg-none:checked::before {

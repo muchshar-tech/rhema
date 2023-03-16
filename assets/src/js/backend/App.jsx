@@ -114,6 +114,9 @@ const Settings = () => {
         (!!updateOptionsResponse &&
             !/2[0-9][0-9]/.test(updateOptionsResponse?.response?.code)) ||
         !!updateOptionsError
+    
+    const showOptionsSaved = updateOptionsResponse?.success === true ? true : false
+
     console.log(updateOptionsError, updateOptionsResponse)
     const exceptionMessage = {
         code: updateOptionsError?.status,
@@ -124,9 +127,9 @@ const Settings = () => {
     }
     const successMessage = {
         code: updateOptionsResponse?.response?.code || 200,
-        label: '',
+        label: 'Success',
         message:
-            updateOptionsError?.data?.data?.message || 'Update Successfully.',
+            updateOptionsError?.data?.data?.message || updateOptionsResponse?.data?.message || 'Rhema options saved.',
     }
 
     const onSubmit = async (data) => {
@@ -193,7 +196,7 @@ const Settings = () => {
             <div className="flex">
                 <button
                     type="submit"
-                    className="button button-primary m-0"
+                    className="button button-primary m-0 flex items-center"
                     {...(isUpdating && { disabled: true })}
                 >
                     {isUpdating ? (
@@ -202,6 +205,11 @@ const Settings = () => {
                         'Save Settings'
                     )}
                 </button>
+                {showOptionsSaved ? (
+                    <FormTable.ResponseSuccessMsg label={successMessage.label}>
+                        {successMessage.message}
+                    </FormTable.ResponseSuccessMsg>
+                ) : null}
                 {showExceptionMessage && (
                     <FormTable.ResponseErrorMsg
                         code={exceptionMessage.code}

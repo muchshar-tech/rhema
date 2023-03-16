@@ -1,7 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
+import {
+    retrieveLogosSignedToken,
+    setLogosSignedToken,
+    removeLogosSignedToken,
+} from '@components/common'
 
 const initialState = {
-    token: sessionStorage.getItem('logos.token'),
+    token: retrieveLogosSignedToken(sessionStorage),
 }
 
 export const accountSlice = createSlice({
@@ -10,12 +15,11 @@ export const accountSlice = createSlice({
     reducers: {
         addSigninToken: (state, action) => {
             const { token } = action.payload
-            console.log(token)
-            sessionStorage.setItem('logos.token', token)
+            setLogosSignedToken(sessionStorage, token)
             state = { token }
         },
         delelteSigninToken: (state) => {
-            sessionStorage.removeItem('logos.token')
+            removeLogosSignedToken(sessionStorage)
             state.token = null
         },
     },

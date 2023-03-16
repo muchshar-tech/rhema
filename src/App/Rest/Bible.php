@@ -78,6 +78,20 @@ class Bible extends Base {
 				'permission_callback' => '__return_true',
 			]
 		);
+		register_rest_route(
+			'rhema/v1',
+			'/bible/search',
+			[
+				'methods'  => \WP_REST_Server::READABLE,
+				'callback' => [ $this, 'searchRaws' ],
+				'args'     => [
+					'words'  => [
+						'default' => false,
+					],
+				],
+				'permission_callback' => '__return_true',
+			]
+		);
 	}
 	/**
 	 * getRaws
@@ -110,5 +124,14 @@ class Bible extends Base {
 			return [];
 		}
 		return $rhema_res;
+	}
+	/**
+	 * Search bible by keywords
+	 *
+	 * @param WP_REST_Request $request
+	 * @return array
+	 */
+	public function searchRaws( WP_REST_Request $request ): array {
+		return [];
 	}
 }

@@ -116,27 +116,52 @@ class Options extends Base {
 	 */
 	public function updateOptions( WP_REST_Request $request ) {
 		$functions_options = rhema()->options();
-		$isempty = $functions_options->checkRewriteIsEmpty( 'bible' );
+		$options = $functions_options->get();
+		$general = isset( $options['general'] ) ? $options['general'] : null;
+		if ( isset( $general['bible_entry'] ) ) {
+			$bible_entry_path = $general['bible_entry'];
+		}
+
 		$json = $request->get_json_params();
+
 		if ( empty( $json ) ) {
 			$error = new WP_Error( 400, Constants::init()->error_message['system/app/rest/options/field_is_wrong'] );
 		}
+
+		$rewrite_isempty = $functions_options->checkRewriteIsEmpty( $json['bible_entry'] );
+		if ( $bible_entry_path !== $json['bible_entry'] && is_wp_error( $rewrite_isempty ) ) {
+			$error = new WP_Error( 400, Constants::init()->error_message['system/app/rest/options/field_is_wrong'] );
+		}
+
 		try {
 			v::key( 'bible_entry', v::stringType() )
 				->key( 'bible_default_translation', v::stringType() )
 				->assert( $json );
 		} catch ( ValidationException $exception ) {
-			$error = new WP_Error( 500, $exception->getFullMessage() );
+			$error = new WP_Error( 500, $exception->getMessage() );
 		} catch ( Exception $exception ) {
 			$error = new WP_Error( 500, $exception->getMessage() );
 		}
+
 		if ( is_wp_error( $error ) ) {
 			wp_send_json_error( [ 'message' => $error->get_error_message() ], $error->get_error_code() );
 		}
+
 		$plugin_domain = $this->plugin->textDomain();
-		update_option( $plugin_domain, json_encode( [
+
+		$updated = update_option( $plugin_domain, json_encode( [
 			'general' => $json,
 		] ) );
+
+		if ( ! $updated ) {
+			wp_send_json_success( [
+				'message' => 'Rhema options nothing to save.',
+			], 200 );
+		}
+
+		wp_send_json_success( [
+			'message' => 'Rhema options saved.',
+		], 200 );
 	}
 	/**
 	 * Option bible entry sanitize

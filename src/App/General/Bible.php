@@ -95,6 +95,7 @@ final class Bible extends Base {
 			'activate' => "{$rest_url}{$this->restNamespace()}/activate",
 			'deactivate' => "{$rest_url}{$this->restNamespace()}/deactivate",
 			'account' => "{$rest_url}{$this->restNamespace()}/account",
+			'orders' => "{$rest_url}{$this->restNamespace()}/orders",
 		];
 	}
 	/**
@@ -225,7 +226,9 @@ final class Bible extends Base {
 			}
 			$raw_params = $this->generateGetRawParam( $query_schema );
 			$query_string = $this->generateQueryString( $raw_params );
-			$rhema_res = Logos\Api::init()->getRaws( $query_string );
+			/** @var Logos\Api */
+			$integration_logos_api = Logos\Api::init();
+			$rhema_res = $integration_logos_api->getRaws( $query_string );
 		} catch ( Exception $e ) {
 			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
 		}

@@ -146,7 +146,7 @@ class Activate extends Base {
 				return $token;
 			}
 		} catch ( ValidationException $exception ) {
-			return new WP_Error( 500, $exception->getFullMessage() );
+			return new WP_Error( 500, $exception->getMessage() );
 		} catch ( Exception $exception ) {
 			return new WP_Error( 500, $exception->getMessage() );
 		}

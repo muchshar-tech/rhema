@@ -314,6 +314,42 @@ final class Api extends Base {
 		return $json_parsed;
 	}
 	/**
+	 * Search bible.
+	 *
+	 * @param string $keyword
+	 * @param int $from
+	 * @return array|WP_Error
+	 */
+	public function searchRaws( string $keyword, int $from = 0 ): array|WP_Error {
+		$is_valid = $this->authenticated();
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
+		if ( ! $is_valid ) {
+			return new WP_Error( 403, Constants::init()->error_message['logos_authorization_failed'] );
+		}
+		$search_remote = "{$this->remote()}/search/cuv";
+		$token = $this->getSavedToken();
+		$rhema_res = wp_remote_get( "$search_remote?words={$keyword}&from={$from}", [
+			'headers' => [
+				'Authorization' => "Bearer $token",
+			],
+		] );
+		if ( is_wp_error( $rhema_res ) ) {
+			return $rhema_res;
+		}
+
+		if ( 401 === $rhema_res['response']['code'] ) {
+			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
+		}
+
+		if ( 200 !== $rhema_res['response']['code'] ) {
+			return new WP_Error( 404, 'Can\'t get verse.' );
+		}
+		$json_parsed = json_decode( $rhema_res['body'], true );
+		return $json_parsed;
+	}
+	/**
 	 * Signin function
 	 *
 	 * @param string $username

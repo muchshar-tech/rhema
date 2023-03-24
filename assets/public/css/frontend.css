@@ -722,6 +722,9 @@ video {
 .ml-2 {
   margin-left: 0.5rem;
 }
+.mt-2 {
+  margin-top: 0.5rem;
+}
 .mr-5px {
   margin-right: 5px;;
 }
@@ -734,8 +737,8 @@ video {
 .mb-10px {
   margin-bottom: 10px;;
 }
-.mt-2 {
-  margin-top: 0.5rem;
+.mb-4 {
+  margin-bottom: 1rem;
 }
 .box-border {
   box-sizing: border-box;
@@ -818,6 +821,9 @@ video {
 .w-80 {
   width: 20rem;
 }
+.w-16 {
+  width: 4rem;
+}
 .w-1\/6 {
   width: 16.666667%;
 }
@@ -842,6 +848,9 @@ video {
 .w-0 {
   width: 0px;
 }
+.w-auto {
+  width: auto;
+}
 .w-8px {
   width: 8px;;
 }
@@ -850,12 +859,6 @@ video {
 }
 .w-40px {
   width: 40px;;
-}
-.w-16 {
-  width: 4rem;
-}
-.w-auto {
-  width: auto;
 }
 .min-w-200px {
   min-width: 200px;;
@@ -1166,6 +1169,9 @@ video {
 .p-12px {
   padding: 12px;;
 }
+.p-10 {
+  padding: 2.5rem;
+}
 .p-5px {
   padding: 5px;;
 }
@@ -1280,6 +1286,10 @@ video {
 }
 .text-12px {
   font-size: 12px;;
+}
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 .font-medium {
   font-weight: 500;
@@ -1435,6 +1445,10 @@ video {
   content: var(--tw-content);
   width: 18px;;
 }
+.before\:items-start::before {
+  content: var(--tw-content);
+  align-items: flex-start;
+}
 .before\:items-center::before {
   content: var(--tw-content);
   align-items: center;
@@ -1442,6 +1456,14 @@ video {
 .before\:justify-center::before {
   content: var(--tw-content);
   justify-content: center;
+}
+.before\:whitespace-nowrap::before {
+  content: var(--tw-content);
+  white-space: nowrap;
+}
+.before\:p-3px::before {
+  content: var(--tw-content);
+  padding: 3px;;
 }
 .before\:px-3px::before {
   content: var(--tw-content);
@@ -1511,16 +1533,12 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(220 38 38 / var(--tw-bg-opacity));
 }
-.after\:content-\[\'\'\]::after {
-  --tw-content: '';
-  content: var(--tw-content);
-}
 .after\:content-\[\'\:\'\]::after {
   --tw-content: ':';
   content: var(--tw-content);
 }
-.after\:content-\[\'\:_\'\]::after {
-  --tw-content: ': ';
+.after\:content-\[\'\'\]::after {
+  --tw-content: '';
   content: var(--tw-content);
 }
 .checked\:before\:bg-none:checked::before {
@@ -1685,6 +1703,11 @@ video {
 
   .md\:text-14px {
     font-size: 14px;;
+  }
+
+  .md\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 
   .md\:leading-22px {

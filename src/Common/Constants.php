@@ -124,6 +124,11 @@ final class Constants extends Base {
 	 */
 	public $books = [];
 	/**
+	 * Books
+	 *
+	 */
+	public $error_message = [];
+	/**
 	 * Constants constructor.
 	 *
 	 * @since 1.0.0

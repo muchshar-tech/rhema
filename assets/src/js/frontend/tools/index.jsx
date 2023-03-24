@@ -29,7 +29,7 @@ const Borderless = ({ onClick, children }) => {
     return (
         <Ripples>
             <div
-                className="relative flex items-center justify-center overflow-hidden h-30px w-30px md:h-40px md:w-40px"
+                className="relative flex items-center justify-center overflow-hidden h-30px w-30px md:h-40px md:w-40px cursor-pointer"
                 onClick={onClick}
             >
                 {children}

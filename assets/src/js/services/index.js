@@ -91,21 +91,53 @@ export const bibleApi = createApi({
                 return returnConverted
             },
         }),
+    }),
+})
+
+export const { useGetBibleRawQuery } = bibleApi
+
+export const searchApi = createApi({
+    reducerPath: 'api.search',
+    baseQuery: fetchBaseQuery({
+        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.bible,
+        prepareHeaders,
+    }),
+    endpoints: (builder) => ({
         searchBibleRaws: builder.query({
-            query: ({ words }) => {
-                return words
+            query: ({ words, paged = 1, size = 20 }) => {
+                return `search?words=${words}&from=${(paged - 1) * size}`
+            },
+            serializeQueryArgs: ({ endpointName }) => {
+                return endpointName
+            },
+            merge: (currentCache, newItems) => {
+                console.log('merge')
+                console.log(currentCache.data.hits.hits, newItems)
+                const currentIds = currentCache.data.hits.hits.map((item) => {
+                    return item._id
+                })
+                const newPushItems = newItems.data.hits.hits.filter((item) => {
+                    return !currentIds.includes(item._id)
+                })
+                console.log(newPushItems)
+                currentCache.data.hits.hits.push(...newPushItems)
             },
             transformResponse: (response) => {
+                console.log(response)
                 return response
             },
             transformErrorResponse: (response) => {
+                console.log(response)
                 return response
+            },
+            forceRefetch({ currentArg, previousArg }) {
+                return currentArg !== previousArg
             },
         }),
     }),
 })
 
-export const { useGetBibleRawQuery, useSearchBibleRawsQuery } = bibleApi
+export const { useSearchBibleRawsQuery } = searchApi
 
 export const activateApi = createApi({
     reducerPath: 'api.activate',

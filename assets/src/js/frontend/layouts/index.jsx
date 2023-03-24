@@ -80,7 +80,11 @@ const Body = ({ children }) => {
 }
 
 const Content = ({ children }) => {
-    const showMain = useSelector((state) => state.general.headersSwitch.main)
+    const showMain = useSelector(
+        (state) =>
+            state.general.headersSwitch.main ||
+            state.general.headersSwitch.selection
+    )
     const [movePercentage, setMovePercentage] = useState(0)
     const [pagePos, setPagePos] = useState(0)
     const onSwipeStart = (event) => {

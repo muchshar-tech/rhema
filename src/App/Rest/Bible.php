@@ -13,11 +13,13 @@ declare( strict_types = 1 );
 
 namespace Rhema\App\Rest;
 
+use Exception;
 use WP_REST_Request;
 use WP_Error;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
+use Rhema\Common\Constants;
 /**
  * Class Example
  *
@@ -88,6 +90,9 @@ class Bible extends Base {
 					'words'  => [
 						'default' => false,
 					],
+					'from'  => [
+						'default' => 0,
+					],
 				],
 				'permission_callback' => '__return_true',
 			]
@@ -132,6 +137,31 @@ class Bible extends Base {
 	 * @return array
 	 */
 	public function searchRaws( WP_REST_Request $request ): array {
-		return [];
+		/** @var Logos\Api */
+		$integration_logos_api = Logos\Api::init();
+		$keyword = $request->get_param( 'words' );
+		$from = (int) $request->get_param( 'from' );
+		/** @var Constants */
+		$constants = Constants::init();
+
+		try {
+
+			if ( empty( $keyword ) ) {
+				throw new Exception( $constants->error_message['system/integrations/logos/api/param_wrong'], 403 );
+			}
+
+			$rhema_res = $integration_logos_api->searchRaws( $keyword, $from );
+
+			if ( is_wp_error( $rhema_res ) ) {
+				throw new Exception( $rhema_res->get_error_message(), $rhema_res->get_error_code() );
+			}
+
+			return [
+				'data' => $rhema_res,
+				'success' => true,
+			];
+		} catch ( Exception $exception ) {
+			wp_send_json_error( [ 'message' => $exception->getMessage() ], $exception->getCode() );
+		}
 	}
 }

@@ -21,6 +21,26 @@ export const Button = ({ onClick, children }) => {
     )
 }
 
+export const KeywordLabel = ({ className, onClick, children }) => {
+    const classNames = [
+        'p-2',
+        'bg-zinc-200',
+        'inline-block',
+        'text-sm',
+        className,
+    ].join(' ')
+    return (
+        <span
+            className={classNames}
+            {...{
+                ...(onClick ? { onClick } : {}),
+            }}
+        >
+            {children}
+        </span>
+    )
+}
+
 export const StringLabel = ({ className, children }) => {
     const classNames = ['inline-block', 'text-sm', className].join(' ')
     return <span className={classNames}>{children}</span>
@@ -58,6 +78,7 @@ export const Line = ({
     chapterNum,
     verseNum,
     className,
+    onClick,
     children,
 }) => {
     const booksDataSelector = useSelector((state) => [
@@ -65,11 +86,12 @@ export const Line = ({
         ...state.data.books.new,
     ])
     const currentKeywords = useSelector(
-        (state) => state.general.searchKeywords.current
+        (state) => state.general.search.keywords.current
     )
 
     const classNames = [
         'flex',
+        'cursor-pointer',
         'before:whitespace-nowrap',
         'before:p-3px',
         'before:mt-5px',
@@ -89,6 +111,7 @@ export const Line = ({
     const bookAbbrString = booksDataSelector[bookAbbr - 1].abbr
     return (
         <span
+            {...(onClick ? { onClick } : {})}
             {...(bookAbbr
                 ? {
                       'data-book-abbr': bookAbbrString,

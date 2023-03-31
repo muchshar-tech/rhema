@@ -106,6 +106,7 @@ export const Verses = () => {
         withPrevChapter: true,
         withNextChapter: true,
     })
+    console.log(data, error, isFetching)
     const currentQueryMaxVerseNumber = queryString[queryString.length - 1].verse
     const loadingLine = isFetching ? currentQueryMaxVerseNumber : 0
     useEffect(() => {
@@ -113,6 +114,11 @@ export const Verses = () => {
             dispatch(loadRaws(data))
         }
     }, [data])
+    useEffect(() => {
+        if (error && Object.keys(error).length > 0) {
+            throw new Error(error.data.code)
+        }
+    }, [error])
     return (
         <MemoContainer
             raws={current}

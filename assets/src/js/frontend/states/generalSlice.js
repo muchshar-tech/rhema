@@ -2,6 +2,9 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     fullscreen: false,
+    displaySetting: {
+        fontSize: 'md'
+    },
     headersSwitch: {
         main: true,
         books: false,
@@ -18,9 +21,12 @@ const initialState = {
         chapters: '',
         verses: '',
     },
-    searchKeywords: {
-        current: '',
-        history: [],
+    search: {
+        keywords: {
+            current: '',
+            history: [],
+        },
+        paged: 1,
     },
     drawer: {},
 }
@@ -124,13 +130,25 @@ export const generalSlice = createSlice({
         inputSearchKeywords: (state, action) => {
             const { payload } = action
             if (
-                !!state.searchKeywords.current &&
-                state.searchKeywords.current.length > 0 &&
-                payload !== state.searchKeywords.current
+                !!state.search.keywords.current &&
+                state.search.keywords.current.length > 0 &&
+                payload !== state.search.keywords.current
             ) {
-                state.searchKeywords.history.push(state.searchKeywords.current)
+                state.search.keywords.history.push(
+                    state.search.keywords.current
+                )
             }
-            state.searchKeywords.current = payload
+            if (state.search.keywords.history.includes(payload)) {
+                state.search.keywords.history =
+                    state.search.keywords.history.filter((item) => {
+                        return item !== payload
+                    })
+            }
+            state.search.keywords.current = payload
+        },
+        changeSearchPaged: (state, action) => {
+            const { payload: paged } = action
+            state.search.paged = paged
         },
         incrementByAmount: (state, action) => {
             state.value += action.payload
@@ -151,6 +169,7 @@ export const {
     booksSelectorVerses,
     currentSelection,
     inputSearchKeywords,
+    changeSearchPaged,
     incrementByAmount,
 } = generalSlice.actions
 

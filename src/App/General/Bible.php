@@ -95,7 +95,6 @@ final class Bible extends Base {
 			'activate' => "{$rest_url}{$this->restNamespace()}/activate",
 			'deactivate' => "{$rest_url}{$this->restNamespace()}/deactivate",
 			'account' => "{$rest_url}{$this->restNamespace()}/account",
-			'orders' => "{$rest_url}{$this->restNamespace()}/orders",
 		];
 	}
 	/**

@@ -39,3 +39,14 @@ export const localDateTime = (moment, value, timeZone = 0) => {
     }
     return moment(value).utcOffset(timeZone).format('YYYY/MM/DD hh:mm:ss')
 }
+ export const retrieveFontSize = (size) => {
+    const sizeMap = {
+        'sm': 'text-14px',
+        'md': 'text-16px',
+        'lg': 'text-18px',
+    }
+    if (typeof sizeMap[size] === 'undefined') {
+        return 'text-16px';
+    }
+    return sizeMap[size];
+ }

@@ -65,11 +65,11 @@ class HTML_Widget extends WP_Widget {
 		$this->plugin = Plugin::init();
 		$widget_ops = [
 			'classname'                   => 'widget_html',
-			'description'                 => __( 'Displays HTML code with syntax highlighting.', 'rhema' ),
+			'description'                 => 'Displays HTML code with syntax highlighting.',
 			'customize_selective_refresh' => true,
 		];
 		$control_ops = [];
-		parent::__construct( 'rhema', __( 'HTML Test Widget', 'rhema' ), $widget_ops, $control_ops );
+		parent::__construct( 'rhema', 'HTML Test Widget', $widget_ops, $control_ops );
 	}
 
 	/**

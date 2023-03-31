@@ -78,8 +78,8 @@ export const Account = () => {
                     />
                 </div>
             ) : (
-                <div className="flex justify-center">
-                    <div>
+                <div className="flex flex-wrap justify-center">
+                    <div className="mb-4 w-full">
                         {__(
                             `Welcome to Logos. You can check your information related to Logos here after logging in.`,
                             RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT

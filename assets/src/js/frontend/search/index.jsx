@@ -1,31 +1,45 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
 import Skeleton from 'react-loading-skeleton'
 
 import * as Paragraph from '@components/frontend/paragraph'
-import { Line, StringLabel, Button } from '@assets/js/frontend/components'
+import {
+    Line,
+    StringLabel,
+    Button,
+    KeywordLabel,
+} from '@assets/js/frontend/components'
 import { useSearchBibleRawsQuery } from '@components/services'
-import { currentSelection } from '@assets/js/frontend/states/generalSlice'
-import { updateQueryString } from '@assets/js/frontend/states/dataSlice'
+import {
+    changeSearchPaged,
+    inputSearchKeywords,
+} from '@assets/js/frontend/states/generalSlice'
 
 export const Results = () => {
-    const [paged, setPaged] = useState(1)
+    console.log('Results')
+    const dispatch = useDispatch()
+    const paged = useSelector((state) => state.general.search.paged)
+    const history = useSelector(
+        (state) => state.general.search.keywords.history
+    )
+
     const showSearchResults = useSelector(
         (state) => state.general.headersSwitch.search
     )
     const currentKeywords = useSelector(
-        (state) => state.general.searchKeywords.current
+        (state) => state.general.search.keywords.current
     )
-    const { data, error, isFetching } = useSearchBibleRawsQuery(
-        {
-            words: currentKeywords,
-            paged,
-        },
-        {
-            skip: currentKeywords.length === 0,
-        }
-    )
+    const { data, currentData, error, isFetching, isLoading, isUninitialized } =
+        useSearchBibleRawsQuery(
+            {
+                words: currentKeywords,
+                paged,
+            },
+            {
+                skip: currentKeywords.length === 0,
+            }
+        )
     const classNames = [
         ...(showSearchResults ? ['block'] : ['hidden']),
         'bg-white',
@@ -33,39 +47,77 @@ export const Results = () => {
         'p-10',
     ].join(' ')
 
-    const { hits, total } = data?.data?.hits || {
+    const {
+        hits,
+        total: { value: total },
+    } = data?.data?.hits || {
         hits: [],
         total: { value: 0 },
     }
-    const loadingLine = 20 || 0
+    const loadingLine =
+        (isLoading
+            ? 20
+            : Number(total) - hits.length > 20
+            ? 20
+            : Number(total) - hits.length) || 0
+    const hasMore = total > hits.length
+
+    useEffect(() => {
+        if (error && Object.keys(error).length > 0) {
+            throw new Error(error.data.code)
+        }
+    }, [error])
     return (
         <div className={classNames}>
-            <StringLabel className={`block w-full mb-4`}>
-                共 {isFetching ? '?' : total.value} 筆結果
+            {history.map((keyword, index) => {
+                return (
+                    <KeywordLabel
+                        key={index}
+                        onClick={() => {
+                            dispatch(inputSearchKeywords(keyword))
+                            dispatch(changeSearchPaged(1))
+                        }}
+                        className="text-zinc-400 mr-1 cursor-pointer"
+                    >
+                        {keyword}
+                    </KeywordLabel>
+                )
+            })}
+            <KeywordLabel className="text-rose-600">
+                {currentKeywords}
+            </KeywordLabel>
+            <StringLabel className={`block w-full my-4`}>
+                共 {isLoading ? '?' : total} 筆結果
             </StringLabel>
             <Paragraph.Block>
                 <>
-                    {hits.map(({ _source: raw }) => (
-                        <Line
-                            block={true}
-                            id={raw.id}
-                            key={raw.id}
-                            bookAbbr={raw.book}
-                            chapterNum={raw.chapter}
-                            verseNum={raw.verse}
-                        >
-                            {raw.text}
-                        </Line>
-                    ))}
+                    {currentData
+                        ? hits.map(({ _source: raw }) => (
+                              <Line
+                                  block={true}
+                                  id={raw.id}
+                                  key={raw.id}
+                                  bookAbbr={raw.book}
+                                  chapterNum={raw.chapter}
+                                  verseNum={raw.verse}
+                              >
+                                  {raw.text}
+                              </Line>
+                          ))
+                        : null}
                     {isFetching ? (
                         <Skeleton inline={false} count={loadingLine} />
                     ) : null}
                 </>
             </Paragraph.Block>
-            <div className="w-full">
+            <div
+                className={['w-full', ...(!hasMore ? ['hidden'] : [])].join(
+                    ' '
+                )}
+            >
                 <Button
                     onClick={() => {
-                        setPaged(paged + 1)
+                        dispatch(changeSearchPaged(paged + 1))
                     }}
                 >
                     讀取更多

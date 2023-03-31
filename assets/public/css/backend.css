@@ -179,6 +179,10 @@
         margin-top: 10px;;
         margin-bottom: 10px;;
 }
+    .tailwind .my-4 {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+}
     .tailwind .mx-1 {
         margin-left: 0.25rem;
         margin-right: 0.25rem;
@@ -318,6 +322,9 @@
     .tailwind .w-1\/4 {
         width: 25%;
 }
+    .tailwind .w-72px {
+        width: 72px;;
+}
     .tailwind .w-20px {
         width: 20px;;
 }
@@ -326,9 +333,6 @@
 }
     .tailwind .w-11\/12 {
         width: 91.666667%;
-}
-    .tailwind .w-72px {
-        width: 72px;;
 }
     .tailwind .w-30px {
         width: 30px;;
@@ -625,6 +629,10 @@
         --tw-bg-opacity: 1;
         background-color: rgb(229 231 235 / var(--tw-bg-opacity));
 }
+    .tailwind .bg-zinc-200 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(228 228 231 / var(--tw-bg-opacity));
+}
     .tailwind .bg-white\/\[\.9\] {
         background-color: rgb(255 255 255 / .9);
 }
@@ -687,6 +695,10 @@
         padding-left: 0.25rem;
         padding-right: 0.25rem;
 }
+    .tailwind .py-5px {
+        padding-top: 5px;;
+        padding-bottom: 5px;;
+}
     .tailwind .px-10px {
         padding-left: 10px;;
         padding-right: 10px;;
@@ -722,10 +734,6 @@
     .tailwind .py-8px {
         padding-top: 8px;;
         padding-bottom: 8px;;
-}
-    .tailwind .py-5px {
-        padding-top: 5px;;
-        padding-bottom: 5px;;
 }
     .tailwind .py-2px {
         padding-top: 2px;;
@@ -769,21 +777,31 @@
         font-size: 0.875rem;
         line-height: 1.25rem;
 }
+    .tailwind .text-base {
+        font-size: 1rem;
+        line-height: 1.5rem;
+}
     .tailwind .text-16px {
         font-size: 16px;;
 }
     .tailwind .text-12px {
         font-size: 12px;;
 }
-    .tailwind .text-base {
-        font-size: 1rem;
-        line-height: 1.5rem;
+    .tailwind .text-lg {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+}
+    .tailwind .text-18px {
+        font-size: 18px;;
 }
     .tailwind .font-medium {
         font-weight: 500;
 }
     .tailwind .font-bold {
         font-weight: 700;
+}
+    .tailwind .leading-18px {
+        line-height: 18px;;
 }
     .tailwind .leading-20px {
         line-height: 20px;;
@@ -793,9 +811,6 @@
 }
     .tailwind .leading-12 {
         line-height: 3rem;
-}
-    .tailwind .leading-18px {
-        line-height: 18px;;
 }
     .tailwind .text-gray-400 {
         --tw-text-opacity: 1;
@@ -844,6 +859,10 @@
     .tailwind .text-neutral-600 {
         --tw-text-opacity: 1;
         color: rgb(82 82 82 / var(--tw-text-opacity));
+}
+    .tailwind .text-zinc-400 {
+        --tw-text-opacity: 1;
+        color: rgb(161 161 170 / var(--tw-text-opacity));
 }
     .tailwind .underline {
         -webkit-text-decoration-line: underline;
@@ -1178,15 +1197,15 @@
         }
 }
     @media (min-width: 768px) {
-        .tailwind .md\:py-10px {
-                padding-top: 10px;;
-                padding-bottom: 10px;;
-        }
-}
-    @media (min-width: 768px) {
         .tailwind .md\:py-8px {
                 padding-top: 8px;;
                 padding-bottom: 8px;;
+        }
+}
+    @media (min-width: 768px) {
+        .tailwind .md\:py-10px {
+                padding-top: 10px;;
+                padding-bottom: 10px;;
         }
 }
     @media (min-width: 768px) {
@@ -1206,14 +1225,14 @@
         }
 }
     @media (min-width: 768px) {
-        .tailwind .md\:text-14px {
-                font-size: 14px;;
-        }
-}
-    @media (min-width: 768px) {
         .tailwind .md\:text-lg {
                 font-size: 1.125rem;
                 line-height: 1.75rem;
+        }
+}
+    @media (min-width: 768px) {
+        .tailwind .md\:text-14px {
+                font-size: 14px;;
         }
 }
     @media (min-width: 768px) {

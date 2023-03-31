@@ -45,6 +45,7 @@ class PostTypes extends Base {
 	 */
 	public function register() {
 		$plugin_domain = $this->plugin->textDomain();
+		/*
 		register_post_type( Constants::BIBLE_QUESTION_TYPE['id'],
 			[
 				'labels'             => [
@@ -52,13 +53,13 @@ class PostTypes extends Base {
 					'singular_name'  => Constants::BIBLE_QUESTION_TYPE['singular'],
 					'menu_name'      => Constants::BIBLE_QUESTION_TYPE['title'],
 					'name_admin_bar' => Constants::BIBLE_QUESTION_TYPE['singular'],
-					'add_new'        => sprintf( /* translators: %s: post type singular title */ __( 'New %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
-					'add_new_item'   => sprintf( /* translators: %s: post type singular title */ __( 'Add New %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
-					'new_item'       => sprintf( /* translators: %s: post type singular title */ __( 'New %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
-					'edit_item'      => sprintf( /* translators: %s: post type singular title */ __( 'Edit %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
-					'view_item'      => sprintf( /* translators: %s: post type singular title */ __( 'View %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
-					'all_items'      => sprintf( /* translators: %s: post type title */ __( '%s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['title'] ),
-					'search_items'   => sprintf( /* translators: %s: post type title */ __( 'Search %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['title'] ),
+					'add_new'        => sprintf( __( 'New %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
+					'add_new_item'   => sprintf( __( 'Add New %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
+					'new_item'       => sprintf( __( 'New %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
+					'edit_item'      => sprintf( __( 'Edit %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
+					'view_item'      => sprintf( __( 'View %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['singular'] ),
+					'all_items'      => sprintf( __( '%s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['title'] ),
+					'search_items'   => sprintf( __( 'Search %s', 'rhema' ), Constants::BIBLE_QUESTION_TYPE['title'] ),
 				],
 				'public'             => true,
 				'publicly_queryable' => true,
@@ -75,5 +76,6 @@ class PostTypes extends Base {
 				'supports'           => [ 'title', 'editor' ],
 			]
 		);
+		*/
 	}
 }

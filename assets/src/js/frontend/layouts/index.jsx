@@ -40,7 +40,7 @@ const AppContainer = ({ children }) => {
             className={[
                 'mx-auto',
                 'overflow-hidden',
-                'md:rounded-8px',
+                ...(fullscreen ? [] : ['md:rounded-8px']),
                 'font-bible',
                 'drop-shadow-md',
                 ...fullscreenStyle,

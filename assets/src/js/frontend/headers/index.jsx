@@ -10,8 +10,10 @@ import {
     switchHeadersMain,
     toggleDrawer,
     switchHeadersSearch,
+    changeSearchPaged,
     inputSearchKeywords,
 } from '@assets/js/frontend/states/generalSlice'
+
 import { queryStringModifier } from '@assets/js/frontend/utilities'
 import * as Layout from '@components/frontend/layouts'
 import * as Tools from '@components/frontend/tools'
@@ -48,6 +50,7 @@ const Main = () => {
     const onSubmit = async (data) => {
         console.log(data)
         dispatch(inputSearchKeywords(data.words))
+        dispatch(changeSearchPaged(1))
         dispatch(switchHeadersSearch())
     }
 
@@ -78,10 +81,10 @@ const Main = () => {
                 {!showSearchHeader ? (
                     <>
                         <Tools.FullScreenToggle />
-                        <Tools.Borderless>
+                        <Tools.Borderless onClick={() => {}}>
                             <BiFontSize className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                         </Tools.Borderless>
-                        <Tools.Borderless
+                        {/* <Tools.Borderless
                             onClick={() =>
                                 dispatch(
                                     toggleDrawer({ name: 'relative-posts' })
@@ -89,7 +92,7 @@ const Main = () => {
                             }
                         >
                             <BsLayoutTextSidebarReverse className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
-                        </Tools.Borderless>
+                        </Tools.Borderless> */}
                     </>
                 ) : null}
             </Layout.Top.RightSide>

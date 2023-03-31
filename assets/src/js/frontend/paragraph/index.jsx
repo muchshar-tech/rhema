@@ -54,6 +54,9 @@ const Line = ({
     const { current: currentChapterRaws } = useSelector(
         (state) => state.data.raws
     )
+    const {
+        fontSize,
+    } = useSelector((state) => state.general.displaySetting)
     const selectedRaws = useSelector((state) => state.selected.raws)
     const bind = useLongPress(
         !isSelectionMode
@@ -124,6 +127,7 @@ const Line = ({
         'before:leading-none',
         'before:decoration-sky-500',
         'cursor-pointer',
+        'text-16px',
     ].join(' ')
     return (
         <span

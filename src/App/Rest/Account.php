@@ -83,7 +83,7 @@ class Account extends Base {
 			'rhema/v1',
 			'/account/orders',
 			[
-				'methods'  => \WP_REST_Server::CREATABLE,
+				'methods'  => \WP_REST_Server::READABLE,
 				'callback' => [ $this, 'orders' ],
 				'args'     => [],
 				'permission_callback' => function () {
@@ -124,19 +124,21 @@ class Account extends Base {
 	 * Orders
 	 *
 	 * @param WP_REST_Request $request
-	 * @return array
+	 *
 	 */
-	public function orders( WP_REST_Request $request ): array {
-		$body = $request->get_json_params();
-
+	public function orders( WP_REST_Request $request ) {
+		$header_authorization = $request->get_header( 'Authorization' );
+		$token = preg_replace( '/^Bearer /', '', $header_authorization );
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
-
-		return [
-			'response' => [
-				'code' => 200,
-			],
-			'body' => $license_key,
-		];
+		try {
+			$orders = $integration_logos_api->orders( $token );
+			if ( is_wp_error( $orders ) ) {
+				throw new Exception( $orders->get_error_message(), $orders->get_error_code() );
+			}
+		} catch ( Exception $error ) {
+			wp_send_json_error( [ 'message' => $error->getMessage() ], $error->getCode() );
+		}
+		wp_send_json_success( $orders, 200 );
 	}
 }

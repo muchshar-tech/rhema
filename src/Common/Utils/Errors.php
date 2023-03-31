@@ -47,7 +47,7 @@ class Errors {
 	public static function wpDie( $message = '', $subtitle = '', $source = '', $exception = '', $title = '' ) {
 		if ( $message ) {
 			$plugin = self::getPluginData();
-			$title = $title ? $title : $plugin['name'] . ' ' . $plugin['version'] . ' ' . __( '&rsaquo; Fatal Error', 'rhema' );
+			$title = $title ? $title : $plugin['name'] . ' ' . $plugin['version'] . ' ' . '&rsaquo; Fatal Error';
 			Errors::writeLog(
 				[
 					'title'     => $title . ' - ' . $subtitle,
@@ -83,7 +83,7 @@ class Errors {
 	public static function pluginDie( $message = '', $subtitle = '', $source = '', $exception = '', $title = '' ) {
 		if ( $message ) {
 			$plugin = self::getPluginData();
-			$title = $title ? $title : $plugin['name'] . ' ' . $plugin['version'] . ' ' . __( '&rsaquo; Plugin Disabled', 'rhema' );
+			$title = $title ? $title : $plugin['name'] . ' ' . $plugin['version'] . ' ' . '&rsaquo; Plugin Disabled';
 			Errors::writeLog(
 				[
 					'title'     => $title . ' - ' . $subtitle,

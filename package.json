@@ -25,7 +25,7 @@
         "stylelint:fix": "stylelint assets/src/**/**/*.{css,scss,pcss} --fix",
         "prettier": "prettier assets/src/js/**/*.js",
         "prettier:fix": "prettier --write assets/src/js/**/*.js",
-        "translate": "wp-pot --src '**/**/**/*.php' --dest-file 'languages/rhema.pot' --package 'rhema' --domain 'rhema' --last-translator 'TXIpartners <jive.cheng@txipartners.com>' --team 'TXIpartners <jive.cheng@txipartners.com>' --bug-report 'txipartners.com'"
+        "translate": "wp i18n make-pot . languages/rhema.pot --domain=\"rhema\" --include=\"src/**/**/*.php,src/**/*.php,assets/src/js/*.js,assets/src/js/**/*.js,assets/src/js/**/*.jsx,assets/src/js/**/**/*.jsx\" --ignore-domain"
     },
     "babel": {
         "extends": "./webpack/babel.config.js"
@@ -106,6 +106,7 @@
         "redux": "^4.2.0",
         "sass": "^1.32.2",
         "sass-loader": "^10.1.0",
+        "shorthash2": "^1.0.3",
         "stylelint": "^13.8.0",
         "stylelint-scss": "^3.18.0",
         "stylelint-webpack-plugin": "^2.1.1",

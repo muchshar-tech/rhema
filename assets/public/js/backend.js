@@ -11946,8 +11946,10 @@ var Account = function Account() {
       isSigning: isSigning
     }
   })) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "flex justify-center"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_3___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_6__.OrdersListing, null)));
+    className: "flex flex-wrap justify-center"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "mb-4 w-full"
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_3___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_6__.OrdersListing, null)));
 };
 
 /***/ }),
@@ -12006,6 +12008,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "capitalizeFirstLetter": () => (/* binding */ capitalizeFirstLetter),
 /* harmony export */   "localDateTime": () => (/* binding */ localDateTime),
 /* harmony export */   "removeLogosSignedToken": () => (/* binding */ removeLogosSignedToken),
+/* harmony export */   "retrieveFontSize": () => (/* binding */ retrieveFontSize),
 /* harmony export */   "retrieveLogosSignedToken": () => (/* binding */ retrieveLogosSignedToken),
 /* harmony export */   "setLogosSignedToken": () => (/* binding */ setLogosSignedToken)
 /* harmony export */ });
@@ -12046,6 +12049,19 @@ var localDateTime = function localDateTime(moment, value) {
 
   return moment(value).utcOffset(timeZone).format('YYYY/MM/DD hh:mm:ss');
 };
+var retrieveFontSize = function retrieveFontSize(size) {
+  var sizeMap = {
+    'sm': 'text-14px',
+    'md': 'text-16px',
+    'lg': 'text-18px'
+  };
+
+  if (typeof sizeMap[size] === 'undefined') {
+    return 'text-16px';
+  }
+
+  return sizeMap[size];
+};
 
 /***/ }),
 
@@ -12059,16 +12075,25 @@ var localDateTime = function localDateTime(moment, value) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ACTIVATING_COUNT_DOWN_TIME": () => (/* binding */ ACTIVATING_COUNT_DOWN_TIME),
+/* harmony export */   "ERROR_MESSAGE_MAPPING": () => (/* binding */ ERROR_MESSAGE_MAPPING),
 /* harmony export */   "IDENTITY_TYPE": () => (/* binding */ IDENTITY_TYPE),
 /* harmony export */   "PRODUCT_SLUGS": () => (/* binding */ PRODUCT_SLUGS),
 /* harmony export */   "PRODUCT_SLUG_REST_NAME_MAP": () => (/* binding */ PRODUCT_SLUG_REST_NAME_MAP)
 /* harmony export */ });
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1__);
+
+
 var ACTIVATING_COUNT_DOWN_TIME = 4000;
 var IDENTITY_TYPE = 'domain';
 var PRODUCT_SLUG_REST_NAME_MAP = {
   'wp-rehema-core-feature': 'core'
 };
 var PRODUCT_SLUGS = ['donate-for-txipartners', 'wp-rehema-core-feature', 'wp-rehema-rlation-feature', 'wp-rehema-q-and-a-feature', 'wp-rehema-offline-reading'];
+var ERROR_MESSAGE_MAPPING = {
+  rest_cookie_invalid_nonce: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Page is expired, please refresh", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT))
+};
 
 /***/ }),
 
@@ -12218,13 +12243,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "useSigninMutation": () => (/* binding */ useSigninMutation),
 /* harmony export */   "useUpdateOptionsMutation": () => (/* binding */ useUpdateOptionsMutation)
 /* harmony export */ });
-/* harmony import */ var _reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @reduxjs/toolkit/query/react */ "./node_modules/@reduxjs/toolkit/dist/query/react/rtk-query-react.esm.js");
-/* harmony import */ var _reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @reduxjs/toolkit/query/react */ "./node_modules/@reduxjs/toolkit/dist/query/rtk-query.esm.js");
-/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
-/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _components_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @components/common */ "./assets/src/js/common/index.js");
-/* harmony import */ var _components_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @components/constants */ "./assets/src/js/constants.js");
-/* harmony import */ var _components_frontend_utilities__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @components/frontend/utilities */ "./assets/src/js/frontend/utilities.js");
+/* harmony import */ var _reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @reduxjs/toolkit/query/react */ "./node_modules/@reduxjs/toolkit/dist/query/react/rtk-query-react.esm.js");
+/* harmony import */ var _reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @reduxjs/toolkit/query/react */ "./node_modules/@reduxjs/toolkit/dist/query/rtk-query.esm.js");
+/* harmony import */ var shorthash2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! shorthash2 */ "./node_modules/shorthash2/dist/index.js");
+/* harmony import */ var shorthash2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(shorthash2__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _components_common__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @components/common */ "./assets/src/js/common/index.js");
+/* harmony import */ var _components_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @components/constants */ "./assets/src/js/constants.js");
+/* harmony import */ var _components_frontend_utilities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @components/frontend/utilities */ "./assets/src/js/frontend/utilities.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -12249,10 +12276,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 var prepareHeaders = function prepareHeaders(headers) {
   var _RHEMA_LOCALIZE$RHEMA, _RHEMA_LOCALIZE$RHEMA2;
 
-  var nonce = ((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default()) === null || (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default()) === void 0 ? void 0 : (_RHEMA_LOCALIZE$RHEMA = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_BACKEND)) === null || _RHEMA_LOCALIZE$RHEMA === void 0 ? void 0 : _RHEMA_LOCALIZE$RHEMA.NONCE) || ((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default()) === null || (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default()) === void 0 ? void 0 : (_RHEMA_LOCALIZE$RHEMA2 = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_INITAIL_DATA)) === null || _RHEMA_LOCALIZE$RHEMA2 === void 0 ? void 0 : _RHEMA_LOCALIZE$RHEMA2.NONCE);
+  var nonce = ((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default()) === null || (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default()) === void 0 ? void 0 : (_RHEMA_LOCALIZE$RHEMA = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_BACKEND)) === null || _RHEMA_LOCALIZE$RHEMA === void 0 ? void 0 : _RHEMA_LOCALIZE$RHEMA.NONCE) || ((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default()) === null || (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default()) === void 0 ? void 0 : (_RHEMA_LOCALIZE$RHEMA2 = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_INITAIL_DATA)) === null || _RHEMA_LOCALIZE$RHEMA2 === void 0 ? void 0 : _RHEMA_LOCALIZE$RHEMA2.NONCE);
 
   if (nonce) {
     headers.set('X-WP-Nonce', nonce);
@@ -12261,10 +12289,10 @@ var prepareHeaders = function prepareHeaders(headers) {
   return headers;
 };
 
-var optionsApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var optionsApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.options',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.options),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.options),
     prepareHeaders: prepareHeaders
   }),
   endpoints: function endpoints(builder) {
@@ -12288,10 +12316,10 @@ var optionsApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cr
 });
 var useUpdateOptionsMutation = optionsApi.useUpdateOptionsMutation;
 
-var bibleApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var bibleApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.bible',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.bible),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.bible),
     prepareHeaders: prepareHeaders
   }),
   endpoints: function endpoints(builder) {
@@ -12313,7 +12341,7 @@ var bibleApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.crea
           var ranges = _ref2.ranges,
               withPrevChapter = _ref2.withPrevChapter,
               withNextChapter = _ref2.withNextChapter;
-          var currentChapter = (0,_components_frontend_utilities__WEBPACK_IMPORTED_MODULE_3__.retrieveChapterByParamString)(ranges[0]);
+          var currentChapter = (0,_components_frontend_utilities__WEBPACK_IMPORTED_MODULE_4__.retrieveChapterByParamString)(ranges[0]);
 
           var converterFilter = function converterFilter(response, chapterNumber) {
             return response.filter(function (raw) {
@@ -12337,10 +12365,10 @@ var bibleApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.crea
 });
 var useGetBibleRawQuery = bibleApi.useGetBibleRawQuery;
 
-var searchApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var searchApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.search',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.bible),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.bible),
     prepareHeaders: prepareHeaders
   }),
   endpoints: function endpoints(builder) {
@@ -12355,36 +12383,54 @@ var searchApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cre
           return "search?words=".concat(words, "&from=").concat((paged - 1) * size);
         },
         serializeQueryArgs: function serializeQueryArgs(_ref4) {
-          var endpointName = _ref4.endpointName;
-          return endpointName;
+          var queryArgs = _ref4.queryArgs,
+              endpointName = _ref4.endpointName;
+          var words = queryArgs.words;
+
+          if (typeof words === 'undefined') {
+            return endpointName;
+          }
+
+          var shortHashString = shorthash2__WEBPACK_IMPORTED_MODULE_0___default()(words);
+          return "".concat(endpointName, "_").concat(shortHashString);
         },
         merge: function merge(currentCache, newItems) {
-          var _currentCache$data$hi;
-
           console.log('merge');
-          console.log(currentCache.data.hits.hits, newItems);
-          var currentIds = currentCache.data.hits.hits.map(function (item) {
+          var currentItems = currentCache.data.hits.hits;
+          var currentIds = currentItems.map(function (item) {
             return item._id;
           });
           var newPushItems = newItems.data.hits.hits.filter(function (item) {
             return !currentIds.includes(item._id);
           });
-          console.log(newPushItems);
-
-          (_currentCache$data$hi = currentCache.data.hits.hits).push.apply(_currentCache$data$hi, _toConsumableArray(newPushItems));
+          currentItems.push.apply(currentItems, _toConsumableArray(newPushItems));
         },
         transformResponse: function transformResponse(response) {
-          console.log(response);
+          // console.log(response)
           return response;
         },
         transformErrorResponse: function transformErrorResponse(response) {
-          console.log(response);
+          // console.log(response)
           return response;
         },
         forceRefetch: function forceRefetch(_ref5) {
           var currentArg = _ref5.currentArg,
               previousArg = _ref5.previousArg;
-          return currentArg !== previousArg;
+
+          if (typeof previousArg === 'undefined') {
+            return true;
+          }
+
+          if ((currentArg === null || currentArg === void 0 ? void 0 : currentArg.words) !== (previousArg === null || previousArg === void 0 ? void 0 : previousArg.words)) {
+            console.log('forceRefetch', (currentArg === null || currentArg === void 0 ? void 0 : currentArg.words) !== (previousArg === null || previousArg === void 0 ? void 0 : previousArg.words));
+            return true;
+          }
+
+          if ((currentArg === null || currentArg === void 0 ? void 0 : currentArg.paged) !== (previousArg === null || previousArg === void 0 ? void 0 : previousArg.paged)) {
+            return true;
+          }
+
+          return false;
         }
       })
     };
@@ -12392,10 +12438,10 @@ var searchApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cre
 });
 var useSearchBibleRawsQuery = searchApi.useSearchBibleRawsQuery;
 
-var activateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var activateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.activate',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.activate),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.activate),
     prepareHeaders: prepareHeaders
   }),
   endpoints: function endpoints(builder) {
@@ -12403,14 +12449,14 @@ var activateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.c
       activateCore: builder.mutation({
         query: function query(body) {
           var productSlug = body.product_slug;
-          var restName = _components_constants__WEBPACK_IMPORTED_MODULE_2__.PRODUCT_SLUG_REST_NAME_MAP[productSlug];
+          var restName = _components_constants__WEBPACK_IMPORTED_MODULE_3__.PRODUCT_SLUG_REST_NAME_MAP[productSlug];
 
           if (typeof restName === 'undefined' || !restName) {
             throw new Error('Error in mutation.query');
           }
 
           return {
-            url: _components_constants__WEBPACK_IMPORTED_MODULE_2__.PRODUCT_SLUG_REST_NAME_MAP[productSlug],
+            url: _components_constants__WEBPACK_IMPORTED_MODULE_3__.PRODUCT_SLUG_REST_NAME_MAP[productSlug],
             method: 'POST',
             body: body
           };
@@ -12430,7 +12476,7 @@ var activateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.c
             throw new Error('Error in mutation.query');
           }
 
-          if (!_components_constants__WEBPACK_IMPORTED_MODULE_2__.PRODUCT_SLUGS.includes(productSlug)) {
+          if (!_components_constants__WEBPACK_IMPORTED_MODULE_3__.PRODUCT_SLUGS.includes(productSlug)) {
             throw new Error('Error in mutation.query');
           }
 
@@ -12447,10 +12493,10 @@ var activateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.c
 var useActivateCoreMutation = activateApi.useActivateCoreMutation,
     useActivateByLicenseMutation = activateApi.useActivateByLicenseMutation;
 
-var deactivateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var deactivateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.deactivate',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.deactivate),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.deactivate),
     prepareHeaders: prepareHeaders
   }),
   endpoints: function endpoints(builder) {
@@ -12460,7 +12506,7 @@ var deactivateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__
           var product_slug = body.product_slug,
               license = body.license;
 
-          if (!_components_constants__WEBPACK_IMPORTED_MODULE_2__.PRODUCT_SLUGS.includes(product_slug)) {
+          if (!_components_constants__WEBPACK_IMPORTED_MODULE_3__.PRODUCT_SLUGS.includes(product_slug)) {
             throw new Error('Error in mutation.query');
           }
 
@@ -12486,10 +12532,10 @@ var deactivateApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__
 });
 var useDeactivateMutation = deactivateApi.useDeactivateMutation;
 
-var signinApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var signinApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.signin',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.account),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.account),
     prepareHeaders: prepareHeaders
   }),
   endpoints: function endpoints(builder) {
@@ -12514,18 +12560,18 @@ var signinApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cre
 });
 var useSigninMutation = signinApi.useSigninMutation;
 
-var ordersApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+var ordersApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.createApi)({
   reducerPath: 'api.orders',
-  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
-    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_REST_ENDPOINTS.orders),
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_6__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.account),
     prepareHeaders: function prepareHeaders(headers) {
-      var nonce = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_0___default().RHEMA_BACKEND.NONCE);
+      var nonce = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_BACKEND.NONCE);
 
       if (nonce) {
         headers.set('X-WP-Nonce', nonce);
       }
 
-      var token = (0,_components_common__WEBPACK_IMPORTED_MODULE_1__.retrieveLogosSignedToken)(sessionStorage);
+      var token = (0,_components_common__WEBPACK_IMPORTED_MODULE_2__.retrieveLogosSignedToken)(sessionStorage);
 
       if (token) {
         headers.set('Authorization', "Bearer ".concat(token));
@@ -12538,7 +12584,9 @@ var ordersApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cre
     return {
       orders: builder.query({
         query: function query() {
-          return {};
+          return {
+            url: 'orders'
+          };
         },
         transformResponse: function transformResponse(response) {
           return response;
@@ -74998,6 +75046,65 @@ if (
 if (false) {} else {
   module.exports = __webpack_require__(/*! ./cjs/scheduler.development.js */ "./node_modules/scheduler/cjs/scheduler.development.js");
 }
+
+
+/***/ }),
+
+/***/ "./node_modules/shorthash2/dist/index.js":
+/*!***********************************************!*\
+  !*** ./node_modules/shorthash2/dist/index.js ***!
+  \***********************************************/
+/***/ ((module) => {
+
+"use strict";
+
+/**
+ * shorthash2 Jecsham (c) 2020
+ * Based in shorthash (c) 2013 Bibig https://github.com/bibig/node-shorthash (MIT)
+ */
+var bitwise = function (str) {
+    var hash = 0;
+    if (str.length == 0)
+        return hash;
+    for (var i = 0; i < str.length; i++) {
+        var ch = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + ch;
+        hash = hash & hash;
+    }
+    return hash;
+};
+var binaryTransfer = function (integer, binary) {
+    var dictionary = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    binary = binary || 62;
+    var stack = [];
+    var num;
+    var result = '';
+    var sign = integer < 0 ? '-' : '';
+    integer = Math.abs(integer);
+    while (integer >= binary) {
+        num = integer % binary;
+        integer = Math.floor(integer / binary);
+        stack.push(dictionary[num]);
+    }
+    if (integer > 0) {
+        stack.push(dictionary[integer]);
+    }
+    for (var i = stack.length - 1; i >= 0; i--) {
+        result += stack[i];
+    }
+    return sign + result;
+};
+var shortHash = function (text) {
+    var type = typeof text;
+    if (type === "string" || type === "number") {
+        var id = binaryTransfer(bitwise(String(text)), 61);
+        return id.replace('-', 'Z');
+    }
+    else {
+        throw new Error("Unexpected input type");
+    }
+};
+module.exports = shortHash;
 
 
 /***/ }),

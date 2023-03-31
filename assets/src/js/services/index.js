@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import shortHash from 'shorthash2'
 
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 import { retrieveLogosSignedToken } from '@components/common'
@@ -107,31 +108,48 @@ export const searchApi = createApi({
             query: ({ words, paged = 1, size = 20 }) => {
                 return `search?words=${words}&from=${(paged - 1) * size}`
             },
-            serializeQueryArgs: ({ endpointName }) => {
-                return endpointName
+            serializeQueryArgs: ({ queryArgs, endpointName }) => {
+                const { words } = queryArgs
+                if (typeof words === 'undefined') {
+                    return endpointName
+                }
+                const shortHashString = shortHash(words)
+                return `${endpointName}_${shortHashString}`
             },
             merge: (currentCache, newItems) => {
                 console.log('merge')
-                console.log(currentCache.data.hits.hits, newItems)
-                const currentIds = currentCache.data.hits.hits.map((item) => {
+                const currentItems = currentCache.data.hits.hits
+                const currentIds = currentItems.map((item) => {
                     return item._id
                 })
                 const newPushItems = newItems.data.hits.hits.filter((item) => {
                     return !currentIds.includes(item._id)
                 })
-                console.log(newPushItems)
-                currentCache.data.hits.hits.push(...newPushItems)
+                currentItems.push(...newPushItems)
             },
             transformResponse: (response) => {
-                console.log(response)
+                // console.log(response)
                 return response
             },
             transformErrorResponse: (response) => {
-                console.log(response)
+                // console.log(response)
                 return response
             },
             forceRefetch({ currentArg, previousArg }) {
-                return currentArg !== previousArg
+                if (typeof previousArg === 'undefined') {
+                    return true
+                }
+                if (currentArg?.words !== previousArg?.words) {
+                    console.log(
+                        'forceRefetch',
+                        currentArg?.words !== previousArg?.words
+                    )
+                    return true
+                }
+                if (currentArg?.paged !== previousArg?.paged) {
+                    return true
+                }
+                return false
             },
         }),
     }),
@@ -254,7 +272,7 @@ export const { useSigninMutation } = signinApi
 export const ordersApi = createApi({
     reducerPath: 'api.orders',
     baseQuery: fetchBaseQuery({
-        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.orders,
+        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.account,
         prepareHeaders: (headers) => {
             const nonce = RHEMA_LOCALIZE.RHEMA_BACKEND.NONCE
 
@@ -273,7 +291,9 @@ export const ordersApi = createApi({
     }),
     endpoints: (builder) => ({
         orders: builder.query({
-            query: () => ({}),
+            query: () => ({
+                url: 'orders',
+            }),
             transformResponse: (response) => {
                 return response
             },

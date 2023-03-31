@@ -54,6 +54,7 @@ class Taxonomy extends Base {
 	 */
 	public function register() {
 		$plugin_domain = $this->plugin->textDomain();
+		/*
 		$labels = [
 			'name'              => __( 'Bible Question Categories', 'rhema' ),
 			'singular_name'     => __( 'Bible Question Category', 'rhema' ),
@@ -77,5 +78,6 @@ class Taxonomy extends Base {
 			'rewrite'           => [ 'slug' => Constants::BIBLE_QUESTION_TYPE['id'] ],
 		];
 		register_taxonomy( 'bible-question-category', [ Constants::BIBLE_QUESTION_TYPE['id'] ], $args );
+		*/
 	}
 }

@@ -49,7 +49,7 @@ class Notices extends Base {
 		global $pagenow;
 		if ( $pagenow === 'options-general.php' ) {
 			echo '<div class="notice notice-warning is-dismissible">
-             <p>' . __( 'This is an example of a notice that appears on the settings page.', 'rhema' ) . '</p>
+             <p>' . 'This is an example of a notice that appears on the settings page.' . '</p>
          </div>';
 		}
 	}

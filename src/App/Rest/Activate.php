@@ -70,7 +70,7 @@ class Activate extends Base {
 				'callback' => [ $this, 'activateFeature' ],
 				'args'     => [
 					'proudct_slug'  => [
-						'default' => 'wp-rehema-core-feature',
+						'default' => 'wp-rhema-core-feature',
 					],
 					'email'  => [
 						'default' => false,
@@ -96,7 +96,7 @@ class Activate extends Base {
 				'callback' => [ $this, 'activateByLicense' ],
 				'args'     => [
 					'proudct_slug'  => [
-						'default' => 'wp-rehema-core-feature',
+						'default' => 'wp-rhema-core-feature',
 						'required' => true,
 					],
 					'email'  => [

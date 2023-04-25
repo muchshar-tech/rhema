@@ -31,7 +31,7 @@ export const Core = memo(function Core({ show, onClickClose }) {
         defaultValues: {
             email: RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
             identity_type: IDENTITY_TYPE,
-            product_slug: 'wp-rehema-core-feature',
+            product_slug: 'wp-rhema-core-feature',
             username: RHEMA_LOCALIZE.WP_OPTIONS.HOST_DOMAIN,
             password: '',
             confirm_password: '',
@@ -261,7 +261,7 @@ export const License = ({ show, onClickClose }) => {
     const licenseData = useSelector((state) => {
         const timeZone = RHEMA_LOCALIZE.WP_OPTIONS.TIME_ZONE || '0'
         const license = state.general.licenses.bible
-        const licenseData = JSON.parse(license.data)
+        const licenseData = JSON.parse(license.license_data)
         const renewDate = moment(license.renew_date).utcOffset(timeZone)
         const nowDate = moment()
         if (typeof license.key !== 'string' || license.key.length <= 0) {
@@ -298,7 +298,7 @@ export const License = ({ show, onClickClose }) => {
         defaultValues: {
             email: licenseData?.email || RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
             identity_type: licenseData?.identity_type || IDENTITY_TYPE,
-            product_slug: licenseData?.product_slug || 'wp-rehema-core-feature',
+            product_slug: licenseData?.product_slug || 'wp-rhema-core-feature',
             username:
                 licenseData?.username || RHEMA_LOCALIZE.WP_OPTIONS.HOST_DOMAIN,
             license: licenseData?.key || '',
@@ -394,7 +394,7 @@ export const License = ({ show, onClickClose }) => {
         e.preventDefault()
         console.log('Deactivate')
         const payload = await deactivate({
-            product_slug: 'wp-rehema-core-feature',
+            product_slug: 'wp-rhema-core-feature',
             // license:
         })
     }

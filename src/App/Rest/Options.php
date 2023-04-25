@@ -154,11 +154,12 @@ class Options extends Base {
 		] ) );
 
 		if ( ! $updated ) {
+			flush_rewrite_rules();
 			wp_send_json_success( [
 				'message' => 'Rhema options nothing to save.',
 			], 200 );
 		}
-
+		flush_rewrite_rules();
 		wp_send_json_success( [
 			'message' => 'Rhema options saved.',
 		], 200 );

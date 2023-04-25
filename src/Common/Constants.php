@@ -602,8 +602,10 @@ final class Constants extends Base {
 			],
 		];
 		$this->error_message = [
-			'should_activate' => __( 'Please activate plugin `Rehema`.', 'rhema' ),
-			'should_input_register_info' => __( 'Please activate plugin `Rehema`.', 'rhema' ),
+			'should_activate' => __( 'Please activate plugin `Rhema`.', 'rhema' ),
+			'should_setup_permalink' => __( 'Please setup "Permalinks" first.', 'rhema' ),
+			'remote_timeout' => __( 'The remote server connection of Rhema has timed out. Please try again later.', 'rhema' ),
+			'should_input_register_info' => __( 'Please activate plugin `Rhema`.', 'rhema' ),
 			'logos_authorization_failed' => __( 'Logos service authorization failed', 'rhema' ),
 			'unknown_error' => __( 'Unknown error.', 'rhema' ),
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),

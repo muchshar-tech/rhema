@@ -15,6 +15,7 @@ namespace Rhema\App\Backend;
 
 use Exception;
 use Rhema\Common\Abstracts\Base;
+use Rhema\App\Backend\Notices;
 use Rhema\Integrations\Logos;
 
 /**
@@ -48,6 +49,11 @@ class Enqueue extends Base {
 	 * @since 1.0.0
 	 */
 	public function enqueueScripts() {
+		$current_screen = get_current_screen();
+		if ( 'toplevel_page_rhema' !== $current_screen->base ) {
+			return;
+		}
+		$class_notices = new Notices();
 		// Enqueue CSS
 		foreach (
 			[
@@ -91,13 +97,20 @@ class Enqueue extends Base {
 			$licenses_data = [
 				'bible' => $core_license_data,
 			];
+			$availabel_translations = $integration_logos_api->getTranslationList();
+			if ( is_wp_error( $availabel_translations ) ) {
+				add_action( 'admin_notices', [ $class_notices, 'logosRemoteTimeout' ] );
+				/** @var WP_Error $availabel_translations */
+				throw new Exception( $availabel_translations->get_error_code() );
+			}
+
 			$backend = [
 				'NONCE' => $this->plugin->createNonce(),
 				'OPTIONS' => $options,
 				'LICENSES' => $licenses_data,
 				'DATA' => [
-					'AVAILABLE_TRANSLATIONS' => $integration_logos_api->getTranslationList(),
-				]
+					'AVAILABLE_TRANSLATIONS' => $availabel_translations,
+				],
 			];
 		} catch ( Exception $e ) {
 			$licenses_data = [

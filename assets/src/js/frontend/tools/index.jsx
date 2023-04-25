@@ -93,7 +93,7 @@ const BooksSelectorButton = ({ range = [] }) => {
             </>
         ) : null
     const dispatch = useDispatch()
-
+    console.log(range)
     return (
         <div
             className="flex items-center overflow-hidden bg-white border border-dashed border-gray-300 rounded-sm cursor-pointer"

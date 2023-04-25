@@ -188,9 +188,10 @@ const Books = ({ booksData }) => {
             </div>
             <BlockWrap className="bg-gray-200">
                 {booksData.old.map(({ abbr, name, index }, idx) => {
-                    const isSomeInCurrentQuery = currentQueryString.filter(
-                        (query) => query.book.name === name
-                    )[0]
+                    const isSomeInCurrentQuery =
+                        currentQueryString.filter(
+                            (query) => query.book.name === name
+                        )[0] || false
                     const isCurrentSelection =
                         currentSelectionSelector.books.index === index
                     const classNames = [
@@ -299,7 +300,7 @@ const Chapters = () => {
                                               Number(number)
                                         : Number(query.chapter) ===
                                           Number(number)
-                                )[0]
+                                )[0] || false
                             const isCurrentSelection =
                                 currentSelectionChapter === Number(number)
                             const classNames = ['text-center']
@@ -350,27 +351,35 @@ const Verses = () => {
                     arrQuery.chapter === query.chapter
             )
     )
-    const currentQueryChapterVerseInfo = isSameQueryBookChapter
-        ? {
-              [currentQueryString[0].chapter]:
-                  chapterVerseInfo[currentQueryString[0].book.index][
-                      currentQueryString[0].chapter
-                  ],
-          }
-        : currentQueryString.reduce(
-              (accumulator, query, currentIndex, currentArray) => {
-                  const currentQueryBook = currentArray[0].book
-                  const currentQueryChapter = query.chapter
-                  const chapterMaxVerse =
-                      chapterVerseInfo[currentQueryBook.index][query.chapter]
-                  accumulator[currentQueryChapter] = chapterMaxVerse
-                  return accumulator
-              },
-              {}
-          )
+    const currentQueryChapterVerseInfo =
+        currentQueryString.length > 0
+            ? isSameQueryBookChapter
+                ? {
+                      [currentQueryString[0]?.chapter]:
+                          chapterVerseInfo[currentQueryString[0]?.book.index][
+                              currentQueryString[0]?.chapter
+                          ],
+                  }
+                : currentQueryString.reduce(
+                      (accumulator, query, currentIndex, currentArray) => {
+                          const currentQueryBook = currentArray[0].book
+                          const currentQueryChapter = query.chapter
+                          const chapterMaxVerse =
+                              chapterVerseInfo[currentQueryBook.index][
+                                  query.chapter
+                              ]
+                          accumulator[currentQueryChapter] = chapterMaxVerse
+                          return accumulator
+                      },
+                      {}
+                  )
+            : {}
+    console.log(currentQueryChapterVerseInfo)
     const displayBooksIndex = currentSelectionBookIndex
         ? currentSelectionBookIndex
-        : currentQueryString[0].book.index
+        : currentQueryString.length > 0
+        ? currentQueryString[0].book.index
+        : 0
     const displayChapterVerseInfo = currentSelectionChapter
         ? {
               [currentSelectionChapter]:
@@ -443,12 +452,15 @@ const Verses = () => {
                                             {...{ title: number.toString() }}
                                         >
                                             <LinkVerse
-                                                onClick={onClickBlock.bind(this, {
-                                                    book: currentSelectionBooks,
-                                                    chapter:
-                                                        currentSelectionChapter,
-                                                    verse: number,
-                                                })}
+                                                onClick={onClickBlock.bind(
+                                                    this,
+                                                    {
+                                                        book: currentSelectionBooks,
+                                                        chapter:
+                                                            currentSelectionChapter,
+                                                        verse: number,
+                                                    }
+                                                )}
                                                 book={displayBooksIndex}
                                                 chapter={Number(chapter)}
                                                 number={number}

@@ -29,15 +29,6 @@ class UrlRewrite extends Base {
 	 * @since 1.0.0
 	 */
 	public function init() {
-		do_action( 'qm/debug', 'Run UrlRewrite init' );
-
-		add_filter( 'query_vars', function ( $query_vars ) {
-			$query_vars[] = 'is_bible';
-			$query_vars[] = 'bible_from';
-			$query_vars[] = 'bible_to';
-			return $query_vars;
-		}, 0 );
-
 		add_action( 'init', function() {
 			$options = rhema()->options()->get();
 			$bible_entry_path = 'bible';
@@ -47,14 +38,22 @@ class UrlRewrite extends Base {
 			}
 
 			foreach ( Constants::REWRITE_RULES as $rule_pattern => $url ) {
-				add_rewrite_rule( strtr( $rule_pattern, [ '$bible_entry_path' => $bible_entry_path ] ), $url, 'top' );
+				$rule_regex_str = strtr( $rule_pattern, [ '$bible_entry_path' => $bible_entry_path ] );
+				add_rewrite_rule( $rule_regex_str, $url, 'top' );
 			}
-
 			flush_rewrite_rules();
 		}, 0 );
 
+		add_filter( 'query_vars', function ( $query_vars ) {
+			$query_vars[] = 'is_bible';
+			$query_vars[] = 'bible_from';
+			$query_vars[] = 'bible_to';
+			return $query_vars;
+		}, 10 );
+
 		add_filter( 'template_include', function( $template ) {
-			$is_bible = boolval( get_query_var( 'is_bible' ) );
+			$query_var_is_bible = get_query_var( 'is_bible' );
+			$is_bible = boolval( $query_var_is_bible );
 			if ( ! $is_bible ) {
 				return $template;
 			}
@@ -63,13 +62,6 @@ class UrlRewrite extends Base {
 			}
 
 			return rhema()->templates()->get( 'entry-template', null, null, false );
-		}, 0 );
-	}
-
-	public function retrieveRewriteRule() {
-		return [
-			"($bible_entry_path)\/?$" => 'index.php?is_bible=1',
-			"($bible_entry_path)\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?" => 'index.php?is_bible=1&bible_from=$matches[2]&bible_to=$matches[7]',
-		];
+		}, 10 );
 	}
 }

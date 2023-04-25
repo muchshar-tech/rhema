@@ -217,6 +217,9 @@
     .tailwind .mt-2 {
         margin-top: 0.5rem;
 }
+    .tailwind .mb-4 {
+        margin-bottom: 1rem;
+}
     .tailwind .mr-5px {
         margin-right: 5px;;
 }
@@ -228,9 +231,6 @@
 }
     .tailwind .mb-10px {
         margin-bottom: 10px;;
-}
-    .tailwind .mb-4 {
-        margin-bottom: 1rem;
 }
     .tailwind .box-border {
         box-sizing: border-box;
@@ -773,6 +773,12 @@
     .tailwind .text-14px {
         font-size: 14px;;
 }
+    .tailwind .text-16px {
+        font-size: 16px;;
+}
+    .tailwind .text-18px {
+        font-size: 18px;;
+}
     .tailwind .text-sm {
         font-size: 0.875rem;
         line-height: 1.25rem;
@@ -781,18 +787,8 @@
         font-size: 1rem;
         line-height: 1.5rem;
 }
-    .tailwind .text-16px {
-        font-size: 16px;;
-}
     .tailwind .text-12px {
         font-size: 12px;;
-}
-    .tailwind .text-lg {
-        font-size: 1.125rem;
-        line-height: 1.75rem;
-}
-    .tailwind .text-18px {
-        font-size: 18px;;
 }
     .tailwind .font-medium {
         font-weight: 500;

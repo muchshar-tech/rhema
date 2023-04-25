@@ -216,8 +216,14 @@ final class Api extends Base {
 	 * @return array|WP_Error
 	 */
 	public function getTranslationList(): array | WP_Error {
+		$result_body = $this->getLogosCoreTransient( 'translates' );
+		if ( ! empty( $result_body ) ) {
+			return json_decode( $result_body, true );
+		}
 		$remote_query = $this->remote( 'bible/translates' );
-		$translation_list_res = wp_remote_get( $remote_query );
+		$translation_list_res = wp_remote_get( $remote_query, [
+			'timeout' => 2,
+		] );
 		if ( is_wp_error( $translation_list_res ) ) {
 			return $translation_list_res;
 		}
@@ -230,7 +236,11 @@ final class Api extends Base {
 		if ( empty( $translation_list_res['body'] ) ) {
 			return [];
 		}
-		return json_decode( $translation_list_res['body'], true );
+
+		$result_body = $translation_list_res['body'];
+
+		$this->setLogosCoreTransient( 'translates', $result_body, WEEK_IN_SECONDS );
+		return json_decode( $result_body, true );
 	}
 	/**
 	 * Get translation info.
@@ -435,11 +445,11 @@ final class Api extends Base {
 	 *
 	 * @param string $attr_name
 	 * @param mixed $value
-	 * @param string $prefix
 	 * @param integer $expiration
+	 * @param string $prefix
 	 * @return boolean
 	 */
-	public function setLogosCoreTransient( $attr_name, $value, $prefix = 'rhema.bible.integrations.logos.core', $expiration = 0 ): bool {
+	public function setLogosCoreTransient( $attr_name, $value, $expiration = 0, $prefix = 'rhema.bible.integrations.logos.core' ): bool {
 		$transient_label = "$prefix.$attr_name";
 		$transient_seted = set_transient( $transient_label, $value, $expiration );
 		self::$require_data[ $attr_name ] = $value;

@@ -1,3 +1,4 @@
+import isempty from 'lodash/isEmpty'
 import { generatePath } from 'react-router-dom'
 
 /**
@@ -6,8 +7,11 @@ import { generatePath } from 'react-router-dom'
  * @returns string
  */
 export const queryStringModifier = (queryString = []) => {
-    if (queryString < 2) {
-        return ''
+    if (isempty(queryString)) {
+        return ['聖經目錄']
+    }
+    if (queryString.length < 2) {
+        return ['']
     }
     const rangeFrom = queryString[0]
     const rangeTo = queryString[1] ? queryString[1] : queryString[0]

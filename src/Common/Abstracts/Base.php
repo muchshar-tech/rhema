@@ -14,7 +14,6 @@ declare( strict_types = 1 );
 namespace Rhema\Common\Abstracts;
 
 use Rhema\Config\Plugin;
-use stdClass;
 
 /**
  * The Base class which can be extended by other classes to load in default methods

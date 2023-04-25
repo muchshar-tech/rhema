@@ -729,6 +729,9 @@ video {
 .mt-2 {
   margin-top: 0.5rem;
 }
+.mb-4 {
+  margin-bottom: 1rem;
+}
 .mr-5px {
   margin-right: 5px;;
 }
@@ -740,9 +743,6 @@ video {
 }
 .mb-10px {
   margin-bottom: 10px;;
-}
-.mb-4 {
-  margin-bottom: 1rem;
 }
 .box-border {
   box-sizing: border-box;
@@ -1285,6 +1285,12 @@ video {
 .text-14px {
   font-size: 14px;;
 }
+.text-16px {
+  font-size: 16px;;
+}
+.text-18px {
+  font-size: 18px;;
+}
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -1293,18 +1299,8 @@ video {
   font-size: 1rem;
   line-height: 1.5rem;
 }
-.text-16px {
-  font-size: 16px;;
-}
 .text-12px {
   font-size: 12px;;
-}
-.text-lg {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-}
-.text-18px {
-  font-size: 18px;;
 }
 .font-medium {
   font-weight: 500;

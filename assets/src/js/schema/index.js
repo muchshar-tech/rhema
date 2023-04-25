@@ -5,12 +5,12 @@ import { IDENTITY_TYPE } from '@components/constants'
 const fields = {
     email: Joi.string().email({
         minDomainSegments: 2,
-        tlds: { allow: ['com', 'net', 'tw', 'org', 'io', 'app'] },
+        tlds: { allow: ['com', 'net', 'tw', 'org', 'io', 'app', 'test'] },
     }),
     identity_type: Joi.string().valid(IDENTITY_TYPE),
     product_slug: Joi.string().valid(
         'donate-for-txipartners',
-        'wp-rehema-core-feature',
+        'wp-rhema-core-feature',
         'wp-rehema-rlation-feature',
         'wp-rehema-q-and-a-feature',
         'wp-rehema-offline-reading'

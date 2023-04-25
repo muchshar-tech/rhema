@@ -76,6 +76,10 @@ final class Options extends Base {
 
 		$rewrite_rules = get_option( 'rewrite_rules' );
 
+		if ( is_string( $rewrite_rules ) ) {
+			$rewrite_rules = [ $rewrite_rules ];
+		}
+
 		foreach ( $new_rule as $rule_pattern => $query ) {
 			$rule_string = strtr( $rule_pattern, [ '$bible_entry_path' => $bible_entry_path ] );
 			if ( array_key_exists( $rule_string, $rewrite_rules ) ) {

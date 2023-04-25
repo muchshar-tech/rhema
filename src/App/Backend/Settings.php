@@ -51,6 +51,7 @@ class Settings extends Base {
 		add_submenu_page( $plugin_domain, 'Question Category', 'Question Categories', 'manage_options', 'edit-tags.php?taxonomy=bible-question-category' );
 		add_action( 'parent_file', [ $this, 'adminQuestionCategoryMenuModifier' ] );
 	}
+
 	public function adminQuestionCategoryMenuModifier( string $parent_file ) {
 		global $current_screen;
 		$plugin_domain = $this->plugin->textDomain();

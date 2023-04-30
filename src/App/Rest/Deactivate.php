@@ -92,13 +92,13 @@ class Deactivate extends Base {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		$license_key = $integration_logos_api->getLogosCoreTransient( 'license_key' );
-		if ( $license_key === $body['license'] ) {
+		if ( $license_key !== $body['license'] ) {
 			$error = new WP_Error( 500, __( 'Sorry, you are not allowed to do that.' ) );
 			return wp_send_json_error( $error, 500 );
 		}
-		// $integration_logos_api->deleteLogosCoreTransient( 'license_key' );
-		// $integration_logos_api->deleteLogosCoreTransient( 'license_renew_date' );
-		// $integration_logos_api->deleteLogosCoreTransient( 'license_data' );
+		$integration_logos_api->deleteLogosCoreTransient( 'license_key' );
+		$integration_logos_api->deleteLogosCoreTransient( 'license_renew_date' );
+		$integration_logos_api->deleteLogosCoreTransient( 'license_data' );
 
 		return [
 			'response' => [

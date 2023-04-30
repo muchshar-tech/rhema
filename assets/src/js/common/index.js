@@ -39,14 +39,35 @@ export const localDateTime = (moment, value, timeZone = 0) => {
     }
     return moment(value).utcOffset(timeZone).format('YYYY/MM/DD hh:mm:ss')
 }
- export const retrieveFontSize = (size) => {
+export const retrieveFontSize = (size) => {
     const sizeMap = {
-        'sm': 'text-14px',
-        'md': 'text-16px',
-        'lg': 'text-18px',
+        sm: 'text-14px',
+        md: 'text-16px',
+        lg: 'text-18px',
     }
     if (typeof sizeMap[size] === 'undefined') {
-        return 'text-16px';
+        return 'text-16px'
     }
-    return sizeMap[size];
- }
+    return sizeMap[size]
+}
+export const retrieveResponseFromRTK = (response, error) => {
+    let code =''
+    let label = ''
+    let message = 'There has been a critical error.'
+    if (response) {
+
+    }
+    return {
+        code,
+        label,
+        message,
+    }
+}
+export const isJsonStr = (str) => {
+    try {
+        JSON.parse(str)
+    } catch (e) {
+        return false
+    }
+    return true
+}

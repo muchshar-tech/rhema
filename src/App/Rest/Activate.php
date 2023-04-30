@@ -22,6 +22,9 @@ use Exception;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
 use Rhema\Common\Constants;
+use Rhema\Common\Traits\RestCommons;
+use WP;
+
 /**
  * Class Example
  *
@@ -29,7 +32,7 @@ use Rhema\Common\Constants;
  * @since 1.0.0
  */
 class Activate extends Base {
-
+	use RestCommons;
 	/**
 	 * Initialize the class.
 	 *
@@ -120,8 +123,13 @@ class Activate extends Base {
 			]
 		);
 	}
-
-	public function activateByLicense( WP_REST_Request $request ): array {
+	/**
+	 * Use an existing key to activate.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return array|WP_Error
+	 */
+	public function activateByLicense( WP_REST_Request $request ): array|WP_Error {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		$body = $request->get_json_params();
@@ -146,9 +154,9 @@ class Activate extends Base {
 				return $token;
 			}
 		} catch ( ValidationException $exception ) {
-			return new WP_Error( 500, $exception->getMessage() );
+			return new WP_Error( $exception->getCode(), $exception->getMessage(), [ 'status' => $exception->getCode() ] );
 		} catch ( Exception $exception ) {
-			return new WP_Error( 500, $exception->getMessage() );
+			return new WP_Error( $exception->getCode(), $exception->getMessage(), [ 'status' => $exception->getCode() ] );
 		}
 
 		$integration_logos_api->setLogosCoreTransient( 'license_key', $license_key );
@@ -158,7 +166,7 @@ class Activate extends Base {
 
 		$body = [
 			'license_key' => $license_key,
-			'license_data' => $license_data,
+			'license_data' => json_encode( $license_data ),
 			'renew_date' => $license_renew_date,
 		];
 		$response = [
@@ -173,9 +181,9 @@ class Activate extends Base {
 	 * Activate core feature callback
 	 *
 	 * @param WP_REST_Request $request
-	 * @return array
+	 * @return array|WP_Error
 	 */
-	public function activateFeature( WP_REST_Request $request ): array {
+	public function activateFeature( WP_REST_Request $request ): array|WP_Error {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		$body = $request->get_json_params();

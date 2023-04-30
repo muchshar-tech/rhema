@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import moment from 'moment/moment'
 import { joiResolver } from '@hookform/resolvers/joi'
 
+import { isJsonStr } from '@components/common'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 import {
     ACTIVATING_COUNT_DOWN_TIME,
@@ -261,7 +262,7 @@ export const License = ({ show, onClickClose }) => {
     const licenseData = useSelector((state) => {
         const timeZone = RHEMA_LOCALIZE.WP_OPTIONS.TIME_ZONE || '0'
         const license = state.general.licenses.bible
-        const licenseData = JSON.parse(license.license_data)
+        const licenseData = isJsonStr() ? JSON.parse(license.data) : license.data
         const renewDate = moment(license.renew_date).utcOffset(timeZone)
         const nowDate = moment()
         if (typeof license.key !== 'string' || license.key.length <= 0) {
@@ -332,7 +333,7 @@ export const License = ({ show, onClickClose }) => {
         (!!deactivateResponse &&
             !/2[0-9][0-9]/.test(deactivateResponse?.response?.code)) ||
         !!deactivateError
-    const responseMessage = ((activateError, deactivateError) => {
+    const responseMessage = ((activateResponse, deactivateResponse, activateError, deactivateError) => {
         const code =
             activateResponse?.response.code ||
             activateError?.status ||
@@ -353,7 +354,7 @@ export const License = ({ show, onClickClose }) => {
             label,
             message,
         }
-    })(activateError, deactivateError)
+    })(activateResponse, deactivateResponse, activateError, deactivateError)
     const showActivatingPrepare =
         /2[0-9][0-9]/.test(activateResponse?.response.code) &&
         !showExceptionMessage

@@ -21,7 +21,7 @@ use Exception;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Constants;
-
+use Rhema\Common\Traits\RestCommons;
 /**
  * Class Example
  *
@@ -29,6 +29,7 @@ use Rhema\Common\Constants;
  * @since 1.0.0
  */
 class Options extends Base {
+	use RestCommons;
 	/**
 	 * Initialize the class.
 	 *
@@ -125,12 +126,12 @@ class Options extends Base {
 		$json = $request->get_json_params();
 
 		if ( empty( $json ) ) {
-			$error = new WP_Error( 400, Constants::init()->error_message['system/app/rest/options/field_is_wrong'] );
+			$exception = new Exception( Constants::init()->error_message['system/app/rest/options/field_is_wrong'], 400 );
 		}
 
 		$rewrite_isempty = $functions_options->checkRewriteIsEmpty( $json['bible_entry'] );
 		if ( $bible_entry_path !== $json['bible_entry'] && is_wp_error( $rewrite_isempty ) ) {
-			$error = new WP_Error( 400, Constants::init()->error_message['system/app/rest/options/field_is_wrong'] );
+			$exception = new Exception( Constants::init()->error_message['system/app/rest/options/field_is_wrong'], 400 );
 		}
 
 		try {
@@ -138,13 +139,13 @@ class Options extends Base {
 				->key( 'bible_default_translation', v::stringType() )
 				->assert( $json );
 		} catch ( ValidationException $exception ) {
-			$error = new WP_Error( 500, $exception->getMessage() );
+			$exception = new Exception( $exception->getMessage(), 500 );
 		} catch ( Exception $exception ) {
-			$error = new WP_Error( 500, $exception->getMessage() );
+			$exception = new Exception( $exception->getMessage(), 500 );
 		}
 
-		if ( is_wp_error( $error ) ) {
-			wp_send_json_error( [ 'message' => $error->get_error_message() ], $error->get_error_code() );
+		if ( is_wp_error( $exception ) ) {
+			return $this->sendError( $exception );
 		}
 
 		$plugin_domain = $this->plugin->textDomain();
@@ -153,16 +154,17 @@ class Options extends Base {
 			'general' => $json,
 		] ) );
 
-		if ( ! $updated ) {
-			flush_rewrite_rules();
-			wp_send_json_success( [
-				'message' => 'Rhema options nothing to save.',
-			], 200 );
-		}
 		flush_rewrite_rules();
-		wp_send_json_success( [
+		
+		if ( ! $updated ) {
+			return $this->sendRes( [
+				'message' => 'Rhema options nothing to save.',
+			] );
+		}
+
+		return $this->sendRes( [
 			'message' => 'Rhema options saved.',
-		], 200 );
+		] );
 	}
 	/**
 	 * Option bible entry sanitize

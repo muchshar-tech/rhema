@@ -608,6 +608,7 @@ final class Constants extends Base {
 			'should_input_register_info' => __( 'Please activate plugin `Rhema`.', 'rhema' ),
 			'logos_authorization_failed' => __( 'Logos service authorization failed', 'rhema' ),
 			'unknown_error' => __( 'Unknown error.', 'rhema' ),
+			'not_allowed' => __( 'Sorry, you are not allowed to do that.', 'rhema' ),
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
 			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
 			'system/app/general/options/rewrite_rules_exsited' => __( 'Entry path cant use.', 'rhema' ),

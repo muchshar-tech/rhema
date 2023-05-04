@@ -23,7 +23,6 @@ use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
 use Rhema\Common\Constants;
 use Rhema\Common\Traits\RestCommons;
-use WP;
 
 /**
  * Class Example
@@ -151,12 +150,14 @@ class Activate extends Base {
 			$payload = $integration_logos_api->getPayloadFromJWT( $token );
 			$license_renew_date = $payload['license_renew_date'];
 			if ( is_wp_error( $token ) ) {
-				return $token;
+				/** @var WP_Error $token */
+				$exception = new Exception( $token->get_error_message(), $token->get_error_code() );
+				return $this->sendError( $exception );
 			}
 		} catch ( ValidationException $exception ) {
-			return new WP_Error( $exception->getCode(), $exception->getMessage(), [ 'status' => $exception->getCode() ] );
+			return $this->sendError( $exception );
 		} catch ( Exception $exception ) {
-			return new WP_Error( $exception->getCode(), $exception->getMessage(), [ 'status' => $exception->getCode() ] );
+			return $this->sendError( $exception );
 		}
 
 		$integration_logos_api->setLogosCoreTransient( 'license_key', $license_key );
@@ -169,13 +170,7 @@ class Activate extends Base {
 			'license_data' => json_encode( $license_data ),
 			'renew_date' => $license_renew_date,
 		];
-		$response = [
-			'response' => [
-				'code' => 200,
-			],
-			'body' => $body,
-		];
-		return $response;
+		return $this->sendRes( $body );
 	}
 	/**
 	 * Activate core feature callback
@@ -195,16 +190,19 @@ class Activate extends Base {
 			'password' => $body['password'],
 		] );
 		if ( is_wp_error( $response ) ) {
-			return $response;
+			$exception = new Exception( $response->get_error_message(), $response->get_error_code() );
+			return $this->sendError( $exception );
 		}
 		if ( 300 < $response['response']['code'] ) {
-			return $response;
+			$exception = new Exception( $response['body'], $response['response']['code'] );
+			return $this->sendError( $exception );
 		}
 
 		$response['body'] = json_decode( $response['body'], true );
 
 		if ( empty( $response['body'] ) || empty( $response['body']['license_key'] ) || empty( $response['body']['renew_date'] ) ) {
-			return new WP_Error( 500, Constants::init()->error_message['system/app/rest/bible/response_wrong'] );
+			$exception = new Exception( Constants::init()->error_message['system/app/rest/bible/response_wrong'], 500 );
+			return $this->sendError( $exception );
 		}
 
 		$license_key = $response['body']['license_key'];
@@ -223,11 +221,14 @@ class Activate extends Base {
 
 		$authenticated = $integration_logos_api->authenticated();
 		if ( is_wp_error( $authenticated ) ) {
-			return $authenticated;
+			/** @var WP_Error $authenticated */
+			$exception = new Exception( $authenticated->get_error_message(), $authenticated->get_error_code() );
+			return $this->sendError( $exception );
 		}
 		if ( ! $authenticated ) {
-			return new WP_Error( 500, Constants::init()->error_message['unknown_error'] );
+			$exception = new Exception( Constants::init()->error_message['unknown_error'], 500 );
+			return $this->sendError( $exception );
 		}
-		return $response;
+		return $this->sendRes( $response['body'] );
 	}
 }

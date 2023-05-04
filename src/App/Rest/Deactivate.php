@@ -20,6 +20,7 @@ use Exception;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
 use Rhema\Common\Constants;
+use Rhema\Common\Traits\RestCommons;
 /**
  * Class Example
  *
@@ -27,7 +28,7 @@ use Rhema\Common\Constants;
  * @since 1.0.0
  */
 class Deactivate extends Base {
-
+	use RestCommons;
 	/**
 	 * Initialize the class.
 	 *
@@ -93,18 +94,15 @@ class Deactivate extends Base {
 		$integration_logos_api = Logos\Api::init();
 		$license_key = $integration_logos_api->getLogosCoreTransient( 'license_key' );
 		if ( $license_key !== $body['license'] ) {
-			$error = new WP_Error( 500, __( 'Sorry, you are not allowed to do that.' ) );
-			return wp_send_json_error( $error, 500 );
+			$exception = new Exception( Constants::init()->error_message['not_allowed'], 403 );
+			return $this->sendError( $exception );
 		}
 		$integration_logos_api->deleteLogosCoreTransient( 'license_key' );
 		$integration_logos_api->deleteLogosCoreTransient( 'license_renew_date' );
 		$integration_logos_api->deleteLogosCoreTransient( 'license_data' );
 
-		return [
-			'response' => [
-				'code' => 200,
-			],
-			'body' => $license_key,
-		];
+		return $this->sendRes( [
+			'license_key' => $license_key,
+		] );
 	}
 }

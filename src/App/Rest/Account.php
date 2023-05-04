@@ -14,12 +14,11 @@ declare( strict_types = 1 );
 namespace Rhema\App\Rest;
 
 use WP_REST_Request;
-use WP_Error;
 use Exception;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
-use Rhema\Common\Constants;
+use Rhema\Common\Traits\RestCommons;
 /**
  * Class Example
  *
@@ -27,7 +26,7 @@ use Rhema\Common\Constants;
  * @since 1.0.0
  */
 class Account extends Base {
-
+	use RestCommons;
 	/**
 	 * Initialize the class.
 	 *
@@ -105,20 +104,20 @@ class Account extends Base {
 		$integration_logos_api = Logos\Api::init();
 		$signin = $integration_logos_api->signin( $body['username'], $body['password'] );
 		if ( is_wp_error( $signin ) ) {
-			$error = new WP_Error( 500, __( 'Sorry, you are not allowed to do that.' ) );
-			return wp_send_json_error( $error, 500 );
+			$exception = new Exception( $signin->get_error_message(), $signin->get_error_code() );
+			return $this->sendError( $exception );
 		}
 
 		if ( 300 < $signin['response']['code'] ) {
-			$error = new WP_Error( $signin['response']['code'], $signin['body'] );
-			return wp_send_json_error( [ 'message' => $signin['body'] ], $signin['response']['code'] );
+			$exception = new Exception( $signin['body'], $signin['response']['code'] );
+			return $this->sendError( $exception );
 		}
 
 		$response_body = json_decode( $signin['body'], true );
 
-		wp_send_json_success( [
+		return $this->sendRes( [
 			'token' => $response_body['token'],
-		], 200 );
+		] );
 	}
 	/**
 	 * Orders
@@ -136,9 +135,9 @@ class Account extends Base {
 			if ( is_wp_error( $orders ) ) {
 				throw new Exception( $orders->get_error_message(), $orders->get_error_code() );
 			}
-		} catch ( Exception $error ) {
-			wp_send_json_error( [ 'message' => $error->getMessage() ], $error->getCode() );
+		} catch ( Exception $exception ) {
+			return $this->sendError( $exception );
 		}
-		wp_send_json_success( $orders, 200 );
+		return $this->sendRes( $orders );
 	}
 }

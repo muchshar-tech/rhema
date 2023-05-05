@@ -75,7 +75,7 @@ export const bibleApi = createApi({
                 const currentChapter = retrieveChapterByParamString(ranges[0])
 
                 const converterFilter = (response, chapterNumber) => {
-                    return response.filter(
+                    return response.data.filter(
                         (raw) => raw.chapter === chapterNumber
                     )
                 }

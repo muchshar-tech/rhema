@@ -27,6 +27,8 @@ const Container = ({ raws, selected, isFetching, loadingLine }) => {
                 <Books.List />
                 <Search.Results />
                 <Layout.Content>
+                    <Layout.Page>-2</Layout.Page>
+                    <Layout.Page>-1</Layout.Page>
                     <Layout.Page>
                         <Paragraph.Block>
                             {isLoading ? (
@@ -48,7 +50,7 @@ const Container = ({ raws, selected, isFetching, loadingLine }) => {
                             )}
                         </Paragraph.Block>
                     </Layout.Page>
-                    <Layout.Page></Layout.Page>
+                    <Layout.Page>1</Layout.Page>
                 </Layout.Content>
                 <Layout.Drawer name="new-post">
                     <Forms.Posts />
@@ -116,7 +118,7 @@ export const Verses = () => {
     }, [data])
     useEffect(() => {
         if (error && Object.keys(error).length > 0) {
-            throw new Error(error.data.code)
+            throw new Error(error.data.message)
         }
     }, [error])
     return (

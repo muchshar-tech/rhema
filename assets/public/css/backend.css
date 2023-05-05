@@ -214,6 +214,9 @@
     .tailwind .ml-2 {
         margin-left: 0.5rem;
 }
+    .tailwind .ml-1 {
+        margin-left: 0.25rem;
+}
     .tailwind .mt-2 {
         margin-top: 0.5rem;
 }

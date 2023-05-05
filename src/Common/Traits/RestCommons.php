@@ -33,7 +33,10 @@ trait RestCommons {
 		}
 		$code = 0 === $exception->getCode() ? 500 : $exception->getCode();
 		$msg = $exception->getMessage();
-		return new WP_Error( 'send_output_schema_exception', $msg, [ 'status' => $code ] );
+		if ( $exception instanceof ValidationException ) {
+			return new WP_Error( 'send_output_schema_exception', $msg, [ 'status' => $code ] );
+		}
+		return new WP_Error( $code, $msg, [ 'status' => $code ] );
 	}
 
 	final public function sendRes( $data ) {

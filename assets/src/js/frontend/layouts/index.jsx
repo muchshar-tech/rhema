@@ -80,13 +80,14 @@ const Body = ({ children }) => {
 }
 
 const Content = ({ children }) => {
+    const initialPage = 1
     const showMain = useSelector(
         (state) =>
             state.general.headersSwitch.main ||
             state.general.headersSwitch.selection
     )
     const [movePercentage, setMovePercentage] = useState(0)
-    const [pagePos, setPagePos] = useState(0)
+    const [pagePos, setPagePos] = useState(-100)
     const onSwipeStart = (event) => {
         console.log('Start swiping...', event)
     }
@@ -98,17 +99,19 @@ const Content = ({ children }) => {
         const movePercentageY = Number(
             ((position.y / Number(screen.width)) * 100).toFixed(1)
         )
-        // console.log(`Moved ${position.x} pixels horizontally`, event)
-        // console.log(`Moved ${movePercentageX} percentage horizontally`, event)
-        console.log(`Moved ${position.y} pixels vertically`, event)
-        console.log(`Moved ${movePercentageY} percentage vertically`, event)
+        console.log(`Moved ${position.x} pixels horizontally`, event)
+        console.log(`Moved ${movePercentageX} percentage horizontally`, event)
+        // console.log(`Moved ${position.y} pixels vertically`, event)
+        // console.log(`Moved ${movePercentageY} percentage vertically`, event)
         setMovePercentage(clamp(movePercentageX, -100, 100))
     }
 
     const onSwipeEnd = (event) => {
         console.log('End swiping...', event, movePercentage)
         const moveAbsPercentage = Math.abs(movePercentage)
+        const pagesCount = children.length || 0
         if (moveAbsPercentage > 30) {
+            console.log(pagesCount, pagePos)
             setPagePos(movePercentage < 0 ? pagePos - 100 : pagePos + 100)
         }
         setMovePercentage(0)

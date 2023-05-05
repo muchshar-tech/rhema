@@ -10238,7 +10238,7 @@ var Main = function Main() {
 };
 
 var Settings = function Settings() {
-  var _updateOptionsRespons, _updateOptionsError$d, _updateOptionsError$d2, _updateOptionsRespons2, _updateOptionsError$d3, _updateOptionsError$d4, _updateOptionsRespons3;
+  var _updateOptionsRespons, _updateOptionsError$d, _updateOptionsRespons2, _updateOptionsError$d2, _updateOptionsError$d3, _updateOptionsRespons3;
 
   var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
     defaultValues: _objectSpread({
@@ -10265,12 +10265,12 @@ var Settings = function Settings() {
   var exceptionMessage = {
     code: updateOptionsError === null || updateOptionsError === void 0 ? void 0 : updateOptionsError.status,
     label: '',
-    message: (updateOptionsError === null || updateOptionsError === void 0 ? void 0 : (_updateOptionsError$d = updateOptionsError.data) === null || _updateOptionsError$d === void 0 ? void 0 : (_updateOptionsError$d2 = _updateOptionsError$d.data) === null || _updateOptionsError$d2 === void 0 ? void 0 : _updateOptionsError$d2.message) || 'There has been a critical error.'
+    message: (updateOptionsError === null || updateOptionsError === void 0 ? void 0 : (_updateOptionsError$d = updateOptionsError.data) === null || _updateOptionsError$d === void 0 ? void 0 : _updateOptionsError$d.message) || 'There has been a critical error.'
   };
   var successMessage = {
     code: (updateOptionsResponse === null || updateOptionsResponse === void 0 ? void 0 : (_updateOptionsRespons2 = updateOptionsResponse.response) === null || _updateOptionsRespons2 === void 0 ? void 0 : _updateOptionsRespons2.code) || 200,
     label: 'Success',
-    message: (updateOptionsError === null || updateOptionsError === void 0 ? void 0 : (_updateOptionsError$d3 = updateOptionsError.data) === null || _updateOptionsError$d3 === void 0 ? void 0 : (_updateOptionsError$d4 = _updateOptionsError$d3.data) === null || _updateOptionsError$d4 === void 0 ? void 0 : _updateOptionsError$d4.message) || (updateOptionsResponse === null || updateOptionsResponse === void 0 ? void 0 : (_updateOptionsRespons3 = updateOptionsResponse.data) === null || _updateOptionsRespons3 === void 0 ? void 0 : _updateOptionsRespons3.message) || 'Rhema options saved.'
+    message: (updateOptionsError === null || updateOptionsError === void 0 ? void 0 : (_updateOptionsError$d2 = updateOptionsError.data) === null || _updateOptionsError$d2 === void 0 ? void 0 : (_updateOptionsError$d3 = _updateOptionsError$d2.data) === null || _updateOptionsError$d3 === void 0 ? void 0 : _updateOptionsError$d3.message) || (updateOptionsResponse === null || updateOptionsResponse === void 0 ? void 0 : (_updateOptionsRespons3 = updateOptionsResponse.data) === null || _updateOptionsRespons3 === void 0 ? void 0 : _updateOptionsRespons3.message) || 'Rhema options saved.'
   };
 
   var onSubmit = /*#__PURE__*/function () {
@@ -11398,21 +11398,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
-/* harmony import */ var _hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @hookform/resolvers/joi */ "./node_modules/@hookform/resolvers/joi/dist/joi.mjs");
-/* harmony import */ var moment_moment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! moment/moment */ "./node_modules/moment/moment.js");
-/* harmony import */ var moment_moment__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(moment_moment__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
-/* harmony import */ var _tanstack_react_table__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @tanstack/react-table */ "./node_modules/@tanstack/table-core/build/lib/index.mjs");
-/* harmony import */ var _tanstack_react_table__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @tanstack/react-table */ "./node_modules/@tanstack/react-table/build/lib/index.mjs");
-/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
-/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _components_common__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @components/common */ "./assets/src/js/common/index.js");
-/* harmony import */ var _components_services__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @components/services */ "./assets/src/js/services/index.js");
-/* harmony import */ var _components_constants__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @components/constants */ "./assets/src/js/constants.js");
-/* harmony import */ var _components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @components/backend/form-table */ "./assets/src/js/backend/form-table/index.jsx");
-/* harmony import */ var _components_schema__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @components/schema */ "./assets/src/js/schema/index.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_hook_form__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react-hook-form */ "./node_modules/react-hook-form/dist/index.esm.mjs");
+/* harmony import */ var _hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @hookform/resolvers/joi */ "./node_modules/@hookform/resolvers/joi/dist/joi.mjs");
+/* harmony import */ var moment_moment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! moment/moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment_moment__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(moment_moment__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var _tanstack_react_table__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @tanstack/react-table */ "./node_modules/@tanstack/table-core/build/lib/index.mjs");
+/* harmony import */ var _tanstack_react_table__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @tanstack/react-table */ "./node_modules/@tanstack/react-table/build/lib/index.mjs");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
+/* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _components_common__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @components/common */ "./assets/src/js/common/index.js");
+/* harmony import */ var _components_services__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @components/services */ "./assets/src/js/services/index.js");
+/* harmony import */ var _components_constants__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @components/constants */ "./assets/src/js/constants.js");
+/* harmony import */ var _components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @components/backend/form-table */ "./assets/src/js/backend/form-table/index.jsx");
+/* harmony import */ var _components_schema__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @components/schema */ "./assets/src/js/schema/index.js");
+/* harmony import */ var _components_backend_states_accountSlice__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @components/backend/states/accountSlice */ "./assets/src/js/backend/states/accountSlice.js");
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
 
 
 
@@ -11436,13 +11439,13 @@ var LoginCard = function LoginCard(_ref) {
       onClickForgotPw = _ref.onClickForgotPw,
       onClickRegister = _ref.onClickRegister,
       signinData = _ref.signinData;
-  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_10__.useForm)({
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
     defaultValues: {
-      username: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().WP_OPTIONS.HOST_DOMAIN),
-      identity_type: _components_constants__WEBPACK_IMPORTED_MODULE_7__.IDENTITY_TYPE,
+      username: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.HOST_DOMAIN),
+      identity_type: _components_constants__WEBPACK_IMPORTED_MODULE_8__.IDENTITY_TYPE,
       password: ''
     },
-    resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_1__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_9__.signinLogosFields)
+    resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.signinLogosFields)
   });
   var register = formMethods.register,
       setError = formMethods.setError,
@@ -11476,34 +11479,34 @@ var LoginCard = function LoginCard(_ref) {
     className: "postbox-header px-2 justify-center"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
     className: "text-14px py-3 m-0"
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Signin Logos", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().RHEMA_DOMAIN_TEXT)))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("Signin Logos", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().RHEMA_DOMAIN_TEXT)))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "inside pb-0"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("If you have lost your License Key, you can log in here to check\n                all the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ModalForm, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("If you have lost your License Key, you can log in here to check\n                all the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().RHEMA_DOMAIN_TEXT))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
     onSubmit: handleSubmit(onClickSigin)
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ModalForm.FieldRow, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
     label: "Username"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     className: "w-full",
     type: "text"
   }, register('username', {
     required: true
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.FieldErrorMsg, {
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
     message: (_errors$email = errors.email) === null || _errors$email === void 0 ? void 0 : _errors$email.message
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ModalForm.FieldRow, {
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
     label: "Password"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "password",
     className: "w-full min-w-200px"
   }, register('password', {
     required: true
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.FieldErrorMsg, {
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
     message: (_errors$password = errors.password) === null || _errors$password === void 0 ? void 0 : _errors$password.message
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
     className: "m-0 mb-2 max-w-200px text-xs"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     className: "button button-link hover:bg-transparent",
     onClick: onClickForgotPw
-  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Forgot password?", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().RHEMA_DOMAIN_TEXT))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("Forgot password?", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().RHEMA_DOMAIN_TEXT))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "hidden"
   }, register('identity_type'))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]"
@@ -11521,17 +11524,16 @@ var LoginCard = function LoginCard(_ref) {
     }
   }, (isSubmitting || isSigning) && {
     disabled: 'disabled'
-  }), !isSubmitting && !isSigning ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().RHEMA_DOMAIN_TEXT)) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_3__.__)("Signing...", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().RHEMA_DOMAIN_TEXT))), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseSuccessMsg, {
+  }), !isSubmitting && !isSigning ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("Signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().RHEMA_DOMAIN_TEXT)) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("Signing...", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().RHEMA_DOMAIN_TEXT))), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
     label: "Success"
-  }, "Signin suceesfully."), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseErrorMsg, {
+  }, "Signin suceesfully."), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
     code: responseMessage.code,
     label: responseMessage.label
   }, (responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message) || 'There has been a critical error.') : null)));
 };
 var OrdersListing = function OrdersListing() {
-  var _error$data, _error$data$data;
-
-  var columnHelper = (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_11__.createColumnHelper)();
+  var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
+  var columnHelper = (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_13__.createColumnHelper)();
   var columns = [columnHelper.accessor('id', {
     header: function header() {
       return 'ID';
@@ -11544,7 +11546,7 @@ var OrdersListing = function OrdersListing() {
       return 'Status';
     },
     cell: function cell(info) {
-      return (0,_components_common__WEBPACK_IMPORTED_MODULE_5__.capitalizeFirstLetter)(info.getValue());
+      return (0,_components_common__WEBPACK_IMPORTED_MODULE_6__.capitalizeFirstLetter)(info.getValue());
     }
   }), columnHelper.accessor('order_items', {
     header: function header() {
@@ -11572,7 +11574,7 @@ var OrdersListing = function OrdersListing() {
           className: "select-none after:content-[':'] mr-1"
         }, "Renew Date"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
           className: "select-none"
-        }, moment_moment__WEBPACK_IMPORTED_MODULE_2___default()(orderItem.license_key.renew_date).utcOffset((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().WP_OPTIONS.TIME_ZONE) || 0).format('YYYY/MM/DD hh:mm:ss')))));
+        }, moment_moment__WEBPACK_IMPORTED_MODULE_3___default()(orderItem.license_key.renew_date).utcOffset((RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.TIME_ZONE) || 0).format('YYYY/MM/DD hh:mm:ss')))));
       });
     }
   }), columnHelper.accessor('total', {
@@ -11580,23 +11582,23 @@ var OrdersListing = function OrdersListing() {
   }), columnHelper.accessor('createdAt', {
     header: 'Order Date',
     cell: function cell(info) {
-      return (0,_components_common__WEBPACK_IMPORTED_MODULE_5__.localDateTime)((moment_moment__WEBPACK_IMPORTED_MODULE_2___default()), info.getValue(), (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_4___default().WP_OPTIONS.TIME_ZONE));
+      return (0,_components_common__WEBPACK_IMPORTED_MODULE_6__.localDateTime)((moment_moment__WEBPACK_IMPORTED_MODULE_3___default()), info.getValue(), (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.TIME_ZONE));
     }
   })];
 
-  var _useOrdersQuery = (0,_components_services__WEBPACK_IMPORTED_MODULE_6__.useOrdersQuery)(),
+  var _useOrdersQuery = (0,_components_services__WEBPACK_IMPORTED_MODULE_7__.useOrdersQuery)(),
       data = _useOrdersQuery.data,
       error = _useOrdersQuery.error,
       isFetching = _useOrdersQuery.isFetching;
 
   console.log(data, error, isFetching);
   var showExceptionMessage = !!error;
-  var exceptionMessage = (error === null || error === void 0 ? void 0 : (_error$data = error.data) === null || _error$data === void 0 ? void 0 : (_error$data$data = _error$data.data) === null || _error$data$data === void 0 ? void 0 : _error$data$data.message) || 'Somthing wrong.';
-  var table = (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_12__.useReactTable)({
+  var exceptionMessage = (error === null || error === void 0 ? void 0 : error.data.message) || 'Somthing wrong.';
+  var table = (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_14__.useReactTable)({
     data: data === null || data === void 0 ? void 0 : data.data,
     columns: columns,
-    getCoreRowModel: (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_11__.getCoreRowModel)(),
-    getPaginationRowModel: (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_11__.getPaginationRowModel)()
+    getCoreRowModel: (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_13__.getCoreRowModel)(),
+    getPaginationRowModel: (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_13__.getPaginationRowModel)()
   });
 
   if (!isFetching && !showExceptionMessage) {
@@ -11611,19 +11613,26 @@ var OrdersListing = function OrdersListing() {
     }, headerGroup.headers.map(function (header) {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("th", {
         key: header.id
-      }, header.isPlaceholder ? null : (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_12__.flexRender)(header.column.columnDef.header, header.getContext()));
+      }, header.isPlaceholder ? null : (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_14__.flexRender)(header.column.columnDef.header, header.getContext()));
     }));
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tbody", null, isFetching ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("td", {
-    colSpan: 5
+    colSpan: columns.length
   }, "Loading...")) : showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("td", {
-    colSpan: 5
-  }, exceptionMessage)) : table.getRowModel().rows.map(function (row) {
+    colSpan: columns.length
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "flex items-center"
+  }, exceptionMessage, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    className: "button button-small ml-1",
+    onClick: function onClick(e) {
+      dispatch((0,_components_backend_states_accountSlice__WEBPACK_IMPORTED_MODULE_11__.deleteSigninToken)());
+    }
+  }, "Signin")))) : table.getRowModel().rows.map(function (row) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tr", {
       key: row.id
     }, row.getVisibleCells().map(function (cell) {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("td", {
         key: cell.id
-      }, (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_12__.flexRender)(cell.column.columnDef.cell, cell.getContext()));
+      }, (0,_tanstack_react_table__WEBPACK_IMPORTED_MODULE_14__.flexRender)(cell.column.columnDef.cell, cell.getContext()));
     }));
   }))), !isFetching && !showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "mt-2 flex items-center gap-2"
@@ -11678,7 +11687,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "accountSlice": () => (/* binding */ accountSlice),
 /* harmony export */   "addSigninToken": () => (/* binding */ addSigninToken),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   "delelteSigninToken": () => (/* binding */ delelteSigninToken)
+/* harmony export */   "deleteSigninToken": () => (/* binding */ deleteSigninToken)
 /* harmony export */ });
 /* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
 /* harmony import */ var _components_common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @components/common */ "./assets/src/js/common/index.js");
@@ -11694,11 +11703,10 @@ var accountSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createSlice)
     addSigninToken: function addSigninToken(state, action) {
       var token = action.payload.token;
       (0,_components_common__WEBPACK_IMPORTED_MODULE_0__.setLogosSignedToken)(sessionStorage, token);
-      state = {
-        token: token
-      };
+      state.token = token;
+      console.log(token, state);
     },
-    delelteSigninToken: function delelteSigninToken(state) {
+    deleteSigninToken: function deleteSigninToken(state) {
       (0,_components_common__WEBPACK_IMPORTED_MODULE_0__.removeLogosSignedToken)(sessionStorage);
       state.token = null;
     }
@@ -11706,7 +11714,7 @@ var accountSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createSlice)
 });
 var _accountSlice$actions = accountSlice.actions,
     addSigninToken = _accountSlice$actions.addSigninToken,
-    delelteSigninToken = _accountSlice$actions.delelteSigninToken;
+    deleteSigninToken = _accountSlice$actions.deleteSigninToken;
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (accountSlice.reducer);
 
@@ -11873,6 +11881,7 @@ var About = function About() {
   }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("If you are willing to support our ministry, please consider\n                making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_3___default().RHEMA_DOMAIN_TEXT))));
 };
 var Account = function Account() {
+  console.log('Run Account');
   var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
 
   var _useSigninMutation = (0,_components_services__WEBPACK_IMPORTED_MODULE_5__.useSigninMutation)(),
@@ -11883,7 +11892,7 @@ var Account = function Account() {
       signinError = _useSigninMutation2$.error,
       isSigning = _useSigninMutation2$.isLoading;
 
-  var isSignined = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(function (state) {
+  var hasToken = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(function (state) {
     var _state$account, _state$account2, _state$account3;
 
     if (!(state !== null && state !== void 0 && (_state$account = state.account) !== null && _state$account !== void 0 && _state$account.token)) {
@@ -11900,42 +11909,48 @@ var Account = function Account() {
 
     return true;
   });
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, !isSignined ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+
+  var onClickSigin = /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(data) {
+      var identity_type, body, payload, response, token;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              console.log('onClickSigin');
+              identity_type = data.identity_type, body = _objectWithoutProperties(data, _excluded);
+              console.log('Start Signin');
+              _context.next = 5;
+              return signin(body);
+
+            case 5:
+              payload = _context.sent;
+              console.log('End Signin');
+              response = payload.data.data;
+              token = response.token;
+              console.log(token);
+              dispatch((0,_components_backend_states_accountSlice__WEBPACK_IMPORTED_MODULE_7__.addSigninToken)({
+                token: token
+              }));
+
+            case 11:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    return function onClickSigin(_x) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, !hasToken ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex justify-center"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_6__.LoginCard, {
     className: "max-w-sm",
-    onClickSigin: /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(data) {
-        var identity_type, body, payload, response, token;
-        return _regeneratorRuntime().wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                identity_type = data.identity_type, body = _objectWithoutProperties(data, _excluded);
-                _context.next = 3;
-                return signin(body);
-
-              case 3:
-                payload = _context.sent;
-                response = payload.data.data;
-                token = response.token;
-                console.log(token);
-                dispatch((0,_components_backend_states_accountSlice__WEBPACK_IMPORTED_MODULE_7__.addSigninToken)({
-                  token: token
-                }));
-
-              case 8:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee);
-      }));
-
-      return function (_x) {
-        return _ref.apply(this, arguments);
-      };
-    }(),
+    onClickSigin: onClickSigin,
     onClickForgotPw: function onClickForgotPw() {
       console.log('onClickForgotPw');
     },
@@ -12377,7 +12392,7 @@ var bibleApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.crea
           var currentChapter = (0,_components_frontend_utilities__WEBPACK_IMPORTED_MODULE_4__.retrieveChapterByParamString)(ranges[0]);
 
           var converterFilter = function converterFilter(response, chapterNumber) {
-            return response.filter(function (raw) {
+            return response.data.filter(function (raw) {
               return raw.chapter === chapterNumber;
             });
           };

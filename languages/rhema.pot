@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-03-29T06:47:31+00:00\n"
+"POT-Creation-Date: 2023-05-05T07:16:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 
@@ -25,11 +25,6 @@ msgstr ""
 
 #. Author of the plugin
 msgid "TXIpartners"
-msgstr ""
-
-#: src/App/Rest/Account.php:108
-#: src/App/Rest/Deactivate.php:96
-msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
 #: src/Common/Constants.php:141
@@ -507,39 +502,63 @@ msgid "Revelation"
 msgstr ""
 
 #: src/Common/Constants.php:605
+#: src/Common/Constants.php:608
+msgid "Please activate plugin `Rhema`."
+msgstr ""
+
 #: src/Common/Constants.php:606
-msgid "Please activate plugin `Rehema`."
+msgid "Please setup \"Permalinks\" first."
 msgstr ""
 
 #: src/Common/Constants.php:607
-msgid "Logos service authorization failed"
-msgstr ""
-
-#: src/Common/Constants.php:608
-msgid "Unknown error."
+msgid "The remote server connection of Rhema has timed out. Please try again later."
 msgstr ""
 
 #: src/Common/Constants.php:609
-msgid "JWT token wrong."
+msgid "Logos service authorization failed"
 msgstr ""
 
 #: src/Common/Constants.php:610
-msgid "Must have parameters."
+msgid "Unknown error."
 msgstr ""
 
 #: src/Common/Constants.php:611
-msgid "Entry path cant use."
+msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
 #: src/Common/Constants.php:612
-msgid "Your request field is wrong."
+msgid "Sorry, no found."
 msgstr ""
 
 #: src/Common/Constants.php:613
-msgid "Response wrong."
+msgid "JWT token wrong."
 msgstr ""
 
 #: src/Common/Constants.php:614
+msgid "Must have parameters."
+msgstr ""
+
+#: src/Common/Constants.php:615
+msgid "Entry path cant use."
+msgstr ""
+
+#: src/Common/Constants.php:616
+msgid "Your request field is wrong."
+msgstr ""
+
+#: src/Common/Constants.php:617
+msgid "Rhema options nothing to save."
+msgstr ""
+
+#: src/Common/Constants.php:618
+msgid "Rhema options saved."
+msgstr ""
+
+#: src/Common/Constants.php:619
+msgid "Response wrong."
+msgstr ""
+
+#: src/Common/Constants.php:620
 msgid "Permission denied."
 msgstr ""
 
@@ -616,25 +635,25 @@ msgstr ""
 msgid "License"
 msgstr ""
 
-#: assets/src/js/backend/my-account/index.jsx:74
+#: assets/src/js/backend/my-account/index.jsx:75
 msgid "Signin Logos"
 msgstr ""
 
-#: assets/src/js/backend/my-account/index.jsx:79
+#: assets/src/js/backend/my-account/index.jsx:80
 msgid ""
 "If you have lost your License Key, you can log in here to check\n"
 "                all the License Keys you have obtained in the past."
 msgstr ""
 
-#: assets/src/js/backend/my-account/index.jsx:115
+#: assets/src/js/backend/my-account/index.jsx:116
 msgid "Forgot password?"
 msgstr ""
 
-#: assets/src/js/backend/my-account/index.jsx:143
+#: assets/src/js/backend/my-account/index.jsx:144
 msgid "Signin"
 msgstr ""
 
-#: assets/src/js/backend/my-account/index.jsx:144
+#: assets/src/js/backend/my-account/index.jsx:145
 msgid "Signing..."
 msgstr ""
 
@@ -654,7 +673,7 @@ msgid ""
 "                making a donation to us."
 msgstr ""
 
-#: assets/src/js/backend/tab/contents.jsx:83
+#: assets/src/js/backend/tab/contents.jsx:90
 msgid "Welcome to Logos. You can check your information related to Logos here after logging in."
 msgstr ""
 

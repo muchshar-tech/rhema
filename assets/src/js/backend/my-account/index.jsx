@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import PropTypes from 'prop-types'
+import React from 'react'
+import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { joiResolver } from '@hookform/resolvers/joi'
 import moment from 'moment/moment'
@@ -18,6 +18,7 @@ import { useOrdersQuery } from '@components/services'
 import { IDENTITY_TYPE } from '@components/constants'
 import * as FormTable from '@components/backend/form-table'
 import * as FieldSchama from '@components/schema'
+import { deleteSigninToken } from '@components/backend/states/accountSlice'
 
 export const LoginCard = ({
     className = '',
@@ -167,6 +168,7 @@ export const LoginCard = ({
 }
 
 export const OrdersListing = () => {
+    const dispatch = useDispatch()
     const columnHelper = createColumnHelper()
 
     const columns = [
@@ -238,7 +240,7 @@ export const OrdersListing = () => {
 
     console.log(data, error, isFetching)
     const showExceptionMessage = !!error
-    const exceptionMessage = error?.data?.data?.message || 'Somthing wrong.'
+    const exceptionMessage = error?.data.message || 'Somthing wrong.'
 
     const table = useReactTable({
         data: data?.data,
@@ -273,11 +275,23 @@ export const OrdersListing = () => {
                 <tbody>
                     {isFetching ? (
                         <tr>
-                            <td colSpan={5}>Loading...</td>
+                            <td colSpan={columns.length}>Loading...</td>
                         </tr>
                     ) : showExceptionMessage ? (
                         <tr>
-                            <td colSpan={5}>{exceptionMessage}</td>
+                            <td colSpan={columns.length}>
+                                <div className="flex items-center">
+                                    {exceptionMessage}
+                                    <button
+                                        className="button button-small ml-1"
+                                        onClick={(e) => {
+                                            dispatch(deleteSigninToken())
+                                        }}
+                                    >
+                                        Signin
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                     ) : (
                         table.getRowModel().rows.map((row) => {

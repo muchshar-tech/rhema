@@ -20,6 +20,7 @@ use WP_Error;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
 use Rhema\Common\Constants;
+use Rhema\Common\Traits\RestCommons;
 /**
  * Class Example
  *
@@ -27,7 +28,7 @@ use Rhema\Common\Constants;
  * @since 1.0.0
  */
 class Bible extends Base {
-
+	use RestCommons;
 	/**
 	 * Initialize the class.
 	 *
@@ -108,6 +109,8 @@ class Bible extends Base {
 	public function getRaws( WP_REST_Request $request ): array {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
+		/** @var Constants */
+		$constants = Constants::init();
 		$param = $request->get_param( 'range' );
 		$with_prev_chapter = $request->get_param( 'with_prev_chapter' );
 		$with_next_chapter = $request->get_param( 'with_next_chapter' );
@@ -123,20 +126,24 @@ class Bible extends Base {
 		$rhema_res = $integration_logos_api->getRaws( $query_string );
 
 		if ( $rhema_res instanceof WP_Error ) {
-			return $rhema_res;
+			$exception = new Exception( $rhema_res->get_error_message(), $rhema_res->get_error_code() );
+			return $this->sendError( $exception );
 		}
+
 		if ( empty( $rhema_res ) ) {
-			return [];
+			$exception = new Exception( $constants->error_message['no_found'], 404 );
+			return $this->sendError( $exception );
 		}
-		return $rhema_res;
+
+		return $this->sendRes( $rhema_res );
 	}
 	/**
 	 * Search bible by keywords
 	 *
 	 * @param WP_REST_Request $request
-	 * @return array
+	 * @return array|WP_Error
 	 */
-	public function searchRaws( WP_REST_Request $request ): array {
+	public function searchRaws( WP_REST_Request $request ): array|WP_Error {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		$keyword = $request->get_param( 'words' );
@@ -147,7 +154,7 @@ class Bible extends Base {
 		try {
 
 			if ( empty( $keyword ) ) {
-				throw new Exception( $constants->error_message['system/integrations/logos/api/param_wrong'], 403 );
+				throw new Exception( $constants->error_message['system/integrations/logos/api/param_wrong'], 400 );
 			}
 
 			$rhema_res = $integration_logos_api->searchRaws( $keyword, $from );
@@ -156,12 +163,9 @@ class Bible extends Base {
 				throw new Exception( $rhema_res->get_error_message(), $rhema_res->get_error_code() );
 			}
 
-			return [
-				'data' => $rhema_res,
-				'success' => true,
-			];
+			return $this->sendRes( $rhema_res );
 		} catch ( Exception $exception ) {
-			wp_send_json_error( [ 'message' => $exception->getMessage() ], $exception->getCode() );
+			return $this->sendError( $exception );
 		}
 	}
 }

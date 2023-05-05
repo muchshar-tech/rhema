@@ -609,10 +609,13 @@ final class Constants extends Base {
 			'logos_authorization_failed' => __( 'Logos service authorization failed', 'rhema' ),
 			'unknown_error' => __( 'Unknown error.', 'rhema' ),
 			'not_allowed' => __( 'Sorry, you are not allowed to do that.', 'rhema' ),
+			'no_found' => __( 'Sorry, no found.', 'rhema' ),
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
 			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
 			'system/app/general/options/rewrite_rules_exsited' => __( 'Entry path cant use.', 'rhema' ),
 			'system/app/rest/options/field_is_wrong' => __( 'Your request field is wrong.', 'rhema' ),
+			'system/app/rest/options/noting_to_save' => __( 'Rhema options nothing to save.', 'rhema' ),
+			'system/app/rest/options/option_saved' => __( 'Rhema options saved.', 'rhema' ),
 			'system/app/rest/bible/response_wrong' => __( 'Response wrong.', 'rhema' ),
 			'system/app/rest/permission_denied' => __( 'Permission denied.', 'rhema' ),
 		];

@@ -16,7 +16,6 @@ namespace Rhema\App\Rest;
 use Respect\Validation\Validator as v;
 use Respect\Validation\Exceptions\ValidationException;
 use WP_REST_Request;
-use WP_Error;
 use Exception;
 
 use Rhema\Common\Abstracts\Base;
@@ -139,12 +138,10 @@ class Options extends Base {
 				->key( 'bible_default_translation', v::stringType() )
 				->assert( $json );
 		} catch ( ValidationException $exception ) {
-			$exception = new Exception( $exception->getMessage(), 500 );
+			$exception = new Exception( $exception->getMessage(), $exception->getCode() );
+			return $this->sendError( $exception );
 		} catch ( Exception $exception ) {
-			$exception = new Exception( $exception->getMessage(), 500 );
-		}
-
-		if ( is_wp_error( $exception ) ) {
+			$exception = new Exception( $exception->getMessage(), $exception->getCode() );
 			return $this->sendError( $exception );
 		}
 
@@ -155,15 +152,15 @@ class Options extends Base {
 		] ) );
 
 		flush_rewrite_rules();
-		
+
 		if ( ! $updated ) {
 			return $this->sendRes( [
-				'message' => 'Rhema options nothing to save.',
+				'message' => Constants::init()->error_message['system/app/rest/options/noting_to_save'],
 			] );
 		}
 
 		return $this->sendRes( [
-			'message' => 'Rhema options saved.',
+			'message' => Constants::init()->error_message['system/app/rest/options/option_saved'],
 		] );
 	}
 	/**

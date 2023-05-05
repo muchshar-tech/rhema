@@ -62,11 +62,8 @@ export const Results = () => {
             : Number(total) - hits.length) || 0
     const hasMore = total > hits.length
 
-    useEffect(() => {
-        if (error && Object.keys(error).length > 0) {
-            throw new Error(error.data.code)
-        }
-    }, [error])
+    const hasError = error && Object.keys(error).length > 0
+
     return (
         <div className={classNames}>
             {history.map((keyword, index) => {
@@ -91,6 +88,7 @@ export const Results = () => {
             </StringLabel>
             <Paragraph.Block>
                 <>
+                    {hasError ? error.data.message : null}
                     {currentData
                         ? hits.map(({ _source: raw }) => (
                               <Line

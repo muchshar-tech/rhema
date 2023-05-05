@@ -122,7 +122,7 @@ const Settings = () => {
         code: updateOptionsError?.status,
         label: '',
         message:
-            updateOptionsError?.data?.data?.message ||
+            updateOptionsError?.data?.message ||
             'There has been a critical error.',
     }
     const successMessage = {

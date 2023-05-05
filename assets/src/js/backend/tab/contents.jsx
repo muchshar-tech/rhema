@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { __ } from '@wordpress/i18n'
 
@@ -35,12 +35,13 @@ export const About = () => {
 }
 
 export const Account = () => {
+    console.log('Run Account')
     const dispatch = useDispatch()
     const [
         signin,
         { data: signinResponse, error: signinError, isLoading: isSigning },
     ] = useSigninMutation()
-    const isSignined = useSelector((state) => {
+    const hasToken = useSelector((state) => {
         if (!state?.account?.token) {
             return false
         }
@@ -52,22 +53,28 @@ export const Account = () => {
         }
         return true
     })
+
+    const onClickSigin = async (data) => {
+        console.log('onClickSigin')
+        const { identity_type, ...body } = data
+        console.log('Start Signin')
+        const payload = await signin(body)
+        console.log('End Signin')
+        const {
+            data: { data: response },
+        } = payload
+        const { token } = response
+        console.log(token)
+        dispatch(addSigninToken({ token }))
+    }
+    
     return (
         <>
-            {!isSignined ? (
+            {!hasToken ? (
                 <div className="flex justify-center">
                     <LoginCard
                         className="max-w-sm"
-                        onClickSigin={async (data) => {
-                            const { identity_type, ...body } = data
-                            const payload = await signin(body)
-                            const {
-                                data: { data: response },
-                            } = payload
-                            const { token } = response
-                            console.log(token)
-                            dispatch(addSigninToken({ token }))
-                        }}
+                        onClickSigin={onClickSigin}
                         onClickForgotPw={() => {
                             console.log('onClickForgotPw')
                         }}

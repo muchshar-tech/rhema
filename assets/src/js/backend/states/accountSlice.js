@@ -16,15 +16,16 @@ export const accountSlice = createSlice({
         addSigninToken: (state, action) => {
             const { token } = action.payload
             setLogosSignedToken(sessionStorage, token)
-            state = { token }
+            state.token = token
+            console.log(token, state)
         },
-        delelteSigninToken: (state) => {
+        deleteSigninToken: (state) => {
             removeLogosSignedToken(sessionStorage)
             state.token = null
         },
     },
 })
 
-export const { addSigninToken, delelteSigninToken } = accountSlice.actions
+export const { addSigninToken, deleteSigninToken } = accountSlice.actions
 
 export default accountSlice.reducer

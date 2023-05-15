@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     fullscreen: false,
+    isAfterReload: true,
     displaySetting: {
         fontSize: 'md'
     },
@@ -125,6 +126,7 @@ export const generalSlice = createSlice({
                         break
                 }
             }
+            state.isAfterReload = false
             state.currentSelection = { ...state.currentSelection, ...payload }
         },
         inputSearchKeywords: (state, action) => {

@@ -47,3 +47,33 @@ export const retrieveChapterByParamString = (paramString) => {
     const matched = paramString.match(/[0-9]?[a-z]+(\d{0,3}):?(\d{0,3})/i)
     return Number(matched[1])
 }
+
+export const validIsQueryWholeChapter = (querys, chapterVerseInfo) => {
+    if (!chapterVerseInfo) {
+        return new Error(`Parma chapterVerseInfo is must needed.`)
+    }
+    if (!Array.isArray(querys) || querys.length === 0) {
+        return new Error(`Parma querys length equal 0.`)
+    }
+    if (querys.length > 2) {
+        return new Error(`Parma querys length should be less then 2.`)
+    }
+    if (querys.length === 1) {
+        return true
+    }
+    if (querys[0].book.index !== querys[1].book.index) {
+        return false
+    }
+    if (Number(querys[0].chapter) !== Number(querys[1].chapter)) {
+        return false
+    }
+    if (Number(querys[0].verse) !== 1) {
+        return false
+    }
+    const maxVerseNumber =
+        chapterVerseInfo[querys[0].book.index][querys[0].chapter]
+    if (Number(querys[1].verse) !== maxVerseNumber) {
+        return false
+    }
+    return true
+}

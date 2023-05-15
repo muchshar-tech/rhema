@@ -106,7 +106,7 @@ class Bible extends Base {
 	 * @return array
 	 * @since 1.0.0
 	 */
-	public function getRaws( WP_REST_Request $request ): array {
+	public function getRaws( WP_REST_Request $request ): array|WP_Error {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		/** @var Constants */

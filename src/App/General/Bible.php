@@ -55,11 +55,29 @@ final class Bible extends Base {
 		$range_from = $query_schema[0];
 		$range_to = isset( $query_schema[1] ) ? $query_schema[1] : null;
 
-		if ( ! empty( $range_from ) && ! empty( $range_from['verse'] ) && $range_from['verse'] > 1 && ! empty( $range_to ) ) {
+		if ( ! empty( $range_from['book'] ) && ! empty( $range_to['book'] ) && $range_from['book'] !== $range_to['book'] ) {
 			return false;
 		}
 
-		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) ) {
+		if ( ! empty( $range_from['chapter'] ) && ! empty( $range_to['chapter'] ) && $range_from['chapter'] !== $range_to['chapter'] ) {
+			return false;
+		}
+
+		$translation_info = $this->getTranslationInfo( 'cuv' );
+		$chapter_verse_info = $translation_info['chapterVerseInfo'];
+
+		if ( is_string( $range_from['book'] ) ) {
+			$book_index = (int) $this->getBookIndexBySlug( $range_from['book'] ) + 1;
+		}
+		if ( is_array( $range_from['book'] ) && $range_from['book']['index'] ) {
+			$book_index = (int) $range_from['book']['index'];
+		}
+		if ( empty( $book_index ) ) {
+			throw new Exception( 'book index is empty.' );
+		}
+		$max_verse_number = $chapter_verse_info[ $book_index + 1 ][ $range_from['chapter'] ];
+
+		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) && $max_verse_number > $range_to['verse'] ) {
 			return false;
 		}
 
@@ -189,9 +207,10 @@ final class Bible extends Base {
 		}
 		$chapter_verse_info = $translation_info['chapterVerseInfo'];
 		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
+
 		if ( ! empty( $query_schema[0] ) ) {
 			$query_schema[0]['verse'] = '1';
-			$query_schema[] = [
+			$query_schema[1] = [
 				'book' => $query_schema[0]['book'],
 				'chapter' => $query_schema[0]['chapter'],
 				'verse' => (int) $chapter_verse_info[ $book_index ][ $query_schema[0]['chapter'] ],
@@ -205,7 +224,8 @@ final class Bible extends Base {
 		if ( isset( $options['with_next_chapter'] ) && $options['with_next_chapter'] ) {
 			$query_schema_count = count( $query_schema );
 			$query_schema_last_index = max( 0, $query_schema_count - 1 );
-			$next_chapter_number = max( 0, (int) $query_schema[ $query_schema_last_index ]['chapter'] + 1 );
+			$max_chapter_number = array_key_last( $chapter_verse_info[ $book_index ] );
+			$next_chapter_number = min( $max_chapter_number, (int) $query_schema[ $query_schema_last_index ]['chapter'] + 1 );
 			$query_schema[ $query_schema_last_index ]['chapter'] = $next_chapter_number;
 			$query_schema[ $query_schema_last_index ]['verse'] = (int) $chapter_verse_info[ $book_index ][ $next_chapter_number ];
 		}
@@ -291,7 +311,7 @@ final class Bible extends Base {
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$bible_remote = $this->remote();
 		$remote_query_string = "{$bible_remote}/{$translate_abbr}";
-		$transient_translate_res = $this->get_transient( 'rhema.bible.translate.info', $remote_query_string );
+		$transient_translate_res = $this->getTransient( 'rhema.bible.translate.info', $remote_query_string );
 		if ( ! empty( $transient_translate_res ) ) {
 			return $transient_translate_res;
 		}
@@ -299,7 +319,7 @@ final class Bible extends Base {
 		if ( is_wp_error( $translate_res ) ) {
 			return $translate_res;
 		}
-		$this->set_transient( 'rhema.bible.translate.info', $remote_query_string, $translate_res, MONTH_IN_SECONDS );
+		$this->setTransient( 'rhema.bible.translate.info', $remote_query_string, $translate_res, MONTH_IN_SECONDS );
 		return $translate_res;
 	}
 	/**
@@ -319,7 +339,7 @@ final class Bible extends Base {
 	 * @param string $query_string
 	 * @return mixed
 	 */
-	public function get_transient( string $prefix, string $query_string ): mixed {
+	public function getTransient( string $prefix, string $query_string ): mixed {
 		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
 		$transient_label = "$prefix.$remote_query_string_base64";
 		return get_transient( $transient_label );
@@ -333,7 +353,7 @@ final class Bible extends Base {
 	 * @param integer $expiration
 	 * @return boolean
 	 */
-	public function set_transient( string $prefix, string $query_string, mixed $value, $expiration = 0 ): bool {
+	public function setTransient( string $prefix, string $query_string, mixed $value, $expiration = 0 ): bool {
 		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
 		$transient_label = "$prefix.$remote_query_string_base64";
 		return set_transient( $transient_label, $value, $expiration );

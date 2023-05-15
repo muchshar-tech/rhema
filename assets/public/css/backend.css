@@ -935,6 +935,17 @@
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 150ms;
 }
+    .tailwind .transition-transform {
+        transition-property: transform;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+}
+    .tailwind .duration-500 {
+        transition-duration: 500ms;
+}
+    .tailwind .ease-out {
+        transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
     .tailwind .content-none {
         --tw-content: none;
         content: var(--tw-content);

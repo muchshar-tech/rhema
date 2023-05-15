@@ -50,12 +50,12 @@ export const retrieveFontSize = (size) => {
     }
     return sizeMap[size]
 }
-export const retrieveResponseFromRTK = (response, error) => {
+export const retrieveResponseFromRTK = (response) => {
     let code =''
     let label = ''
     let message = 'There has been a critical error.'
     if (response) {
-
+        console.log('response')
     }
     return {
         code,
@@ -70,4 +70,8 @@ export const isJsonStr = (str) => {
         return false
     }
     return true
+}
+
+export const converterFilter = (raws, chapterNumber) => {
+    return raws.filter((raw) => raw.chapter === chapterNumber)
 }

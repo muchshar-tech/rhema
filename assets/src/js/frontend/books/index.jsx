@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { LinkVerse } from '@assets/js/frontend/components'
 import { currentSelection } from '@assets/js/frontend/states/generalSlice'
-import { updateQueryString } from '@assets/js/frontend/states/dataSlice'
+import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
 
 const Block = ({
     onClick,
@@ -167,7 +167,7 @@ const Books = ({ booksData }) => {
         ...state.data.books.old,
         ...state.data.books.new,
     ])
-    const currentQueryString = useSelector((state) => state.data.queryString)
+    const currentQueryString = useSelector((state) => state.data.readingQuerys)
     const currentSelectionSelector = useSelector(
         (state) => state.general.currentSelection
     )
@@ -251,7 +251,7 @@ const Chapters = () => {
     const toggleChapters = useSelector(
         (state) => state.general.booksSelector.chapters
     )
-    const currentQueryString = useSelector((state) => state.data.queryString)
+    const currentQueryString = useSelector((state) => state.data.readingQuerys)
     const chapterVerseInfo = useSelector(
         (state) => state.data.translation.info.chapterVerseInfo
     )
@@ -332,7 +332,7 @@ const Verses = () => {
     const toggleVerses = useSelector(
         (state) => state.general.booksSelector.verses
     )
-    const currentQueryString = useSelector((state) => state.data.queryString)
+    const currentQueryString = useSelector((state) => state.data.readingQuerys)
     const chapterVerseInfo = useSelector(
         (state) => state.data.translation.info.chapterVerseInfo
     )
@@ -406,7 +406,7 @@ const Verses = () => {
                 verses: Number(verse),
             })
         )
-        await dispatch(updateQueryString(prepareQueryString))
+        await dispatch(updateReadingQuerys(prepareQueryString))
     }
     return (
         <Container className="w-full" toggle={toggleVerses}>

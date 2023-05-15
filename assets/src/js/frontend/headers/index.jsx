@@ -27,7 +27,7 @@ const Main = () => {
     const showSearchHeader = useSelector(
         (state) => state.general.headersSwitch.search
     )
-    const queryString = useSelector((state) => state.data.queryString)
+    const queryString = useSelector((state) => state.data.readingQuerys)
     const classNames = [
         ...(showMainHeader || showSearchHeader ? ['flex'] : ['hidden']),
         'ralative',

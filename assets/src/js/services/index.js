@@ -7,7 +7,6 @@ import {
     PRODUCT_SLUG_REST_NAME_MAP,
     PRODUCT_SLUGS,
 } from '@components/constants'
-import { retrieveChapterByParamString } from '@components/frontend/utilities'
 
 const prepareHeaders = (headers) => {
     const nonce =
@@ -56,6 +55,9 @@ export const bibleApi = createApi({
     endpoints: (builder) => ({
         getBibleRaw: builder.query({
             query: ({ ranges = [], withPrevChapter, withNextChapter }) => {
+                if (typeof ranges === 'string') {
+                    ranges = [ranges]
+                }
                 const withPrevChapterQueryString = withPrevChapter
                     ? '&with_prev_chapter=1'
                     : ''
@@ -67,35 +69,15 @@ export const bibleApi = createApi({
                     return `${acc}${joiner}range[]=${range}`
                 }, '')}${withPrevChapterQueryString}${withNextChapterQueryString}`
             },
-            transformResponse: (
-                response,
-                meta,
-                { ranges, withPrevChapter, withNextChapter }
-            ) => {
-                const currentChapter = retrieveChapterByParamString(ranges[0])
-
-                const converterFilter = (response, chapterNumber) => {
-                    return response.data.filter(
-                        (raw) => raw.chapter === chapterNumber
-                    )
-                }
-                const returnConverted = {
-                    ...(!!withPrevChapter && {
-                        prev: converterFilter(response, currentChapter - 1),
-                    }),
-                    current: converterFilter(response, currentChapter),
-                    ...(!!withNextChapter && {
-                        next: converterFilter(response, currentChapter + 1),
-                    }),
-                }
-
-                return returnConverted
+            transformErrorResponse: (response) => {
+                console.log(response)
+                return response
             },
         }),
     }),
 })
 
-export const { useGetBibleRawQuery } = bibleApi
+export const { useGetBibleRawQuery, usePrefetch } = bibleApi
 
 export const searchApi = createApi({
     reducerPath: 'api.search',

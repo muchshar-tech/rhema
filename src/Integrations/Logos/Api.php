@@ -293,8 +293,9 @@ final class Api extends Base {
 		if ( ! $is_valid ) {
 			return new WP_Error( 403, Constants::init()->error_message['logos_authorization_failed'] );
 		}
-		if ( ! empty( wp_cache_get( 'fetched_bible', $this->plugin->name() ) ) ) {
-			return wp_cache_get( 'fetched_bible', $this->plugin->name() );
+		$cache_tag = base64_encode( $query_string );
+		if ( ! empty( $cached_raws_of_query ) ) {
+			return $cached_raws_of_query;
 		}
 		$bible_remote = rhema()->bible()->remote();
 		$token = $this->getSavedToken();
@@ -320,7 +321,7 @@ final class Api extends Base {
 		}
 
 		$json_parsed = json_decode( $rhema_res['body'], true );
-		wp_cache_add( 'fetched_bible', $json_parsed, $this->plugin->name() );
+		wp_cache_add( "fetched_bible_$cache_tag", $json_parsed, $this->plugin->name() );
 		return $json_parsed;
 	}
 	/**

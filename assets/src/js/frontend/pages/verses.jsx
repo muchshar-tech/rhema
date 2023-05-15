@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { max, isEqual } from 'lodash'
@@ -29,7 +30,7 @@ const Container = ({
     currentChapter,
     selectedRaws,
 }) => {
-    console.log('run Container start ========================>')
+    console.log('run Container start ========================>', readingQuerys, currentChapter)
     const dispatch = useDispatch()
     const [chapterPaged, setChapterPaged] = useState(currentChapter)
 
@@ -60,28 +61,41 @@ const Container = ({
                     chapterVerseInfo[readingQuerys[0].book.index][
                         slotChapterNumber
                     ],
+                chapterNumber: slotChapterNumber,
             }
         })
 
-    const renderChapters = useMemo(
-        () =>
-            (Array.isArray(prepareChaptersSlot)
+    const renderChapters = useMemo(() => {
+        let returnChapters = (
+            Array.isArray(prepareChaptersSlot)
                 ? prepareChaptersSlot
                 : [prepareChaptersSlot]
-            ).filter((chapter, idx) => {
-                console.log('run renderChapters filter')
-                const chapterPageNumber = idx + 1
-                const pagesCount = prepareChaptersSlot.length || 0
-                return (
-                    chapterPageNumber === chapterPaged ||
-                    chapterPageNumber ===
-                        chapterPaged + (pagesCount > chapterPaged ? 1 : 0) ||
-                    chapterPageNumber ===
-                        chapterPaged - (chapterPaged > 1 ? 1 : 0)
-                )
-            }),
-        [bookRaws]
-    )
+        ).filter((chapter, idx) => {
+            const chapterPageNumber = idx + 1
+            const pagesCount = prepareChaptersSlot.length || 0
+            return (
+                chapterPageNumber === chapterPaged ||
+                chapterPageNumber ===
+                    chapterPaged + (pagesCount > chapterPaged ? 1 : 0) ||
+                chapterPageNumber === chapterPaged - (chapterPaged > 1 ? 1 : 0)
+            )
+        })
+        let middleChapterIndex = returnChapters.findIndex(
+            (raws) => Number(raws.chapter) === chapterPaged
+        )
+        /* let middleChapter = returnChapters[middleChapterIndex]
+        returnChapters[0] = returnChapters[1]
+        returnChapters[1] = middleChapter */
+        return returnChapters.sort((a) => {
+            console.log(a)
+            const chapterNumber = Array.isArray(a)
+                ? a[0]?.chapter
+                : a.chapterNumber
+            return chapterNumber >= middleChapterIndex ? 1 : -1
+        })
+    }, [bookRaws, chapterPaged])
+
+    console.log(renderChapters)
 
     useEffect(() => {
         if (currentChapter !== chapterPaged) {
@@ -104,6 +118,7 @@ const Container = ({
                 <Books.List />
                 <Search.Results />
                 <Layout.Content
+                    pagePosition={chapterPaged === 1 ? 'left' : chapterPaged > 1 && chapterPaged < currentBookChaptersNumber ? 'middle' : 'right'}
                     onMoveFirstPage={() => {
                         console.log('run onMoveFirstPage')
                         const newChapterPaged = chapterPaged - 1
@@ -129,7 +144,7 @@ const Container = ({
                     onCompletedMove={(pagePos) => {
                         console.log('run onCompletedMove', pagePos)
                         const newChapterPaged =
-                            pagePos > 1 ? chapterPaged + 1 : chapterPaged - 1
+                            pagePos > 1 ? chapterPaged + 1 : chapterPaged > 1 ? chapterPaged - 1 : chapterPaged
                         const newReadingQuerys = [
                             {
                                 book: { ...readingQuerys[0].book },
@@ -144,15 +159,8 @@ const Container = ({
                                 ][newChapterPaged],
                             },
                         ]
-                        if (pagePos === 2) {
-                            setChapterPaged(chapterPaged + 1)
-                            readingQuerys
-                            dispatch(updateReadingQuerys(newReadingQuerys))
-                        }
-                        if (pagePos === 0) {
-                            setChapterPaged(chapterPaged - 1)
-                            dispatch(updateReadingQuerys(newReadingQuerys))
-                        }
+                        setChapterPaged(newChapterPaged)
+                        dispatch(updateReadingQuerys(newReadingQuerys))
                     }}
                 >
                     {renderChapters.map((raws, idx) => {
@@ -291,11 +299,14 @@ export const Verses = () => {
 
     return (
         <MemoContainer
-            readingQuerys={readingQuerys}
-            bookRaws={bookRaws}
-            chapterVerseInfo={chapterVerseInfo}
-            currentChapter={currentChapter}
-            selectedRaws={selectedRaws}
+            {...{
+                readingQuerys,
+                bookRaws,
+                chapterVerseInfo,
+                currentChapter,
+                selectedRaws,
+                isFetching,
+            }}
         />
     )
 }

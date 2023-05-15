@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import clamp from 'lodash/clamp'
 import { useSelector } from 'react-redux'
@@ -81,11 +81,14 @@ const Body = ({ children }) => {
 }
 
 const Content = ({
+    pagePosition = 'middle',
     onMoveFirstPage,
     onMoveLastPage,
     onCompletedMove,
     children,
 }) => {
+    const initialPos =
+        pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 2
     const showMain = useSelector(
         (state) =>
             state.general.headersSwitch.main ||
@@ -93,7 +96,7 @@ const Content = ({
     )
     const [movePercentage, setMovePercentage] = useState(0)
     const [onTransition, setOnTransition] = useState(false)
-    const [pagePos, setPagePos] = useState(1)
+    const [pagePos, setPagePos] = useState(initialPos)
     const onSwipeStart = (event) => {
         console.log('Start swiping...', event)
     }
@@ -128,10 +131,10 @@ const Content = ({
                 2
             )
             console.log(pagesCount, pagePos, nextPagePos)
-            if (nextPagePos === 0) {
+            if (nextPagePos === 0 || (initialPos === 2 && nextPagePos === 1)) {
                 onMoveFirstPage()
             }
-            if (nextPagePos === 2) {
+            if (nextPagePos === 2 || (initialPos === 0 && nextPagePos === 1)) {
                 onMoveLastPage()
             }
             setPagePos(nextPagePos)
@@ -157,6 +160,10 @@ const Content = ({
         'px-10',
     ]
 
+    useEffect(() => {
+        setPagePos(initialPos)
+    }, [initialPos])
+
     return (
         <Swipe
             onSwipeStart={onSwipeStart}
@@ -164,21 +171,6 @@ const Content = ({
             onSwipeEnd={onSwipeEnd}
             className={classNames}
         >
-            {/* children.map((child, idx) => {
-                return (
-                    <motion.div
-                        key={idx}
-                        animate={{
-                            x: `${-(pagePos * 100) + movePercentage}%`,
-                        }}
-                        transition={{ ease: 'easeOut' }}
-                        initial={false}
-                        className="min-w-full px-10"
-                    >
-                        {child}
-                    </motion.div>
-                )
-            }) */}
             {children.map((child, idx) => {
                 return (
                     <div
@@ -189,12 +181,18 @@ const Content = ({
                             }%`,
                         }}
                         className={pageClassNames.join(' ')}
-                        {...(idx === 1 && {
+                        {...(idx === initialPos && {
                             onTransitionEnd: () => {
                                 console.log('onTransitionEnd')
-                                if (pagePos !== 1) {
+                                if (pagePos !== initialPos) {
                                     onCompletedMove(pagePos)
-                                    setPagePos(1)
+                                    setPagePos(
+                                        initialPos === 0
+                                            ? 1
+                                            : initialPos === 2
+                                            ? 1
+                                            : initialPos
+                                    )
                                     setOnTransition(false)
                                 }
                             },

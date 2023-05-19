@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { max, isEqual } from 'lodash'
 import Skeleton from 'react-loading-skeleton'
+import { __ } from '@wordpress/i18n'
 
 import * as Layout from '@components/frontend/layouts'
 import * as Headers from '@components/frontend/headers'
@@ -22,6 +23,7 @@ import {
     loadRaws,
     updateReadingQuerys,
 } from '@assets/js/frontend/states/dataSlice'
+import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const Container = ({
     readingQuerys,
@@ -30,9 +32,14 @@ const Container = ({
     currentChapter,
     selectedRaws,
 }) => {
-    console.log('run Container start ========================>', readingQuerys, currentChapter)
+    console.groupCollapsed('Container')
+    console.log(
+        'run Container start ========================>',
+        readingQuerys,
+        currentChapter
+    )
     const dispatch = useDispatch()
-    const [chapterPaged, setChapterPaged] = useState(currentChapter)
+    const chapterPaged = currentChapter
 
     if (!chapterVerseInfo) {
         return null
@@ -83,9 +90,6 @@ const Container = ({
         let middleChapterIndex = returnChapters.findIndex(
             (raws) => Number(raws.chapter) === chapterPaged
         )
-        /* let middleChapter = returnChapters[middleChapterIndex]
-        returnChapters[0] = returnChapters[1]
-        returnChapters[1] = middleChapter */
         return returnChapters.sort((a) => {
             console.log(a)
             const chapterNumber = Array.isArray(a)
@@ -97,15 +101,46 @@ const Container = ({
 
     console.log(renderChapters)
 
-    useEffect(() => {
-        if (currentChapter !== chapterPaged) {
-            console.log(
-                'currentChapter !== chapterPaged',
-                currentChapter !== chapterPaged
-            )
-            setChapterPaged(currentChapter)
-        }
-    }, [currentChapter])
+    const onMoveFirstPage = () => {
+        console.log('run onMoveFirstPage')
+        const newChapterPaged = chapterPaged - 1
+        prefetchRaw({
+            ranges: [`${readingQuerys[0].book.slug}${newChapterPaged}:1`],
+            withPrevChapter: true,
+            withNextChapter: true,
+        })
+    }
+
+    const onMoveLastPage = () => {
+        console.log('run onMoveLastPage')
+        const newChapterPaged = chapterPaged + 1
+        prefetchRaw({
+            ranges: [`${readingQuerys[0].book.slug}${newChapterPaged}:1`],
+            withPrevChapter: true,
+            withNextChapter: true,
+        })
+    }
+
+    const onCompletedMove = (offest) => {
+        console.log('run onCompletedMove', chapterPaged, offest)
+        const newChapterPaged = chapterPaged + offest
+        const newReadingQuerys = [
+            {
+                book: { ...readingQuerys[0].book },
+                chapter: newChapterPaged,
+                verse: 1,
+            },
+            {
+                book: { ...readingQuerys[1].book },
+                chapter: newChapterPaged,
+                verse: chapterVerseInfo[readingQuerys[0].book.index][
+                    newChapterPaged
+                ],
+            },
+        ]
+        // setChapterPaged(newChapterPaged)
+        dispatch(updateReadingQuerys(newReadingQuerys))
+    }
 
     return (
         <Layout.AppContainer>
@@ -118,53 +153,20 @@ const Container = ({
                 <Books.List />
                 <Search.Results />
                 <Layout.Content
-                    pagePosition={chapterPaged === 1 ? 'left' : chapterPaged > 1 && chapterPaged < currentBookChaptersNumber ? 'middle' : 'right'}
-                    onMoveFirstPage={() => {
-                        console.log('run onMoveFirstPage')
-                        const newChapterPaged = chapterPaged - 1
-                        prefetchRaw({
-                            ranges: [
-                                `${readingQuerys[0].book.slug}${newChapterPaged}:1`,
-                            ],
-                            withPrevChapter: true,
-                            withNextChapter: true,
-                        })
-                    }}
-                    onMoveLastPage={() => {
-                        console.log('run onMoveLastPage')
-                        const newChapterPaged = chapterPaged + 1
-                        prefetchRaw({
-                            ranges: [
-                                `${readingQuerys[0].book.slug}${newChapterPaged}:1`,
-                            ],
-                            withPrevChapter: true,
-                            withNextChapter: true,
-                        })
-                    }}
-                    onCompletedMove={(pagePos) => {
-                        console.log('run onCompletedMove', pagePos)
-                        const newChapterPaged =
-                            pagePos > 1 ? chapterPaged + 1 : chapterPaged > 1 ? chapterPaged - 1 : chapterPaged
-                        const newReadingQuerys = [
-                            {
-                                book: { ...readingQuerys[0].book },
-                                chapter: newChapterPaged,
-                                verse: 1,
-                            },
-                            {
-                                book: { ...readingQuerys[1].book },
-                                chapter: newChapterPaged,
-                                verse: chapterVerseInfo[
-                                    readingQuerys[0].book.index
-                                ][newChapterPaged],
-                            },
-                        ]
-                        setChapterPaged(newChapterPaged)
-                        dispatch(updateReadingQuerys(newReadingQuerys))
-                    }}
+                    pagePosition={
+                        chapterPaged === 1
+                            ? 'left'
+                            : chapterPaged > 1 &&
+                              chapterPaged < currentBookChaptersNumber
+                            ? 'middle'
+                            : 'right'
+                    }
+                    onMoveFirstPage={onMoveFirstPage}
+                    onMoveLastPage={onMoveLastPage}
+                    onCompletedMove={onCompletedMove}
                 >
-                    {renderChapters.map((raws, idx) => {
-                        const pageIdx = idx + 1
+                    {renderChapters.map((raws) => {
+                        const pageIdx = raws?.chapterNumber || raws[0].chapter
                         const isWaitingLoading =
                             raws.length === 0 ||
                             !Array.isArray ||
@@ -202,13 +204,18 @@ const Container = ({
                     <Forms.Posts />
                 </Layout.Drawer>
                 <Layout.Drawer className="p-2" name="relative-posts">
-                    <DrawerTitle>此段聖經相關文章</DrawerTitle>
+                    <DrawerTitle>相關文章</DrawerTitle>
                 </Layout.Drawer>
                 <Layout.Drawer
                     className="p-2 content-start flex-wrap"
                     name="selected-raws"
                 >
-                    <DrawerTitle>已選擇的經文</DrawerTitle>
+                    <DrawerTitle>
+                        {__(
+                            `Selected Verses`,
+                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+                        )}
+                    </DrawerTitle>
                     <Layout.Drawer.SelectedRaw />
                 </Layout.Drawer>
             </Layout.Body>
@@ -216,7 +223,7 @@ const Container = ({
     )
 }
 const MemoContainer = React.memo(Container, (prev, next) => {
-    console.log('run MemoContainer =>>>>')
+    console.groupCollapsed('MemoContainer')
     if (!isEqual(prev.chapterVerseInfo, next.chapterVerseInfo)) {
         console.log(
             'chapterVerseInfo',
@@ -249,22 +256,18 @@ const MemoContainer = React.memo(Container, (prev, next) => {
         )
         return false
     }
-
+    console.groupEnd('MemoContainer')
     return true
 })
 
 export const Verses = () => {
     const dispatch = useDispatch()
-    const isAfterReload = useSelector((state) => state.data.isAfterReload)
-    const readingQuerys = useSelector((state) => state.data.readingQuerys)
-    const bookRaws = useSelector((state) => {
-        return state.data.raws.filter((raw) => {
-            return raw.book === Number(readingQuerys[0].book.index)
-        })
+    const stateData = useSelector((state) => state.data)
+    const { isAfterReload, readingQuerys } = stateData
+    const { chapterVerseInfo } = stateData.translation?.info
+    const bookRaws = stateData.raws.filter((raw) => {
+        return raw.book === Number(readingQuerys[0].book.index)
     })
-    const { chapterVerseInfo } = useSelector(
-        (state) => state.data.translation?.info
-    )
     const selectedRaws = useSelector((state) => state.selected.raws)
 
     const isQueryWholeChapter = validIsQueryWholeChapter(
@@ -305,7 +308,6 @@ export const Verses = () => {
                 chapterVerseInfo,
                 currentChapter,
                 selectedRaws,
-                isFetching,
             }}
         />
     )

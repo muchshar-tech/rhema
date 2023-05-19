@@ -1,10 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
+import { __ } from '@wordpress/i18n'
 
 import { LinkVerse } from '@assets/js/frontend/components'
 import { currentSelection } from '@assets/js/frontend/states/generalSlice'
 import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
+import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const Block = ({
     onClick,
@@ -184,7 +186,7 @@ const Books = ({ booksData }) => {
     return (
         <Container toggle={toggleBooks}>
             <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
-                舊約
+                {__(`bible-directory/old-testament`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
             </div>
             <BlockWrap className="bg-gray-200">
                 {booksData.old.map(({ abbr, name, index }, idx) => {
@@ -212,7 +214,7 @@ const Books = ({ booksData }) => {
                 })}
             </BlockWrap>
             <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
-                新約
+                {__(`bible-directory/new-testament`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
             </div>
             <BlockWrap className="bg-gray-200">
                 {booksData.new.map(({ abbr, name, index }, idx) => {
@@ -374,7 +376,6 @@ const Verses = () => {
                       {}
                   )
             : {}
-    console.log(currentQueryChapterVerseInfo)
     const displayBooksIndex = currentSelectionBookIndex
         ? currentSelectionBookIndex
         : currentQueryString.length > 0

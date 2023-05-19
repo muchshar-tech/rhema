@@ -4,7 +4,7 @@ const initialState = {
     fullscreen: false,
     isAfterReload: true,
     displaySetting: {
-        fontSize: 'md'
+        fontSize: 'md',
     },
     headersSwitch: {
         main: true,
@@ -152,8 +152,16 @@ export const generalSlice = createSlice({
             const { payload: paged } = action
             state.search.paged = paged
         },
-        incrementByAmount: (state, action) => {
-            state.value += action.payload
+        changeFontSize: (state) => {
+            const sizes = ['sm', 'md', 'lg']
+            const currentSizeIndex = sizes.indexOf(
+                state.displaySetting.fontSize
+            )
+            const nextfontSize =
+                currentSizeIndex + 1 > sizes.length - 1
+                    ? sizes[0]
+                    : sizes[currentSizeIndex + 1]
+            state.displaySetting.fontSize = nextfontSize
         },
     },
 })
@@ -172,7 +180,7 @@ export const {
     currentSelection,
     inputSearchKeywords,
     changeSearchPaged,
-    incrementByAmount,
+    changeFontSize,
 } = generalSlice.actions
 
 export default generalSlice.reducer

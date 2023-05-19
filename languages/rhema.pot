@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-05-05T07:16:19+00:00\n"
+"POT-Creation-Date: 2023-05-19T09:48:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 
@@ -608,35 +608,35 @@ msgid "Content:"
 msgstr ""
 
 #: assets/src/js/backend/App.jsx:145
-msgid "Bible Entry Path"
+msgid "bible-entry-path"
 msgstr ""
 
 #: assets/src/js/backend/App.jsx:164
-msgid "Default Translation"
+msgid "default-translation"
 msgstr ""
 
 #: assets/src/js/backend/App.jsx:175
-msgid "Default"
+msgid "default-translation/default"
 msgstr ""
 
 #: assets/src/js/backend/components/index.jsx:233
-msgid "Status:"
+msgid "features/status"
 msgstr ""
 
 #: assets/src/js/backend/components/index.jsx:242
-msgid "Comming Soon..."
+msgid "features/comming-soon"
 msgstr ""
 
 #: assets/src/js/backend/components/index.jsx:254
-msgid "Active"
+msgid "features/active"
 msgstr ""
 
 #: assets/src/js/backend/components/index.jsx:257
-msgid "License"
+msgid "features/license"
 msgstr ""
 
 #: assets/src/js/backend/my-account/index.jsx:75
-msgid "Signin Logos"
+msgid "my-account/signin-logos"
 msgstr ""
 
 #: assets/src/js/backend/my-account/index.jsx:80
@@ -646,15 +646,15 @@ msgid ""
 msgstr ""
 
 #: assets/src/js/backend/my-account/index.jsx:116
-msgid "Forgot password?"
+msgid "my-account/forgot-password"
 msgstr ""
 
 #: assets/src/js/backend/my-account/index.jsx:144
-msgid "Signin"
+msgid "my-account/signin"
 msgstr ""
 
 #: assets/src/js/backend/my-account/index.jsx:145
-msgid "Signing..."
+msgid "my-account/signing"
 msgstr ""
 
 #: assets/src/js/backend/tab/contents.jsx:15
@@ -678,5 +678,33 @@ msgid "Welcome to Logos. You can check your information related to Logos here af
 msgstr ""
 
 #: assets/src/js/constants.js:18
-msgid "Page is expired, please refresh"
+msgid "error/page-is-expired"
+msgstr ""
+
+#: assets/src/js/frontend/books/index.jsx:189
+msgid "bible-directory/old-testament"
+msgstr ""
+
+#: assets/src/js/frontend/books/index.jsx:217
+msgid "bible-directory/new-testament"
+msgstr ""
+
+#: assets/src/js/frontend/headers/index.jsx:130
+msgid "bible-directory"
+msgstr ""
+
+#: assets/src/js/frontend/pages/verses.jsx:214
+msgid "Selected Verses"
+msgstr ""
+
+#: assets/src/js/frontend/tabs/index.jsx:58
+msgid "bible-directory/book"
+msgstr ""
+
+#: assets/src/js/frontend/tabs/index.jsx:61
+msgid "bible-directory/chapter"
+msgstr ""
+
+#: assets/src/js/frontend/tabs/index.jsx:64
+msgid "bible-directory/verse"
 msgstr ""

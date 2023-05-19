@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { switchHeadersSelection } from '@assets/js/frontend/states/generalSlice'
 import { putRaw, delRaw } from '@assets/js/frontend/states/selectedSlice'
+import { retrieveFontSize } from '@assets/js/common'
 
 const RelateContent = ({}) => {
     return (
@@ -127,7 +128,7 @@ const Line = ({
         'before:leading-none',
         'before:decoration-sky-500',
         'cursor-pointer',
-        'text-16px',
+        retrieveFontSize(fontSize),
     ].join(' ')
     return (
         <span

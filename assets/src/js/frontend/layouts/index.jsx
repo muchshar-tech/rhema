@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import clamp from 'lodash/clamp'
 import { useSelector } from 'react-redux'
@@ -80,6 +80,42 @@ const Body = ({ children }) => {
     return <div className={classnames}>{children}</div>
 }
 
+const PageWrapper = ({
+    className,
+    movePercentage,
+    pagePos,
+    onTransitionEnd,
+    children,
+}) => {
+    const elementRef = useRef(null)
+
+    useEffect(() => {
+        const element = elementRef.current
+        const handlerOnTransitionEnd = () => {
+            console.log('run handlerOnTransitionEnd', pagePos, children)
+            onTransitionEnd()
+        }
+        if (onTransitionEnd) {
+            element.addEventListener('transitionend', handlerOnTransitionEnd)
+        }
+
+        return () => {
+            element.removeEventListener('transitionend', handlerOnTransitionEnd)
+        }
+    }, [onTransitionEnd])
+    return (
+        <div
+            ref={elementRef}
+            style={{
+                transform: `translateX(${-(pagePos * 100) + movePercentage}%`,
+            }}
+            className={className}
+        >
+            {children}
+        </div>
+    )
+}
+
 const Content = ({
     pagePosition = 'middle',
     onMoveFirstPage,
@@ -88,7 +124,8 @@ const Content = ({
     children,
 }) => {
     const initialPos =
-        pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 2
+        pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 1
+
     const showMain = useSelector(
         (state) =>
             state.general.headersSwitch.main ||
@@ -98,6 +135,7 @@ const Content = ({
     const [onTransition, setOnTransition] = useState(false)
     const [pagePos, setPagePos] = useState(initialPos)
     const onSwipeStart = (event) => {
+        console.groupCollapsed('Start swiping...')
         console.log('Start swiping...', event)
     }
 
@@ -113,15 +151,17 @@ const Content = ({
         setMovePercentage(
             clamp(
                 movePercentageX,
-                pagePos < 2 ? -100 : -20,
-                pagePos > 0 ? 100 : 20
+                pagePosition !== 'right' ? -100 : -20,
+                pagePosition !== 'left' ? 100 : 20
             )
         )
         setOnTransition(true)
     }
 
     const onSwipeEnd = (event) => {
-        console.log('End swiping...', event, movePercentage)
+        console.groupEnd('Start swiping...')
+        console.groupCollapsed('End swiping...')
+        console.log(event, movePercentage)
         const moveAbsPercentage = Math.abs(movePercentage)
         const pagesCount = children.length || 0
         if (moveAbsPercentage > 30) {
@@ -140,7 +180,18 @@ const Content = ({
             setPagePos(nextPagePos)
         }
         setMovePercentage(0)
-        setOnTransition(true)
+        console.groupEnd('End swiping...')
+    }
+
+    const handlerOnTransitionEnd = () => {
+        console.log('onTransitionEnd', pagePos, initialPos)
+        if (pagePos !== initialPos) {
+            setOnTransition(false)
+            onCompletedMove(
+                initialPos > pagePos ? -1 : initialPos < pagePos ? 1 : 0
+            )
+            setPagePos(initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos)
+        }
     }
 
     const classNames = [
@@ -173,39 +224,28 @@ const Content = ({
         >
             {children.map((child, idx) => {
                 return (
-                    <div
-                        key={idx}
-                        style={{
-                            transform: `translateX(${
-                                -(pagePos * 100) + movePercentage
-                            }%`,
+                    <PageWrapper
+                        {...{
+                            key: idx,
+                            className: pageClassNames.join(' '),
+                            movePercentage,
+                            pagePos,
+                            ...(idx === initialPos && {
+                                onTransitionEnd: handlerOnTransitionEnd,
+                            }),
                         }}
-                        className={pageClassNames.join(' ')}
-                        {...(idx === initialPos && {
-                            onTransitionEnd: () => {
-                                console.log('onTransitionEnd')
-                                if (pagePos !== initialPos) {
-                                    onCompletedMove(pagePos)
-                                    setPagePos(
-                                        initialPos === 0
-                                            ? 1
-                                            : initialPos === 2
-                                            ? 1
-                                            : initialPos
-                                    )
-                                    setOnTransition(false)
-                                }
-                            },
-                        })}
                     >
                         {child}
-                    </div>
+                    </PageWrapper>
                 )
             })}
+            {console.groupEnd()}
+            {console.groupEnd()}
         </Swipe>
     )
 }
 Content.propTypes = {
+    pagePosition: PropTypes.string,
     onMoveStartPage: PropTypes.func,
     onMoveEndPage: PropTypes.func,
     children: PropTypes.oneOfType([

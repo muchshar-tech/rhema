@@ -16,7 +16,7 @@ export const PRODUCT_SLUGS = [
 ]
 export const ERROR_MESSAGE_MAPPING = {
     rest_cookie_invalid_nonce: __(
-        `Page is expired, please refresh`,
+        `error/page-is-expired`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
 }

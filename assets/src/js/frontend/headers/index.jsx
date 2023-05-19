@@ -4,11 +4,12 @@ import { useForm } from 'react-hook-form'
 import { joiResolver } from '@hookform/resolvers/joi'
 import { BiChevronLeft, BiFontSize } from 'react-icons/bi'
 import { BsLayoutTextSidebarReverse } from 'react-icons/bs'
+import { __ } from '@wordpress/i18n'
 
 import * as FieldSchama from '@components/schema'
 import {
     switchHeadersMain,
-    toggleDrawer,
+    changeFontSize,
     switchHeadersSearch,
     changeSearchPaged,
     inputSearchKeywords,
@@ -18,6 +19,7 @@ import { queryStringModifier } from '@assets/js/frontend/utilities'
 import * as Layout from '@components/frontend/layouts'
 import * as Tools from '@components/frontend/tools'
 import * as Tabs from '@components/frontend/tabs'
+import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const Main = () => {
     const dispatch = useDispatch()
@@ -54,6 +56,10 @@ const Main = () => {
         dispatch(switchHeadersSearch())
     }
 
+    const onClickFontSize = () => {
+        dispatch(changeFontSize())
+    }
+
     return (
         <Layout.Top.Row className={classNames}>
             <Layout.Top.LeftSide>
@@ -81,7 +87,7 @@ const Main = () => {
                 {!showSearchHeader ? (
                     <>
                         <Tools.FullScreenToggle />
-                        <Tools.Borderless onClick={() => {}}>
+                        <Tools.Borderless onClick={onClickFontSize}>
                             <BiFontSize className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                         </Tools.Borderless>
                         {/* <Tools.Borderless
@@ -121,7 +127,7 @@ const Books = () => {
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>
                 <Layout.Top.MiddleSide className="text-16px">
-                    聖經目錄
+                    {__(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
                 </Layout.Top.MiddleSide>
                 <Layout.Top.RightSide>
                     <Tools.Bordered>和合本</Tools.Bordered>

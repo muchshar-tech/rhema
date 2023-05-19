@@ -72,7 +72,7 @@ export const LoginCard = ({
         <div className={classNames.join(' ')}>
             <div className="postbox-header px-2 justify-center">
                 <h2 className="text-14px py-3 m-0">
-                    {__(`Signin Logos`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                    {__(`my-account/signin-logos`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
                 </h2>
             </div>
             <div className="inside pb-0">
@@ -114,7 +114,7 @@ export const LoginCard = ({
                                 onClick={onClickForgotPw}
                             >
                                 {__(
-                                    `Forgot password?`,
+                                    `my-account/forgot-password`,
                                     RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                                 )}
                             </button>
@@ -141,9 +141,9 @@ export const LoginCard = ({
                         })}
                     >
                         {!isSubmitting && !isSigning
-                            ? __(`Signin`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)
+                            ? __(`my-account/signin`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)
                             : __(
-                                  `Signing...`,
+                                  `my-account/signing`,
                                   RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                               )}
                     </button>

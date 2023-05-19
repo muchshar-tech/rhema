@@ -143,7 +143,7 @@ const Settings = () => {
                 <FormTable.Row>
                     <FormTable.Label htmlFor="bible_entry">
                         {__(
-                            'Bible Entry Path',
+                            'bible-entry-path',
                             RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                         )}
                     </FormTable.Label>
@@ -162,7 +162,7 @@ const Settings = () => {
                 <FormTable.Row>
                     <FormTable.Label htmlFor="bible_default_translation">
                         {__(
-                            'Default Translation',
+                            'default-translation',
                             RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                         )}
                     </FormTable.Label>
@@ -173,7 +173,7 @@ const Settings = () => {
                         >
                             <option value="">
                                 {__(
-                                    'Default',
+                                    'default-translation/default',
                                     RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                                 )}
                             </option>

@@ -64,6 +64,9 @@ final class Bible extends Base {
 		}
 
 		$translation_info = $this->getTranslationInfo( 'cuv' );
+		if ( is_wp_error( $translation_info ) ) {
+			throw new Exception( $translation_info->get_error_message() );
+		}
 		$chapter_verse_info = $translation_info['chapterVerseInfo'];
 
 		if ( is_string( $range_from['book'] ) ) {

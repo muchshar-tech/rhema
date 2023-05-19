@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { __ } from '@wordpress/i18n'
 
 import {
     booksSelectorBooks,
@@ -7,6 +8,7 @@ import {
     booksSelectorVerses,
 } from '@assets/js/frontend/states/generalSlice'
 import * as Layout from '@components/frontend/layouts'
+import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const Tab = ({ isActive, onClick, children }) => {
     const underlineClassNames = [
@@ -53,13 +55,13 @@ const BookTab = ({ classname: extraClassName = '' }) => {
     return (
         <Layout.Top.Row className={classNames}>
             <Tab isActive={triggerTabs.books} onClick={onClickTabBook}>
-                Book
+                {__(`bible-directory/book`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
             </Tab>
             <Tab isActive={triggerTabs.chapters} onClick={onClickTabChapter}>
-                Chapter
+                {__(`bible-directory/chapter`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
             </Tab>
             <Tab isActive={triggerTabs.verses} onClick={onClickTabVerse}>
-                Verse
+                {__(`bible-directory/verse`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
             </Tab>
         </Layout.Top.Row>
     )

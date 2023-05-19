@@ -230,7 +230,7 @@ export const FeatureCard = ({
                     <h2 className="text-14px py-3 m-0">{title}</h2>
                     <div className="flex items-center hide-if-no-js">
                         <span className="text-gray-400 mr-1">
-                            {__(`Status:`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                            {__(`features/status`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
                         </span>
                         <Components.SwitchToggle isActive={isActive} />
                     </div>
@@ -240,7 +240,7 @@ export const FeatureCard = ({
                     {commingSoon ? (
                         <button className="button" disabled>
                             {__(
-                                `Comming Soon...`,
+                                `features/comming-soon`,
                                 RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                             )}
                         </button>
@@ -251,11 +251,11 @@ export const FeatureCard = ({
                                 onClick={onClickActive}
                                 {...(isActive && { disabled: true })}
                             >
-                                {__(`Active`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                                {__(`features/active`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
                             </button>
                             <button className="button" onClick={onClickLicense}>
                                 {__(
-                                    `License`,
+                                    `features/license`,
                                     RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
                                 )}
                             </button>

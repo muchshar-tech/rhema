@@ -187,7 +187,7 @@ final class Constants extends Base {
 				'index' => 7,
 			],
 			[
-				'abbr' => __( 'Ruth', 'rhema' ),
+				'abbr' => __( 'Rut', 'rhema' ),
 				'slug' => 'rth',
 				'name' => __( 'Ruth', 'rhema' ),
 				'chapters' => 4,

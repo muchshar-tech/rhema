@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-05-19T09:48:35+00:00\n"
+"POT-Creation-Date: 2023-05-19T10:10:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 
@@ -28,7 +28,7 @@ msgid "TXIpartners"
 msgstr ""
 
 #: src/Common/Constants.php:141
-msgid "Gen."
+msgid "abbr/gen"
 msgstr ""
 
 #: src/Common/Constants.php:143
@@ -36,7 +36,7 @@ msgid "Genesis"
 msgstr ""
 
 #: src/Common/Constants.php:148
-msgid "Ex."
+msgid "abbr/ex"
 msgstr ""
 
 #: src/Common/Constants.php:150
@@ -44,7 +44,7 @@ msgid "Exodus"
 msgstr ""
 
 #: src/Common/Constants.php:155
-msgid "Lev."
+msgid "abbr/lev"
 msgstr ""
 
 #: src/Common/Constants.php:157
@@ -52,7 +52,7 @@ msgid "Leviticus"
 msgstr ""
 
 #: src/Common/Constants.php:162
-msgid "Num."
+msgid "abbr/num"
 msgstr ""
 
 #: src/Common/Constants.php:164
@@ -60,7 +60,7 @@ msgid "Numbers"
 msgstr ""
 
 #: src/Common/Constants.php:169
-msgid "Deut."
+msgid "abbr/deut"
 msgstr ""
 
 #: src/Common/Constants.php:171
@@ -68,7 +68,7 @@ msgid "Deuteronomy"
 msgstr ""
 
 #: src/Common/Constants.php:176
-msgid "Josh."
+msgid "abbr/josh"
 msgstr ""
 
 #: src/Common/Constants.php:178
@@ -76,7 +76,7 @@ msgid "Joshua"
 msgstr ""
 
 #: src/Common/Constants.php:183
-msgid "Judg."
+msgid "abbr/judg"
 msgstr ""
 
 #: src/Common/Constants.php:185
@@ -84,12 +84,15 @@ msgid "Judges"
 msgstr ""
 
 #: src/Common/Constants.php:190
+msgid "abbr/rut"
+msgstr ""
+
 #: src/Common/Constants.php:192
 msgid "Ruth"
 msgstr ""
 
 #: src/Common/Constants.php:197
-msgid "1 Sam."
+msgid "abbr/1sam"
 msgstr ""
 
 #: src/Common/Constants.php:199
@@ -97,7 +100,7 @@ msgid "1 Samuel"
 msgstr ""
 
 #: src/Common/Constants.php:204
-msgid "2 Sam."
+msgid "abbr/2sam"
 msgstr ""
 
 #: src/Common/Constants.php:206
@@ -105,17 +108,23 @@ msgid "2 Samuel"
 msgstr ""
 
 #: src/Common/Constants.php:211
+msgid "abbr/1ki"
+msgstr ""
+
 #: src/Common/Constants.php:213
 msgid "1 Kings"
 msgstr ""
 
 #: src/Common/Constants.php:218
+msgid "abbr/2ki"
+msgstr ""
+
 #: src/Common/Constants.php:220
 msgid "2 Kings"
 msgstr ""
 
 #: src/Common/Constants.php:225
-msgid "1 Chron."
+msgid "abbr/1chron"
 msgstr ""
 
 #: src/Common/Constants.php:227
@@ -123,7 +132,7 @@ msgid "1 Chronicles"
 msgstr ""
 
 #: src/Common/Constants.php:232
-msgid "2 Chron."
+msgid "abbr/2chron"
 msgstr ""
 
 #: src/Common/Constants.php:234
@@ -131,12 +140,15 @@ msgid "2 Chronicles"
 msgstr ""
 
 #: src/Common/Constants.php:239
+msgid "abbr/ezr"
+msgstr ""
+
 #: src/Common/Constants.php:241
 msgid "Ezra"
 msgstr ""
 
 #: src/Common/Constants.php:246
-msgid "Neh."
+msgid "abbr/neh"
 msgstr ""
 
 #: src/Common/Constants.php:248
@@ -144,7 +156,7 @@ msgid "Nehemiah"
 msgstr ""
 
 #: src/Common/Constants.php:253
-msgid "Est."
+msgid "abbr/est"
 msgstr ""
 
 #: src/Common/Constants.php:255
@@ -152,12 +164,15 @@ msgid "Esther"
 msgstr ""
 
 #: src/Common/Constants.php:260
+msgid "abbr/job"
+msgstr ""
+
 #: src/Common/Constants.php:262
 msgid "Job"
 msgstr ""
 
 #: src/Common/Constants.php:267
-msgid "Ps."
+msgid "abbr/ps"
 msgstr ""
 
 #: src/Common/Constants.php:269
@@ -165,7 +180,7 @@ msgid "Psalms"
 msgstr ""
 
 #: src/Common/Constants.php:274
-msgid "Prov."
+msgid "abbr/prov"
 msgstr ""
 
 #: src/Common/Constants.php:276
@@ -173,7 +188,7 @@ msgid "Proverbs"
 msgstr ""
 
 #: src/Common/Constants.php:281
-msgid "Eccles."
+msgid "abbr/eccles"
 msgstr ""
 
 #: src/Common/Constants.php:283
@@ -181,7 +196,7 @@ msgid "Ecclesiastes"
 msgstr ""
 
 #: src/Common/Constants.php:288
-msgid "Song"
+msgid "abbr/song"
 msgstr ""
 
 #: src/Common/Constants.php:290
@@ -189,7 +204,7 @@ msgid "Song of Solomon"
 msgstr ""
 
 #: src/Common/Constants.php:295
-msgid "Isa."
+msgid "abbr/isa"
 msgstr ""
 
 #: src/Common/Constants.php:297
@@ -197,7 +212,7 @@ msgid "Isaiah"
 msgstr ""
 
 #: src/Common/Constants.php:302
-msgid "Jer."
+msgid "abbr/jer"
 msgstr ""
 
 #: src/Common/Constants.php:304
@@ -205,7 +220,7 @@ msgid "Jeremiah"
 msgstr ""
 
 #: src/Common/Constants.php:309
-msgid "Lam."
+msgid "abbr/lam"
 msgstr ""
 
 #: src/Common/Constants.php:311
@@ -213,7 +228,7 @@ msgid "Lamentations"
 msgstr ""
 
 #: src/Common/Constants.php:316
-msgid "Ezek."
+msgid "abbr/ezek"
 msgstr ""
 
 #: src/Common/Constants.php:318
@@ -221,7 +236,7 @@ msgid "Ezekiel"
 msgstr ""
 
 #: src/Common/Constants.php:323
-msgid "Dan."
+msgid "abbr/dan"
 msgstr ""
 
 #: src/Common/Constants.php:325
@@ -229,7 +244,7 @@ msgid "Daniel"
 msgstr ""
 
 #: src/Common/Constants.php:330
-msgid "Hos."
+msgid "abbr/hos"
 msgstr ""
 
 #: src/Common/Constants.php:332
@@ -237,17 +252,23 @@ msgid "Hosea"
 msgstr ""
 
 #: src/Common/Constants.php:337
+msgid "abbr/joel"
+msgstr ""
+
 #: src/Common/Constants.php:339
 msgid "Joel"
 msgstr ""
 
 #: src/Common/Constants.php:344
+msgid "abbr/amos"
+msgstr ""
+
 #: src/Common/Constants.php:346
 msgid "Amos"
 msgstr ""
 
 #: src/Common/Constants.php:351
-msgid "Obad."
+msgid "abbr/obad"
 msgstr ""
 
 #: src/Common/Constants.php:353
@@ -255,12 +276,15 @@ msgid "Obadiah"
 msgstr ""
 
 #: src/Common/Constants.php:358
+msgid "abbr/jonah"
+msgstr ""
+
 #: src/Common/Constants.php:360
 msgid "Jonah"
 msgstr ""
 
 #: src/Common/Constants.php:365
-msgid "Mic."
+msgid "abbr/mic"
 msgstr ""
 
 #: src/Common/Constants.php:367
@@ -268,7 +292,7 @@ msgid "Micah"
 msgstr ""
 
 #: src/Common/Constants.php:372
-msgid "Nah."
+msgid "abbr/nah"
 msgstr ""
 
 #: src/Common/Constants.php:374
@@ -276,7 +300,7 @@ msgid "Nahum"
 msgstr ""
 
 #: src/Common/Constants.php:379
-msgid "Hab."
+msgid "abbr/hab"
 msgstr ""
 
 #: src/Common/Constants.php:381
@@ -284,7 +308,7 @@ msgid "Habakkuk"
 msgstr ""
 
 #: src/Common/Constants.php:386
-msgid "Zeph."
+msgid "abbr/zeph"
 msgstr ""
 
 #: src/Common/Constants.php:388
@@ -292,7 +316,7 @@ msgid "Zephaniah"
 msgstr ""
 
 #: src/Common/Constants.php:393
-msgid "Hag."
+msgid "abbr/hag"
 msgstr ""
 
 #: src/Common/Constants.php:395
@@ -300,7 +324,7 @@ msgid "Haggai"
 msgstr ""
 
 #: src/Common/Constants.php:400
-msgid "Zech."
+msgid "abbr/zech"
 msgstr ""
 
 #: src/Common/Constants.php:402
@@ -308,7 +332,7 @@ msgid "Zechariah"
 msgstr ""
 
 #: src/Common/Constants.php:407
-msgid "Mal."
+msgid "abbr/mal"
 msgstr ""
 
 #: src/Common/Constants.php:409
@@ -316,7 +340,7 @@ msgid "Malachi"
 msgstr ""
 
 #: src/Common/Constants.php:415
-msgid "Matt."
+msgid "abbr/matt"
 msgstr ""
 
 #: src/Common/Constants.php:417
@@ -324,27 +348,39 @@ msgid "Matthew"
 msgstr ""
 
 #: src/Common/Constants.php:422
+msgid "abbr/mark"
+msgstr ""
+
 #: src/Common/Constants.php:424
 msgid "Mark"
 msgstr ""
 
 #: src/Common/Constants.php:429
+msgid "abbr/luke"
+msgstr ""
+
 #: src/Common/Constants.php:431
 msgid "Luke"
 msgstr ""
 
 #: src/Common/Constants.php:436
+msgid "abbr/john"
+msgstr ""
+
 #: src/Common/Constants.php:438
 msgid "John"
 msgstr ""
 
 #: src/Common/Constants.php:443
+msgid "abbr/acts"
+msgstr ""
+
 #: src/Common/Constants.php:445
 msgid "Acts"
 msgstr ""
 
 #: src/Common/Constants.php:450
-msgid "Rom."
+msgid "abbr/rom"
 msgstr ""
 
 #: src/Common/Constants.php:452
@@ -352,7 +388,7 @@ msgid "Romans"
 msgstr ""
 
 #: src/Common/Constants.php:457
-msgid "1 Cor."
+msgid "abbr/1cor"
 msgstr ""
 
 #: src/Common/Constants.php:459
@@ -360,7 +396,7 @@ msgid "1 Corinthians"
 msgstr ""
 
 #: src/Common/Constants.php:464
-msgid "2 Cor."
+msgid "abbr/2cor"
 msgstr ""
 
 #: src/Common/Constants.php:466
@@ -368,7 +404,7 @@ msgid "2 Corinthians"
 msgstr ""
 
 #: src/Common/Constants.php:471
-msgid "Gal."
+msgid "abbr/gal"
 msgstr ""
 
 #: src/Common/Constants.php:473
@@ -376,7 +412,7 @@ msgid "Galatians"
 msgstr ""
 
 #: src/Common/Constants.php:478
-msgid "Eph."
+msgid "abbr/eph"
 msgstr ""
 
 #: src/Common/Constants.php:480
@@ -384,7 +420,7 @@ msgid "Ephesians"
 msgstr ""
 
 #: src/Common/Constants.php:485
-msgid "Phil."
+msgid "abbr/phil"
 msgstr ""
 
 #: src/Common/Constants.php:487
@@ -392,7 +428,7 @@ msgid "Philippians"
 msgstr ""
 
 #: src/Common/Constants.php:492
-msgid "Col."
+msgid "abbr/col"
 msgstr ""
 
 #: src/Common/Constants.php:494
@@ -400,7 +436,7 @@ msgid "Colossians"
 msgstr ""
 
 #: src/Common/Constants.php:499
-msgid "1 Thess."
+msgid "abbr/1thess"
 msgstr ""
 
 #: src/Common/Constants.php:501
@@ -408,7 +444,7 @@ msgid "1 Thessalonians"
 msgstr ""
 
 #: src/Common/Constants.php:506
-msgid "2 Thess."
+msgid "abbr/2thess"
 msgstr ""
 
 #: src/Common/Constants.php:508
@@ -416,7 +452,7 @@ msgid "2 Thessalonians"
 msgstr ""
 
 #: src/Common/Constants.php:513
-msgid "1 Tim."
+msgid "abbr/1tim"
 msgstr ""
 
 #: src/Common/Constants.php:515
@@ -424,7 +460,7 @@ msgid "1 Timothy"
 msgstr ""
 
 #: src/Common/Constants.php:520
-msgid "2 Tim."
+msgid "abbr/2tim"
 msgstr ""
 
 #: src/Common/Constants.php:522
@@ -432,12 +468,15 @@ msgid "2 Timothy"
 msgstr ""
 
 #: src/Common/Constants.php:527
+msgid "abbr/titus"
+msgstr ""
+
 #: src/Common/Constants.php:529
 msgid "Titus"
 msgstr ""
 
 #: src/Common/Constants.php:534
-msgid "Philem."
+msgid "abbr/philem"
 msgstr ""
 
 #: src/Common/Constants.php:536
@@ -445,7 +484,7 @@ msgid "Philemon"
 msgstr ""
 
 #: src/Common/Constants.php:541
-msgid "Heb."
+msgid "abbr/heb"
 msgstr ""
 
 #: src/Common/Constants.php:543
@@ -453,12 +492,15 @@ msgid "Hebrews"
 msgstr ""
 
 #: src/Common/Constants.php:548
+msgid "abbr/james"
+msgstr ""
+
 #: src/Common/Constants.php:550
 msgid "James"
 msgstr ""
 
 #: src/Common/Constants.php:555
-msgid "1 Pet."
+msgid "abbr/1pet"
 msgstr ""
 
 #: src/Common/Constants.php:557
@@ -466,7 +508,7 @@ msgid "1 Peter"
 msgstr ""
 
 #: src/Common/Constants.php:562
-msgid "2 Pet."
+msgid "abbr/2pet"
 msgstr ""
 
 #: src/Common/Constants.php:564
@@ -474,27 +516,39 @@ msgid "2 Peter"
 msgstr ""
 
 #: src/Common/Constants.php:569
+msgid "abbr/1john"
+msgstr ""
+
 #: src/Common/Constants.php:571
 msgid "1 John"
 msgstr ""
 
 #: src/Common/Constants.php:576
+msgid "abbr/2john"
+msgstr ""
+
 #: src/Common/Constants.php:578
 msgid "2 John"
 msgstr ""
 
 #: src/Common/Constants.php:583
+msgid "abbr/3john"
+msgstr ""
+
 #: src/Common/Constants.php:585
 msgid "3 John"
 msgstr ""
 
 #: src/Common/Constants.php:590
+msgid "abbr/jude"
+msgstr ""
+
 #: src/Common/Constants.php:592
 msgid "Jude"
 msgstr ""
 
 #: src/Common/Constants.php:597
-msgid "Rev."
+msgid "abbr/rev"
 msgstr ""
 
 #: src/Common/Constants.php:599

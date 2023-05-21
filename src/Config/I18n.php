@@ -29,10 +29,11 @@ final class I18n extends Base {
 	 * @since 1.0.0
 	 */
 	public function load() {
+		$plugin_rel_path = dirname( plugin_basename( RHEMA_PLUGIN_FILE ) ) . '/languages';  // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
 		load_plugin_textdomain(
 			$this->plugin->textDomain(),
 			false,
-			dirname( plugin_basename( RHEMA_PLUGIN_FILE ) ) . '/languages' // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
+			$plugin_rel_path
 		);
 	}
 }

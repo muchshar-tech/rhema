@@ -265,13 +265,14 @@ final class Api extends Base {
 				'Authorization' => "Bearer $token",
 			],
 		] );
+		if ( is_wp_error( $translate_res ) ) {
+			return $translate_res;
+		}
+		
 		$response = $translate_res['response'];
 		$status_code = $response['code'];
 		if ( 200 !== $status_code ) {
 			return new WP_Error( $status_code, $response['message'] );
-		}
-		if ( is_wp_error( $translate_res ) ) {
-			return $translate_res;
 		}
 		if ( empty( $translate_res['body'] ) ) {
 			return [];

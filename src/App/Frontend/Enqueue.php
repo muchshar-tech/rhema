@@ -77,11 +77,15 @@ class Enqueue extends Base {
 		// Send variables to JS
 		global $wp_query;
 
+		$functions_options = rhema()->options();
+
 		// localize script and send variables
 
 		try {
+			$options = $functions_options->get();
+			$bible_default_translation = ( empty( $options ) || empty( $options['general']['bible_default_translation'] ) ) ? 'kjv' : $options['general']['bible_default_translation'];
 			$initial_raw = rhema()->bible()->getInitialRaw();
-			$translation_info = rhema()->bible()->getTranslationInfo( 'cuv' );
+			$translation_info = rhema()->bible()->getTranslationInfo( $bible_default_translation );
 			if ( is_wp_error( $initial_raw ) ) {
 				/** @var WP_Error $initial_raw */
 				throw new Exception( $initial_raw->get_error_message() );

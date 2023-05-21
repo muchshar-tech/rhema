@@ -40,9 +40,9 @@ class Enqueue extends Base {
 		 *
 		 * Add plugin code here
 		 */
+		
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueueScripts' ] );
 	}
-
 	/**
 	 * Enqueue scripts
 	 *
@@ -77,6 +77,13 @@ class Enqueue extends Base {
 					'source'    => plugins_url( '/assets/public/js/backend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
 					'version'   => $this->plugin->version(),
 				],
+				[
+					'deps'      => [ 'wp-i18n' ],
+					'handle'    => 'rhema-translations',
+					'in_footer' => true,
+					'source'    => plugins_url( '/assets/public/js/translations.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
+					'version'   => $this->plugin->version(),
+				]
 			] as $js ) {
 			wp_enqueue_script( $js['handle'], $js['source'], $js['deps'], $js['version'], $js['in_footer'] );
 		}
@@ -118,6 +125,8 @@ class Enqueue extends Base {
 			];
 		}
 		// localize script and send variables
+		$plugin_rel_path = plugin_dir_path(RHEMA_PLUGIN_FILE) . 'languages';
+		wp_set_script_translations( 'rhema-translations', 'rhema', $plugin_rel_path );
 		wp_localize_script( 'rhema-backend-js', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
 				'RHEMA_SITE_ROOT'  => get_site_url( null, '', ),

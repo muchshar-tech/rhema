@@ -222,23 +222,25 @@ const Content = ({
             onSwipeEnd={onSwipeEnd}
             className={classNames}
         >
-            {children.map((child, idx) => {
-                return (
-                    <PageWrapper
-                        {...{
-                            key: idx,
-                            className: pageClassNames.join(' '),
-                            movePercentage,
-                            pagePos,
-                            ...(idx === initialPos && {
-                                onTransitionEnd: handlerOnTransitionEnd,
-                            }),
-                        }}
-                    >
-                        {child}
-                    </PageWrapper>
-                )
-            })}
+            {Array.isArray(children) && children.length > 0
+                ? children.map((child, idx) => {
+                      return (
+                          <PageWrapper
+                              {...{
+                                  key: idx,
+                                  className: pageClassNames.join(' '),
+                                  movePercentage,
+                                  pagePos,
+                                  ...(idx === initialPos && {
+                                      onTransitionEnd: handlerOnTransitionEnd,
+                                  }),
+                              }}
+                          >
+                              {child}
+                          </PageWrapper>
+                      )
+                  })
+                : children}
             {console.groupEnd()}
             {console.groupEnd()}
         </Swipe>

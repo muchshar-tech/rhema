@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react'
-import PropTypes from 'prop-types'
+import React, { useMemo, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { max, isEqual } from 'lodash'
 import Skeleton from 'react-loading-skeleton'
-import { __ } from '@wordpress/i18n'
 
+import { UI_MESSAGE_MAPPING } from '@components/constants'
 import * as Layout from '@components/frontend/layouts'
 import * as Headers from '@components/frontend/headers'
 import * as Paragraph from '@components/frontend/paragraph'
@@ -23,7 +22,6 @@ import {
     loadRaws,
     updateReadingQuerys,
 } from '@assets/js/frontend/states/dataSlice'
-import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const Container = ({
     readingQuerys,
@@ -211,10 +209,7 @@ const Container = ({
                     name="selected-raws"
                 >
                     <DrawerTitle>
-                        {__(
-                            `Selected Verses`,
-                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                        )}
+                        {UI_MESSAGE_MAPPING['selected-verses']}
                     </DrawerTitle>
                     <Layout.Drawer.SelectedRaw />
                 </Layout.Drawer>

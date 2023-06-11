@@ -220,7 +220,7 @@ final class Bible extends Base {
 			];
 		}
 		if ( isset( $options['with_prev_chapter'] ) && $options['with_prev_chapter'] ) {
-			$prev_chapter_number = max( 0, (int) $query_schema[0]['chapter'] - 1 );
+			$prev_chapter_number = max( 1, (int) $query_schema[0]['chapter'] - 1 );
 			$query_schema[0]['chapter'] = $prev_chapter_number;
 		}
 
@@ -252,7 +252,13 @@ final class Bible extends Base {
 			$integration_logos_api = Logos\Api::init();
 			$rhema_res = $integration_logos_api->getRaws( $query_string );
 		} catch ( Exception $e ) {
-			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
+			$message = $e->getMessage();
+			$code = $e->getCode();
+			if ( 0 === $code ) {
+				$code = 500;
+				$message = Constants::init()->error_message['server_maintenance'];
+			}
+			return new WP_Error( $code, $message );
 		}
 
 		if ( $rhema_res instanceof WP_Error ) {

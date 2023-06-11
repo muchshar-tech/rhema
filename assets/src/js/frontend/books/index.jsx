@@ -1,12 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useSelector, useDispatch } from 'react-redux'
-import { __ } from '@wordpress/i18n'
 
+import { UI_MESSAGE_MAPPING } from '@components/constants'
 import { LinkVerse } from '@assets/js/frontend/components'
 import { currentSelection } from '@assets/js/frontend/states/generalSlice'
 import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
-import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const Block = ({
     onClick,
@@ -186,7 +185,7 @@ const Books = ({ booksData }) => {
     return (
         <Container toggle={toggleBooks}>
             <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
-                {__(`bible-directory/old-testament`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                {UI_MESSAGE_MAPPING[`bible-directory/old-testament`]}
             </div>
             <BlockWrap className="bg-gray-200">
                 {booksData.old.map(({ abbr, name, index }, idx) => {
@@ -214,7 +213,7 @@ const Books = ({ booksData }) => {
                 })}
             </BlockWrap>
             <div className="w-full text-sm p-3 bg-gray-200 text-gray-500">
-                {__(`bible-directory/new-testament`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                {UI_MESSAGE_MAPPING[`bible-directory/new-testament`]}
             </div>
             <BlockWrap className="bg-gray-200">
                 {booksData.new.map(({ abbr, name, index }, idx) => {

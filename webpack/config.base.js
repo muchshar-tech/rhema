@@ -137,6 +137,7 @@ module.exports = (projectOptions) => {
      */
     const externals = {
         RHEMA_LOCALIZE: 'LOCALIZE_SCRIPT_VARIABLES',
+        '@wordpress/i18n': [ 'window wp', 'i18n' ],
     }
 
     return {

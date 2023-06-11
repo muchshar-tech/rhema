@@ -58,8 +58,8 @@ class Enqueue extends Base {
 		];
 		$enqueue_scripts = [
 			[
-				'deps'      => [],
-				'handle'    => 'rhema-frontend-js',
+				'deps'      => [ 'wp-i18n' ],
+				'handle'    => '6c578e31e43e3a17dea38f6a319e105d',
 				'in_footer' => true,
 				'source'    => plugins_url( '/assets/public/js/frontend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
 				'version'   => $this->plugin->version(),
@@ -85,13 +85,13 @@ class Enqueue extends Base {
 			$options = $functions_options->get();
 			$bible_default_translation = ( empty( $options ) || empty( $options['general']['bible_default_translation'] ) ) ? 'kjv' : $options['general']['bible_default_translation'];
 			$initial_raw = rhema()->bible()->getInitialRaw();
-			$translation_info = rhema()->bible()->getTranslationInfo( $bible_default_translation );
 			if ( is_wp_error( $initial_raw ) ) {
 				/** @var WP_Error $initial_raw */
 				throw new Exception( $initial_raw->get_error_message() );
 			}
+			$translation_info = rhema()->bible()->getTranslationInfo( $bible_default_translation );
 			if ( is_wp_error( $translation_info ) ) {
-				/** @var WP_Error $initial_raw */
+				/** @var WP_Error $translation_info */
 				throw new Exception( $translation_info->get_error_message() );
 			}
 
@@ -111,7 +111,8 @@ class Enqueue extends Base {
 				'ERROR' => $e->getMessage(),
 			];
 		}
-		wp_localize_script( 'rhema-frontend-js', 'LOCALIZE_SCRIPT_VARIABLES',
+		$plugin_rel_path = plugin_dir_path( RHEMA_PLUGIN_FILE ) . 'languages';
+		wp_localize_script( '6c578e31e43e3a17dea38f6a319e105d', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
 				'RHEMA_SITE_ROOT'  => get_site_url( null, '', 'relative' ),
 				'RHEMA_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
@@ -122,5 +123,6 @@ class Enqueue extends Base {
 				'RHEMA_INITAIL_DATA' => $initial_data,
 			]
 		);
+		wp_set_script_translations( '6c578e31e43e3a17dea38f6a319e105d', 'rhema', $plugin_rel_path );
 	}
 }

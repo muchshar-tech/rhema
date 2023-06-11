@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { __ } from '@wordpress/i18n'
 
-import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
+import { UI_MESSAGE_MAPPING } from '@assets/js/constants'
 import * as Components from '@components/backend/components'
 
 export const ButtonSpinner = ({ className }) => {
@@ -230,7 +229,7 @@ export const FeatureCard = ({
                     <h2 className="text-14px py-3 m-0">{title}</h2>
                     <div className="flex items-center hide-if-no-js">
                         <span className="text-gray-400 mr-1">
-                            {__(`features/status`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                            {UI_MESSAGE_MAPPING['features/status']}
                         </span>
                         <Components.SwitchToggle isActive={isActive} />
                     </div>
@@ -239,10 +238,7 @@ export const FeatureCard = ({
                 <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
                     {commingSoon ? (
                         <button className="button" disabled>
-                            {__(
-                                `features/comming-soon`,
-                                RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                            )}
+                            {UI_MESSAGE_MAPPING['features/comming-soon']}
                         </button>
                     ) : (
                         <div>
@@ -251,13 +247,10 @@ export const FeatureCard = ({
                                 onClick={onClickActive}
                                 {...(isActive && { disabled: true })}
                             >
-                                {__(`features/active`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                                {UI_MESSAGE_MAPPING['features/comming-soon']}
                             </button>
                             <button className="button" onClick={onClickLicense}>
-                                {__(
-                                    `features/license`,
-                                    RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                                )}
+                                {UI_MESSAGE_MAPPING['features/license']}
                             </button>
                         </div>
                     )}

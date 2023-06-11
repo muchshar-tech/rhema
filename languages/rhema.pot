@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-05-19T10:10:17+00:00\n"
+"POT-Creation-Date: 2023-05-22T06:14:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 
@@ -661,104 +661,104 @@ msgstr ""
 msgid "Content:"
 msgstr ""
 
-#: assets/src/js/backend/App.jsx:145
-msgid "bible-entry-path"
-msgstr ""
-
-#: assets/src/js/backend/App.jsx:164
-msgid "default-translation"
-msgstr ""
-
-#: assets/src/js/backend/App.jsx:175
-msgid "default-translation/default"
-msgstr ""
-
-#: assets/src/js/backend/components/index.jsx:233
-msgid "features/status"
-msgstr ""
-
-#: assets/src/js/backend/components/index.jsx:242
-msgid "features/comming-soon"
-msgstr ""
-
-#: assets/src/js/backend/components/index.jsx:254
-msgid "features/active"
-msgstr ""
-
-#: assets/src/js/backend/components/index.jsx:257
-msgid "features/license"
-msgstr ""
-
-#: assets/src/js/backend/my-account/index.jsx:75
-msgid "my-account/signin-logos"
-msgstr ""
-
-#: assets/src/js/backend/my-account/index.jsx:80
-msgid ""
-"If you have lost your License Key, you can log in here to check\n"
-"                all the License Keys you have obtained in the past."
-msgstr ""
-
-#: assets/src/js/backend/my-account/index.jsx:116
-msgid "my-account/forgot-password"
-msgstr ""
-
-#: assets/src/js/backend/my-account/index.jsx:144
-msgid "my-account/signin"
-msgstr ""
-
-#: assets/src/js/backend/my-account/index.jsx:145
-msgid "my-account/signing"
-msgstr ""
-
-#: assets/src/js/backend/tab/contents.jsx:15
-msgid ""
-"Rhema is a WordPress plugin developed and operated by Muchshar\n"
-"                Ltd. It is designed to provide a digital Bible service for\n"
-"                church websites around the world and increase the exposure of\n"
-"                church websites in search engine results when users search for\n"
-"                Bible verses online. In the future, additional features will be\n"
-"                developed for the purpose of evangelism and pastoral care."
-msgstr ""
-
-#: assets/src/js/backend/tab/contents.jsx:27
-msgid ""
-"If you are willing to support our ministry, please consider\n"
-"                making a donation to us."
-msgstr ""
-
-#: assets/src/js/backend/tab/contents.jsx:90
-msgid "Welcome to Logos. You can check your information related to Logos here after logging in."
-msgstr ""
-
 #: assets/src/js/constants.js:18
 msgid "error/page-is-expired"
 msgstr ""
 
-#: assets/src/js/frontend/books/index.jsx:189
-msgid "bible-directory/old-testament"
+#: assets/src/js/constants.js:24
+msgid "bible-entry-path"
 msgstr ""
 
-#: assets/src/js/frontend/books/index.jsx:217
-msgid "bible-directory/new-testament"
+#: assets/src/js/constants.js:28
+msgid "default-translation"
 msgstr ""
 
-#: assets/src/js/frontend/headers/index.jsx:130
+#: assets/src/js/constants.js:32
+msgid "default-translation/default"
+msgstr ""
+
+#: assets/src/js/constants.js:36
+msgid "features/status"
+msgstr ""
+
+#: assets/src/js/constants.js:37
+msgid "features/comming-soon"
+msgstr ""
+
+#: assets/src/js/constants.js:41
+msgid "features/active"
+msgstr ""
+
+#: assets/src/js/constants.js:42
+msgid "features/license"
+msgstr ""
+
+#: assets/src/js/constants.js:46
+msgid "my-account/signin-logos"
+msgstr ""
+
+#: assets/src/js/constants.js:50
+msgid ""
+"If you have lost your License Key, you can log in here to check\n"
+"all the License Keys you have obtained in the past."
+msgstr ""
+
+#: assets/src/js/constants.js:55
+msgid "my-account/forgot-password"
+msgstr ""
+
+#: assets/src/js/constants.js:59
+msgid "my-account/signin"
+msgstr ""
+
+#: assets/src/js/constants.js:63
+msgid "my-account/signing"
+msgstr ""
+
+#: assets/src/js/constants.js:67
+msgid "Welcome to Logos. You can check your information related to Logos here after logging in."
+msgstr ""
+
+#: assets/src/js/constants.js:71
+msgid ""
+"Rhema is a WordPress plugin developed and operated by Muchshar\n"
+"    Ltd. It is designed to provide a digital Bible service for\n"
+"    church websites around the world and increase the exposure of\n"
+"    church websites in search engine results when users search for\n"
+"    Bible verses online. In the future, additional features will be\n"
+"    developed for the purpose of evangelism and pastoral care."
+msgstr ""
+
+#: assets/src/js/constants.js:80
+msgid ""
+"If you are willing to support our ministry, please consider\n"
+"    making a donation to us."
+msgstr ""
+
+#: assets/src/js/constants.js:85
 msgid "bible-directory"
 msgstr ""
 
-#: assets/src/js/frontend/pages/verses.jsx:214
-msgid "Selected Verses"
+#: assets/src/js/constants.js:86
+msgid "bible-directory/old-testament"
 msgstr ""
 
-#: assets/src/js/frontend/tabs/index.jsx:58
+#: assets/src/js/constants.js:90
+msgid "bible-directory/new-testament"
+msgstr ""
+
+#: assets/src/js/constants.js:94
 msgid "bible-directory/book"
 msgstr ""
 
-#: assets/src/js/frontend/tabs/index.jsx:61
+#: assets/src/js/constants.js:98
 msgid "bible-directory/chapter"
 msgstr ""
 
-#: assets/src/js/frontend/tabs/index.jsx:64
+#: assets/src/js/constants.js:102
 msgid "bible-directory/verse"
+msgstr ""
+
+#: assets/src/js/constants.js:106
+msgid "Selected Verses"
 msgstr ""

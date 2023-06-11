@@ -3,9 +3,8 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { joiResolver } from '@hookform/resolvers/joi'
 import { BiChevronLeft, BiFontSize } from 'react-icons/bi'
-import { BsLayoutTextSidebarReverse } from 'react-icons/bs'
-import { __ } from '@wordpress/i18n'
 
+import { UI_MESSAGE_MAPPING } from '@components/constants'
 import * as FieldSchama from '@components/schema'
 import {
     switchHeadersMain,
@@ -127,7 +126,7 @@ const Books = () => {
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>
                 <Layout.Top.MiddleSide className="text-16px">
-                    {__(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                    {UI_MESSAGE_MAPPING['bible-directory']}
                 </Layout.Top.MiddleSide>
                 <Layout.Top.RightSide>
                     <Tools.Bordered>和合本</Tools.Bordered>

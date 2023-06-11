@@ -58,6 +58,9 @@ export const generalSlice = createSlice({
         switchHeadersMain: (state) => {
             disableAllHeader(state.headersSwitch)
             state.headersSwitch.main = true
+            state.booksSelector.chapters = false
+            state.booksSelector.verses = false
+            state.booksSelector.books = true
             Object.keys(state.drawer).forEach((key) => {
                 state.drawer[key] = false
             })

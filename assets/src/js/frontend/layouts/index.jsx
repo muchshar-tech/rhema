@@ -199,8 +199,9 @@ const Content = ({
         'items-start',
         'relative',
         'flex',
-        'min-h-full',
         'py-10',
+        'overflow-hidden',
+        'h-full'
     ].join(' ')
 
     const pageClassNames = [
@@ -208,6 +209,8 @@ const Content = ({
             ? ['transition-transform', 'ease-out', 'duration-500']
             : []),
         'min-w-full',
+        'h-full',
+        'overflow-y-auto',
         'px-10',
     ]
 
@@ -222,25 +225,27 @@ const Content = ({
             onSwipeEnd={onSwipeEnd}
             className={classNames}
         >
-            {Array.isArray(children) && children.length > 0
-                ? children.map((child, idx) => {
-                      return (
-                          <PageWrapper
-                              {...{
-                                  key: idx,
-                                  className: pageClassNames.join(' '),
-                                  movePercentage,
-                                  pagePos,
-                                  ...(idx === initialPos && {
-                                      onTransitionEnd: handlerOnTransitionEnd,
-                                  }),
-                              }}
-                          >
-                              {child}
-                          </PageWrapper>
-                      )
-                  })
-                : children}
+            {Array.isArray(children) && children.length > 0 ? (
+                children.map((child, idx) => {
+                    return (
+                        <PageWrapper
+                            {...{
+                                key: idx,
+                                className: pageClassNames.join(' '),
+                                movePercentage,
+                                pagePos,
+                                ...(idx === initialPos && {
+                                    onTransitionEnd: handlerOnTransitionEnd,
+                                }),
+                            }}
+                        >
+                            {child}
+                        </PageWrapper>
+                    )
+                })
+            ) : (
+                <div className="px-6">{children}</div>
+            )}
             {console.groupEnd()}
             {console.groupEnd()}
         </Swipe>
@@ -258,7 +263,7 @@ Content.propTypes = {
 }
 
 const Page = ({ children }) => {
-    return <>{children}</>
+    return <div>{children}</div>
 }
 
 const Drawer = ({ name, className: extraClassName = '', children }) => {

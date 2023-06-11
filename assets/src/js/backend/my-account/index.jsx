@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-table'
 
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
+import { UI_MESSAGE_MAPPING } from '@assets/js/constants'
 import { capitalizeFirstLetter, localDateTime } from '@components/common'
 import { useOrdersQuery } from '@components/services'
 import { IDENTITY_TYPE } from '@components/constants'
@@ -72,17 +73,11 @@ export const LoginCard = ({
         <div className={classNames.join(' ')}>
             <div className="postbox-header px-2 justify-center">
                 <h2 className="text-14px py-3 m-0">
-                    {__(`my-account/signin-logos`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)}
+                    {UI_MESSAGE_MAPPING['my-account/signin-logos']}
                 </h2>
             </div>
             <div className="inside pb-0">
-                <p>
-                    {__(
-                        `If you have lost your License Key, you can log in here to check
-                all the License Keys you have obtained in the past.`,
-                        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                    )}
-                </p>
+                <p>{UI_MESSAGE_MAPPING['my-account/description']}</p>
 
                 <FormTable.ModalForm onSubmit={handleSubmit(onClickSigin)}>
                     <FormTable.ModalForm.FieldRow label="Username">
@@ -113,10 +108,11 @@ export const LoginCard = ({
                                 className="button button-link hover:bg-transparent"
                                 onClick={onClickForgotPw}
                             >
-                                {__(
-                                    `my-account/forgot-password`,
-                                    RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                                )}
+                                {
+                                    UI_MESSAGE_MAPPING[
+                                        'my-account/forgot-password'
+                                    ]
+                                }
                             </button>
                         </p>
                     </FormTable.ModalForm.FieldRow>
@@ -141,11 +137,8 @@ export const LoginCard = ({
                         })}
                     >
                         {!isSubmitting && !isSigning
-                            ? __(`my-account/signin`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT)
-                            : __(
-                                  `my-account/signing`,
-                                  RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                              )}
+                            ? UI_MESSAGE_MAPPING['my-account/signin']
+                            : UI_MESSAGE_MAPPING['my-account/signing']}
                     </button>
                     {showSuccess && (
                         <FormTable.ResponseSuccessMsg label="Success">

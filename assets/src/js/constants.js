@@ -20,3 +20,88 @@ export const ERROR_MESSAGE_MAPPING = {
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
 }
+export const UI_MESSAGE_MAPPING = {
+    'bible-entry-path': __(
+        'bible-entry-path',
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'default-translation': __(
+        'default-translation',
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'default-translation/default': __(
+        'default-translation/default',
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'features/status': __(`features/status`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+    'features/comming-soon': __(
+        `features/comming-soon`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'features/active': __(`features/active`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+    'features/license': __(
+        `features/license`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/signin-logos': __(
+        `my-account/signin-logos`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/description': __(
+        `If you have lost your License Key, you can log in here to check
+all the License Keys you have obtained in the past.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/forgot-password': __(
+        `my-account/forgot-password`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/signin': __(
+        `my-account/signin`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/signing': __(
+        `my-account/signing`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/welcome': __(
+        `Welcome to Logos. You can check your information related to Logos here after logging in.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'about/paragraph-1': __(
+        `Rhema is a WordPress plugin developed and operated by Muchshar
+    Ltd. It is designed to provide a digital Bible service for
+    church websites around the world and increase the exposure of
+    church websites in search engine results when users search for
+    Bible verses online. In the future, additional features will be
+    developed for the purpose of evangelism and pastoral care.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'about/paragraph-2': __(
+        `If you are willing to support our ministry, please consider
+    making a donation to us.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'bible-directory': __(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+    'bible-directory/old-testament': __(
+        `bible-directory/old-testament`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'bible-directory/new-testament': __(
+        `bible-directory/new-testament`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'bible-directory/book': __(
+        `bible-directory/book`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'bible-directory/chapter': __(
+        `bible-directory/chapter`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'bible-directory/verse': __(
+        `bible-directory/verse`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'selected-verses': __(`Selected Verses`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+}

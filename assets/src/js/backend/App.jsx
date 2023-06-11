@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { __ } from '@wordpress/i18n'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
+import { UI_MESSAGE_MAPPING } from '@assets/js/constants'
 import * as Tab from './tab'
 import * as TabContents from './tab/contents'
 import * as FormTable from './form-table'
@@ -114,8 +114,9 @@ const Settings = () => {
         (!!updateOptionsResponse &&
             !/2[0-9][0-9]/.test(updateOptionsResponse?.response?.code)) ||
         !!updateOptionsError
-    
-    const showOptionsSaved = updateOptionsResponse?.success === true ? true : false
+
+    const showOptionsSaved =
+        updateOptionsResponse?.success === true ? true : false
 
     console.log(updateOptionsError, updateOptionsResponse)
     const exceptionMessage = {
@@ -129,7 +130,9 @@ const Settings = () => {
         code: updateOptionsResponse?.response?.code || 200,
         label: 'Success',
         message:
-            updateOptionsError?.data?.data?.message || updateOptionsResponse?.data?.message || 'Rhema options saved.',
+            updateOptionsError?.data?.data?.message ||
+            updateOptionsResponse?.data?.message ||
+            'Rhema options saved.',
     }
 
     const onSubmit = async (data) => {
@@ -142,10 +145,7 @@ const Settings = () => {
             <FormTable.Table>
                 <FormTable.Row>
                     <FormTable.Label htmlFor="bible_entry">
-                        {__(
-                            'bible-entry-path',
-                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                        )}
+                        {UI_MESSAGE_MAPPING['bible-entry-path']}
                     </FormTable.Label>
                     <FormTable.FieldWrap>
                         {RHEMA_LOCALIZE.RHEMA_SITE_ROOT + '/'}
@@ -161,10 +161,7 @@ const Settings = () => {
                 </FormTable.Row>
                 <FormTable.Row>
                     <FormTable.Label htmlFor="bible_default_translation">
-                        {__(
-                            'default-translation',
-                            RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                        )}
+                        {UI_MESSAGE_MAPPING['default-translation']}
                     </FormTable.Label>
                     <FormTable.FieldWrap>
                         <select
@@ -172,10 +169,7 @@ const Settings = () => {
                             {...register('bible_default_translation')}
                         >
                             <option value="">
-                                {__(
-                                    'default-translation/default',
-                                    RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-                                )}
+                                {UI_MESSAGE_MAPPING['default-translation/default']}
                             </option>
                             {RHEMA_LOCALIZE.RHEMA_BACKEND.DATA.AVAILABLE_TRANSLATIONS.map(
                                 (translation) => {

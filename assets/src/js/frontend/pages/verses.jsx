@@ -22,6 +22,7 @@ import {
     loadRaws,
     updateReadingQuerys,
 } from '@assets/js/frontend/states/dataSlice'
+import { updatePageSwipper } from '@assets/js/frontend/states/generalSlice'
 
 const Container = ({
     readingQuerys,
@@ -119,7 +120,7 @@ const Container = ({
         })
     }
 
-    const onCompletedMove = (offest) => {
+    const onCompletedMove = (offest, pagePos, onTransition) => {
         console.log('run onCompletedMove', chapterPaged, offest)
         const newChapterPaged = chapterPaged + offest
         const newReadingQuerys = [
@@ -138,6 +139,12 @@ const Container = ({
         ]
         // setChapterPaged(newChapterPaged)
         dispatch(updateReadingQuerys(newReadingQuerys))
+        dispatch(
+            updatePageSwipper({
+                pagePos,
+                onTransition,
+            })
+        )
     }
 
     return (

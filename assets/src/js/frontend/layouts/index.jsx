@@ -1,13 +1,14 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import clamp from 'lodash/clamp'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { FiMinusSquare } from 'react-icons/fi'
 import Swipe from 'react-easy-swipe'
 
 import * as Paragraph from '@components/frontend/paragraph'
 import * as Tools from '@components/frontend/tools'
+import { updatePageSwipper } from '@assets/js/frontend/states/generalSlice'
 
 const AppContainer = ({ children }) => {
     const showSelection = useSelector(
@@ -89,20 +90,20 @@ const PageWrapper = ({
 }) => {
     const elementRef = useRef(null)
 
+    const handlerOnTransitionEnd = useCallback(onTransitionEnd, [pagePos])
+
     useEffect(() => {
         const element = elementRef.current
-        const handlerOnTransitionEnd = () => {
-            console.log('run handlerOnTransitionEnd', pagePos, children)
-            onTransitionEnd()
-        }
+
         if (onTransitionEnd) {
             element.addEventListener('transitionend', handlerOnTransitionEnd)
         }
 
         return () => {
+            console.log('run return useEffect', handlerOnTransitionEnd)
             element.removeEventListener('transitionend', handlerOnTransitionEnd)
         }
-    }, [onTransitionEnd])
+    }, [pagePos])
     return (
         <div
             ref={elementRef}
@@ -123,6 +124,8 @@ const Content = ({
     onCompletedMove,
     children,
 }) => {
+    console.log('Content render')
+    const dispatch = useDispatch()
     const initialPos =
         pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 1
 
@@ -131,9 +134,10 @@ const Content = ({
             state.general.headersSwitch.main ||
             state.general.headersSwitch.selection
     )
+    const { pagePos, onTransition } = useSelector(
+        (state) => state.general.pageSwipper
+    )
     const [movePercentage, setMovePercentage] = useState(0)
-    const [onTransition, setOnTransition] = useState(false)
-    const [pagePos, setPagePos] = useState(initialPos)
     const onSwipeStart = (event) => {
         console.groupCollapsed('Start swiping...')
         console.log('Start swiping...', event)
@@ -151,11 +155,11 @@ const Content = ({
         setMovePercentage(
             clamp(
                 movePercentageX,
-                pagePosition !== 'right' ? -100 : -20,
-                pagePosition !== 'left' ? 100 : 20
+                pagePosition !== 'right' ? -99 : -20,
+                pagePosition !== 'left' ? 99 : 20
             )
         )
-        setOnTransition(true)
+        dispatch(updatePageSwipper({ onTransition: true }))
     }
 
     const onSwipeEnd = (event) => {
@@ -163,21 +167,19 @@ const Content = ({
         console.groupCollapsed('End swiping...')
         console.log(event, movePercentage)
         const moveAbsPercentage = Math.abs(movePercentage)
-        const pagesCount = children.length || 0
         if (moveAbsPercentage > 30) {
             const nextPagePos = clamp(
                 movePercentage < 0 ? pagePos + 1 : pagePos - 1,
                 0,
                 2
             )
-            console.log(pagesCount, pagePos, nextPagePos)
             if (nextPagePos === 0 || (initialPos === 2 && nextPagePos === 1)) {
                 onMoveFirstPage()
             }
             if (nextPagePos === 2 || (initialPos === 0 && nextPagePos === 1)) {
                 onMoveLastPage()
             }
-            setPagePos(nextPagePos)
+            dispatch(updatePageSwipper({ pagePos: nextPagePos }))
         }
         setMovePercentage(0)
         console.groupEnd('End swiping...')
@@ -185,13 +187,14 @@ const Content = ({
 
     const handlerOnTransitionEnd = () => {
         console.log('onTransitionEnd', pagePos, initialPos)
-        if (pagePos !== initialPos) {
-            setOnTransition(false)
-            onCompletedMove(
-                initialPos > pagePos ? -1 : initialPos < pagePos ? 1 : 0
-            )
-            setPagePos(initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos)
+        if (pagePos === initialPos) {
+            return
         }
+        onCompletedMove(
+            initialPos > pagePos ? -1 : initialPos < pagePos ? 1 : 0,
+            initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos,
+            false,
+        )
     }
 
     const classNames = [
@@ -201,7 +204,7 @@ const Content = ({
         'flex',
         'py-10',
         'overflow-hidden',
-        'h-full'
+        'h-full',
     ].join(' ')
 
     const pageClassNames = [
@@ -215,7 +218,7 @@ const Content = ({
     ]
 
     useEffect(() => {
-        setPagePos(initialPos)
+        dispatch(updatePageSwipper({ pagePos: initialPos }))
     }, [initialPos])
 
     return (
@@ -230,7 +233,7 @@ const Content = ({
                     return (
                         <PageWrapper
                             {...{
-                                key: idx,
+                                key: child.key,
                                 className: pageClassNames.join(' '),
                                 movePercentage,
                                 pagePos,

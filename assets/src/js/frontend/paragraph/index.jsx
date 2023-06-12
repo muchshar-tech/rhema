@@ -52,8 +52,8 @@ const Line = ({
         (state) => state.general.headersSwitch.selection
     )
     const dispatch = useDispatch()
-    const { current: currentChapterRaws } = useSelector(
-        (state) => state.data.raws
+    const { raws } = useSelector(
+        (state) => state.data
     )
     const {
         fontSize,
@@ -67,10 +67,10 @@ const Line = ({
                   if (active) {
                       return
                   }
-                  const rawIndex = currentChapterRaws.findIndex(
+                  const rawIndex = raws.findIndex(
                       (raw) => raw.id === id
                   )
-                  dispatch(putRaw(currentChapterRaws[rawIndex]))
+                  dispatch(putRaw(raws[rawIndex]))
               }
             : null,
         {
@@ -85,7 +85,7 @@ const Line = ({
         if (!isSelectionMode) {
             return
         }
-        const rawIndex = currentChapterRaws.findIndex((raw) => raw.id === id)
+        const rawIndex = raws.findIndex((raw) => raw.id === id)
         const selectedRawIndex = selectedRaws.findIndex((raw) => raw.id === id)
         const isSelectedRaw = selectedRawIndex !== -1
         if (isSelectedRaw) {
@@ -93,10 +93,10 @@ const Line = ({
             return
         }
         if (active) {
-            dispatch(delRaw(currentChapterRaws[rawIndex]))
+            dispatch(delRaw(raws[rawIndex]))
             return
         }
-        dispatch(putRaw(currentChapterRaws[rawIndex]))
+        dispatch(putRaw(raws[rawIndex]))
     }
     const generateBeforeContentClassName = (bookAbbr, chapterNum) => {
         if (bookAbbr && chapterNum) {

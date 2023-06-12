@@ -3,6 +3,10 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
     fullscreen: false,
     isAfterReload: true,
+    pageSwipper: {
+        pagePos: 1,
+        onTransition: true,
+    },
     displaySetting: {
         fontSize: 'md',
     },
@@ -166,6 +170,10 @@ export const generalSlice = createSlice({
                     : sizes[currentSizeIndex + 1]
             state.displaySetting.fontSize = nextfontSize
         },
+        updatePageSwipper: (state, action) => {
+            const { payload } = action
+            state.pageSwipper = { ...state.pageSwipper, ...payload }
+        },
     },
 })
 
@@ -184,6 +192,7 @@ export const {
     inputSearchKeywords,
     changeSearchPaged,
     changeFontSize,
+    updatePageSwipper,
 } = generalSlice.actions
 
 export default generalSlice.reducer

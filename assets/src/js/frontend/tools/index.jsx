@@ -146,14 +146,12 @@ const AddNewPostButton = ({
 }
 
 const CurrentRawsSelected = () => {
-    const currentRaws = useSelector((state) => state.data.raws.current)
     const selectedRaws = useSelector((state) => state.selected.raws)
     const booksDataSelector = useSelector((state) => [
         ...state.data.books.old,
         ...state.data.books.new,
     ])
-    const currentSelectedRaws = intersection(selectedRaws, currentRaws)
-    const displayCurrentSelected = currentSelectedRaws.reduce(
+    const displayCurrentSelected = selectedRaws.reduce(
         (acc, raw, index, raws) => {
             const bookIndex = raw.book
             const bookFilterd = booksDataSelector.filter(

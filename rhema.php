@@ -5,7 +5,7 @@
  * @package   rhema
  * @author    TXIpartners <jive.cheng@txipartners.com>
  * @copyright 2022 Rhema
- * @license   MIT
+ * @license   GNU General Public License v2.0 or later
  * @link      https://txipartners.com
  *
  * Plugin Name:      Rhema

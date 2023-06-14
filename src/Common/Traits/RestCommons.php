@@ -5,7 +5,6 @@
  * @package   rhema
  * @author    TXIpartners <jive.cheng@txipartners.com>
  * @copyright 2022 Rhema
- * @license   MIT
  * @link      https://txipartners.com
  */
 

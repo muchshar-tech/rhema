@@ -32,6 +32,7 @@ final class Constants extends Base {
 	 */
 	public const REWRITE_RULES = [
 		'($bible_entry_path)\/?$' => 'index.php?is_bible=1',
+		'($bible_entry_path)\/([0-9]?[a-z]*)\/?$' => 'index.php?is_bible=1&bible_from=$matches[2]/1:1',
 		'($bible_entry_path)\/(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?(?=(to|-)\/?(([^\/]+)\/([0-9]{0,3}):?([0-9]{0,3})?)\/?)?' => 'index.php?is_bible=1&bible_from=$matches[2]&bible_to=$matches[7]',
 	];
 	/**

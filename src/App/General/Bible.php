@@ -78,7 +78,7 @@ final class Bible extends Base {
 		if ( empty( $book_index ) ) {
 			throw new Exception( 'book index is empty.' );
 		}
-		$max_verse_number = $chapter_verse_info[ $book_index + 1 ][ $range_from['chapter'] ];
+		$max_verse_number = $chapter_verse_info[ $book_index ][ $range_from['chapter'] ];
 
 		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) && $max_verse_number > $range_to['verse'] ) {
 			return false;

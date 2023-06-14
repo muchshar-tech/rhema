@@ -9998,7 +9998,17 @@ var About = function About() {
     className: "text-sm"
   }, _components_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["about/paragraph-1"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
     className: "text-sm"
-  }, _components_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["about/paragraph-2"]));
+  }, _components_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["about/paragraph-2"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
+    className: "text-sm"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
+    href: "https://p.ecpay.com.tw/BDA9F8A",
+    target: "_blank",
+    rel: "noreferrer"
+  }, "\u53F0\u7063\u5730\u5340 \u6350\u6B3E\u9023\u7D50")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
+    href: "https://paypal.me/eoncenter",
+    target: "_blank",
+    rel: "noreferrer"
+  }, "\u6D77\u5916\u5730\u5340 \u6350\u6B3E\u9023\u7D50"))));
 };
 var Account = function Account() {
   console.log('Run Account');
@@ -10274,13 +10284,13 @@ var UI_MESSAGE_MAPPING = {
   'features/active': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("features/active", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'features/license': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("features/license", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signin-logos': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signin-logos", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
-  'my-account/description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you have lost your License Key, you can log in here to check\nall the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you have lost your License Key, you can log in here to check all the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signin': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signing': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signing", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/welcome': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
-  'about/paragraph-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema is a WordPress plugin developed and operated by Muchshar\n    Ltd. It is designed to provide a digital Bible service for\n    church websites around the world and increase the exposure of\n    church websites in search engine results when users search for\n    Bible verses online. In the future, additional features will be\n    developed for the purpose of evangelism and pastoral care.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
-  'about/paragraph-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you are willing to support our ministry, please consider\n    making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'about/paragraph-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'about/paragraph-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you are willing to support our ministry, please consider making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'bible-directory': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("bible-directory", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'bible-directory/old-testament': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("bible-directory/old-testament", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'bible-directory/new-testament': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("bible-directory/new-testament", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),

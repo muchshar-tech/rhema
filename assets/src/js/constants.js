@@ -48,8 +48,7 @@ export const UI_MESSAGE_MAPPING = {
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'my-account/description': __(
-        `If you have lost your License Key, you can log in here to check
-all the License Keys you have obtained in the past.`,
+        `If you have lost your License Key, you can log in here to check all the License Keys you have obtained in the past.`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'my-account/forgot-password': __(
@@ -69,17 +68,11 @@ all the License Keys you have obtained in the past.`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'about/paragraph-1': __(
-        `Rhema is a WordPress plugin developed and operated by Muchshar
-    Ltd. It is designed to provide a digital Bible service for
-    church websites around the world and increase the exposure of
-    church websites in search engine results when users search for
-    Bible verses online. In the future, additional features will be
-    developed for the purpose of evangelism and pastoral care.`,
+        `Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care.`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'about/paragraph-2': __(
-        `If you are willing to support our ministry, please consider
-    making a donation to us.`,
+        `If you are willing to support our ministry, please consider making a donation to us.`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'bible-directory': __(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),

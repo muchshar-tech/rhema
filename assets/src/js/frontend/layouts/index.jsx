@@ -1,13 +1,16 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import clamp from 'lodash/clamp'
+import { max, isEqual, clamp } from 'lodash'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { FiMinusSquare } from 'react-icons/fi'
 import Swipe from 'react-easy-swipe'
+import Skeleton from 'react-loading-skeleton'
 
 import * as Paragraph from '@components/frontend/paragraph'
 import * as Tools from '@components/frontend/tools'
+import { usePrefetch } from '@components/services'
+import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
 import { updatePageSwipper } from '@assets/js/frontend/states/generalSlice'
 
 const AppContainer = ({ children }) => {
@@ -193,7 +196,7 @@ const Content = ({
         onCompletedMove(
             initialPos > pagePos ? -1 : initialPos < pagePos ? 1 : 0,
             initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos,
-            false,
+            false
         )
     }
 
@@ -264,6 +267,215 @@ Content.propTypes = {
         PropTypes.arrayOf(PropTypes.element),
     ]),
 }
+
+const BbileRaws = ({
+    readingQuerys,
+    bookRaws,
+    chapterVerseInfo,
+    currentChapter,
+    selectedRaws,
+}) => {
+    console.groupCollapsed('Container')
+    console.log(
+        'run Container start ========================>',
+        readingQuerys,
+        currentChapter
+    )
+    const dispatch = useDispatch()
+    const chapterPaged = currentChapter
+
+    if (!chapterVerseInfo) {
+        return null
+    }
+
+    const prefetchRaw = usePrefetch('getBibleRaw')
+
+    const currentBookChaptersNumber = max(
+        Object.keys(chapterVerseInfo[readingQuerys[0].book.index]).map((num) =>
+            Number(num)
+        )
+    )
+
+    const prepareChaptersSlot = new Array(currentBookChaptersNumber)
+        .fill(null)
+        .map((item, slotIdx) => {
+            const slotChapterNumber = slotIdx + 1
+            const fetchedChapterRaws = bookRaws.filter((raw) => {
+                return raw.chapter === slotChapterNumber
+            })
+            if (fetchedChapterRaws.length > 0) {
+                return fetchedChapterRaws
+            }
+            return {
+                maxVerseNumber:
+                    chapterVerseInfo[readingQuerys[0].book.index][
+                        slotChapterNumber
+                    ],
+                chapterNumber: slotChapterNumber,
+            }
+        })
+
+    const renderChapters = useMemo(() => {
+        let returnChapters = (
+            Array.isArray(prepareChaptersSlot)
+                ? prepareChaptersSlot
+                : [prepareChaptersSlot]
+        ).filter((chapter, idx) => {
+            const chapterPageNumber = idx + 1
+            const pagesCount = prepareChaptersSlot.length || 0
+            return (
+                chapterPageNumber === chapterPaged ||
+                chapterPageNumber ===
+                    chapterPaged + (pagesCount > chapterPaged ? 1 : 0) ||
+                chapterPageNumber === chapterPaged - (chapterPaged > 1 ? 1 : 0)
+            )
+        })
+        let middleChapterIndex = returnChapters.findIndex(
+            (raws) => Number(raws.chapter) === chapterPaged
+        )
+        return returnChapters.sort((a) => {
+            console.log(a)
+            const chapterNumber = Array.isArray(a)
+                ? a[0]?.chapter
+                : a.chapterNumber
+            return chapterNumber >= middleChapterIndex ? 1 : -1
+        })
+    }, [bookRaws, chapterPaged])
+
+    console.log(renderChapters)
+
+    const onMoveFirstPage = () => {
+        console.log('run onMoveFirstPage')
+        const newChapterPaged = chapterPaged - 1
+        prefetchRaw({
+            ranges: [`${readingQuerys[0].book.slug}${newChapterPaged}:1`],
+            withPrevChapter: true,
+            withNextChapter: true,
+        })
+    }
+
+    const onMoveLastPage = () => {
+        console.log('run onMoveLastPage')
+        const newChapterPaged = chapterPaged + 1
+        prefetchRaw({
+            ranges: [`${readingQuerys[0].book.slug}${newChapterPaged}:1`],
+            withPrevChapter: true,
+            withNextChapter: true,
+        })
+    }
+
+    const onCompletedMove = (offest, pagePos, onTransition) => {
+        console.log('run onCompletedMove', chapterPaged, offest)
+        const newChapterPaged = chapterPaged + offest
+        const newReadingQuerys = [
+            {
+                book: { ...readingQuerys[0].book },
+                chapter: newChapterPaged,
+                verse: 1,
+            },
+            {
+                book: { ...readingQuerys[1].book },
+                chapter: newChapterPaged,
+                verse: chapterVerseInfo[readingQuerys[0].book.index][
+                    newChapterPaged
+                ],
+            },
+        ]
+        // setChapterPaged(newChapterPaged)
+        dispatch(updateReadingQuerys(newReadingQuerys))
+        dispatch(
+            updatePageSwipper({
+                pagePos,
+                onTransition,
+            })
+        )
+    }
+
+    return (
+        <Content
+            pagePosition={
+                chapterPaged === 1
+                    ? 'left'
+                    : chapterPaged > 1 &&
+                      chapterPaged < currentBookChaptersNumber
+                    ? 'middle'
+                    : 'right'
+            }
+            onMoveFirstPage={onMoveFirstPage}
+            onMoveLastPage={onMoveLastPage}
+            onCompletedMove={onCompletedMove}
+        >
+            {renderChapters.map((raws) => {
+                const pageIdx = raws?.chapterNumber || raws[0].chapter
+                const isWaitingLoading =
+                    raws.length === 0 || !Array.isArray || raws.maxVerseNumber
+                return (
+                    <Page key={pageIdx}>
+                        <Paragraph.Block>
+                            {isWaitingLoading ? (
+                                <Skeleton
+                                    inline={true}
+                                    count={raws.maxVerseNumber}
+                                />
+                            ) : (
+                                raws.map((raw) => (
+                                    <Paragraph.Line
+                                        active={selectedRaws.some(
+                                            (selectedRaw) =>
+                                                selectedRaw.id === raw.id
+                                        )}
+                                        id={raw.id}
+                                        key={raw.id}
+                                        verseNum={raw.verse}
+                                    >
+                                        {raw.text}
+                                    </Paragraph.Line>
+                                ))
+                            )}
+                        </Paragraph.Block>
+                    </Page>
+                )
+            })}
+        </Content>
+    )
+}
+const RawsContent = React.memo(BbileRaws, (prev, next) => {
+    console.groupCollapsed('MemoContainer')
+    if (!isEqual(prev.chapterVerseInfo, next.chapterVerseInfo)) {
+        console.log(
+            'chapterVerseInfo',
+            !isEqual(prev.chapterVerseInfo, next.chapterVerseInfo)
+        )
+        return false
+    }
+    if (!isEqual(prev.currentChapter, next.currentChapter)) {
+        console.log(
+            'currentChapter',
+            !isEqual(prev.currentChapter, next.currentChapter)
+        )
+        return false
+    }
+    if (!isEqual(prev.readingQuerys, next.readingQuerys)) {
+        console.log(
+            'readingQuerys',
+            !isEqual(prev.readingQuerys, next.readingQuerys)
+        )
+        return false
+    }
+    if (!isEqual(prev.bookRaws, next.bookRaws)) {
+        console.log('bookRaws', !isEqual(prev.bookRaws, next.bookRaws))
+        return false
+    }
+    if (!isEqual(prev.selectedRaws, next.selectedRaws)) {
+        console.log(
+            'selectedRaws',
+            !isEqual(prev.selectedRaws, next.selectedRaws)
+        )
+        return false
+    }
+    console.groupEnd('MemoContainer')
+    return true
+})
 
 const Page = ({ children }) => {
     return <div>{children}</div>
@@ -388,4 +600,4 @@ Drawer.SelectedRaw = function SelectedRaw() {
     )
 }
 
-export { AppContainer, Body, Content, Drawer, Page, Top }
+export { AppContainer, Body, Content, RawsContent, Drawer, Page, Top }

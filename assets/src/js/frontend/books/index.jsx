@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { UI_MESSAGE_MAPPING } from '@components/constants'
 import { LinkVerse } from '@assets/js/frontend/components'
-import { currentSelection } from '@assets/js/frontend/states/generalSlice'
+import { clickBookSelector } from '@assets/js/frontend/states/generalSlice'
 import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
 
 const Block = ({
@@ -175,7 +175,7 @@ const Books = ({ booksData }) => {
     const onClickBlock = function (bookIndex) {
         console.log(bookIndex)
         dispatch(
-            currentSelection({
+            clickBookSelector({
                 books: booksDataSelector.filter((book) => {
                     return book.index === bookIndex
                 })[0],
@@ -279,7 +279,7 @@ const Chapters = () => {
         : currentQueryChapters
     const onClickBlock = function (number) {
         dispatch(
-            currentSelection({
+            clickBookSelector({
                 chapters: Number(number),
             })
         )
@@ -402,7 +402,7 @@ const Verses = () => {
             { book, chapter, verse: maxVerseNumber },
         ]
         await dispatch(
-            currentSelection({
+            clickBookSelector({
                 verses: Number(verse),
             })
         )

@@ -85,21 +85,31 @@ export const generalSlice = createSlice({
             state.headersSwitch.books = !state.headersSwitch.books
         },
         booksSelectorBooks: (state) => {
-            state.booksSelector.chapters = false
-            state.booksSelector.verses = false
-            state.booksSelector.books = !state.booksSelector.books
+            state.booksSelector = {
+                chapters: false,
+                verses: false,
+                books: true,
+            }
         },
         booksSelectorChapters: (state) => {
-            state.booksSelector.chapters = !state.booksSelector.chapters
-            state.booksSelector.verses = false
-            state.booksSelector.books = false
+            state.booksSelector = {
+                chapters: true,
+                verses: false,
+                books: false,
+            }
         },
         booksSelectorVerses: (state) => {
-            state.booksSelector.chapters = false
-            state.booksSelector.verses = !state.booksSelector.verses
-            state.booksSelector.books = false
+            state.booksSelector = {
+                chapters: false,
+                verses: true,
+                books: false,
+            }
         },
         currentSelection: (state, action) => {
+            const { payload } = action
+            state.currentSelection = { ...state.currentSelection, ...payload }
+        },
+        clickBookSelector: (state, action) => {
             const { payload } = action
             const payloadKeys = Object.keys(payload)
             const currentClickBookChapterVerses =
@@ -189,6 +199,7 @@ export const {
     booksSelectorChapters,
     booksSelectorVerses,
     currentSelection,
+    clickBookSelector,
     inputSearchKeywords,
     changeSearchPaged,
     changeFontSize,

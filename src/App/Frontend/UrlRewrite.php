@@ -39,6 +39,7 @@ class UrlRewrite extends Base {
 
 			foreach ( Constants::REWRITE_RULES as $rule_pattern => $url ) {
 				$rule_regex_str = strtr( $rule_pattern, [ '$bible_entry_path' => $bible_entry_path ] );
+				
 				add_rewrite_rule( $rule_regex_str, $url, 'top' );
 			}
 			flush_rewrite_rules();

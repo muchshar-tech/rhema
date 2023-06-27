@@ -6,9 +6,3 @@ Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON 
  - Friendly SEO, support for generating book chapters url in wp-sitemap.xml
  - UI interface multilingual support
  - Chinese and English translations of the Bible are supported, and translations in other languages are gradually being added
-
-
-## Changelog
-
-## License
-WordPress is free software, and is released under the terms of the GNU General Public License version 2 or (at your option) any later version. See LICENSE.md for complete license.

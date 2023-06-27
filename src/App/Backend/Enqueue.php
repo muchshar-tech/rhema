@@ -85,6 +85,10 @@ class Enqueue extends Base {
 
 		$functions_options = rhema()->options();
 
+		$backend = [
+			'NONCE' => $this->plugin->createNonce(),
+		];
+
 		try {
 			$options = $functions_options->get();
 			$core_license_data = rhema()->bible()->getLicenseData();
@@ -100,17 +104,16 @@ class Enqueue extends Base {
 			if ( is_wp_error( $availabel_translations ) ) {
 				add_action( 'admin_notices', [ $class_notices, 'logosRemoteTimeout' ] );
 				/** @var WP_Error $availabel_translations */
-				throw new Exception( $availabel_translations->get_error_code() );
+				throw new Exception( $availabel_translations->get_error_message(), (int) $availabel_translations->get_error_code() );
 			}
 
-			$backend = [
-				'NONCE' => $this->plugin->createNonce(),
+			$backend = array_merge( $backend, [
 				'OPTIONS' => $options,
 				'LICENSES' => $licenses_data,
 				'DATA' => [
 					'AVAILABLE_TRANSLATIONS' => $availabel_translations,
 				],
-			];
+			] );
 		} catch ( Exception $e ) {
 			$licenses_data = [
 				'ERROR' => $e->getMessage(),

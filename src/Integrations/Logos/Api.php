@@ -203,7 +203,7 @@ final class Api extends Base {
 	 * @return string
 	 */
 	private function remote( $path = '' ): string {
-		$host = ! empty( $_ENV['LOGOS_REMOTE'] ) ? $_ENV['LOGOS_REMOTE'] : 'https://logos.api';
+		$host = ! empty( $_ENV['LOGOS_REMOTE'] ) ? $_ENV['LOGOS_REMOTE'] : 'https://logos.muchshar.com';
 		if ( empty( $path ) ) {
 			return $host;
 		}

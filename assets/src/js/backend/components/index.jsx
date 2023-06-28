@@ -247,7 +247,7 @@ export const FeatureCard = ({
                                 onClick={onClickActive}
                                 {...(isActive && { disabled: true })}
                             >
-                                {UI_MESSAGE_MAPPING['features/comming-soon']}
+                                {UI_MESSAGE_MAPPING['features/active']}
                             </button>
                             <button className="button" onClick={onClickLicense}>
                                 {UI_MESSAGE_MAPPING['features/license']}

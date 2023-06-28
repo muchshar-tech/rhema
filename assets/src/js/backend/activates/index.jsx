@@ -68,7 +68,8 @@ export const Core = memo(function Core({ show, onClickClose }) {
         const payload = await activateCore(sendOutFields)
     }
 
-    const triggerClose = () => {
+    const triggerClose = (e) => {
+        e.stopPropagation()
         onClickClose()
         setShowActivatingFeature(false)
     }

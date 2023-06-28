@@ -91,7 +91,7 @@ final class Bible extends Base {
 	 * @return string
 	 */
 	public function remote(): string {
-		return ! empty( $_ENV['BIBLE_REMOTE'] ) ? $_ENV['BIBLE_REMOTE'] : 'https://logos.api/bible';
+		return ! empty( $_ENV['BIBLE_REMOTE'] ) ? $_ENV['BIBLE_REMOTE'] : 'https://logos.muchshar.com/bible';
 	}
 	/**
 	 * Get bible rest namespace by using rhema()->bible()->restNamespace()

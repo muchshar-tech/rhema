@@ -8653,7 +8653,8 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
     };
   }();
 
-  var triggerClose = function triggerClose() {
+  var triggerClose = function triggerClose(e) {
+    e.stopPropagation();
     onClickClose();
     setShowActivatingFeature(false);
   };
@@ -9287,7 +9288,7 @@ var FeatureCard = function FeatureCard(_ref4) {
     onClick: onClickActive
   }, isActive && {
     disabled: true
-  }), _assets_js_constants__WEBPACK_IMPORTED_MODULE_1__.UI_MESSAGE_MAPPING["features/comming-soon"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+  }), _assets_js_constants__WEBPACK_IMPORTED_MODULE_1__.UI_MESSAGE_MAPPING["features/active"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     className: "button",
     onClick: onClickLicense
   }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_1__.UI_MESSAGE_MAPPING["features/license"])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {

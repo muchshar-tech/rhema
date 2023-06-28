@@ -1,17 +1,17 @@
 {
-    "name": "wordpress-webpack-workflow",
+    "name": "rhema",
     "version": "1.1.4",
     "author": "WP-Strap",
     "license": "MIT",
-    "homepage": "https://github.com/wp-strap/wordpress-webpack-workflow",
+    "homepage": "https://rhema.muchshar.com",
     "description": "Modern WebPack workflow for WordPress front-end development and testing (plugins & themes) with handy tools included.\n",
     "main": "index.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/wp-strap/wordpress-webpack-workflow.git"
+        "url": "https://github.com/muchshar-tech/rhema.git"
     },
     "bugs": {
-        "url": "https://github.com/wp-strap/wordpress-webpack-workflow/issues"
+        "url": "https://github.com/muchshar-tech/rhema/issues"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",

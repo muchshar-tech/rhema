@@ -1,12 +1,12 @@
 {
-    "name": "wpstrap/wordpress-plugin-boilerplate",
+    "name": "rhema",
     "description": "Wordpress Plugin Boilerplate",
     "version": "0.3.1",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "type": "wordpress-plugin",
     "license": "MIT",
-    "homepage": "https://wp-strap.com",
+    "homepage": "https://rhema.muchshar.com",
     "autoload": {
         "psr-4": {
             "Rhema\\": "src/"
@@ -53,13 +53,6 @@
         "plugin",
         "boilerplate",
         "framework"
-    ],
-    "authors": [
-        {
-            "name": "WP-Strap",
-            "email": "hello@wp-strap.com",
-            "homepage": "https://wp-strap.com"
-        }
     ],
     "config": {
         "allow-plugins": {

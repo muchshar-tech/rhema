@@ -18,6 +18,7 @@ use Respect\Validation\Exceptions\NestedValidationException;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 use Rhema\Common\Constants;
+use Rhema\Common\Defaults;
 use WP_Error;
 use Exception;
 
@@ -224,7 +225,8 @@ final class Api extends Base {
 			'timeout' => 2,
 		] );
 		if ( is_wp_error( $translation_list_res ) ) {
-			return $translation_list_res;
+			// return $translation_list_res;
+			return json_decode( Defaults::init()->translates, true );
 		}
 		$response = $translation_list_res['response'];
 		$status_code = $response['code'];
@@ -267,7 +269,7 @@ final class Api extends Base {
 		if ( is_wp_error( $translate_res ) ) {
 			return $translate_res;
 		}
-		
+
 		$response = $translate_res['response'];
 		$status_code = $response['code'];
 		if ( 200 !== $status_code ) {

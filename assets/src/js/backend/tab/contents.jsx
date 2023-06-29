@@ -13,8 +13,8 @@ export const About = () => {
             <p className="text-sm">{UI_MESSAGE_MAPPING['about/paragraph-1']}</p>
             <p className="text-sm">{UI_MESSAGE_MAPPING['about/paragraph-2']}</p>
             <ul className="text-sm">
-                <li><a href="https://p.ecpay.com.tw/BDA9F8A" target="_blank" rel="noreferrer">台灣地區 捐款連結</a></li>
-                <li><a href="https://paypal.me/eoncenter" target="_blank" rel="noreferrer">海外地區 捐款連結</a></li>
+                <li><a href="https://p.ecpay.com.tw/BDA9F8A" target="_blank" rel="noreferrer">{UI_MESSAGE_MAPPING['about/link/donation-1']}</a></li>
+                <li><a href="https://paypal.me/eoncenter" target="_blank" rel="noreferrer">{UI_MESSAGE_MAPPING['about/link/donation-2']}</a></li>
             </ul>
         </div>
     )

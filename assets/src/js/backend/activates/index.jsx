@@ -52,10 +52,10 @@ export const Core = memo(function Core({ show, onClickClose }) {
 
     const showExceptionMessage =
         (!!activateCoreResponse &&
-            !/2[0-9][0-9]/.test(activateCoreResponse?.response.code)) ||
+            !/2[0-9][0-9]/.test(activateCoreResponse?.response?.code)) ||
         !!activateCoreError
     const showActivatingFeaturePrepare =
-        /2[0-9][0-9]/.test(activateCoreResponse?.response.code) &&
+        /2[0-9][0-9]/.test(activateCoreResponse?.response?.code) &&
         !showExceptionMessage
 
     const [showActivatingFeature, setShowActivatingFeature] = useState(
@@ -248,7 +248,7 @@ export const Core = memo(function Core({ show, onClickClose }) {
                                 activateCoreError.data.code
                             }
                         >
-                            {activateCoreResponse?.body ||
+                            {activateCoreError?.data.message  ||
                                 'There has been a critical error.'}
                         </FormTable.ResponseErrorMsg>
                     )}

@@ -240,7 +240,6 @@ const Features = () => {
                     }}
                 />
                 <FeatureCards.Relation />
-                <FeatureCards.QandA />
                 <FeatureCards.OfflineReading />
             </div>
             <Activates.Core

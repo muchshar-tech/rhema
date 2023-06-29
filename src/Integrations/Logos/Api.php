@@ -301,7 +301,8 @@ final class Api extends Base {
 		}
 		$bible_remote = rhema()->bible()->remote();
 		$token = $this->getSavedToken();
-		$rhema_res = wp_remote_get( "$bible_remote/cuv?{$query_string}", [
+		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
+		$rhema_res = wp_remote_get( "$bible_remote/$bible_default_translation?{$query_string}", [
 			'headers' => [
 				'Authorization' => "Bearer $token",
 			],
@@ -341,7 +342,8 @@ final class Api extends Base {
 		if ( ! $is_valid ) {
 			return new WP_Error( 403, Constants::init()->error_message['logos_authorization_failed'] );
 		}
-		$search_remote = "{$this->remote()}/search/cuv";
+		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
+		$search_remote = "{$this->remote()}/search/$bible_default_translation";
 		$token = $this->getSavedToken();
 		$rhema_res = wp_remote_get( "$search_remote?words={$keyword}&from={$from}", [
 			'headers' => [

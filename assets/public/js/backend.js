@@ -8487,7 +8487,7 @@ var Features = function Features() {
       e.preventDefault();
       setDisplayLicenseModal([true, 'core']);
     }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.Relation, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.QandA, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.OfflineReading, null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_activates__WEBPACK_IMPORTED_MODULE_7__.Core, {
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.Relation, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_feature_cards__WEBPACK_IMPORTED_MODULE_8__.OfflineReading, null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_activates__WEBPACK_IMPORTED_MODULE_7__.Core, {
     show: displayActiveCoreModal,
     onClickClose: function onClickClose() {
       console.log('onClickClose onClick');
@@ -8586,7 +8586,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Core(_ref) {
-  var _errors$email, _errors$username, _errors$password, _errors$confirm_passw, _errors$identity_type, _errors$product_slug;
+  var _activateCoreResponse, _activateCoreResponse2, _errors$email, _errors$username, _errors$password, _errors$confirm_passw, _errors$identity_type, _errors$product_slug;
 
   var show = _ref.show,
       onClickClose = _ref.onClickClose;
@@ -8617,8 +8617,8 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
       activateCoreError = _useActivateCoreMutat3.error,
       isActivatingCore = _useActivateCoreMutat3.isLoading;
 
-  var showExceptionMessage = !!activateCoreResponse && !/2[0-9][0-9]/.test(activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : activateCoreResponse.response.code) || !!activateCoreError;
-  var showActivatingFeaturePrepare = /2[0-9][0-9]/.test(activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : activateCoreResponse.response.code) && !showExceptionMessage;
+  var showExceptionMessage = !!activateCoreResponse && !/2[0-9][0-9]/.test(activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : (_activateCoreResponse = activateCoreResponse.response) === null || _activateCoreResponse === void 0 ? void 0 : _activateCoreResponse.code) || !!activateCoreError;
+  var showActivatingFeaturePrepare = /2[0-9][0-9]/.test(activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : (_activateCoreResponse2 = activateCoreResponse.response) === null || _activateCoreResponse2 === void 0 ? void 0 : _activateCoreResponse2.code) && !showExceptionMessage;
 
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(showActivatingFeaturePrepare),
       _useState2 = _slicedToArray(_useState, 2),
@@ -8788,7 +8788,7 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
   }, "Your application has been approved, activating the feature"), showExceptionMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseErrorMsg, {
     code: (activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : activateCoreResponse.response.code) || activateCoreError.status,
     label: (activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : activateCoreResponse.response.message) || activateCoreError.data.code
-  }, (activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : activateCoreResponse.body) || 'There has been a critical error.'))));
+  }, (activateCoreError === null || activateCoreError === void 0 ? void 0 : activateCoreError.data.message) || 'There has been a critical error.'))));
 });
 var License = function License(_ref4) {
   var _deactivateResponse$r, _errors$license, _errors$email2, _errors$username2, _errors$identity_type2, _errors$product_slug2;
@@ -9327,8 +9327,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var moment_moment__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(moment_moment__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! RHEMA_LOCALIZE */ "RHEMA_LOCALIZE");
 /* harmony import */ var RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _components_backend_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @components/backend/components */ "./assets/src/js/backend/components/index.jsx");
-/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _assets_js_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @assets/js/constants */ "./assets/src/js/constants.js");
+/* harmony import */ var _components_backend_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @components/backend/components */ "./assets/src/js/backend/components/index.jsx");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+
 
 
 
@@ -9338,8 +9340,8 @@ __webpack_require__.r(__webpack_exports__);
 var Core = function Core(_ref) {
   var onClickActive = _ref.onClickActive,
       onClickLicense = _ref.onClickLicense;
-  react_redux__WEBPACK_IMPORTED_MODULE_4__.useSelector;
-  var isActive = (0,react_redux__WEBPACK_IMPORTED_MODULE_4__.useSelector)(function (state) {
+  react_redux__WEBPACK_IMPORTED_MODULE_5__.useSelector;
+  var isActive = (0,react_redux__WEBPACK_IMPORTED_MODULE_5__.useSelector)(function (state) {
     var timeZone = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_2___default().WP_OPTIONS.TIME_ZONE) || '0';
     var key = state.general.licenses.bible.key;
     var renewDate = moment_moment__WEBPACK_IMPORTED_MODULE_1___default()(state.general.licenses.bible.renew_date).utcOffset(timeZone);
@@ -9355,30 +9357,31 @@ var Core = function Core(_ref) {
 
     return true;
   });
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_3__.FeatureCard, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_4__.FeatureCard, {
     title: "Core",
     isActive: isActive,
     onClickActive: onClickActive,
-    onClickLicense: onClickLicense
-  }, "Rhema \u6838\u5FC3\u529F\u80FD\uFF1A\u95B1\u8B80\u3001\u67E5\u8A62\u5168\u672C\u8056\u7D93");
+    onClickLicense: onClickLicense,
+    version: "1.0.0"
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["features/description/core"]);
 };
 var Relation = function Relation() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_3__.FeatureCard, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_4__.FeatureCard, {
     title: "Relation",
     commingSoon: true
-  }, "\u81EA\u52D5\u95DC\u9023\u7D93\u6587\u76F8\u95DC\u6587\u7AE0\u3001\u7D93\u6587\u63D2\u5165\u5DE5\u5177");
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["features/description/relation"]);
 };
 var QandA = function QandA() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_3__.FeatureCard, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_4__.FeatureCard, {
     title: "Q&A",
     commingSoon: true
   }, "\u8056\u7D93\u7D93\u6587\u554F\u8207\u7B54\u529F\u80FD");
 };
 var OfflineReading = function OfflineReading() {
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_3__.FeatureCard, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_4__.FeatureCard, {
     title: "Offline Reading",
     commingSoon: true
-  }, "\u652F\u63F4 PWA \u6280\u8853\uFF0C\u8B93\u7DB2\u7AD9\u7684\u8056\u7D93\u53EF\u4EE5\u5728\u624B\u6A5F\u4E0A\u96E2\u7DDA\u95B1\u8B80");
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["features/description/offline"]);
 };
 
 /***/ }),
@@ -10005,11 +10008,11 @@ var About = function About() {
     href: "https://p.ecpay.com.tw/BDA9F8A",
     target: "_blank",
     rel: "noreferrer"
-  }, "\u53F0\u7063\u5730\u5340 \u6350\u6B3E\u9023\u7D50")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
+  }, _components_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["about/link/donation-1"])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
     href: "https://paypal.me/eoncenter",
     target: "_blank",
     rel: "noreferrer"
-  }, "\u6D77\u5916\u5730\u5340 \u6350\u6B3E\u9023\u7D50"))));
+  }, _components_constants__WEBPACK_IMPORTED_MODULE_3__.UI_MESSAGE_MAPPING["about/link/donation-2"]))));
 };
 var Account = function Account() {
   console.log('Run Account');
@@ -10280,6 +10283,9 @@ var UI_MESSAGE_MAPPING = {
   'bible-entry-path': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('bible-entry-path', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'default-translation': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('default-translation', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'default-translation/default': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('default-translation/default', (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'features/description/core': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema core function: read and query the whole Bible", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'features/description/relation': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Automatically correlate related posts with verses, bible verse insertion tool", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'features/description/offline': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Support PWA, so that the Bible of the website can be read offline on mobile phones", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'features/status': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("features/status", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'features/comming-soon': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("features/comming-soon", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'features/active': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("features/active", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
@@ -10292,6 +10298,8 @@ var UI_MESSAGE_MAPPING = {
   'my-account/welcome': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you are willing to support our ministry, please consider making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'about/link/donation-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Taiwan Donation Link", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'about/link/donation-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Overseas Donation Link", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'bible-directory': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("bible-directory", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'bible-directory/old-testament': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("bible-directory/old-testament", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'bible-directory/new-testament': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("bible-directory/new-testament", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),

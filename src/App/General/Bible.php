@@ -61,8 +61,8 @@ final class Bible extends Base {
 		if ( ! empty( $range_from['chapter'] ) && ! empty( $range_to['chapter'] ) && $range_from['chapter'] !== $range_to['chapter'] ) {
 			return false;
 		}
-
-		$translation_info = $this->getTranslationInfo( 'cuv' );
+		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
+		$translation_info = $this->getTranslationInfo( $bible_default_translation );
 		if ( is_wp_error( $translation_info ) ) {
 			throw new Exception( $translation_info->get_error_message() );
 		}
@@ -200,7 +200,8 @@ final class Bible extends Base {
 		if ( ! $is_whole_chapter ) {
 			return $query_schema;
 		}
-		$translation_info = $this->getTranslationInfo( 'cuv' );
+		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
+		$translation_info = $this->getTranslationInfo( $bible_default_translation );
 		if ( is_wp_error( $translation_info ) ) {
 			throw new Exception( $translation_info->get_error_message() );
 		}
@@ -283,6 +284,37 @@ final class Bible extends Base {
 		return "{$param_from}{$param_to}";
 	}
 	/**
+	 * Generate query text function
+	 *
+	 * @param array $raw_params
+	 * @return string
+	 */
+	public function generateQueryText( array $raw_params = [] ): string {
+		if ( empty( $raw_params ) ) {
+			$query_schema = $this->getQuerySchema();
+			if ( empty( $query_schema ) ) {
+				return [];
+			}
+			$raw_params = $this->generateGetRawParam( $query_schema );
+		}
+		$books = Constants::init()->books;
+		$from_book_slug = $raw_params['query_from_book'];
+		$from_book_index = $this->getBookTransBySlug( $from_book_slug );
+		$from_book = $books[ $from_book_index['index'] - 1 ];
+		$from_book_name = $from_book['name'];
+		$from_book_chapter = $raw_params['query_from_chapter'];
+		$from_book_verse = $raw_params['query_from_verse'];
+		$to_book_slug = $raw_params['query_to_book'];
+		$to_book_index = $this->getBookTransBySlug( $to_book_slug );
+		$to_book = $books[ $to_book_index['index'] - 1 ];
+		$to_book_name = $from_book_name === $to_book['name'] ? '' : $to_book['name'] . ' ';
+		$to_book_chapter = ( empty( $to_book_name ) && $from_book_chapter === $raw_params['query_to_chapter'] ) ? '' : $raw_params['query_to_chapter'] . ':';
+		$to_book_verse = ( empty( $to_book_name ) && empty( $to_book_chapter ) && $from_book_verse === $raw_params['query_to_verse'] ) ? '' : $raw_params['query_to_verse'];
+
+		return "$from_book_name $from_book_chapter:$from_book_verse-$to_book_name$to_book_chapter$to_book_verse";
+	}
+
+	/**
 	 * Generate raw param function.
 	 *
 	 * @param array $query_schema
@@ -318,6 +350,9 @@ final class Bible extends Base {
 	 */
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$bible_remote = $this->remote();
+		if ( empty( $translate_abbr ) ) {
+			$translate_abbr = 'kjv';
+		}
 		$remote_query_string = "{$bible_remote}/{$translate_abbr}";
 		$transient_translate_res = $this->getTransient( 'rhema.bible.translate.info', $remote_query_string );
 		if ( ! empty( $transient_translate_res ) ) {

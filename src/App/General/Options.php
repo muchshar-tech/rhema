@@ -41,18 +41,38 @@ final class Options extends Base {
 	/**
 	 * Get options
 	 *
-	 * @param WP_REST_Request $request Values.
-	 * @return array
+	 * @param string $key Key.
+	 * @return array|string
 	 * @since 1.0.0
 	 */
-	public function get(): array {
+	public function get( $keys = '' ): array|string {
 		$plugin_domain = $this->plugin->textDomain();
 		// TODO: 拿到 option 後要做一次 valid，要跟前台的 schema validator 一致
 		$options = get_option( $plugin_domain );
 		if ( empty( $options ) || ! $options ) {
 			$options = '{}';
 		}
-		return json_decode( $options, true );
+		$options_decoded = json_decode( $options, true );
+		if ( empty( $keys ) ) {
+			return $options;
+		}
+		$keys = explode( '.', $keys );
+		$option = 'kjv';
+		$options = $options_decoded;
+		foreach ( $keys as $key ) {
+			if ( isset( $options[ $key ] ) && ! empty( $options[ $key ] ) ) {
+				$options = $options[ $key ];
+			} else {
+				break;
+			}
+		}
+
+		$option = $options;
+
+		if ( empty( $option ) ) {
+			return 'kjv';
+		}
+		return $option;
 	}
 	/**
 	 * Update options

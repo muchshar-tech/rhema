@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import moment from 'moment/moment'
 
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
+import { UI_MESSAGE_MAPPING } from '@assets/js/constants'
 import { FeatureCard } from '@components/backend/components'
 import { useSelector } from 'react-redux'
 
@@ -29,8 +30,9 @@ export const Core = ({ onClickActive, onClickLicense }) => {
             isActive={isActive}
             onClickActive={onClickActive}
             onClickLicense={onClickLicense}
+            version='1.0.0'
         >
-            Rhema 核心功能：閱讀、查詢全本聖經
+            {UI_MESSAGE_MAPPING['features/description/core']}
         </FeatureCard>
     )
 }
@@ -38,7 +40,7 @@ export const Core = ({ onClickActive, onClickLicense }) => {
 export const Relation = () => {
     return (
         <FeatureCard title="Relation" commingSoon={true}>
-            自動關連經文相關文章、經文插入工具
+            {UI_MESSAGE_MAPPING['features/description/relation']}
         </FeatureCard>
     )
 }
@@ -54,7 +56,7 @@ export const QandA = () => {
 export const OfflineReading = () => {
     return (
         <FeatureCard title="Offline Reading" commingSoon={true}>
-            支援 PWA 技術，讓網站的聖經可以在手機上離線閱讀
+            {UI_MESSAGE_MAPPING['features/description/offline']}
         </FeatureCard>
     )
 }

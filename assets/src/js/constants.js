@@ -33,6 +33,9 @@ export const UI_MESSAGE_MAPPING = {
         'default-translation/default',
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    'features/description/core': __(`Rhema core function: read and query the whole Bible`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+    'features/description/relation': __(`Automatically correlate related posts with verses, bible verse insertion tool`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+    'features/description/offline': __(`Support PWA, so that the Bible of the website can be read offline on mobile phones`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'features/status': __(`features/status`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'features/comming-soon': __(
         `features/comming-soon`,
@@ -73,6 +76,14 @@ export const UI_MESSAGE_MAPPING = {
     ),
     'about/paragraph-2': __(
         `If you are willing to support our ministry, please consider making a donation to us.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'about/link/donation-1': __(
+        `Taiwan Donation Link`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'about/link/donation-2': __(
+        `Overseas Donation Link`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'bible-directory': __(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),

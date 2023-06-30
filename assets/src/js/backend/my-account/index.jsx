@@ -231,7 +231,6 @@ export const OrdersListing = () => {
     ]
     const { data, error, isFetching } = useOrdersQuery()
 
-    console.log(data, error, isFetching)
     const showExceptionMessage = !!error
     const exceptionMessage = error?.data.message || 'Somthing wrong.'
 
@@ -243,7 +242,7 @@ export const OrdersListing = () => {
     })
 
     if (!isFetching && !showExceptionMessage) {
-        console.log(table.getRowModel())
+        table.getRowModel()
     }
 
     return (

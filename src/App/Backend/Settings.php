@@ -47,7 +47,6 @@ class Settings extends Base {
 	public function adminMenu() {
 		$plugin_domain = $this->plugin->textDomain();
 		add_menu_page( 'Rhema', 'Rhema', 'manage_options', $plugin_domain, [ $this, 'hello' ], 'dashicons-book' );
-		add_submenu_page( $plugin_domain, 'Question Category', 'Question Categories', 'manage_options', 'edit-tags.php?taxonomy=bible-question-category' );
 		add_action( 'parent_file', [ $this, 'adminQuestionCategoryMenuModifier' ] );
 	}
 

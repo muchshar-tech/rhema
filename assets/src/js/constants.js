@@ -78,6 +78,18 @@ export const UI_MESSAGE_MAPPING = {
         `If you are willing to support our ministry, please consider making a donation to us.`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    'about/title/service-policy': __(
+        `Service Policy`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'about/service-policy/update-maintenance': __(
+        `Feature Updates and Maintenance: We will regularly update and maintain the plugin to ensure its compatibility with the latest version of WordPress and continue to improve and add new features. We strive to address known issues and vulnerabilities promptly by providing patches and fixes. If you encounter any problems or discover any vulnerabilities, please visit %s to report your issues.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'about/service-policy/rights-reserved': __(
+        `Rights Reserved: Muchshar Ltd. reserves the right to determine whether you are allowed to use this plugin.`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
     'about/link/donation-1': __(
         `Taiwan Donation Link`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
@@ -86,6 +98,7 @@ export const UI_MESSAGE_MAPPING = {
         `Overseas Donation Link`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    
     'bible-directory': __(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'bible-directory/old-testament': __(
         `bible-directory/old-testament`,

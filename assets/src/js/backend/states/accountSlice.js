@@ -17,7 +17,6 @@ export const accountSlice = createSlice({
             const { token } = action.payload
             setLogosSignedToken(sessionStorage, token)
             state.token = token
-            console.log(token, state)
         },
         deleteSigninToken: (state) => {
             removeLogosSignedToken(sessionStorage)

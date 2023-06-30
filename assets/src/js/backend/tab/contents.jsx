@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { __ } from '@wordpress/i18n'
+import { sprintf } from 'sprintf-js'
+import parseHTML from 'html-react-parser'
 
 import { UI_MESSAGE_MAPPING } from '@components/constants'
 import { useSigninMutation } from '@components/services'
@@ -13,15 +15,46 @@ export const About = () => {
             <p className="text-sm">{UI_MESSAGE_MAPPING['about/paragraph-1']}</p>
             <p className="text-sm">{UI_MESSAGE_MAPPING['about/paragraph-2']}</p>
             <ul className="text-sm">
-                <li><a href="https://p.ecpay.com.tw/BDA9F8A" target="_blank" rel="noreferrer">{UI_MESSAGE_MAPPING['about/link/donation-1']}</a></li>
-                <li><a href="https://paypal.me/eoncenter" target="_blank" rel="noreferrer">{UI_MESSAGE_MAPPING['about/link/donation-2']}</a></li>
+                <li>
+                    <a
+                        href="https://p.ecpay.com.tw/BDA9F8A"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {UI_MESSAGE_MAPPING['about/link/donation-1']}
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="https://paypal.me/eoncenter"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {UI_MESSAGE_MAPPING['about/link/donation-2']}
+                    </a>
+                </li>
+            </ul>
+            <h3>{UI_MESSAGE_MAPPING['about/title/service-policy']}</h3>
+            <ul>
+                <li>
+                    {parseHTML(
+                        sprintf(
+                            UI_MESSAGE_MAPPING[
+                                'about/service-policy/update-maintenance'
+                            ],
+                            '<a href="https://github.com/muchshar-tech/rhema/issues" target="_blank" rel="noreferrer">https://github.com/muchshar-tech/rhema/issues</a>'
+                        )
+                    )}
+                </li>
+                <li>
+                    {UI_MESSAGE_MAPPING['about/service-policy/rights-reserved']}
+                </li>
             </ul>
         </div>
     )
 }
 
 export const Account = () => {
-    console.log('Run Account')
     const dispatch = useDispatch()
     const [
         signin,
@@ -41,16 +74,12 @@ export const Account = () => {
     })
 
     const onClickSigin = async (data) => {
-        console.log('onClickSigin')
         const { identity_type, ...body } = data
-        console.log('Start Signin')
         const payload = await signin(body)
-        console.log('End Signin')
         const {
             data: { data: response },
         } = payload
         const { token } = response
-        console.log(token)
         dispatch(addSigninToken({ token }))
     }
 
@@ -62,10 +91,8 @@ export const Account = () => {
                         className="max-w-sm"
                         onClickSigin={onClickSigin}
                         onClickForgotPw={() => {
-                            console.log('onClickForgotPw')
                         }}
                         onClickRegister={() => {
-                            console.log('onClickRegister')
                         }}
                         signinData={{ signinResponse, signinError, isSigning }}
                     />

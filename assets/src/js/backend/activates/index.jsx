@@ -26,7 +26,6 @@ import {
 } from '@components/backend/states/generalSlice'
 
 export const Core = memo(function Core({ show, onClickClose }) {
-    console.log('Run Core')
     const dispatch = useDispatch()
     const coreActiveFormMethods = useForm({
         defaultValues: {
@@ -63,7 +62,6 @@ export const Core = memo(function Core({ show, onClickClose }) {
     )
 
     const onSubmit = async (data) => {
-        console.log(data)
         const { confirm_password, ...sendOutFields } = data
         const payload = await activateCore(sendOutFields)
     }
@@ -77,12 +75,10 @@ export const Core = memo(function Core({ show, onClickClose }) {
     const onActivatingCompleted = (response) => {
         triggerClose()
         const { license_key: key, renew_date, license_data: data } = response
-        console.log(response, key, renew_date, data)
         dispatch(addLicense({ bible: { key, renew_date, data } }))
     }
 
     useEffect(() => {
-        console.log(showActivatingFeature)
         if (showActivatingFeaturePrepare) {
             setShowActivatingFeature(true)
         }
@@ -363,7 +359,6 @@ export const License = ({ show, onClickClose }) => {
     const [showActivating, setShowActivating] = useState(showActivatingPrepare)
 
     const onSubmit = async (data) => {
-        console.log(data)
         if (!isActived) {
             const payload = await activate(data)
         } else {
@@ -388,13 +383,11 @@ export const License = ({ show, onClickClose }) => {
     const onActivatingCompleted = (response) => {
         triggerClose()
         const { license_key: key, renew_date, license_data: data } = response
-        console.log(response, key, renew_date, data)
         dispatch(addLicense({ bible: { key, renew_date, data } }))
     }
 
     const onClickDeactivate = async (e) => {
         e.preventDefault()
-        console.log('Deactivate')
         const payload = await deactivate({
             product_slug: 'wp-rhema-core-feature',
             // license:
@@ -402,7 +395,6 @@ export const License = ({ show, onClickClose }) => {
     }
 
     useEffect(() => {
-        console.log(showActivating)
         if (showActivatingPrepare) {
             setShowActivating(true)
         }

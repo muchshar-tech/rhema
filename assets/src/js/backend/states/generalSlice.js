@@ -11,7 +11,6 @@ export const generalSlice = createSlice({
     reducers: {
         addLicense: (state, action) => {
             const { bible } = action.payload
-            console.log(bible)
             state.licenses = { bible }
         },
         deleteLicense: (state, action) => {

@@ -93,7 +93,7 @@ const Settings = () => {
     const formMethods = useForm({
         defaultValues: {
             bible_entry: 'bible',
-            ...RHEMA_LOCALIZE.RHEMA_BACKEND.OPTIONS.general,
+            ...JSON.parse(RHEMA_LOCALIZE.RHEMA_BACKEND.OPTIONS).general,
         },
     })
     const { register, handleSubmit, formState } = formMethods
@@ -118,7 +118,6 @@ const Settings = () => {
     const showOptionsSaved =
         updateOptionsResponse?.success === true ? true : false
 
-    console.log(updateOptionsError, updateOptionsResponse)
     const exceptionMessage = {
         code: updateOptionsError?.status,
         label: '',
@@ -136,9 +135,7 @@ const Settings = () => {
     }
 
     const onSubmit = async (data) => {
-        console.log(data)
         const payload = await updateOptions(data)
-        console.log(payload)
     }
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -219,7 +216,6 @@ const Settings = () => {
 }
 
 const Features = () => {
-    console.log('Run Features')
     const [displayActiveCoreModal, setDisplayActiveCoreModal] = useState(false)
     const [displayLicensModal, setDisplayLicenseModal] = useState([false, ''])
 
@@ -229,12 +225,10 @@ const Features = () => {
             <div className="flex flex-wrap -mx-2">
                 <FeatureCards.Core
                     onClickActive={(e) => {
-                        console.log('click Active')
                         e.preventDefault()
                         setDisplayActiveCoreModal(true)
                     }}
                     onClickLicense={(e) => {
-                        console.log('click Active')
                         e.preventDefault()
                         setDisplayLicenseModal([true, 'core'])
                     }}
@@ -245,7 +239,6 @@ const Features = () => {
             <Activates.Core
                 show={displayActiveCoreModal}
                 onClickClose={() => {
-                    console.log('onClickClose onClick')
                     setDisplayActiveCoreModal(false)
                 }}
             />

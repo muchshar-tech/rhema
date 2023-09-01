@@ -49,13 +49,8 @@ export const Core = memo(function Core({ show, onClickClose }) {
         },
     ] = useActivateCoreMutation()
 
-    const showExceptionMessage =
-        (!!activateCoreResponse &&
-            !/2[0-9][0-9]/.test(activateCoreResponse?.response?.code)) ||
-        !!activateCoreError
-    const showActivatingFeaturePrepare =
-        /2[0-9][0-9]/.test(activateCoreResponse?.response?.code) &&
-        !showExceptionMessage
+    const showExceptionMessage = !!activateCoreError
+    const showActivatingFeaturePrepare = activateCoreResponse?.success || false
 
     const [showActivatingFeature, setShowActivatingFeature] = useState(
         showActivatingFeaturePrepare
@@ -66,8 +61,7 @@ export const Core = memo(function Core({ show, onClickClose }) {
         const payload = await activateCore(sendOutFields)
     }
 
-    const triggerClose = (e) => {
-        e.stopPropagation()
+    const triggerClose = () => {
         onClickClose()
         setShowActivatingFeature(false)
     }
@@ -88,7 +82,7 @@ export const Core = memo(function Core({ show, onClickClose }) {
         <Components.ScreenOverlay
             show={show}
             className={{
-                root: '',
+                root: 'z-10',
                 modal: 'max-w-sm',
             }}
             title="Apply to activate Rhema"
@@ -218,7 +212,7 @@ export const Core = memo(function Core({ show, onClickClose }) {
                                     }}
                                     onComplete={() => {
                                         onActivatingCompleted(
-                                            activateCoreResponse.body
+                                            activateCoreResponse.data
                                         )
                                     }}
                                 />
@@ -244,7 +238,7 @@ export const Core = memo(function Core({ show, onClickClose }) {
                                 activateCoreError.data.code
                             }
                         >
-                            {activateCoreError?.data.message  ||
+                            {activateCoreError?.data.message ||
                                 'There has been a critical error.'}
                         </FormTable.ResponseErrorMsg>
                     )}
@@ -259,7 +253,9 @@ export const License = ({ show, onClickClose }) => {
     const licenseData = useSelector((state) => {
         const timeZone = RHEMA_LOCALIZE.WP_OPTIONS.TIME_ZONE || '0'
         const license = state.general.licenses.bible
-        const licenseData = isJsonStr() ? JSON.parse(license.data) : license.data
+        const licenseData = isJsonStr(license.data)
+            ? JSON.parse(license.data)
+            : license.data
         const renewDate = moment(license.renew_date).utcOffset(timeZone)
         const nowDate = moment()
         if (typeof license.key !== 'string' || license.key.length <= 0) {
@@ -286,12 +282,7 @@ export const License = ({ show, onClickClose }) => {
             ...licenseData,
         }
     })
-    const isActived =
-        typeof licenseData === 'object' &&
-        licenseData !== null &&
-        licenseData.hasOwnProperty('key') &&
-        typeof licenseData?.key === 'string' &&
-        licenseData.key.length > 0
+
     const activeFormMethods = useForm({
         defaultValues: {
             email: licenseData?.email || RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
@@ -323,39 +314,48 @@ export const License = ({ show, onClickClose }) => {
         },
     ] = useDeactivateMutation()
 
-    const showExceptionMessage =
-        (!!activateResponse &&
-            !/2[0-9][0-9]/.test(activateResponse?.response.code)) ||
-        !!activateError ||
-        (!!deactivateResponse &&
-            !/2[0-9][0-9]/.test(deactivateResponse?.response?.code)) ||
-        !!deactivateError
-    const responseMessage = ((activateResponse, deactivateResponse, activateError, deactivateError) => {
-        const code =
-            activateResponse?.response.code ||
-            activateError?.status ||
-            deactivateResponse?.response.code ||
-            deactivateError?.status
-        const label =
-            activateResponse?.response.message ||
-            activateError?.data.code ||
-            deactivateResponse?.response.message ||
-            deactivateError?.data?.code ||
-            deactivateError?.data[0]?.code ||
-            ''
+    const isActived =
+        typeof licenseData === 'object' &&
+        licenseData !== null &&
+        licenseData.hasOwnProperty('key') &&
+        typeof licenseData?.key === 'string' &&
+        licenseData.key.length > 0
+    const isDeactivated = deactivateResponse?.success
+
+    const showExceptionMessage = !!activateError || !!deactivateError
+    const responseMessage = ((
+        activateResponse,
+        deactivateResponse,
+        activateError,
+        deactivateError
+    ) => {
+        const code = activateResponse?.success
+            ? 200
+            : false || activateError?.status || deactivateResponse?.success
+            ? 200
+            : false || deactivateError?.status
+        const label = activateResponse?.success
+            ? 'seccess'
+            : false || activateError?.data.code || deactivateResponse?.success
+            ? 200
+            : false ||
+              deactivateError?.data?.code ||
+              deactivateError?.data[0]?.code ||
+              ''
         const message = /5[0-9][0-9]/.test(code)
             ? 'There has been a critical error.'
-            : activateResponse?.body || deactivateError?.data?.message
+            : activateResponse?.body ||
+              activateError?.data?.message ||
+              deactivateError?.data?.message
         return {
             code,
             label,
             message,
         }
     })(activateResponse, deactivateResponse, activateError, deactivateError)
-    const showActivatingPrepare =
-        /2[0-9][0-9]/.test(activateResponse?.response.code) &&
-        !showExceptionMessage
+    const showActivatingPrepare = activateResponse?.success
 
+    const [showDeactivated, setShowDeactivated] = useState(isDeactivated)
     const [showActivating, setShowActivating] = useState(showActivatingPrepare)
 
     const onSubmit = async (data) => {
@@ -386,12 +386,10 @@ export const License = ({ show, onClickClose }) => {
         dispatch(addLicense({ bible: { key, renew_date, data } }))
     }
 
-    const onClickDeactivate = async (e) => {
-        e.preventDefault()
-        const payload = await deactivate({
-            product_slug: 'wp-rhema-core-feature',
-            // license:
-        })
+    const onDeactivated = (response) => {
+        const { license_key: key } = response
+        dispatch(deleteLicense({ bible: { key } }))
+        setShowDeactivated(false)
     }
 
     useEffect(() => {
@@ -400,11 +398,29 @@ export const License = ({ show, onClickClose }) => {
         }
     }, [showActivatingPrepare])
 
+    useEffect(() => {
+        if (isDeactivated && !showDeactivated) {
+            setShowDeactivated(true)
+        }
+    }, [isDeactivated])
+
+    useEffect(() => {
+        if (showDeactivated) {
+            onDeactivated(deactivateResponse.data)
+        }
+    }, [showDeactivated])
+
+    useEffect(() => {
+        if (!show) {
+            setShowDeactivated(false)
+        }
+    }, [show])
+
     return (
         <Components.ScreenOverlay
             show={show[0]}
             className={{
-                root: '',
+                root: 'z-10',
                 modal: 'max-w-xs',
             }}
             title="Enter license to active"
@@ -523,7 +539,7 @@ export const License = ({ show, onClickClose }) => {
                                         }}
                                         onComplete={() => {
                                             onActivatingCompleted(
-                                                activateResponse.body
+                                                activateResponse.data
                                             )
                                         }}
                                     />
@@ -540,6 +556,11 @@ export const License = ({ show, onClickClose }) => {
                         >
                             {isDeactivating ? 'Deactivating...' : 'Deactivate'}
                         </button>
+                    ) : null}
+                    {showDeactivated ? (
+                        <FormTable.ResponseSuccessMsg label="Success">
+                            You have deactivated the feature of Core
+                        </FormTable.ResponseSuccessMsg>
                     ) : null}
                     {showActivating ? (
                         <FormTable.ResponseSuccessMsg label="Success">

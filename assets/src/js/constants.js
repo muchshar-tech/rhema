@@ -58,12 +58,32 @@ export const UI_MESSAGE_MAPPING = {
         `my-account/forgot-password`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    'my-account/verify-email': __(
+        `my-account/verify-email`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/back-to-signin': __(
+        `my-account/back-to-signin`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
     'my-account/signin': __(
         `my-account/signin`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'my-account/signing': __(
         `my-account/signing`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/send-verify-email': __(
+        `my-account/send-verify-email`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/sending-verify-email': __(
+        `my-account/sending-verify-email`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/sent-verify-email': __(
+        `my-account/sent-verify-email`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'my-account/welcome': __(

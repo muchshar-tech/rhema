@@ -34,6 +34,7 @@ export const SwitchToggle = ({ isActive, onSwitchOn, onSwitchOff }) => {
             'focus:outline-2',
             'focus:outline',
             'focus:outline-transparent',
+            'disabled:opacity-70'
         ],
         border: [
             'box-border',
@@ -90,6 +91,7 @@ export const SwitchToggle = ({ isActive, onSwitchOn, onSwitchOff }) => {
                         : deactiveClassNames.input),
                 ].join(' ')}
                 type="checkbox"
+                disabled
             />
             <span
                 className={[

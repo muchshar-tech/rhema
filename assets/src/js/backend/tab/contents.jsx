@@ -83,6 +83,10 @@ export const Account = () => {
         dispatch(addSigninToken({ token }))
     }
 
+    const onClickVerifyEmail = async (data) => {
+
+    }
+
     return (
         <>
             {!hasToken ? (
@@ -92,8 +96,7 @@ export const Account = () => {
                         onClickSigin={onClickSigin}
                         onClickForgotPw={() => {
                         }}
-                        onClickRegister={() => {
-                        }}
+                        onClickVerifyEmail={onClickVerifyEmail}
                         signinData={{ signinResponse, signinError, isSigning }}
                     />
                 </div>

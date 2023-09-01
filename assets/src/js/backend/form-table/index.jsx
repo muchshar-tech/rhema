@@ -25,11 +25,11 @@ const FieldWrap = ({ children }) => {
     return <td>{children}</td>
 }
 
-const ModalForm = ({ onSubmit, children }) => {
+const ModalForm = ({ className, onSubmit, children }) => {
     const formProps = {
         onSubmit,
     }
-    return <form {...formProps}>{children}</form>
+    return <form className={className} {...formProps}>{children}</form>
 }
 
 ModalForm.FieldRow = ({ label, children }) => {

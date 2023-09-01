@@ -486,6 +486,11 @@
     .tailwind .gap-1 {
         gap: 0.25rem;
 }
+    .tailwind .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-x-reverse: 0;
+        margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+        margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
     .tailwind .space-x-4 > :not([hidden]) ~ :not([hidden]) {
         --tw-space-x-reverse: 0;
         margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -1088,6 +1093,9 @@
 }
     .tailwind .focus\:outline-transparent:focus {
         outline-color: transparent;
+}
+    .tailwind .disabled\:opacity-70:disabled {
+        opacity: 0.7;
 }
     .tailwind .group:last-child .group-last\:border-none {
         border-style: none;

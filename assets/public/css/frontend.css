@@ -998,6 +998,11 @@ video {
 .gap-1 {
   gap: 0.25rem;
 }
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -1600,6 +1605,9 @@ video {
 }
 .focus\:outline-transparent:focus {
   outline-color: transparent;
+}
+.disabled\:opacity-70:disabled {
+  opacity: 0.7;
 }
 .group:last-child .group-last\:border-none {
   border-style: none;

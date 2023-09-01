@@ -173,6 +173,7 @@ final class Api extends Base {
 				'username' => $args['username'],
 				'password' => $args['password'],
 			],
+			'timeout' => 10,
 		] );
 		return $response;
 	}

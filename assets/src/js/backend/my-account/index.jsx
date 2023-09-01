@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { joiResolver } from '@hookform/resolvers/joi'
@@ -25,19 +25,28 @@ export const LoginCard = ({
     className = '',
     onClickSigin,
     onClickForgotPw,
-    onClickRegister,
+    onClickVerifyEmail,
     signinData,
 }) => {
-    const formMethods = useForm({
+    const [showVerifyEmailForm, toggleVerifyEmailForm] = useState(false)
+    const loginFormMethods = useForm({
         defaultValues: {
             username: RHEMA_LOCALIZE.WP_OPTIONS.HOST_DOMAIN,
-            identity_type: IDENTITY_TYPE,
-            password: '',
         },
         resolver: joiResolver(FieldSchama.signinLogosFields),
     })
-    const { register, setError, formState, handleSubmit } = formMethods
-    const { isSubmitting, errors } = formState
+    const verifyEmailFormMethods = useForm({
+        defaultValues: {
+            email: RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
+        },
+        resolver: joiResolver(FieldSchama.verifyEmailLogosFields),
+    })
+    const { isSubmitting: isLogging, errors: loginErrors } =
+        loginFormMethods.formState
+    const {
+        isSubmitting: isSendingVerifyEmail,
+        errors: sendingVerifyEmailErrors,
+    } = verifyEmailFormMethods.formState
 
     const { signinResponse, signinError, isSigning } = signinData
 
@@ -79,31 +88,34 @@ export const LoginCard = ({
             <div className="inside pb-0">
                 <p>{UI_MESSAGE_MAPPING['my-account/description']}</p>
 
-                <FormTable.ModalForm onSubmit={handleSubmit(onClickSigin)}>
+                <FormTable.ModalForm
+                    className={showVerifyEmailForm ? 'hidden' : ''}
+                    onSubmit={loginFormMethods.handleSubmit(onClickSigin)}
+                >
                     <FormTable.ModalForm.FieldRow label="Username">
                         <input
                             className="w-full"
                             type="text"
-                            {...register('username', {
+                            {...loginFormMethods.register('username', {
                                 required: true,
                             })}
                         />
                         <FormTable.FieldErrorMsg
-                            message={errors.email?.message}
+                            message={loginErrors.username?.message}
                         />
                     </FormTable.ModalForm.FieldRow>
                     <FormTable.ModalForm.FieldRow label="Password">
                         <input
                             type="password"
                             className="w-full min-w-200px"
-                            {...register('password', {
+                            {...loginFormMethods.register('password', {
                                 required: true,
                             })}
                         />
                         <FormTable.FieldErrorMsg
-                            message={errors.password?.message}
+                            message={loginErrors.password?.message}
                         />
-                        <p className="m-0 mb-2 max-w-200px text-xs">
+                        <p className="m-0 mb-2 text-xs space-x-2">
                             <button
                                 className="button button-link hover:bg-transparent"
                                 onClick={onClickForgotPw}
@@ -114,31 +126,90 @@ export const LoginCard = ({
                                     ]
                                 }
                             </button>
+                            <button
+                                className="button button-link hover:bg-transparent"
+                                onClick={() => {
+                                    toggleVerifyEmailForm(true)
+                                }}
+                            >
+                                {UI_MESSAGE_MAPPING['my-account/verify-email']}
+                            </button>
                         </p>
                     </FormTable.ModalForm.FieldRow>
-                    <input type="hidden" {...register('identity_type')} />
+                    <input
+                        type="hidden"
+                        {...loginFormMethods.register('identity_type')}
+                    />
+                </FormTable.ModalForm>
+                <FormTable.ModalForm
+                    className={!showVerifyEmailForm ? 'hidden' : ''}
+                    onSubmit={loginFormMethods.handleSubmit(onClickSigin)}
+                >
+                    <FormTable.ModalForm.FieldRow label="Email">
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...verifyEmailFormMethods.register('email', {
+                                required: true,
+                            })}
+                        />
+                        <FormTable.FieldErrorMsg
+                            message={sendingVerifyEmailErrors.email?.message}
+                        />
+                        <p className="m-0 mb-2 text-xs space-x-2">
+                            <button
+                                className="button button-link hover:bg-transparent"
+                                onClick={() => {
+                                    toggleVerifyEmailForm(false)
+                                }}
+                            >
+                                {
+                                    UI_MESSAGE_MAPPING[
+                                        'my-account/back-to-signin'
+                                    ]
+                                }
+                            </button>
+                        </p>
+                    </FormTable.ModalForm.FieldRow>
                 </FormTable.ModalForm>
             </div>
             <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
                 <div className="flex grow">
                     <button
-                        className="button button-primary"
+                        className={[
+                            'button',
+                            'button-primary',
+                            ...(showVerifyEmailForm ? ['hidden'] : []),
+                        ].join(' ')}
                         onClick={(e) => {
                             handleSubmit(onClickSigin)(e)
-                            // .catch((err) => {
-                            //     setError('response', {
-                            //         type: 'custom',
-                            //         message: err.message,
-                            //     })
-                            // })
                         }}
-                        {...((isSubmitting || isSigning) && {
+                        {...((isLogging || isSigning) && {
                             disabled: 'disabled',
                         })}
                     >
-                        {!isSubmitting && !isSigning
+                        {!isLogging && !isSigning
                             ? UI_MESSAGE_MAPPING['my-account/signin']
                             : UI_MESSAGE_MAPPING['my-account/signing']}
+                    </button>
+                    <button
+                        className={[
+                            'button',
+                            'button-primary',
+                            ...(!showVerifyEmailForm ? ['hidden'] : []),
+                        ].join(' ')}
+                        onClick={(e) => {
+                            handleSubmit(onClickSigin)(e)
+                        }}
+                        {...((isLogging || isSigning) && {
+                            disabled: 'disabled',
+                        })}
+                    >
+                        {isSendingVerifyEmail
+                            ? UI_MESSAGE_MAPPING['my-account/send-verify-email']
+                            : UI_MESSAGE_MAPPING[
+                                  'my-account/sending-verify-email'
+                              ]}
                     </button>
                     {showSuccess && (
                         <FormTable.ResponseSuccessMsg label="Success">

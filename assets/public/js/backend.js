@@ -8578,7 +8578,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Core(_ref) {
-  var _activateCoreResponse, _activateCoreResponse2, _errors$email, _errors$username, _errors$password, _errors$confirm_passw, _errors$identity_type, _errors$product_slug;
+  var _errors$email, _errors$username, _errors$password, _errors$confirm_passw, _errors$identity_type, _errors$product_slug;
 
   var show = _ref.show,
       onClickClose = _ref.onClickClose;
@@ -8608,8 +8608,8 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
       activateCoreError = _useActivateCoreMutat3.error,
       isActivatingCore = _useActivateCoreMutat3.isLoading;
 
-  var showExceptionMessage = !!activateCoreResponse && !/2[0-9][0-9]/.test(activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : (_activateCoreResponse = activateCoreResponse.response) === null || _activateCoreResponse === void 0 ? void 0 : _activateCoreResponse.code) || !!activateCoreError;
-  var showActivatingFeaturePrepare = /2[0-9][0-9]/.test(activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : (_activateCoreResponse2 = activateCoreResponse.response) === null || _activateCoreResponse2 === void 0 ? void 0 : _activateCoreResponse2.code) && !showExceptionMessage;
+  var showExceptionMessage = !!activateCoreError;
+  var showActivatingFeaturePrepare = (activateCoreResponse === null || activateCoreResponse === void 0 ? void 0 : activateCoreResponse.success) || false;
 
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(showActivatingFeaturePrepare),
       _useState2 = _slicedToArray(_useState, 2),
@@ -8643,8 +8643,7 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
     };
   }();
 
-  var triggerClose = function triggerClose(e) {
-    e.stopPropagation();
+  var triggerClose = function triggerClose() {
     onClickClose();
     setShowActivatingFeature(false);
   };
@@ -8671,7 +8670,7 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_9__.ScreenOverlay, {
     show: show,
     className: {
-      root: '',
+      root: 'z-10',
       modal: 'max-w-sm'
     },
     title: "Apply to activate Rhema",
@@ -8768,7 +8767,7 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
       }
     },
     onComplete: function onComplete() {
-      onActivatingCompleted(activateCoreResponse.body);
+      onActivatingCompleted(activateCoreResponse.data);
     }
   })) : 'Confirm'), showActivatingFeature && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseSuccessMsg, {
     label: "Success"
@@ -8778,7 +8777,7 @@ var Core = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function Cor
   }, (activateCoreError === null || activateCoreError === void 0 ? void 0 : activateCoreError.data.message) || 'There has been a critical error.'))));
 });
 var License = function License(_ref4) {
-  var _deactivateResponse$r, _errors$license, _errors$email2, _errors$username2, _errors$identity_type2, _errors$product_slug2;
+  var _errors$license, _errors$email2, _errors$username2, _errors$identity_type2, _errors$product_slug2;
 
   var show = _ref4.show,
       onClickClose = _ref4.onClickClose;
@@ -8786,7 +8785,7 @@ var License = function License(_ref4) {
   var licenseData = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(function (state) {
     var timeZone = (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_6___default().WP_OPTIONS.TIME_ZONE) || '0';
     var license = state.general.licenses.bible;
-    var licenseData = (0,_components_common__WEBPACK_IMPORTED_MODULE_5__.isJsonStr)() ? JSON.parse(license.data) : license.data;
+    var licenseData = (0,_components_common__WEBPACK_IMPORTED_MODULE_5__.isJsonStr)(license.data) ? JSON.parse(license.data) : license.data;
     var renewDate = moment_moment__WEBPACK_IMPORTED_MODULE_3___default()(license.renew_date).utcOffset(timeZone);
     var nowDate = moment_moment__WEBPACK_IMPORTED_MODULE_3___default()();
 
@@ -8811,7 +8810,6 @@ var License = function License(_ref4) {
       renew_date: license.renew_date
     }, licenseData);
   });
-  var isActived = _typeof(licenseData) === 'object' && licenseData !== null && licenseData.hasOwnProperty('key') && typeof (licenseData === null || licenseData === void 0 ? void 0 : licenseData.key) === 'string' && licenseData.key.length > 0;
   var activeFormMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_13__.useForm)({
     defaultValues: {
       email: (licenseData === null || licenseData === void 0 ? void 0 : licenseData.email) || (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_6___default().WP_OPTIONS.ADMIN_EMAIL),
@@ -8844,14 +8842,16 @@ var License = function License(_ref4) {
       deactivateError = _useDeactivateMutatio3.error,
       isDeactivating = _useDeactivateMutatio3.isLoading;
 
-  var showExceptionMessage = !!activateResponse && !/2[0-9][0-9]/.test(activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.response.code) || !!activateError || !!deactivateResponse && !/2[0-9][0-9]/.test(deactivateResponse === null || deactivateResponse === void 0 ? void 0 : (_deactivateResponse$r = deactivateResponse.response) === null || _deactivateResponse$r === void 0 ? void 0 : _deactivateResponse$r.code) || !!deactivateError;
+  var isActived = _typeof(licenseData) === 'object' && licenseData !== null && licenseData.hasOwnProperty('key') && typeof (licenseData === null || licenseData === void 0 ? void 0 : licenseData.key) === 'string' && licenseData.key.length > 0;
+  var isDeactivated = deactivateResponse === null || deactivateResponse === void 0 ? void 0 : deactivateResponse.success;
+  var showExceptionMessage = !!activateError || !!deactivateError;
 
   var responseMessage = function (activateResponse, deactivateResponse, activateError, deactivateError) {
-    var _deactivateError$data, _deactivateError$data2, _deactivateError$data3;
+    var _deactivateError$data, _deactivateError$data2, _activateError$data, _deactivateError$data3;
 
-    var code = (activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.response.code) || (activateError === null || activateError === void 0 ? void 0 : activateError.status) || (deactivateResponse === null || deactivateResponse === void 0 ? void 0 : deactivateResponse.response.code) || (deactivateError === null || deactivateError === void 0 ? void 0 : deactivateError.status);
-    var label = (activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.response.message) || (activateError === null || activateError === void 0 ? void 0 : activateError.data.code) || (deactivateResponse === null || deactivateResponse === void 0 ? void 0 : deactivateResponse.response.message) || (deactivateError === null || deactivateError === void 0 ? void 0 : (_deactivateError$data = deactivateError.data) === null || _deactivateError$data === void 0 ? void 0 : _deactivateError$data.code) || (deactivateError === null || deactivateError === void 0 ? void 0 : (_deactivateError$data2 = deactivateError.data[0]) === null || _deactivateError$data2 === void 0 ? void 0 : _deactivateError$data2.code) || '';
-    var message = /5[0-9][0-9]/.test(code) ? 'There has been a critical error.' : (activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.body) || (deactivateError === null || deactivateError === void 0 ? void 0 : (_deactivateError$data3 = deactivateError.data) === null || _deactivateError$data3 === void 0 ? void 0 : _deactivateError$data3.message);
+    var code = activateResponse !== null && activateResponse !== void 0 && activateResponse.success ? 200 :  false || activateError !== null && activateError !== void 0 && activateError.status || deactivateResponse !== null && deactivateResponse !== void 0 && deactivateResponse.success ? 200 :  false || (deactivateError === null || deactivateError === void 0 ? void 0 : deactivateError.status);
+    var label = activateResponse !== null && activateResponse !== void 0 && activateResponse.success ? 'seccess' :  false || activateError !== null && activateError !== void 0 && activateError.data.code || deactivateResponse !== null && deactivateResponse !== void 0 && deactivateResponse.success ? 200 :  false || (deactivateError === null || deactivateError === void 0 ? void 0 : (_deactivateError$data = deactivateError.data) === null || _deactivateError$data === void 0 ? void 0 : _deactivateError$data.code) || (deactivateError === null || deactivateError === void 0 ? void 0 : (_deactivateError$data2 = deactivateError.data[0]) === null || _deactivateError$data2 === void 0 ? void 0 : _deactivateError$data2.code) || '';
+    var message = /5[0-9][0-9]/.test(code) ? 'There has been a critical error.' : (activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.body) || (activateError === null || activateError === void 0 ? void 0 : (_activateError$data = activateError.data) === null || _activateError$data === void 0 ? void 0 : _activateError$data.message) || (deactivateError === null || deactivateError === void 0 ? void 0 : (_deactivateError$data3 = deactivateError.data) === null || _deactivateError$data3 === void 0 ? void 0 : _deactivateError$data3.message);
     return {
       code: code,
       label: label,
@@ -8859,12 +8859,17 @@ var License = function License(_ref4) {
     };
   }(activateResponse, deactivateResponse, activateError, deactivateError);
 
-  var showActivatingPrepare = /2[0-9][0-9]/.test(activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.response.code) && !showExceptionMessage;
+  var showActivatingPrepare = activateResponse === null || activateResponse === void 0 ? void 0 : activateResponse.success;
 
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(showActivatingPrepare),
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(isDeactivated),
       _useState4 = _slicedToArray(_useState3, 2),
-      showActivating = _useState4[0],
-      setShowActivating = _useState4[1];
+      showDeactivated = _useState4[0],
+      setShowDeactivated = _useState4[1];
+
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(showActivatingPrepare),
+      _useState6 = _slicedToArray(_useState5, 2),
+      showActivating = _useState6[0],
+      setShowActivating = _useState6[1];
 
   var onSubmit = /*#__PURE__*/function () {
     var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(data) {
@@ -8933,45 +8938,40 @@ var License = function License(_ref4) {
     }));
   };
 
-  var onClickDeactivate = /*#__PURE__*/function () {
-    var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(e) {
-      var payload;
-      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              e.preventDefault();
-              _context3.next = 3;
-              return deactivate({
-                product_slug: 'wp-rhema-core-feature' // license:
-
-              });
-
-            case 3:
-              payload = _context3.sent;
-
-            case 4:
-            case "end":
-              return _context3.stop();
-          }
-        }
-      }, _callee3);
+  var onDeactivated = function onDeactivated(response) {
+    var key = response.license_key;
+    dispatch((0,_components_backend_states_generalSlice__WEBPACK_IMPORTED_MODULE_12__.deleteLicense)({
+      bible: {
+        key: key
+      }
     }));
-
-    return function onClickDeactivate(_x3) {
-      return _ref6.apply(this, arguments);
-    };
-  }();
+    setShowDeactivated(false);
+  };
 
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (showActivatingPrepare) {
       setShowActivating(true);
     }
   }, [showActivatingPrepare]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (isDeactivated && !showDeactivated) {
+      setShowDeactivated(true);
+    }
+  }, [isDeactivated]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (showDeactivated) {
+      onDeactivated(deactivateResponse.data);
+    }
+  }, [showDeactivated]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!show) {
+      setShowDeactivated(false);
+    }
+  }, [show]);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_components__WEBPACK_IMPORTED_MODULE_9__.ScreenOverlay, {
     show: show[0],
     className: {
-      root: '',
+      root: 'z-10',
       modal: 'max-w-xs'
     },
     title: "Enter license to active",
@@ -9046,9 +9046,9 @@ var License = function License(_ref4) {
     className: "mr-1"
   }), "Activating...", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_countdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
     date: Date.now() + _components_constants__WEBPACK_IMPORTED_MODULE_7__.ACTIVATING_COUNT_DOWN_TIME,
-    renderer: function renderer(_ref7) {
-      var seconds = _ref7.seconds,
-          completed = _ref7.completed;
+    renderer: function renderer(_ref6) {
+      var seconds = _ref6.seconds,
+          completed = _ref6.completed;
 
       if (completed) {
         return null;
@@ -9057,12 +9057,14 @@ var License = function License(_ref4) {
       }
     },
     onComplete: function onComplete() {
-      onActivatingCompleted(activateResponse.body);
+      onActivatingCompleted(activateResponse.data);
     }
   })) : 'Confirm') : null, isActived ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     type: "submit",
     className: "button flex items-center"
-  }, isDeactivating ? 'Deactivating...' : 'Deactivate') : null, showActivating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseSuccessMsg, {
+  }, isDeactivating ? 'Deactivating...' : 'Deactivate') : null, showDeactivated ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseSuccessMsg, {
+    label: "Success"
+  }, "You have deactivated the feature of Core") : null, showActivating ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseSuccessMsg, {
     label: "Success"
   }, "Your application has been approved, activating the feature") : null, showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_8__.ResponseErrorMsg, {
     code: responseMessage.code,
@@ -9136,7 +9138,7 @@ var SwitchToggle = function SwitchToggle(_ref2) {
       onSwitchOn = _ref2.onSwitchOn,
       onSwitchOff = _ref2.onSwitchOff;
   var classNames = {
-    input: ['peer', 'absolute', 'top-0', 'left-0', 'w-full', 'h-full', 'm-0', 'p-0', 'border-none', 'z-10', 'opacity-0', 'checked:before:bg-none', 'focus:border-sky-600', 'focus:outline-2', 'focus:outline', 'focus:outline-transparent'],
+    input: ['peer', 'absolute', 'top-0', 'left-0', 'w-full', 'h-full', 'm-0', 'p-0', 'border-none', 'z-10', 'opacity-0', 'checked:before:bg-none', 'focus:border-sky-600', 'focus:outline-2', 'focus:outline', 'focus:outline-transparent', 'disabled:opacity-70'],
     border: ['box-border', 'content-none', 'inline-block', 'align-top', 'border', 'border-solid', 'w-9', 'h-18px', 'rounded-xl', 'transition-colors', 'peer-focus:outline-2', 'peer-focus:outline-offset-2', 'peer-checked:peer-focus:shadow-[0_0_0_2px_#fff,0_0_0_4px_#0284c7]', 'peer-checked:bg-sky-600', 'peer-checked:border-sky-600'],
     rounded: ['box-border', 'translate-x-0', 'block', 'absolute', 'top-3px', 'left-3px', 'w-3', 'h-3', 'rounded-full', 'transition-left', 'border-4', 'border-solid', 'peer-checked:border-white', 'peer-checked:bg-white', 'peer-checked:left-20px']
   };
@@ -9154,7 +9156,8 @@ var SwitchToggle = function SwitchToggle(_ref2) {
     className: "inline-block relative group"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
     className: [].concat(_toConsumableArray(classNames.input), _toConsumableArray(isActive ? activedClassNames.input : deactiveClassNames.input)).join(' '),
-    type: "checkbox"
+    type: "checkbox",
+    disabled: true
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
     className: [].concat(_toConsumableArray(classNames.border), _toConsumableArray(isActive ? activedClassNames.border : deactiveClassNames.border)).join(' ')
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
@@ -9389,6 +9392,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
 
 
 
@@ -9420,12 +9425,15 @@ var FieldWrap = function FieldWrap(_ref4) {
 };
 
 var ModalForm = function ModalForm(_ref5) {
-  var onSubmit = _ref5.onSubmit,
+  var className = _ref5.className,
+      onSubmit = _ref5.onSubmit,
       children = _ref5.children;
   var formProps = {
     onSubmit: onSubmit
   };
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", formProps, children);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", _extends({
+    className: className
+  }, formProps), children);
 };
 
 ModalForm.FieldRow = function (_ref6) {
@@ -9520,7 +9528,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @components/backend/form-table */ "./assets/src/js/backend/form-table/index.jsx");
 /* harmony import */ var _components_schema__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @components/schema */ "./assets/src/js/schema/index.js");
 /* harmony import */ var _components_backend_states_accountSlice__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @components/backend/states/accountSlice */ "./assets/src/js/backend/states/accountSlice.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
@@ -9538,28 +9566,38 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 
 var LoginCard = function LoginCard(_ref) {
-  var _errors$email, _errors$password;
+  var _loginErrors$username, _loginErrors$password, _sendingVerifyEmailEr;
 
   var _ref$className = _ref.className,
       className = _ref$className === void 0 ? '' : _ref$className,
       onClickSigin = _ref.onClickSigin,
       onClickForgotPw = _ref.onClickForgotPw,
-      onClickRegister = _ref.onClickRegister,
+      onClickVerifyEmail = _ref.onClickVerifyEmail,
       signinData = _ref.signinData;
-  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
+
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      showVerifyEmailForm = _useState2[0],
+      toggleVerifyEmailForm = _useState2[1];
+
+  var loginFormMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
     defaultValues: {
-      username: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.HOST_DOMAIN),
-      identity_type: _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.IDENTITY_TYPE,
-      password: ''
+      username: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.HOST_DOMAIN)
     },
     resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.signinLogosFields)
   });
-  var register = formMethods.register,
-      setError = formMethods.setError,
-      formState = formMethods.formState,
-      handleSubmit = formMethods.handleSubmit;
-  var isSubmitting = formState.isSubmitting,
-      errors = formState.errors;
+  var verifyEmailFormMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
+    defaultValues: {
+      email: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.ADMIN_EMAIL)
+    },
+    resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.verifyEmailLogosFields)
+  });
+  var _loginFormMethods$for = loginFormMethods.formState,
+      isLogging = _loginFormMethods$for.isSubmitting,
+      loginErrors = _loginFormMethods$for.errors;
+  var _verifyEmailFormMetho = verifyEmailFormMethods.formState,
+      isSendingVerifyEmail = _verifyEmailFormMetho.isSubmitting,
+      sendingVerifyEmailErrors = _verifyEmailFormMetho.errors;
   var signinResponse = signinData.signinResponse,
       signinError = signinData.signinError,
       isSigning = signinData.isSigning;
@@ -9589,49 +9627,76 @@ var LoginCard = function LoginCard(_ref) {
   }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signin-logos"])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "inside pb-0"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/description"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
-    onSubmit: handleSubmit(onClickSigin)
+    className: showVerifyEmailForm ? 'hidden' : '',
+    onSubmit: loginFormMethods.handleSubmit(onClickSigin)
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
     label: "Username"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     className: "w-full",
     type: "text"
-  }, register('username', {
+  }, loginFormMethods.register('username', {
     required: true
   }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
-    message: (_errors$email = errors.email) === null || _errors$email === void 0 ? void 0 : _errors$email.message
+    message: (_loginErrors$username = loginErrors.username) === null || _loginErrors$username === void 0 ? void 0 : _loginErrors$username.message
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
     label: "Password"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "password",
     className: "w-full min-w-200px"
-  }, register('password', {
+  }, loginFormMethods.register('password', {
     required: true
   }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
-    message: (_errors$password = errors.password) === null || _errors$password === void 0 ? void 0 : _errors$password.message
+    message: (_loginErrors$password = loginErrors.password) === null || _loginErrors$password === void 0 ? void 0 : _loginErrors$password.message
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
-    className: "m-0 mb-2 max-w-200px text-xs"
+    className: "m-0 mb-2 text-xs space-x-2"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     className: "button button-link hover:bg-transparent",
     onClick: onClickForgotPw
-  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/forgot-password"]))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/forgot-password"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    className: "button button-link hover:bg-transparent",
+    onClick: function onClick() {
+      toggleVerifyEmailForm(true);
+    }
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/verify-email"]))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "hidden"
-  }, register('identity_type'))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, loginFormMethods.register('identity_type')))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
+    className: !showVerifyEmailForm ? 'hidden' : '',
+    onSubmit: loginFormMethods.handleSubmit(onClickSigin)
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
+    label: "Email"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+    className: "w-full",
+    type: "text"
+  }, verifyEmailFormMethods.register('email', {
+    required: true
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
+    message: (_sendingVerifyEmailEr = sendingVerifyEmailErrors.email) === null || _sendingVerifyEmailEr === void 0 ? void 0 : _sendingVerifyEmailEr.message
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
+    className: "m-0 mb-2 text-xs space-x-2"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    className: "button button-link hover:bg-transparent",
+    onClick: function onClick() {
+      toggleVerifyEmailForm(false);
+    }
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/back-to-signin"]))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex grow"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
-    className: "button button-primary",
+    className: ['button', 'button-primary'].concat(_toConsumableArray(showVerifyEmailForm ? ['hidden'] : [])).join(' '),
     onClick: function onClick(e) {
-      handleSubmit(onClickSigin)(e); // .catch((err) => {
-      //     setError('response', {
-      //         type: 'custom',
-      //         message: err.message,
-      //     })
-      // })
+      handleSubmit(onClickSigin)(e);
     }
-  }, (isSubmitting || isSigning) && {
+  }, (isLogging || isSigning) && {
     disabled: 'disabled'
-  }), !isSubmitting && !isSigning ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signin"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signing"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
+  }), !isLogging && !isSigning ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signin"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signing"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
+    className: ['button', 'button-primary'].concat(_toConsumableArray(!showVerifyEmailForm ? ['hidden'] : [])).join(' '),
+    onClick: function onClick(e) {
+      handleSubmit(onClickSigin)(e);
+    }
+  }, (isLogging || isSigning) && {
+    disabled: 'disabled'
+  }), isSendingVerifyEmail ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/send-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/sending-verify-email"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
     label: "Success"
   }, "Signin suceesfully."), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
     code: responseMessage.code,
@@ -9865,9 +9930,9 @@ var generalSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createSlice)
       }
 
       state.licenses.bible = {
-        key: '',
-        renew_date: null,
-        data: null
+        key: false,
+        renew_date: false,
+        data: false
       };
     }
   }
@@ -10058,13 +10123,31 @@ var Account = function Account() {
     };
   }();
 
+  var onClickVerifyEmail = /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(data) {
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+
+    return function onClickVerifyEmail(_x2) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, !hasToken ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex justify-center"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_7__.LoginCard, {
     className: "max-w-sm",
     onClickSigin: onClickSigin,
     onClickForgotPw: function onClickForgotPw() {},
-    onClickRegister: function onClickRegister() {},
+    onClickVerifyEmail: onClickVerifyEmail,
     signinData: {
       signinResponse: signinResponse,
       signinError: signinError,
@@ -10267,8 +10350,13 @@ var UI_MESSAGE_MAPPING = {
   'my-account/signin-logos': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signin-logos", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you have lost your License Key, you can log in here to check all the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/back-to-signin': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/back-to-signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signin': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signing': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signing", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/send-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/send-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/sending-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sending-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/sent-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sent-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/welcome': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you are willing to support our ministry, please consider making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
@@ -10300,7 +10388,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "activateRhemeaByLicense": () => (/* binding */ activateRhemeaByLicense),
 /* harmony export */   "activateRhemeaFields": () => (/* binding */ activateRhemeaFields),
 /* harmony export */   "searchBibleRawsByKeyword": () => (/* binding */ searchBibleRawsByKeyword),
-/* harmony export */   "signinLogosFields": () => (/* binding */ signinLogosFields)
+/* harmony export */   "signinLogosFields": () => (/* binding */ signinLogosFields),
+/* harmony export */   "verifyEmailLogosFields": () => (/* binding */ verifyEmailLogosFields)
 /* harmony export */ });
 /* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! joi */ "./node_modules/joi/dist/joi-browser.min.js");
 /* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(joi__WEBPACK_IMPORTED_MODULE_0__);
@@ -10325,6 +10414,9 @@ var signinLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
   identity_type: fields.identity_type.required(),
   username: fields.username.required(),
   password: fields.password.required()
+});
+var verifyEmailLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
+  email: fields.email.required()
 });
 var activateRhemeaFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
   email: fields.email.required(),

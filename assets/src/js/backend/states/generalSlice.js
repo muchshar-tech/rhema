@@ -19,9 +19,9 @@ export const generalSlice = createSlice({
                 return state
             }
             state.licenses.bible = {
-                key: '',
-                renew_date: null,
-                data: null,
+                key: false,
+                renew_date: false,
+                data: false,
             }
         },
     },

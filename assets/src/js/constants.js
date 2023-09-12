@@ -62,6 +62,10 @@ export const UI_MESSAGE_MAPPING = {
         `my-account/verify-email`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    'my-account/verify-email-description': __(
+        `Send the verification letter to your mailbox, copy the startup code and paste it to the field below`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
     'my-account/back-to-signin': __(
         `my-account/back-to-signin`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
@@ -84,6 +88,14 @@ export const UI_MESSAGE_MAPPING = {
     ),
     'my-account/sent-verify-email': __(
         `my-account/sent-verify-email`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/submit-verify-email': __(
+        `my-account/submit-verify-email`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/submitting-verify-email': __(
+        `my-account/submitting-verify-email`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'my-account/welcome': __(
@@ -118,7 +130,7 @@ export const UI_MESSAGE_MAPPING = {
         `Overseas Donation Link`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
-    
+
     'bible-directory': __(`bible-directory`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'bible-directory/old-testament': __(
         `bible-directory/old-testament`,

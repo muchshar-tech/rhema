@@ -29,6 +29,7 @@ export const signinLogosFields = Joi.object({
 
 export const verifyEmailLogosFields = Joi.object({
     email: fields.email.required(),
+    activation_key: Joi.string().empty(''),
 })
 
 export const activateRhemeaFields = Joi.object({

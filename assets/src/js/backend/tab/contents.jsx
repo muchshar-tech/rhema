@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { __ } from '@wordpress/i18n'
 import { sprintf } from 'sprintf-js'
 import parseHTML from 'html-react-parser'
 
 import { UI_MESSAGE_MAPPING } from '@components/constants'
-import { useSigninMutation } from '@components/services'
-import { LoginCard, OrdersListing } from '@components/backend/my-account'
+import { useSigninMutation, useSendVerifyMutation } from '@components/services'
+import {
+    LoginCard,
+    OrdersListing,
+    VerifyEmailCard,
+} from '@components/backend/my-account'
 import { addSigninToken } from '@components/backend/states/accountSlice'
 
 export const About = () => {
@@ -55,11 +59,21 @@ export const About = () => {
 }
 
 export const Account = () => {
+    const [showVerifyEmailForm, toggleVerifyEmailForm] = useState(false)
+    const [showForgotPwForm, toggleForgotPwForm] = useState(false)
     const dispatch = useDispatch()
     const [
         signin,
         { data: signinResponse, error: signinError, isLoading: isSigning },
     ] = useSigninMutation()
+    const [
+        sendVerify,
+        {
+            data: sendVerifyResponse,
+            error: sendVerifyError,
+            isLoading: isSendingVerify,
+        },
+    ] = useSendVerifyMutation()
     const hasToken = useSelector((state) => {
         if (!state?.account?.token) {
             return false
@@ -73,7 +87,8 @@ export const Account = () => {
         return true
     })
 
-    const onClickSigin = async (data) => {
+    const onSubmitSigin = async (data) => {
+        console.log('onSubmitSigin')
         const { identity_type, ...body } = data
         const payload = await signin(body)
         const {
@@ -83,8 +98,13 @@ export const Account = () => {
         dispatch(addSigninToken({ token }))
     }
 
-    const onClickVerifyEmail = async (data) => {
+    const onSubmitVerifyEmail = async (data) => {
+        console.log(data)
+        const payload = await sendVerify(data)
+    }
 
+    const onSubmitForgotPw = async (data) => {
+        console.log(data)
     }
 
     return (
@@ -92,12 +112,40 @@ export const Account = () => {
             {!hasToken ? (
                 <div className="flex justify-center">
                     <LoginCard
-                        className="max-w-sm"
-                        onClickSigin={onClickSigin}
+                        className={[
+                            'max-w-sm',
+                            ...(showVerifyEmailForm || showForgotPwForm
+                                ? ['hidden']
+                                : []),
+                        ].join(' ')}
+                        onSubmitSigin={onSubmitSigin}
                         onClickForgotPw={() => {
+                            toggleForgotPwForm(true)
                         }}
-                        onClickVerifyEmail={onClickVerifyEmail}
-                        signinData={{ signinResponse, signinError, isSigning }}
+                        onClickVerifyEmail={() => {
+                            toggleVerifyEmailForm(true)
+                            // const payload = await sendVerify(data)
+                        }}
+                        signinData={{
+                            signinResponse,
+                            signinError,
+                            isSigning,
+                        }}
+                    />
+                    <VerifyEmailCard
+                        className={[
+                            'max-w-sm',
+                            ...(!showVerifyEmailForm ? ['hidden'] : []),
+                        ].join(' ')}
+                        onSubmitVerifyEmail={onSubmitVerifyEmail}
+                        onClickBackToSignin={() => {
+                            toggleVerifyEmailForm(false)
+                        }}
+                        sendVerifyData={{
+                            sendVerifyResponse,
+                            sendVerifyError,
+                            isSendingVerify,
+                        }}
                     />
                 </div>
             ) : (

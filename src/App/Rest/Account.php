@@ -79,6 +79,25 @@ class Account extends Base {
 		);
 		register_rest_route(
 			'rhema/v1',
+			'/account/verify',
+			[
+				'methods'  => \WP_REST_Server::CREATABLE,
+				'callback' => [ $this, 'verify' ],
+				'args'     => [
+					'email' => [
+						'required' => true,
+					],
+					'activation_key' => [
+						'required' => false,
+					],
+				],
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
+		register_rest_route(
+			'rhema/v1',
 			'/account/orders',
 			[
 				'methods'  => \WP_REST_Server::READABLE,
@@ -117,6 +136,30 @@ class Account extends Base {
 		return $this->sendRes( [
 			'token' => $response_body['token'],
 		] );
+	}
+	/**
+	 * Verify email
+	 *
+	 * @param WP_REST_Request $request
+	 * @return void
+	 */
+	public function verify( WP_REST_Request $request ) {
+		$body = $request->get_json_params();
+		$email = $body['email'];
+		$activation_key = isset( $body['activation_key'] ) ? $body['activation_key'] : '';
+
+		try {
+			/** @var Logos\Api */
+			$integration_logos_api = Logos\Api::init();
+			$sent = $integration_logos_api->verify( $email, $activation_key );
+
+			if ( is_wp_error( $sent ) ) {
+				throw new Exception( $sent->get_error_message(), $sent->get_error_code() );
+			}
+		} catch ( Exception $exception ) {
+			return $this->sendError( $exception );
+		}
+		return $this->sendRes( [ 'message' => $sent ] );
 	}
 	/**
 	 * Orders

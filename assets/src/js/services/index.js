@@ -251,6 +251,33 @@ export const signinApi = createApi({
 
 export const { useSigninMutation } = signinApi
 
+export const sendVerifyApi = createApi({
+    reducerPath: 'api.senderify',
+    baseQuery: fetchBaseQuery({
+        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.account,
+        prepareHeaders,
+    }),
+    endpoints: (builder) => ({
+        sendVerify: builder.mutation({
+            query: (body) => {
+                return {
+                    url: 'verify',
+                    method: 'POST',
+                    body,
+                }
+            },
+            transformResponse: (response) => {
+                return response
+            },
+            transformErrorResponse: (response) => {
+                return response
+            },
+        }),
+    }),
+})
+
+export const { useSendVerifyMutation } = sendVerifyApi
+
 export const ordersApi = createApi({
     reducerPath: 'api.orders',
     baseQuery: fetchBaseQuery({

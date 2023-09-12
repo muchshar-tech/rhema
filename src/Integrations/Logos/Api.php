@@ -21,6 +21,7 @@ use Rhema\Common\Constants;
 use Rhema\Common\Defaults;
 use WP_Error;
 use Exception;
+use PHPUnit\TextUI\XmlConfiguration\Constant;
 
 /**
  * Class Api
@@ -396,6 +397,44 @@ final class Api extends Base {
 			],
 		] );
 		return $response;
+	}
+	/**
+	 * Verify email
+	 *
+	 * @param string $email
+	 * @return array|WP_Error
+	 */
+	public function verify( string $email, string $activation_key = '' ): array|string|WP_Error {
+		if ( empty( $email ) ) {
+			return new WP_Error( 400, Constants::init()->error_message['system/integrations/logos/api/email_required'] );
+		}
+		try {
+			v::key( 'email', v::email() )
+				->key( 'activation_key', v::optional( v::stringType() ) )
+				->validate( [
+					'email' => $email,
+					'activation_key' => $activation_key,
+				] );
+			$remote_host = $this->remote();
+			$remote = "$remote_host/users/verify/email";
+			$response = wp_remote_post( $remote, [
+				'body'        => [
+					'email' => $email,
+					'activation_key' => $activation_key,
+				],
+			] );
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			if ( 200 !== $response['response']['code'] ) {
+				$error_message = ! empty( $response['body'] ) ? $response['body'] : Constants::init()->error_message['system/app/rest/bad_request'];
+				return new WP_Error( $response['response']['code'], $error_message );
+			}
+		} catch ( NestedValidationException $exception ) {
+			throw $exception->getFullMessage();
+		}
+		return $response['body'];
 	}
 	/**
 	 * Orders listing

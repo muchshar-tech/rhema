@@ -9437,10 +9437,11 @@ var ModalForm = function ModalForm(_ref5) {
 };
 
 ModalForm.FieldRow = function (_ref6) {
-  var label = _ref6.label,
+  var className = _ref6.className,
+      label = _ref6.label,
       children = _ref6.children;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "flex items-center mb-2 empty:hidden"
+    className: ['flex items-center mb-2 empty:hidden', className].join(' ')
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex-grow self-start mr-2 mt-1 min-w-100px empty:hidden"
   }, label), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -9507,7 +9508,8 @@ FieldErrorMsg.propTypes = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "LoginCard": () => (/* binding */ LoginCard),
-/* harmony export */   "OrdersListing": () => (/* binding */ OrdersListing)
+/* harmony export */   "OrdersListing": () => (/* binding */ OrdersListing),
+/* harmony export */   "VerifyEmailCard": () => (/* binding */ VerifyEmailCard)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
@@ -9536,8 +9538,6 @@ function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symb
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -9549,6 +9549,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
 
@@ -9566,38 +9568,23 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 var LoginCard = function LoginCard(_ref) {
-  var _loginErrors$username, _loginErrors$password, _sendingVerifyEmailEr;
+  var _loginErrors$username, _loginErrors$password;
 
   var _ref$className = _ref.className,
       className = _ref$className === void 0 ? '' : _ref$className,
-      onClickSigin = _ref.onClickSigin,
+      onSubmitSigin = _ref.onSubmitSigin,
       onClickForgotPw = _ref.onClickForgotPw,
       onClickVerifyEmail = _ref.onClickVerifyEmail,
       signinData = _ref.signinData;
-
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-      _useState2 = _slicedToArray(_useState, 2),
-      showVerifyEmailForm = _useState2[0],
-      toggleVerifyEmailForm = _useState2[1];
-
-  var loginFormMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
     defaultValues: {
       username: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.HOST_DOMAIN)
     },
     resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.signinLogosFields)
   });
-  var verifyEmailFormMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
-    defaultValues: {
-      email: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.ADMIN_EMAIL)
-    },
-    resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.verifyEmailLogosFields)
-  });
-  var _loginFormMethods$for = loginFormMethods.formState,
-      isLogging = _loginFormMethods$for.isSubmitting,
-      loginErrors = _loginFormMethods$for.errors;
-  var _verifyEmailFormMetho = verifyEmailFormMethods.formState,
-      isSendingVerifyEmail = _verifyEmailFormMetho.isSubmitting,
-      sendingVerifyEmailErrors = _verifyEmailFormMetho.errors;
+  var _formMethods$formStat = formMethods.formState,
+      isLogging = _formMethods$formStat.isSubmitting,
+      loginErrors = _formMethods$formStat.errors;
   var signinResponse = signinData.signinResponse,
       signinError = signinData.signinError,
       isSigning = signinData.isSigning;
@@ -9627,14 +9614,13 @@ var LoginCard = function LoginCard(_ref) {
   }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signin-logos"])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "inside pb-0"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/description"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
-    className: showVerifyEmailForm ? 'hidden' : '',
-    onSubmit: loginFormMethods.handleSubmit(onClickSigin)
+    onSubmit: formMethods.handleSubmit(onSubmitSigin)
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
     label: "Username"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     className: "w-full",
     type: "text"
-  }, loginFormMethods.register('username', {
+  }, formMethods.register('username', {
     required: true
   }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
     message: (_loginErrors$username = loginErrors.username) === null || _loginErrors$username === void 0 ? void 0 : _loginErrors$username.message
@@ -9643,62 +9629,149 @@ var LoginCard = function LoginCard(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "password",
     className: "w-full min-w-200px"
-  }, loginFormMethods.register('password', {
+  }, formMethods.register('password', {
     required: true
   }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
     message: (_loginErrors$password = loginErrors.password) === null || _loginErrors$password === void 0 ? void 0 : _loginErrors$password.message
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
     className: "m-0 mb-2 text-xs space-x-2"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
     className: "button button-link hover:bg-transparent",
     onClick: onClickForgotPw
-  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/forgot-password"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/forgot-password"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
     className: "button button-link hover:bg-transparent",
-    onClick: function onClick() {
-      toggleVerifyEmailForm(true);
+    onClick: function onClick(e) {
+      e.preventDefault();
+      onClickVerifyEmail();
     }
   }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/verify-email"]))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     type: "hidden"
-  }, loginFormMethods.register('identity_type')))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
-    className: !showVerifyEmailForm ? 'hidden' : '',
-    onSubmit: loginFormMethods.handleSubmit(onClickSigin)
+  }, formMethods.register('identity_type'))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "flex grow"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
+    className: ['button', 'button-primary'].join(' '),
+    onClick: function onClick(e) {
+      formMethods.handleSubmit(onSubmitSigin)(e);
+    }
+  }, (isLogging || isSigning) && {
+    disabled: 'disabled'
+  }), !isLogging && !isSigning ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signin"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signing"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
+    label: "Success"
+  }, "Signin suceesfully."), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
+    code: responseMessage.code,
+    label: responseMessage.label
+  }, (responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message) || 'There has been a critical error.') : null)));
+};
+var VerifyEmailCard = function VerifyEmailCard(_ref2) {
+  var _sendingVerifyEmailEr, _sendingVerifyEmailEr2;
+
+  var _ref2$className = _ref2.className,
+      className = _ref2$className === void 0 ? '' : _ref2$className,
+      onSubmitVerifyEmail = _ref2.onSubmitVerifyEmail,
+      onClickBackToSignin = _ref2.onClickBackToSignin,
+      sendVerifyData = _ref2.sendVerifyData;
+
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      showActiveCodeInput = _useState2[0],
+      toggleActiveCodeInput = _useState2[1];
+
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
+    defaultValues: {
+      email: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.ADMIN_EMAIL),
+      activation_key: ''
+    },
+    resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.verifyEmailLogosFields)
+  });
+  var _formMethods$formStat2 = formMethods.formState,
+      isSendingVerifyEmail = _formMethods$formStat2.isSubmitting,
+      sendingVerifyEmailErrors = _formMethods$formStat2.errors;
+  var sendVerifyResponse = sendVerifyData.sendVerifyResponse,
+      sendVerifyError = sendVerifyData.sendVerifyError,
+      isSendingVerify = sendVerifyData.isSendingVerify;
+  var showExceptionMessage = !!sendVerifyResponse && !(sendVerifyResponse !== null && sendVerifyResponse !== void 0 && sendVerifyResponse.success) || !!sendVerifyError;
+
+  var responseMessage = function (response, error) {
+    var _response$data, _error$data, _error$data2, _error$data2$data;
+
+    var code = (response === null || response === void 0 ? void 0 : response.success) === true ? 200 :  false || (error === null || error === void 0 ? void 0 : error.status);
+    var label = (response === null || response === void 0 ? void 0 : response.success) === true ? 'Success' :  false || (error === null || error === void 0 ? void 0 : error.data.code) || '';
+    var message = /2[0-9][0-9]/.test(code) ? (response === null || response === void 0 ? void 0 : (_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.message) || 'Signin success!' : (error === null || error === void 0 ? void 0 : (_error$data = error.data) === null || _error$data === void 0 ? void 0 : _error$data.message) || (error === null || error === void 0 ? void 0 : (_error$data2 = error.data) === null || _error$data2 === void 0 ? void 0 : (_error$data2$data = _error$data2.data) === null || _error$data2$data === void 0 ? void 0 : _error$data2$data.message) || 'There has been a critical error.';
+    return {
+      code: code,
+      label: label,
+      message: message
+    };
+  }(sendVerifyResponse, sendVerifyError);
+
+  var showSuccess = /2[0-9][0-9]/.test(responseMessage.code);
+  var classNames = ['postbox mb-0 min-w-0', className];
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: classNames.join(' ')
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "postbox-header px-2 justify-center"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
+    className: "text-14px py-3 m-0"
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/verify-email"])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "inside pb-0"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/verify-email-description"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
+    onSubmit: formMethods.handleSubmit(onSubmitVerifyEmail)
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
     label: "Email"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
     className: "w-full",
     type: "text"
-  }, verifyEmailFormMethods.register('email', {
+  }, formMethods.register('email', {
     required: true
   }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
     message: (_sendingVerifyEmailEr = sendingVerifyEmailErrors.email) === null || _sendingVerifyEmailEr === void 0 ? void 0 : _sendingVerifyEmailEr.message
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
     className: "m-0 mb-2 text-xs space-x-2"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
     className: "button button-link hover:bg-transparent",
-    onClick: function onClick() {
-      toggleVerifyEmailForm(false);
+    onClick: function onClick(e) {
+      e.preventDefault();
+      console.log('back-to-signin');
+      onClickBackToSignin();
     }
-  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/back-to-signin"]))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/back-to-signin"]))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
+    className: _toConsumableArray(showActiveCodeInput ? [] : ['hidden']).join(' '),
+    label: "Activation Key"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+    className: "w-full",
+    type: "text"
+  }, formMethods.register('activation_key', {
+    required: false
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
+    message: (_sendingVerifyEmailEr2 = sendingVerifyEmailErrors.activation_key) === null || _sendingVerifyEmailEr2 === void 0 ? void 0 : _sendingVerifyEmailEr2.message
+  })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "flex grow"
+    className: "flex grow space-x-2"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
-    className: ['button', 'button-primary'].concat(_toConsumableArray(showVerifyEmailForm ? ['hidden'] : [])).join(' '),
+    className: ['button', 'button-primary'].join(' '),
     onClick: function onClick(e) {
-      handleSubmit(onClickSigin)(e);
+      formMethods.handleSubmit(onSubmitVerifyEmail)(e);
     }
-  }, (isLogging || isSigning) && {
+  }, (isSendingVerifyEmail || isSendingVerify) && {
     disabled: 'disabled'
-  }), !isLogging && !isSigning ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signin"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/signing"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
-    className: ['button', 'button-primary'].concat(_toConsumableArray(!showVerifyEmailForm ? ['hidden'] : [])).join(' '),
+  }), isSendingVerifyEmail ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/sending-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/send-verify-email"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
+    className: ['button', 'button-secondnary'].join(' '),
     onClick: function onClick(e) {
-      handleSubmit(onClickSigin)(e);
+      if (!showActiveCodeInput) {
+        toggleActiveCodeInput(true);
+        return;
+      }
+
+      formMethods.handleSubmit(onSubmitVerifyEmail)(e);
     }
-  }, (isLogging || isSigning) && {
+  }, (isSendingVerifyEmail || isSendingVerify) && {
     disabled: 'disabled'
-  }), isSendingVerifyEmail ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/send-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/sending-verify-email"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
+  }), isSendingVerifyEmail ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submit-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submitting-verify-email"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
     label: "Success"
-  }, "Signin suceesfully."), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
+  }, responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
     code: responseMessage.code,
     label: responseMessage.label
   }, (responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message) || 'There has been a critical error.') : null)));
@@ -9975,9 +10048,9 @@ var store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_3__.configureStore)({
   reducer: (_reducer = {
     general: _states_generalSlice__WEBPACK_IMPORTED_MODULE_1__["default"],
     account: _states_accountSlice__WEBPACK_IMPORTED_MODULE_2__["default"]
-  }, _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducer), _reducer),
+  }, _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducer), _reducer),
   middleware: function middleware(getDefaultMiddleware) {
-    return getDefaultMiddleware().concat([_components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.middleware]);
+    return getDefaultMiddleware().concat([_components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.middleware]);
   }
 });
 (0,_reduxjs_toolkit_query__WEBPACK_IMPORTED_MODULE_4__.setupListeners)(store.dispatch);
@@ -10011,6 +10084,14 @@ __webpack_require__.r(__webpack_exports__);
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 var _excluded = ["identity_type"];
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator.return && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, catch: function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
 
@@ -10063,6 +10144,16 @@ var About = function About() {
   }, _components_constants__WEBPACK_IMPORTED_MODULE_5__.UI_MESSAGE_MAPPING["about/link/donation-2"]))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, _components_constants__WEBPACK_IMPORTED_MODULE_5__.UI_MESSAGE_MAPPING["about/title/service-policy"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, (0,html_react_parser__WEBPACK_IMPORTED_MODULE_4__["default"])((0,sprintf_js__WEBPACK_IMPORTED_MODULE_3__.sprintf)(_components_constants__WEBPACK_IMPORTED_MODULE_5__.UI_MESSAGE_MAPPING["about/service-policy/update-maintenance"], '<a href="https://github.com/muchshar-tech/rhema/issues" target="_blank" rel="noreferrer">https://github.com/muchshar-tech/rhema/issues</a>'))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, _components_constants__WEBPACK_IMPORTED_MODULE_5__.UI_MESSAGE_MAPPING["about/service-policy/rights-reserved"])));
 };
 var Account = function Account() {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      showVerifyEmailForm = _useState2[0],
+      toggleVerifyEmailForm = _useState2[1];
+
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+      _useState4 = _slicedToArray(_useState3, 2),
+      showForgotPwForm = _useState4[0],
+      toggleForgotPwForm = _useState4[1];
+
   var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
 
   var _useSigninMutation = (0,_components_services__WEBPACK_IMPORTED_MODULE_6__.useSigninMutation)(),
@@ -10072,6 +10163,14 @@ var Account = function Account() {
       signinResponse = _useSigninMutation2$.data,
       signinError = _useSigninMutation2$.error,
       isSigning = _useSigninMutation2$.isLoading;
+
+  var _useSendVerifyMutatio = (0,_components_services__WEBPACK_IMPORTED_MODULE_6__.useSendVerifyMutation)(),
+      _useSendVerifyMutatio2 = _slicedToArray(_useSendVerifyMutatio, 2),
+      sendVerify = _useSendVerifyMutatio2[0],
+      _useSendVerifyMutatio3 = _useSendVerifyMutatio2[1],
+      sendVerifyResponse = _useSendVerifyMutatio3.data,
+      sendVerifyError = _useSendVerifyMutatio3.error,
+      isSendingVerify = _useSendVerifyMutatio3.isLoading;
 
   var hasToken = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(function (state) {
     var _state$account, _state$account2, _state$account3;
@@ -10091,18 +10190,19 @@ var Account = function Account() {
     return true;
   });
 
-  var onClickSigin = /*#__PURE__*/function () {
+  var onSubmitSigin = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(data) {
       var identity_type, body, payload, response, token;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
+              console.log('onSubmitSigin');
               identity_type = data.identity_type, body = _objectWithoutProperties(data, _excluded);
-              _context.next = 3;
+              _context.next = 4;
               return signin(body);
 
-            case 3:
+            case 4:
               payload = _context.sent;
               response = payload.data.data;
               token = response.token;
@@ -10110,7 +10210,7 @@ var Account = function Account() {
                 token: token
               }));
 
-            case 7:
+            case 8:
             case "end":
               return _context.stop();
           }
@@ -10118,17 +10218,26 @@ var Account = function Account() {
       }, _callee);
     }));
 
-    return function onClickSigin(_x) {
+    return function onSubmitSigin(_x) {
       return _ref.apply(this, arguments);
     };
   }();
 
-  var onClickVerifyEmail = /*#__PURE__*/function () {
+  var onSubmitVerifyEmail = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(data) {
+      var payload;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
+              console.log(data);
+              _context2.next = 3;
+              return sendVerify(data);
+
+            case 3:
+              payload = _context2.sent;
+
+            case 4:
             case "end":
               return _context2.stop();
           }
@@ -10136,22 +10245,58 @@ var Account = function Account() {
       }, _callee2);
     }));
 
-    return function onClickVerifyEmail(_x2) {
+    return function onSubmitVerifyEmail(_x2) {
       return _ref2.apply(this, arguments);
+    };
+  }();
+
+  var onSubmitForgotPw = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(data) {
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              console.log(data);
+
+            case 1:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    }));
+
+    return function onSubmitForgotPw(_x3) {
+      return _ref3.apply(this, arguments);
     };
   }();
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, !hasToken ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex justify-center"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_7__.LoginCard, {
-    className: "max-w-sm",
-    onClickSigin: onClickSigin,
-    onClickForgotPw: function onClickForgotPw() {},
-    onClickVerifyEmail: onClickVerifyEmail,
+    className: ['max-w-sm'].concat(_toConsumableArray(showVerifyEmailForm || showForgotPwForm ? ['hidden'] : [])).join(' '),
+    onSubmitSigin: onSubmitSigin,
+    onClickForgotPw: function onClickForgotPw() {
+      toggleForgotPwForm(true);
+    },
+    onClickVerifyEmail: function onClickVerifyEmail() {
+      toggleVerifyEmailForm(true); // const payload = await sendVerify(data)
+    },
     signinData: {
       signinResponse: signinResponse,
       signinError: signinError,
       isSigning: isSigning
+    }
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_7__.VerifyEmailCard, {
+    className: ['max-w-sm'].concat(_toConsumableArray(!showVerifyEmailForm ? ['hidden'] : [])).join(' '),
+    onSubmitVerifyEmail: onSubmitVerifyEmail,
+    onClickBackToSignin: function onClickBackToSignin() {
+      toggleVerifyEmailForm(false);
+    },
+    sendVerifyData: {
+      sendVerifyResponse: sendVerifyResponse,
+      sendVerifyError: sendVerifyError,
+      isSendingVerify: isSendingVerify
     }
   })) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex flex-wrap justify-center"
@@ -10351,12 +10496,15 @@ var UI_MESSAGE_MAPPING = {
   'my-account/description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you have lost your License Key, you can log in here to check all the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/verify-email-description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Send the verification letter to your mailbox, copy the startup code and paste it to the field below", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/back-to-signin': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/back-to-signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signin': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/signing': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signing", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/send-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/send-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/sending-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sending-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/sent-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sent-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/submit-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/submit-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/submitting-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/submitting-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/welcome': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you are willing to support our ministry, please consider making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
@@ -10416,7 +10564,8 @@ var signinLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
   password: fields.password.required()
 });
 var verifyEmailLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
-  email: fields.email.required()
+  email: fields.email.required(),
+  activation_key: joi__WEBPACK_IMPORTED_MODULE_0___default().string().empty('')
 });
 var activateRhemeaFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
   email: fields.email.required(),
@@ -10454,6 +10603,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "optionsApi": () => (/* binding */ optionsApi),
 /* harmony export */   "ordersApi": () => (/* binding */ ordersApi),
 /* harmony export */   "searchApi": () => (/* binding */ searchApi),
+/* harmony export */   "sendVerifyApi": () => (/* binding */ sendVerifyApi),
 /* harmony export */   "signinApi": () => (/* binding */ signinApi),
 /* harmony export */   "useActivateByLicenseMutation": () => (/* binding */ useActivateByLicenseMutation),
 /* harmony export */   "useActivateCoreMutation": () => (/* binding */ useActivateCoreMutation),
@@ -10462,6 +10612,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "useOrdersQuery": () => (/* binding */ useOrdersQuery),
 /* harmony export */   "usePrefetch": () => (/* binding */ usePrefetch),
 /* harmony export */   "useSearchBibleRawsQuery": () => (/* binding */ useSearchBibleRawsQuery),
+/* harmony export */   "useSendVerifyMutation": () => (/* binding */ useSendVerifyMutation),
 /* harmony export */   "useSigninMutation": () => (/* binding */ useSigninMutation),
 /* harmony export */   "useUpdateOptionsMutation": () => (/* binding */ useUpdateOptionsMutation)
 /* harmony export */ });
@@ -10761,6 +10912,34 @@ var signinApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cre
   }
 });
 var useSigninMutation = signinApi.useSigninMutation;
+
+var sendVerifyApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+  reducerPath: 'api.senderify',
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.account),
+    prepareHeaders: prepareHeaders
+  }),
+  endpoints: function endpoints(builder) {
+    return {
+      sendVerify: builder.mutation({
+        query: function query(body) {
+          return {
+            url: 'verify',
+            method: 'POST',
+            body: body
+          };
+        },
+        transformResponse: function transformResponse(response) {
+          return response;
+        },
+        transformErrorResponse: function transformErrorResponse(response) {
+          return response;
+        }
+      })
+    };
+  }
+});
+var useSendVerifyMutation = sendVerifyApi.useSendVerifyMutation;
 
 var ordersApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
   reducerPath: 'api.orders',

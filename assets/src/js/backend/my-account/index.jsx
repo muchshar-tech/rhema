@@ -23,30 +23,19 @@ import { deleteSigninToken } from '@components/backend/states/accountSlice'
 
 export const LoginCard = ({
     className = '',
-    onClickSigin,
+    onSubmitSigin,
     onClickForgotPw,
     onClickVerifyEmail,
     signinData,
 }) => {
-    const [showVerifyEmailForm, toggleVerifyEmailForm] = useState(false)
-    const loginFormMethods = useForm({
+    const formMethods = useForm({
         defaultValues: {
             username: RHEMA_LOCALIZE.WP_OPTIONS.HOST_DOMAIN,
         },
         resolver: joiResolver(FieldSchama.signinLogosFields),
     })
-    const verifyEmailFormMethods = useForm({
-        defaultValues: {
-            email: RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
-        },
-        resolver: joiResolver(FieldSchama.verifyEmailLogosFields),
-    })
     const { isSubmitting: isLogging, errors: loginErrors } =
-        loginFormMethods.formState
-    const {
-        isSubmitting: isSendingVerifyEmail,
-        errors: sendingVerifyEmailErrors,
-    } = verifyEmailFormMethods.formState
+        formMethods.formState
 
     const { signinResponse, signinError, isSigning } = signinData
 
@@ -89,14 +78,13 @@ export const LoginCard = ({
                 <p>{UI_MESSAGE_MAPPING['my-account/description']}</p>
 
                 <FormTable.ModalForm
-                    className={showVerifyEmailForm ? 'hidden' : ''}
-                    onSubmit={loginFormMethods.handleSubmit(onClickSigin)}
+                    onSubmit={formMethods.handleSubmit(onSubmitSigin)}
                 >
                     <FormTable.ModalForm.FieldRow label="Username">
                         <input
                             className="w-full"
                             type="text"
-                            {...loginFormMethods.register('username', {
+                            {...formMethods.register('username', {
                                 required: true,
                             })}
                         />
@@ -108,7 +96,7 @@ export const LoginCard = ({
                         <input
                             type="password"
                             className="w-full min-w-200px"
-                            {...loginFormMethods.register('password', {
+                            {...formMethods.register('password', {
                                 required: true,
                             })}
                         />
@@ -116,7 +104,7 @@ export const LoginCard = ({
                             message={loginErrors.password?.message}
                         />
                         <p className="m-0 mb-2 text-xs space-x-2">
-                            <button
+                            <a
                                 className="button button-link hover:bg-transparent"
                                 onClick={onClickForgotPw}
                             >
@@ -125,64 +113,30 @@ export const LoginCard = ({
                                         'my-account/forgot-password'
                                     ]
                                 }
-                            </button>
-                            <button
+                            </a>
+                            <a
                                 className="button button-link hover:bg-transparent"
-                                onClick={() => {
-                                    toggleVerifyEmailForm(true)
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    onClickVerifyEmail()
                                 }}
                             >
                                 {UI_MESSAGE_MAPPING['my-account/verify-email']}
-                            </button>
+                            </a>
                         </p>
                     </FormTable.ModalForm.FieldRow>
                     <input
                         type="hidden"
-                        {...loginFormMethods.register('identity_type')}
+                        {...formMethods.register('identity_type')}
                     />
-                </FormTable.ModalForm>
-                <FormTable.ModalForm
-                    className={!showVerifyEmailForm ? 'hidden' : ''}
-                    onSubmit={loginFormMethods.handleSubmit(onClickSigin)}
-                >
-                    <FormTable.ModalForm.FieldRow label="Email">
-                        <input
-                            className="w-full"
-                            type="text"
-                            {...verifyEmailFormMethods.register('email', {
-                                required: true,
-                            })}
-                        />
-                        <FormTable.FieldErrorMsg
-                            message={sendingVerifyEmailErrors.email?.message}
-                        />
-                        <p className="m-0 mb-2 text-xs space-x-2">
-                            <button
-                                className="button button-link hover:bg-transparent"
-                                onClick={() => {
-                                    toggleVerifyEmailForm(false)
-                                }}
-                            >
-                                {
-                                    UI_MESSAGE_MAPPING[
-                                        'my-account/back-to-signin'
-                                    ]
-                                }
-                            </button>
-                        </p>
-                    </FormTable.ModalForm.FieldRow>
                 </FormTable.ModalForm>
             </div>
             <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
                 <div className="flex grow">
                     <button
-                        className={[
-                            'button',
-                            'button-primary',
-                            ...(showVerifyEmailForm ? ['hidden'] : []),
-                        ].join(' ')}
+                        className={['button', 'button-primary'].join(' ')}
                         onClick={(e) => {
-                            handleSubmit(onClickSigin)(e)
+                            formMethods.handleSubmit(onSubmitSigin)(e)
                         }}
                         {...((isLogging || isSigning) && {
                             disabled: 'disabled',
@@ -192,28 +146,181 @@ export const LoginCard = ({
                             ? UI_MESSAGE_MAPPING['my-account/signin']
                             : UI_MESSAGE_MAPPING['my-account/signing']}
                     </button>
-                    <button
+
+                    {showSuccess && (
+                        <FormTable.ResponseSuccessMsg label="Success">
+                            Signin suceesfully.
+                        </FormTable.ResponseSuccessMsg>
+                    )}
+                    {showExceptionMessage ? (
+                        <FormTable.ResponseErrorMsg
+                            code={responseMessage.code}
+                            label={responseMessage.label}
+                        >
+                            {responseMessage?.message ||
+                                'There has been a critical error.'}
+                        </FormTable.ResponseErrorMsg>
+                    ) : null}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export const VerifyEmailCard = ({
+    className = '',
+    onSubmitVerifyEmail,
+    onClickBackToSignin,
+    sendVerifyData,
+}) => {
+    const [showActiveCodeInput, toggleActiveCodeInput] = useState(false)
+    const formMethods = useForm({
+        defaultValues: {
+            email: RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
+            activation_key: ''
+        },
+        resolver: joiResolver(FieldSchama.verifyEmailLogosFields),
+    })
+
+    const {
+        isSubmitting: isSendingVerifyEmail,
+        errors: sendingVerifyEmailErrors,
+    } = formMethods.formState
+
+    const { sendVerifyResponse, sendVerifyError, isSendingVerify } =
+        sendVerifyData
+
+    const showExceptionMessage =
+        (!!sendVerifyResponse && !sendVerifyResponse?.success) ||
+        !!sendVerifyError
+
+    const responseMessage = ((response, error) => {
+        const code = response?.success === true ? 200 : false || error?.status
+        const label =
+            response?.success === true
+                ? 'Success'
+                : false || error?.data.code || ''
+        const message = /2[0-9][0-9]/.test(code)
+            ? response?.data?.message || 'Signin success!'
+            : error?.data?.message ||
+              error?.data?.data?.message ||
+              'There has been a critical error.'
+        return {
+            code,
+            label,
+            message,
+        }
+    })(sendVerifyResponse, sendVerifyError)
+
+    const showSuccess = /2[0-9][0-9]/.test(responseMessage.code)
+
+    const classNames = ['postbox mb-0 min-w-0', className]
+
+    return (
+        <div className={classNames.join(' ')}>
+            <div className="postbox-header px-2 justify-center">
+                <h2 className="text-14px py-3 m-0">
+                    {UI_MESSAGE_MAPPING['my-account/verify-email']}
+                </h2>
+            </div>
+            <div className="inside pb-0">
+                <p>
+                    {UI_MESSAGE_MAPPING['my-account/verify-email-description']}
+                </p>
+                <FormTable.ModalForm
+                    onSubmit={formMethods.handleSubmit(onSubmitVerifyEmail)}
+                >
+                    <FormTable.ModalForm.FieldRow label="Email">
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...formMethods.register('email', {
+                                required: true,
+                            })}
+                        />
+                        {}
+                        <FormTable.FieldErrorMsg
+                            message={sendingVerifyEmailErrors.email?.message}
+                        />
+                        <p className="m-0 mb-2 text-xs space-x-2">
+                            <a
+                                className="button button-link hover:bg-transparent"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    console.log('back-to-signin')
+                                    onClickBackToSignin()
+                                }}
+                            >
+                                {
+                                    UI_MESSAGE_MAPPING[
+                                        'my-account/back-to-signin'
+                                    ]
+                                }
+                            </a>
+                        </p>
+                    </FormTable.ModalForm.FieldRow>
+                    <FormTable.ModalForm.FieldRow
                         className={[
-                            'button',
-                            'button-primary',
-                            ...(!showVerifyEmailForm ? ['hidden'] : []),
+                            ...(showActiveCodeInput ? [] : ['hidden']),
                         ].join(' ')}
+                        label="Activation Key"
+                    >
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...formMethods.register('activation_key', {
+                                required: false,
+                            })}
+                        />
+                        <FormTable.FieldErrorMsg
+                            message={sendingVerifyEmailErrors.activation_key?.message}
+                        />
+                    </FormTable.ModalForm.FieldRow>
+                </FormTable.ModalForm>
+            </div>
+            <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
+                <div className="flex grow space-x-2">
+                    <button
+                        className={['button', 'button-primary'].join(' ')}
                         onClick={(e) => {
-                            handleSubmit(onClickSigin)(e)
+                            formMethods.handleSubmit(onSubmitVerifyEmail)(e)
                         }}
-                        {...((isLogging || isSigning) && {
+                        {...((isSendingVerifyEmail || isSendingVerify) && {
                             disabled: 'disabled',
                         })}
                     >
                         {isSendingVerifyEmail
-                            ? UI_MESSAGE_MAPPING['my-account/send-verify-email']
-                            : UI_MESSAGE_MAPPING[
+                            ? UI_MESSAGE_MAPPING[
                                   'my-account/sending-verify-email'
+                              ]
+                            : UI_MESSAGE_MAPPING[
+                                  'my-account/send-verify-email'
+                              ]}
+                    </button>
+                    <button
+                        className={['button', 'button-secondnary'].join(' ')}
+                        onClick={(e) => {
+                            if (!showActiveCodeInput) {
+                                toggleActiveCodeInput(true)
+                                return
+                            }
+                            formMethods.handleSubmit(onSubmitVerifyEmail)(e)
+                        }}
+                        {...((isSendingVerifyEmail || isSendingVerify) && {
+                            disabled: 'disabled',
+                        })}
+                    >
+                        {isSendingVerifyEmail
+                            ? UI_MESSAGE_MAPPING[
+                                  'my-account/submit-verify-email'
+                              ]
+                            : UI_MESSAGE_MAPPING[
+                                  'my-account/submitting-verify-email'
                               ]}
                     </button>
                     {showSuccess && (
                         <FormTable.ResponseSuccessMsg label="Success">
-                            Signin suceesfully.
+                            {responseMessage?.message}
                         </FormTable.ResponseSuccessMsg>
                     )}
                     {showExceptionMessage ? (

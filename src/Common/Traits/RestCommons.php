@@ -17,7 +17,7 @@ use Respect\Validation\Exceptions\ValidationException;
 use WP_Error;
 use Exception;
 
-use Rhema\Common\Constants;
+use \Rhema\Common\Constants;
 
 /**
  * The singleton skeleton trait to instantiate the class only once

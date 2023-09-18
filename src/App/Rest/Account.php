@@ -98,6 +98,28 @@ class Account extends Base {
 		);
 		register_rest_route(
 			'rhema/v1',
+			'/account/forgot',
+			[
+				'methods'  => \WP_REST_Server::CREATABLE,
+				'callback' => [ $this, 'forgot' ],
+				'args'     => [
+					'email' => [
+						'required' => true,
+					],
+					'auth_code' => [
+						'required' => false,
+					],
+					'password' => [
+						'required' => false,
+					],
+				],
+				'permission_callback' => function () {
+					return current_user_can( 'manage_options' );
+				},
+			]
+		);
+		register_rest_route(
+			'rhema/v1',
 			'/account/orders',
 			[
 				'methods'  => \WP_REST_Server::READABLE,

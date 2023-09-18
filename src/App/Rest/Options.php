@@ -117,6 +117,7 @@ class Options extends Base {
 		$functions_options = rhema()->options();
 		$options = $functions_options->get();
 		$general = isset( $options['general'] ) ? $options['general'] : null;
+		$bible_entry_path = '';
 		if ( isset( $general['bible_entry'] ) ) {
 			$bible_entry_path = $general['bible_entry'];
 		}

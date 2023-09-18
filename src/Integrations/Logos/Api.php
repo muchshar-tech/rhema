@@ -448,9 +448,9 @@ final class Api extends Base {
 			v::optional( v::stringType() )->validate( $auth_code );
 			v::optional( v::stringType() )->validate( $password );
 			$remote_host = $this->remote();
-			$remote = "$remote_host/pwd/forgot";
+			$remote = "$remote_host/users/pwd/forgot";
 			if ( ! empty( $auth_code ) ) {
-				$remote = "$remote_host/pwd/reset";
+				$remote = "$remote_host/users/pwd/reset";
 			}
 			$response = wp_remote_post( $remote, [
 				'body'        => [

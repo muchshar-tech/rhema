@@ -31,6 +31,7 @@ export const LoginCard = ({
     const formMethods = useForm({
         defaultValues: {
             username: RHEMA_LOCALIZE.WP_OPTIONS.HOST_DOMAIN,
+            identity_type: IDENTITY_TYPE,
         },
         resolver: joiResolver(FieldSchama.signinLogosFields),
     })

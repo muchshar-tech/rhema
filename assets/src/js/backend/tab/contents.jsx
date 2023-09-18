@@ -139,7 +139,6 @@ export const Account = () => {
                         }}
                         onClickVerifyEmail={() => {
                             toggleVerifyEmailForm(true)
-                            // const payload = await sendVerify(data)
                         }}
                         signinData={{
                             signinResponse,

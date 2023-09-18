@@ -32,6 +32,13 @@ export const verifyEmailLogosFields = Joi.object({
     activation_key: Joi.string().empty(''),
 })
 
+export const forgotPasswordLogosFields = Joi.object({
+    email: fields.email.required(),
+    auth_code: Joi.string().empty(''),
+    password: fields.password.empty(''),
+    confirm_password: fields.password.empty(''),
+})
+
 export const activateRhemeaFields = Joi.object({
     email: fields.email.required(),
     identity_type: fields.identity_type.required(),

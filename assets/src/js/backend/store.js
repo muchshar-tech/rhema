@@ -7,6 +7,7 @@ import {
     deactivateApi,
     signinApi,
     sendVerifyApi,
+    sendForgotApi,
     ordersApi,
 } from '@components/services'
 import generalReducer from './states/generalSlice'
@@ -21,6 +22,7 @@ export const store = configureStore({
         [deactivateApi.reducerPath]: deactivateApi.reducer,
         [signinApi.reducerPath]: signinApi.reducer,
         [sendVerifyApi.reducerPath]: sendVerifyApi.reducer,
+        [sendForgotApi.reducerPath]: sendForgotApi.reducer,
         [ordersApi.reducerPath]: ordersApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
@@ -30,6 +32,7 @@ export const store = configureStore({
             deactivateApi.middleware,
             signinApi.middleware,
             sendVerifyApi.middleware,
+            sendForgotApi.middleware,
             ordersApi.middleware,
         ]),
 })

@@ -177,7 +177,7 @@ export const VerifyEmailCard = ({
     const formMethods = useForm({
         defaultValues: {
             email: RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
-            activation_key: ''
+            activation_key: '',
         },
         resolver: joiResolver(FieldSchama.verifyEmailLogosFields),
     })
@@ -187,12 +187,13 @@ export const VerifyEmailCard = ({
         errors: sendingVerifyEmailErrors,
     } = formMethods.formState
 
-    const { sendVerifyResponse, sendVerifyError, isSendingVerify } =
-        sendVerifyData
+    const {
+        sendVerifyResponse: response,
+        sendVerifyError: error,
+        isSendingVerify: verifying,
+    } = sendVerifyData
 
-    const showExceptionMessage =
-        (!!sendVerifyResponse && !sendVerifyResponse?.success) ||
-        !!sendVerifyError
+    const showExceptionMessage = (!!response && !response?.success) || !!error
 
     const responseMessage = ((response, error) => {
         const code = response?.success === true ? 200 : false || error?.status
@@ -210,7 +211,7 @@ export const VerifyEmailCard = ({
             label,
             message,
         }
-    })(sendVerifyResponse, sendVerifyError)
+    })(response, error)
 
     const showSuccess = /2[0-9][0-9]/.test(responseMessage.code)
 
@@ -273,7 +274,9 @@ export const VerifyEmailCard = ({
                             })}
                         />
                         <FormTable.FieldErrorMsg
-                            message={sendingVerifyEmailErrors.activation_key?.message}
+                            message={
+                                sendingVerifyEmailErrors.activation_key?.message
+                            }
                         />
                     </FormTable.ModalForm.FieldRow>
                 </FormTable.ModalForm>
@@ -285,7 +288,7 @@ export const VerifyEmailCard = ({
                         onClick={(e) => {
                             formMethods.handleSubmit(onSubmitVerifyEmail)(e)
                         }}
-                        {...((isSendingVerifyEmail || isSendingVerify) && {
+                        {...((isSendingVerifyEmail || verifying) && {
                             disabled: 'disabled',
                         })}
                     >
@@ -306,16 +309,227 @@ export const VerifyEmailCard = ({
                             }
                             formMethods.handleSubmit(onSubmitVerifyEmail)(e)
                         }}
-                        {...((isSendingVerifyEmail || isSendingVerify) && {
+                        {...((isSendingVerifyEmail || verifying) && {
                             disabled: 'disabled',
                         })}
                     >
-                        {isSendingVerifyEmail
+                        {!isSendingVerifyEmail ||
+                        formMethods.getValues('activation_key').length === 0
                             ? UI_MESSAGE_MAPPING[
                                   'my-account/submit-verify-email'
                               ]
                             : UI_MESSAGE_MAPPING[
                                   'my-account/submitting-verify-email'
+                              ]}
+                    </button>
+                    {showSuccess && (
+                        <FormTable.ResponseSuccessMsg label="Success">
+                            {responseMessage?.message}
+                        </FormTable.ResponseSuccessMsg>
+                    )}
+                    {showExceptionMessage ? (
+                        <FormTable.ResponseErrorMsg
+                            code={responseMessage.code}
+                            label={responseMessage.label}
+                        >
+                            {responseMessage?.message ||
+                                'There has been a critical error.'}
+                        </FormTable.ResponseErrorMsg>
+                    ) : null}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export const ForgotPasswordCard = ({
+    className = '',
+    onSubmitForgotPw,
+    onClickBackToSignin,
+    sendForgotPasswordData,
+}) => {
+    const [showAuthCodeInput, toggleAuthCodeInput] = useState(false)
+    const formMethods = useForm({
+        defaultValues: {
+            email: RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
+            auth_code: '',
+            password: '',
+            confirm_password: '',
+        },
+        resolver: joiResolver(FieldSchama.forgotPasswordLogosFields),
+    })
+
+    const { submitting: formSubmitting, errors: formError } =
+        formMethods.formState
+
+    const {
+        sendForgotResponse: response,
+        sendForgotError: error,
+        isSendingForgot: submitting,
+    } = sendForgotPasswordData
+
+    const showExceptionMessage = (!!response && !response?.success) || !!error
+
+    const responseMessage = ((response, error) => {
+        const code = response?.success === true ? 200 : false || error?.status
+        const label =
+            response?.success === true
+                ? 'Success'
+                : false || error?.data.code || ''
+        const message = /2[0-9][0-9]/.test(code)
+            ? response?.data?.message || 'Signin success!'
+            : error?.data?.message ||
+              error?.data?.data?.message ||
+              'There has been a critical error.'
+        return {
+            code,
+            label,
+            message,
+        }
+    })(response, error)
+
+    const showSuccess = /2[0-9][0-9]/.test(responseMessage.code)
+
+    const classNames = ['postbox mb-0 min-w-0', className]
+
+    return (
+        <div className={classNames.join(' ')}>
+            <div className="postbox-header px-2 justify-center">
+                <h2 className="text-14px py-3 m-0">
+                    {UI_MESSAGE_MAPPING['my-account/forgot-password']}
+                </h2>
+            </div>
+            <div className="inside pb-0">
+                <p>
+                    {
+                        UI_MESSAGE_MAPPING[
+                            'my-account/forgot-password-description'
+                        ]
+                    }
+                </p>
+                <FormTable.ModalForm
+                    onSubmit={formMethods.handleSubmit(onSubmitForgotPw)}
+                >
+                    <FormTable.ModalForm.FieldRow label="Email">
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...formMethods.register('email', {
+                                required: true,
+                            })}
+                        />
+                        {}
+                        <FormTable.FieldErrorMsg
+                            message={formError.email?.message}
+                        />
+                        <p className="m-0 mb-2 text-xs space-x-2">
+                            <a
+                                className="button button-link hover:bg-transparent"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    onClickBackToSignin()
+                                }}
+                            >
+                                {
+                                    UI_MESSAGE_MAPPING[
+                                        'my-account/back-to-signin'
+                                    ]
+                                }
+                            </a>
+                        </p>
+                    </FormTable.ModalForm.FieldRow>
+                    <FormTable.ModalForm.FieldRow
+                        className={[
+                            ...(showAuthCodeInput ? [] : ['hidden']),
+                        ].join(' ')}
+                        label="Authorization code"
+                    >
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...formMethods.register('auth_code', {
+                                required: false,
+                            })}
+                        />
+                        <FormTable.FieldErrorMsg
+                            message={formError.auth_code?.message}
+                        />
+                    </FormTable.ModalForm.FieldRow>
+                    <FormTable.ModalForm.FieldRow
+                        className={[
+                            ...(showAuthCodeInput ? [] : ['hidden']),
+                        ].join(' ')}
+                        label="New password"
+                    >
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...formMethods.register('password', {
+                                required: false,
+                            })}
+                        />
+                        <FormTable.FieldErrorMsg
+                            message={formError.password?.message}
+                        />
+                    </FormTable.ModalForm.FieldRow>
+                    <FormTable.ModalForm.FieldRow
+                        className={[
+                            ...(showAuthCodeInput ? [] : ['hidden']),
+                        ].join(' ')}
+                        label="Confirm password"
+                    >
+                        <input
+                            className="w-full"
+                            type="text"
+                            {...formMethods.register('confirm_password', {
+                                required: false,
+                            })}
+                        />
+                        <FormTable.FieldErrorMsg
+                            message={formError.confirm_password?.message}
+                        />
+                    </FormTable.ModalForm.FieldRow>
+                </FormTable.ModalForm>
+            </div>
+            <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
+                <div className="flex grow space-x-2">
+                    <button
+                        className={['button', 'button-primary'].join(' ')}
+                        onClick={(e) => {
+                            formMethods.handleSubmit(onSubmitForgotPw)(e)
+                        }}
+                        {...((formSubmitting || submitting) && {
+                            disabled: 'disabled',
+                        })}
+                    >
+                        {formSubmitting
+                            ? UI_MESSAGE_MAPPING[
+                                  'my-account/sending-forgot-password'
+                              ]
+                            : UI_MESSAGE_MAPPING[
+                                  'my-account/send-forgot-password'
+                              ]}
+                    </button>
+                    <button
+                        className={['button', 'button-secondnary'].join(' ')}
+                        onClick={(e) => {
+                            if (!showAuthCodeInput) {
+                                toggleAuthCodeInput(true)
+                                return
+                            }
+                            formMethods.handleSubmit(onSubmitForgotPw)(e)
+                        }}
+                        {...((formSubmitting || submitting) && {
+                            disabled: 'disabled',
+                        })}
+                    >
+                        {!formSubmitting ||
+                        formMethods.getValues('auth_code').length === 0
+                            ? UI_MESSAGE_MAPPING[
+                                  'my-account/submit-forgot-password'
+                              ]
+                            : UI_MESSAGE_MAPPING[
+                                  'my-account/submitting-forgot-password'
                               ]}
                     </button>
                     {showSuccess && (

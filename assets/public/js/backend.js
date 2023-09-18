@@ -9507,6 +9507,7 @@ FieldErrorMsg.propTypes = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ForgotPasswordCard": () => (/* binding */ ForgotPasswordCard),
 /* harmony export */   "LoginCard": () => (/* binding */ LoginCard),
 /* harmony export */   "OrdersListing": () => (/* binding */ OrdersListing),
 /* harmony export */   "VerifyEmailCard": () => (/* binding */ VerifyEmailCard)
@@ -9688,10 +9689,10 @@ var VerifyEmailCard = function VerifyEmailCard(_ref2) {
   var _formMethods$formStat2 = formMethods.formState,
       isSendingVerifyEmail = _formMethods$formStat2.isSubmitting,
       sendingVerifyEmailErrors = _formMethods$formStat2.errors;
-  var sendVerifyResponse = sendVerifyData.sendVerifyResponse,
-      sendVerifyError = sendVerifyData.sendVerifyError,
-      isSendingVerify = sendVerifyData.isSendingVerify;
-  var showExceptionMessage = !!sendVerifyResponse && !(sendVerifyResponse !== null && sendVerifyResponse !== void 0 && sendVerifyResponse.success) || !!sendVerifyError;
+  var response = sendVerifyData.sendVerifyResponse,
+      error = sendVerifyData.sendVerifyError,
+      verifying = sendVerifyData.isSendingVerify;
+  var showExceptionMessage = !!response && !(response !== null && response !== void 0 && response.success) || !!error;
 
   var responseMessage = function (response, error) {
     var _response$data, _error$data, _error$data2, _error$data2$data;
@@ -9704,7 +9705,7 @@ var VerifyEmailCard = function VerifyEmailCard(_ref2) {
       label: label,
       message: message
     };
-  }(sendVerifyResponse, sendVerifyError);
+  }(response, error);
 
   var showSuccess = /2[0-9][0-9]/.test(responseMessage.code);
   var classNames = ['postbox mb-0 min-w-0', className];
@@ -9755,7 +9756,7 @@ var VerifyEmailCard = function VerifyEmailCard(_ref2) {
     onClick: function onClick(e) {
       formMethods.handleSubmit(onSubmitVerifyEmail)(e);
     }
-  }, (isSendingVerifyEmail || isSendingVerify) && {
+  }, (isSendingVerifyEmail || verifying) && {
     disabled: 'disabled'
   }), isSendingVerifyEmail ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/sending-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/send-verify-email"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
     className: ['button', 'button-secondnary'].join(' '),
@@ -9767,9 +9768,142 @@ var VerifyEmailCard = function VerifyEmailCard(_ref2) {
 
       formMethods.handleSubmit(onSubmitVerifyEmail)(e);
     }
-  }, (isSendingVerifyEmail || isSendingVerify) && {
+  }, (isSendingVerifyEmail || verifying) && {
     disabled: 'disabled'
-  }), isSendingVerifyEmail ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submit-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submitting-verify-email"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
+  }), !isSendingVerifyEmail || formMethods.getValues('activation_key').length === 0 ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submit-verify-email"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submitting-verify-email"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
+    label: "Success"
+  }, responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
+    code: responseMessage.code,
+    label: responseMessage.label
+  }, (responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message) || 'There has been a critical error.') : null)));
+};
+var ForgotPasswordCard = function ForgotPasswordCard(_ref3) {
+  var _formError$email, _formError$auth_code, _formError$password, _formError$confirm_pa;
+
+  var _ref3$className = _ref3.className,
+      className = _ref3$className === void 0 ? '' : _ref3$className,
+      onSubmitForgotPw = _ref3.onSubmitForgotPw,
+      onClickBackToSignin = _ref3.onClickBackToSignin,
+      sendForgotPasswordData = _ref3.sendForgotPasswordData;
+
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+      _useState4 = _slicedToArray(_useState3, 2),
+      showAuthCodeInput = _useState4[0],
+      toggleAuthCodeInput = _useState4[1];
+
+  var formMethods = (0,react_hook_form__WEBPACK_IMPORTED_MODULE_12__.useForm)({
+    defaultValues: {
+      email: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_5___default().WP_OPTIONS.ADMIN_EMAIL),
+      auth_code: '',
+      password: '',
+      confirm_password: ''
+    },
+    resolver: (0,_hookform_resolvers_joi__WEBPACK_IMPORTED_MODULE_2__.joiResolver)(_components_schema__WEBPACK_IMPORTED_MODULE_10__.forgotPasswordLogosFields)
+  });
+  var _formMethods$formStat3 = formMethods.formState,
+      formSubmitting = _formMethods$formStat3.submitting,
+      formError = _formMethods$formStat3.errors;
+  var response = sendForgotPasswordData.sendForgotResponse,
+      error = sendForgotPasswordData.sendForgotError,
+      submitting = sendForgotPasswordData.isSendingForgot;
+  var showExceptionMessage = !!response && !(response !== null && response !== void 0 && response.success) || !!error;
+
+  var responseMessage = function (response, error) {
+    var _response$data2, _error$data3, _error$data4, _error$data4$data;
+
+    var code = (response === null || response === void 0 ? void 0 : response.success) === true ? 200 :  false || (error === null || error === void 0 ? void 0 : error.status);
+    var label = (response === null || response === void 0 ? void 0 : response.success) === true ? 'Success' :  false || (error === null || error === void 0 ? void 0 : error.data.code) || '';
+    var message = /2[0-9][0-9]/.test(code) ? (response === null || response === void 0 ? void 0 : (_response$data2 = response.data) === null || _response$data2 === void 0 ? void 0 : _response$data2.message) || 'Signin success!' : (error === null || error === void 0 ? void 0 : (_error$data3 = error.data) === null || _error$data3 === void 0 ? void 0 : _error$data3.message) || (error === null || error === void 0 ? void 0 : (_error$data4 = error.data) === null || _error$data4 === void 0 ? void 0 : (_error$data4$data = _error$data4.data) === null || _error$data4$data === void 0 ? void 0 : _error$data4$data.message) || 'There has been a critical error.';
+    return {
+      code: code,
+      label: label,
+      message: message
+    };
+  }(response, error);
+
+  var showSuccess = /2[0-9][0-9]/.test(responseMessage.code);
+  var classNames = ['postbox mb-0 min-w-0', className];
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: classNames.join(' ')
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "postbox-header px-2 justify-center"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
+    className: "text-14px py-3 m-0"
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/forgot-password"])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "inside pb-0"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/forgot-password-description"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm, {
+    onSubmit: formMethods.handleSubmit(onSubmitForgotPw)
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
+    label: "Email"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+    className: "w-full",
+    type: "text"
+  }, formMethods.register('email', {
+    required: true
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
+    message: (_formError$email = formError.email) === null || _formError$email === void 0 ? void 0 : _formError$email.message
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
+    className: "m-0 mb-2 text-xs space-x-2"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
+    className: "button button-link hover:bg-transparent",
+    onClick: function onClick(e) {
+      e.preventDefault();
+      onClickBackToSignin();
+    }
+  }, _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/back-to-signin"]))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
+    className: _toConsumableArray(showAuthCodeInput ? [] : ['hidden']).join(' '),
+    label: "Authorization code"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+    className: "w-full",
+    type: "text"
+  }, formMethods.register('auth_code', {
+    required: false
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
+    message: (_formError$auth_code = formError.auth_code) === null || _formError$auth_code === void 0 ? void 0 : _formError$auth_code.message
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
+    className: _toConsumableArray(showAuthCodeInput ? [] : ['hidden']).join(' '),
+    label: "New password"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+    className: "w-full",
+    type: "text"
+  }, formMethods.register('password', {
+    required: false
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
+    message: (_formError$password = formError.password) === null || _formError$password === void 0 ? void 0 : _formError$password.message
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ModalForm.FieldRow, {
+    className: _toConsumableArray(showAuthCodeInput ? [] : ['hidden']).join(' '),
+    label: "Confirm password"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", _extends({
+    className: "w-full",
+    type: "text"
+  }, formMethods.register('confirm_password', {
+    required: false
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.FieldErrorMsg, {
+    message: (_formError$confirm_pa = formError.confirm_password) === null || _formError$confirm_pa === void 0 ? void 0 : _formError$confirm_pa.message
+  })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "flex grow space-x-2"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
+    className: ['button', 'button-primary'].join(' '),
+    onClick: function onClick(e) {
+      formMethods.handleSubmit(onSubmitForgotPw)(e);
+    }
+  }, (formSubmitting || submitting) && {
+    disabled: 'disabled'
+  }), formSubmitting ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/sending-forgot-password"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/send-forgot-password"]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", _extends({
+    className: ['button', 'button-secondnary'].join(' '),
+    onClick: function onClick(e) {
+      if (!showAuthCodeInput) {
+        toggleAuthCodeInput(true);
+        return;
+      }
+
+      formMethods.handleSubmit(onSubmitForgotPw)(e);
+    }
+  }, (formSubmitting || submitting) && {
+    disabled: 'disabled'
+  }), !formSubmitting || formMethods.getValues('auth_code').length === 0 ? _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submit-forgot-password"] : _assets_js_constants__WEBPACK_IMPORTED_MODULE_6__.UI_MESSAGE_MAPPING["my-account/submitting-forgot-password"]), showSuccess && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseSuccessMsg, {
     label: "Success"
   }, responseMessage === null || responseMessage === void 0 ? void 0 : responseMessage.message), showExceptionMessage ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_form_table__WEBPACK_IMPORTED_MODULE_9__.ResponseErrorMsg, {
     code: responseMessage.code,
@@ -10048,9 +10182,9 @@ var store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_3__.configureStore)({
   reducer: (_reducer = {
     general: _states_generalSlice__WEBPACK_IMPORTED_MODULE_1__["default"],
     account: _states_accountSlice__WEBPACK_IMPORTED_MODULE_2__["default"]
-  }, _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducer), _reducer),
+  }, _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendForgotApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendForgotApi.reducer), _defineProperty(_reducer, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducerPath, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.reducer), _reducer),
   middleware: function middleware(getDefaultMiddleware) {
-    return getDefaultMiddleware().concat([_components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.middleware]);
+    return getDefaultMiddleware().concat([_components_services__WEBPACK_IMPORTED_MODULE_0__.optionsApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.activateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.deactivateApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.signinApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendVerifyApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.sendForgotApi.middleware, _components_services__WEBPACK_IMPORTED_MODULE_0__.ordersApi.middleware]);
   }
 });
 (0,_reduxjs_toolkit_query__WEBPACK_IMPORTED_MODULE_4__.setupListeners)(store.dispatch);
@@ -10172,6 +10306,14 @@ var Account = function Account() {
       sendVerifyError = _useSendVerifyMutatio3.error,
       isSendingVerify = _useSendVerifyMutatio3.isLoading;
 
+  var _useSendForgotMutatio = (0,_components_services__WEBPACK_IMPORTED_MODULE_6__.useSendForgotMutation)(),
+      _useSendForgotMutatio2 = _slicedToArray(_useSendForgotMutatio, 2),
+      sendForgot = _useSendForgotMutatio2[0],
+      _useSendForgotMutatio3 = _useSendForgotMutatio2[1],
+      sendForgotResponse = _useSendForgotMutatio3.data,
+      sendForgotError = _useSendForgotMutatio3.error,
+      isSendingForgot = _useSendForgotMutatio3.isLoading;
+
   var hasToken = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(function (state) {
     var _state$account, _state$account2, _state$account3;
 
@@ -10252,13 +10394,19 @@ var Account = function Account() {
 
   var onSubmitForgotPw = /*#__PURE__*/function () {
     var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(data) {
+      var payload;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
               console.log(data);
+              _context3.next = 3;
+              return sendForgot(data);
 
-            case 1:
+            case 3:
+              payload = _context3.sent;
+
+            case 4:
             case "end":
               return _context3.stop();
           }
@@ -10297,6 +10445,17 @@ var Account = function Account() {
       sendVerifyResponse: sendVerifyResponse,
       sendVerifyError: sendVerifyError,
       isSendingVerify: isSendingVerify
+    }
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_backend_my_account__WEBPACK_IMPORTED_MODULE_7__.ForgotPasswordCard, {
+    className: ['max-w-sm'].concat(_toConsumableArray(!showForgotPwForm ? ['hidden'] : [])).join(' '),
+    onSubmitForgotPw: onSubmitForgotPw,
+    onClickBackToSignin: function onClickBackToSignin() {
+      toggleForgotPwForm(false);
+    },
+    sendForgotPasswordData: {
+      sendForgotResponse: sendForgotResponse,
+      sendForgotError: sendForgotError,
+      isSendingForgot: isSendingForgot
     }
   })) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "flex flex-wrap justify-center"
@@ -10495,6 +10654,7 @@ var UI_MESSAGE_MAPPING = {
   'my-account/signin-logos': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/signin-logos", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you have lost your License Key, you can log in here to check all the License Keys you have obtained in the past.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/forgot-password-description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/forgot-password-description", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/verify-email-description': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Send the verification letter to your mailbox, copy the startup code and paste it to the field below", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/back-to-signin': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/back-to-signin", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
@@ -10505,6 +10665,11 @@ var UI_MESSAGE_MAPPING = {
   'my-account/sent-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sent-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/submit-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/submit-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/submitting-verify-email': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/submitting-verify-email", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/send-forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/send-forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/sending-forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sending-forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/sent-forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/sent-forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/submit-forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/submit-forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
+  'my-account/submitting-forgot-password': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("my-account/submitting-forgot-password", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'my-account/welcome': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Welcome to Logos. You can check your information related to Logos here after logging in.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-1': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
   'about/paragraph-2': (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("If you are willing to support our ministry, please consider making a donation to us.", (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_DOMAIN_TEXT)),
@@ -10535,6 +10700,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "activateRhemeaByLicense": () => (/* binding */ activateRhemeaByLicense),
 /* harmony export */   "activateRhemeaFields": () => (/* binding */ activateRhemeaFields),
+/* harmony export */   "forgotPasswordLogosFields": () => (/* binding */ forgotPasswordLogosFields),
 /* harmony export */   "searchBibleRawsByKeyword": () => (/* binding */ searchBibleRawsByKeyword),
 /* harmony export */   "signinLogosFields": () => (/* binding */ signinLogosFields),
 /* harmony export */   "verifyEmailLogosFields": () => (/* binding */ verifyEmailLogosFields)
@@ -10566,6 +10732,12 @@ var signinLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
 var verifyEmailLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
   email: fields.email.required(),
   activation_key: joi__WEBPACK_IMPORTED_MODULE_0___default().string().empty('')
+});
+var forgotPasswordLogosFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
+  email: fields.email.required(),
+  auth_code: joi__WEBPACK_IMPORTED_MODULE_0___default().string().empty(''),
+  password: fields.password.empty(''),
+  confirm_password: fields.password.empty('')
 });
 var activateRhemeaFields = joi__WEBPACK_IMPORTED_MODULE_0___default().object({
   email: fields.email.required(),
@@ -10603,6 +10775,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "optionsApi": () => (/* binding */ optionsApi),
 /* harmony export */   "ordersApi": () => (/* binding */ ordersApi),
 /* harmony export */   "searchApi": () => (/* binding */ searchApi),
+/* harmony export */   "sendForgotApi": () => (/* binding */ sendForgotApi),
 /* harmony export */   "sendVerifyApi": () => (/* binding */ sendVerifyApi),
 /* harmony export */   "signinApi": () => (/* binding */ signinApi),
 /* harmony export */   "useActivateByLicenseMutation": () => (/* binding */ useActivateByLicenseMutation),
@@ -10612,6 +10785,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "useOrdersQuery": () => (/* binding */ useOrdersQuery),
 /* harmony export */   "usePrefetch": () => (/* binding */ usePrefetch),
 /* harmony export */   "useSearchBibleRawsQuery": () => (/* binding */ useSearchBibleRawsQuery),
+/* harmony export */   "useSendForgotMutation": () => (/* binding */ useSendForgotMutation),
 /* harmony export */   "useSendVerifyMutation": () => (/* binding */ useSendVerifyMutation),
 /* harmony export */   "useSigninMutation": () => (/* binding */ useSigninMutation),
 /* harmony export */   "useUpdateOptionsMutation": () => (/* binding */ useUpdateOptionsMutation)
@@ -10914,7 +11088,7 @@ var signinApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.cre
 var useSigninMutation = signinApi.useSigninMutation;
 
 var sendVerifyApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
-  reducerPath: 'api.senderify',
+  reducerPath: 'api.sendverify',
   baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
     baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.account),
     prepareHeaders: prepareHeaders
@@ -10940,6 +11114,34 @@ var sendVerifyApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__
   }
 });
 var useSendVerifyMutation = sendVerifyApi.useSendVerifyMutation;
+
+var sendForgotApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
+  reducerPath: 'api.sendforgot',
+  baseQuery: (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_5__.fetchBaseQuery)({
+    baseUrl: (RHEMA_LOCALIZE__WEBPACK_IMPORTED_MODULE_1___default().RHEMA_REST_ENDPOINTS.account),
+    prepareHeaders: prepareHeaders
+  }),
+  endpoints: function endpoints(builder) {
+    return {
+      sendForgot: builder.mutation({
+        query: function query(body) {
+          return {
+            url: 'forgot',
+            method: 'POST',
+            body: body
+          };
+        },
+        transformResponse: function transformResponse(response) {
+          return response;
+        },
+        transformErrorResponse: function transformErrorResponse(response) {
+          return response;
+        }
+      })
+    };
+  }
+});
+var useSendForgotMutation = sendForgotApi.useSendForgotMutation;
 
 var ordersApi = (0,_reduxjs_toolkit_query_react__WEBPACK_IMPORTED_MODULE_4__.createApi)({
   reducerPath: 'api.orders',

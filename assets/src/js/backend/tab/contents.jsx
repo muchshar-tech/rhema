@@ -5,11 +5,16 @@ import { sprintf } from 'sprintf-js'
 import parseHTML from 'html-react-parser'
 
 import { UI_MESSAGE_MAPPING } from '@components/constants'
-import { useSigninMutation, useSendVerifyMutation } from '@components/services'
+import {
+    useSigninMutation,
+    useSendVerifyMutation,
+    useSendForgotMutation,
+} from '@components/services'
 import {
     LoginCard,
     OrdersListing,
     VerifyEmailCard,
+    ForgotPasswordCard,
 } from '@components/backend/my-account'
 import { addSigninToken } from '@components/backend/states/accountSlice'
 
@@ -74,6 +79,15 @@ export const Account = () => {
             isLoading: isSendingVerify,
         },
     ] = useSendVerifyMutation()
+    const [
+        sendForgot,
+        {
+            data: sendForgotResponse,
+            error: sendForgotError,
+            isLoading: isSendingForgot,
+        },
+    ] = useSendForgotMutation()
+
     const hasToken = useSelector((state) => {
         if (!state?.account?.token) {
             return false
@@ -105,6 +119,7 @@ export const Account = () => {
 
     const onSubmitForgotPw = async (data) => {
         console.log(data)
+        const payload = await sendForgot(data)
     }
 
     return (
@@ -145,6 +160,21 @@ export const Account = () => {
                             sendVerifyResponse,
                             sendVerifyError,
                             isSendingVerify,
+                        }}
+                    />
+                    <ForgotPasswordCard
+                        className={[
+                            'max-w-sm',
+                            ...(!showForgotPwForm ? ['hidden'] : []),
+                        ].join(' ')}
+                        onSubmitForgotPw={onSubmitForgotPw}
+                        onClickBackToSignin={() => {
+                            toggleForgotPwForm(false)
+                        }}
+                        sendForgotPasswordData={{
+                            sendForgotResponse,
+                            sendForgotError,
+                            isSendingForgot,
                         }}
                     />
                 </div>

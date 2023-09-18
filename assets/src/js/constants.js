@@ -58,6 +58,10 @@ export const UI_MESSAGE_MAPPING = {
         `my-account/forgot-password`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    'my-account/forgot-password-description': __(
+        `my-account/forgot-password-description`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
     'my-account/verify-email': __(
         `my-account/verify-email`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
@@ -65,7 +69,7 @@ export const UI_MESSAGE_MAPPING = {
     'my-account/verify-email-description': __(
         `Send the verification letter to your mailbox, copy the startup code and paste it to the field below`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-    ),
+    ),    
     'my-account/back-to-signin': __(
         `my-account/back-to-signin`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
@@ -96,6 +100,26 @@ export const UI_MESSAGE_MAPPING = {
     ),
     'my-account/submitting-verify-email': __(
         `my-account/submitting-verify-email`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/send-forgot-password': __(
+        `my-account/send-forgot-password`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/sending-forgot-password': __(
+        `my-account/sending-forgot-password`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/sent-forgot-password': __(
+        `my-account/sent-forgot-password`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/submit-forgot-password': __(
+        `my-account/submit-forgot-password`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
+    'my-account/submitting-forgot-password': __(
+        `my-account/submitting-forgot-password`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'my-account/welcome': __(

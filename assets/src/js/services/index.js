@@ -252,7 +252,7 @@ export const signinApi = createApi({
 export const { useSigninMutation } = signinApi
 
 export const sendVerifyApi = createApi({
-    reducerPath: 'api.senderify',
+    reducerPath: 'api.sendverify',
     baseQuery: fetchBaseQuery({
         baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.account,
         prepareHeaders,
@@ -277,6 +277,33 @@ export const sendVerifyApi = createApi({
 })
 
 export const { useSendVerifyMutation } = sendVerifyApi
+
+export const sendForgotApi = createApi({
+    reducerPath: 'api.sendforgot',
+    baseQuery: fetchBaseQuery({
+        baseUrl: RHEMA_LOCALIZE.RHEMA_REST_ENDPOINTS.account,
+        prepareHeaders,
+    }),
+    endpoints: (builder) => ({
+        sendForgot: builder.mutation({
+            query: (body) => {
+                return {
+                    url: 'forgot',
+                    method: 'POST',
+                    body,
+                }
+            },
+            transformResponse: (response) => {
+                return response
+            },
+            transformErrorResponse: (response) => {
+                return response
+            },
+        }),
+    }),
+})
+
+export const { useSendForgotMutation } = sendForgotApi
 
 export const ordersApi = createApi({
     reducerPath: 'api.orders',

@@ -162,6 +162,31 @@ class Account extends Base {
 		return $this->sendRes( [ 'message' => $sent ] );
 	}
 	/**
+	 * Forgot password
+	 *
+	 * @param WP_REST_Request $request
+	 * @return void
+	 */
+	public function forgot( WP_REST_Request $request ) {
+		$body = $request->get_json_params();
+		$email = $body['email'];
+		$auth_code = isset( $body['auth_code'] ) ? $body['auth_code'] : '';
+		$password = isset( $body['password'] ) ? $body['password'] : '';
+
+		try {
+			/** @var Logos\Api */
+			$integration_logos_api = Logos\Api::init();
+			$sent = $integration_logos_api->forgot( $email, $auth_code, $password );
+
+			if ( is_wp_error( $sent ) ) {
+				throw new Exception( $sent->get_error_message(), $sent->get_error_code() );
+			}
+		} catch ( Exception $exception ) {
+			return $this->sendError( $exception );
+		}
+		return $this->sendRes( [ 'message' => $sent ] );
+	}
+	/**
 	 * Orders
 	 *
 	 * @param WP_REST_Request $request

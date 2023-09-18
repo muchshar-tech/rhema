@@ -227,8 +227,7 @@ final class Api extends Base {
 			'timeout' => 2,
 		] );
 		if ( is_wp_error( $translation_list_res ) ) {
-			// return $translation_list_res;
-			return json_decode( Defaults::init()->translates, true );
+			return new WP_Error( $translation_list_res->get_error_code(), $translation_list_res->get_error_message(), json_decode( Defaults::init()->translates, true ) );
 		}
 		$response = $translation_list_res['response'];
 		$status_code = $response['code'];
@@ -409,18 +408,55 @@ final class Api extends Base {
 			return new WP_Error( 400, Constants::init()->error_message['system/integrations/logos/api/email_required'] );
 		}
 		try {
-			v::key( 'email', v::email() )
-				->key( 'activation_key', v::optional( v::stringType() ) )
-				->validate( [
-					'email' => $email,
-					'activation_key' => $activation_key,
-				] );
+			v::email()->validate( $email );
+			v::optional( v::stringType() )->validate( $activation_key );
 			$remote_host = $this->remote();
 			$remote = "$remote_host/users/verify/email";
 			$response = wp_remote_post( $remote, [
 				'body'        => [
 					'email' => $email,
 					'activation_key' => $activation_key,
+				],
+			] );
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			if ( 200 !== $response['response']['code'] ) {
+				$error_message = ! empty( $response['body'] ) ? $response['body'] : Constants::init()->error_message['system/app/rest/bad_request'];
+				return new WP_Error( $response['response']['code'], $error_message );
+			}
+		} catch ( NestedValidationException $exception ) {
+			throw $exception->getFullMessage();
+		}
+		return $response['body'];
+	}
+	/**
+	 * Forgot password
+	 *
+	 * @param string $email
+	 * @param string $auth_code
+	 * @param string $password
+	 * @return array|WP_Error
+	 */
+	public function forgot( string $email, string $auth_code = '', string $password = '' ): array|WP_Error {
+		if ( empty( $email ) ) {
+			return new WP_Error( 400, Constants::init()->error_message['system/integrations/logos/api/email_required'] );
+		}
+		try {
+			v::email()->validate( $email );
+			v::optional( v::stringType() )->validate( $auth_code );
+			v::optional( v::stringType() )->validate( $password );
+			$remote_host = $this->remote();
+			$remote = "$remote_host/pwd/forgot";
+			if ( ! empty( $auth_code ) ) {
+				$remote = "$remote_host/pwd/reset";
+			}
+			$response = wp_remote_post( $remote, [
+				'body'        => [
+					'email' => $email,
+					'auth_code' => $auth_code,
+					'password' => $password,
 				],
 			] );
 			if ( is_wp_error( $response ) ) {

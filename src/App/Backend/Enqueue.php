@@ -87,6 +87,7 @@ class Enqueue extends Base {
 
 		$backend = [
 			'NONCE' => $this->plugin->createNonce(),
+			'LICENSES' => [],
 		];
 
 		try {
@@ -100,20 +101,23 @@ class Enqueue extends Base {
 			$licenses_data = [
 				'bible' => $core_license_data,
 			];
+			$backend = array_merge( $backend, [
+				'OPTIONS' => $options,
+				'LICENSES' => $licenses_data,
+				'DATA' => [
+					'AVAILABLE_TRANSLATIONS' => [],
+				],
+			] );
+
 			$availabel_translations = $integration_logos_api->getTranslationList();
 			if ( is_wp_error( $availabel_translations ) ) {
+				$backend['DATA']['AVAILABLE_TRANSLATIONS'] = $availabel_translations->get_error_data();
 				add_action( 'admin_notices', [ $class_notices, 'logosRemoteTimeout' ] );
 				/** @var WP_Error $availabel_translations */
 				throw new Exception( $availabel_translations->get_error_message(), (int) $availabel_translations->get_error_code() );
 			}
 
-			$backend = array_merge( $backend, [
-				'OPTIONS' => $options,
-				'LICENSES' => $licenses_data,
-				'DATA' => [
-					'AVAILABLE_TRANSLATIONS' => $availabel_translations,
-				],
-			] );
+			$backend['DATA']['AVAILABLE_TRANSLATIONS'] = $availabel_translations;
 		} catch ( Exception $e ) {
 			$licenses_data = [
 				'ERROR' => $e->getMessage(),

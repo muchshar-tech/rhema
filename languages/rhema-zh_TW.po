@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rhema 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rhema\n"
-"POT-Creation-Date: 2023-09-16T11:51:41+00:00\n"
-"PO-Revision-Date: 2023-09-16 19:54+0800\n"
+"POT-Creation-Date: 2023-09-19T02:13:29+00:00\n"
+"PO-Revision-Date: 2023-09-19 10:13+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_TW\n"
@@ -803,20 +803,24 @@ msgid "my-account/sent-forgot-password"
 msgstr "已寄送"
 
 #: assets/src/js/constants.js:117
+msgid "my-account/have-authorization-code"
+msgstr "我有授權碼"
+
+#: assets/src/js/constants.js:121
 msgid "my-account/submit-forgot-password"
 msgstr "重新設定密碼"
 
-#: assets/src/js/constants.js:121
+#: assets/src/js/constants.js:125
 msgid "my-account/submitting-forgot-password"
 msgstr "密碼設定中"
 
-#: assets/src/js/constants.js:125
+#: assets/src/js/constants.js:129
 msgid ""
 "Welcome to Logos. You can check your information related to Logos here after "
 "logging in."
 msgstr "歡迎來到 Logos。 登錄後您可以在此查看您的 Logos 相關信息。"
 
-#: assets/src/js/constants.js:129
+#: assets/src/js/constants.js:133
 msgid ""
 "Rhema is a WordPress plugin developed and operated by Muchshar on behalf of "
 "EON Center. Its purpose is to provide digital Bible services to churches, "
@@ -829,17 +833,17 @@ msgstr ""
 "提供數位聖經服務，使世界各地的教會網站增加搜尋聖經時的曝光率、提供教會會友線"
 "上查尋跟經文有關的教會專屬教導及講道，為傳福音和教牧關懷的工具。"
 
-#: assets/src/js/constants.js:133
+#: assets/src/js/constants.js:137
 msgid ""
 "If you are willing to support our ministry, please consider making a "
 "donation to us."
 msgstr "如果您願意支持我們的事工，請考慮捐獻給我們。"
 
-#: assets/src/js/constants.js:137
+#: assets/src/js/constants.js:141
 msgid "Service Policy"
 msgstr "服務政策"
 
-#: assets/src/js/constants.js:141
+#: assets/src/js/constants.js:145
 msgid ""
 "Feature Updates and Maintenance: We will regularly update and maintain the "
 "plugin to ensure its compatibility with the latest version of WordPress and "
@@ -849,44 +853,44 @@ msgid ""
 "report your issues."
 msgstr ""
 
-#: assets/src/js/constants.js:145
+#: assets/src/js/constants.js:149
 msgid ""
 "Rights Reserved: Muchshar Ltd. reserves the right to determine whether you "
 "are allowed to use this plugin."
 msgstr ""
 
-#: assets/src/js/constants.js:149
+#: assets/src/js/constants.js:153
 msgid "Taiwan Donation Link"
 msgstr "台灣捐款帳號"
 
-#: assets/src/js/constants.js:153
+#: assets/src/js/constants.js:157
 msgid "Overseas Donation Link"
 msgstr "Overseas Donation Link"
 
-#: assets/src/js/constants.js:158
+#: assets/src/js/constants.js:162
 msgid "bible-directory"
 msgstr "聖經目錄"
 
-#: assets/src/js/constants.js:159
+#: assets/src/js/constants.js:163
 msgid "bible-directory/old-testament"
 msgstr "舊約"
 
-#: assets/src/js/constants.js:163
+#: assets/src/js/constants.js:167
 msgid "bible-directory/new-testament"
 msgstr "新約"
 
-#: assets/src/js/constants.js:167
+#: assets/src/js/constants.js:171
 msgid "bible-directory/book"
 msgstr "書"
 
-#: assets/src/js/constants.js:171
+#: assets/src/js/constants.js:175
 msgid "bible-directory/chapter"
 msgstr "章"
 
-#: assets/src/js/constants.js:175
+#: assets/src/js/constants.js:179
 msgid "bible-directory/verse"
 msgstr "節"
 
-#: assets/src/js/constants.js:179
+#: assets/src/js/constants.js:183
 msgid "Selected Verses"
 msgstr "已選取的經文"

@@ -79,6 +79,7 @@ export const LoginCard = ({
                 <p>{UI_MESSAGE_MAPPING['my-account/description']}</p>
 
                 <FormTable.ModalForm
+                    id="login-card"
                     onSubmit={formMethods.handleSubmit(onSubmitSigin)}
                 >
                     <FormTable.ModalForm.FieldRow label="Username">
@@ -135,6 +136,7 @@ export const LoginCard = ({
             <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
                 <div className="flex grow">
                     <button
+                        form="login-card"
                         className={['button', 'button-primary'].join(' ')}
                         onClick={(e) => {
                             formMethods.handleSubmit(onSubmitSigin)(e)
@@ -230,6 +232,7 @@ export const VerifyEmailCard = ({
                     {UI_MESSAGE_MAPPING['my-account/verify-email-description']}
                 </p>
                 <FormTable.ModalForm
+                    id="verify-email-card"
                     onSubmit={formMethods.handleSubmit(onSubmitVerifyEmail)}
                 >
                     <FormTable.ModalForm.FieldRow label="Email">
@@ -285,6 +288,7 @@ export const VerifyEmailCard = ({
             <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
                 <div className="flex grow space-x-2">
                     <button
+                        form="verify-email-card"
                         className={['button', 'button-primary'].join(' ')}
                         onClick={(e) => {
                             formMethods.handleSubmit(onSubmitVerifyEmail)(e)
@@ -393,6 +397,26 @@ export const ForgotPasswordCard = ({
 
     const classNames = ['postbox mb-0 min-w-0', className]
 
+    const onClickResetPassword = (e) => {
+        console.log('onClickResetPassword')
+        if (!showAuthCodeInput) {
+            toggleAuthCodeInput(true)
+            return
+        }
+        formMethods.handleSubmit(onSubmitForgotPw)(e)
+    }
+
+    const watchEmail = formMethods.watch('email')
+    const watchAuthCode = formMethods.watch('auth_code')
+    const watchPassword = formMethods.watch('password')
+    const watchConfirmPassword = formMethods.watch('confirm_password')
+
+    const ableToSubmitReset = showAuthCodeInput
+        ? watchAuthCode.length > 0 &&
+          watchPassword.length > 0 &&
+          watchConfirmPassword.length > 0
+        : watchEmail.length > 0
+
     return (
         <div className={classNames.join(' ')}>
             <div className="postbox-header px-2 justify-center">
@@ -409,6 +433,7 @@ export const ForgotPasswordCard = ({
                     }
                 </p>
                 <FormTable.ModalForm
+                    id="forgot-password-card"
                     onSubmit={formMethods.handleSubmit(onSubmitForgotPw)}
                 >
                     <FormTable.ModalForm.FieldRow label="Email">
@@ -429,6 +454,7 @@ export const ForgotPasswordCard = ({
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onClickBackToSignin()
+                                    toggleAuthCodeInput(false)
                                 }}
                             >
                                 {
@@ -464,7 +490,7 @@ export const ForgotPasswordCard = ({
                     >
                         <input
                             className="w-full"
-                            type="text"
+                            type="password"
                             {...formMethods.register('password', {
                                 required: false,
                             })}
@@ -481,7 +507,7 @@ export const ForgotPasswordCard = ({
                     >
                         <input
                             className="w-full"
-                            type="text"
+                            type="password"
                             {...formMethods.register('confirm_password', {
                                 required: false,
                             })}
@@ -495,6 +521,9 @@ export const ForgotPasswordCard = ({
             <div className="p-1 flex items-center justify-between border-0 border-t border-[#c3c4c7] border-solid bg-[#f6f7f7]">
                 <div className="flex grow space-x-2">
                     <button
+                        {...(showAuthCodeInput
+                            ? {}
+                            : { form: 'forgot-password-card' })}
                         className={['button', 'button-primary'].join(' ')}
                         onClick={(e) => {
                             formMethods.handleSubmit(onSubmitForgotPw)(e)
@@ -512,20 +541,23 @@ export const ForgotPasswordCard = ({
                               ]}
                     </button>
                     <button
+                        {...(showAuthCodeInput && {
+                            form: 'forgot-password-card',
+                        })}
                         className={['button', 'button-secondnary'].join(' ')}
-                        onClick={(e) => {
-                            if (!showAuthCodeInput) {
-                                toggleAuthCodeInput(true)
-                                return
-                            }
-                            formMethods.handleSubmit(onSubmitForgotPw)(e)
-                        }}
-                        {...((formSubmitting || submitting) && {
+                        onClick={onClickResetPassword}
+                        {...((formSubmitting ||
+                            submitting ||
+                            !ableToSubmitReset) && {
                             disabled: 'disabled',
                         })}
                     >
-                        {!formSubmitting ||
-                        formMethods.getValues('auth_code').length === 0
+                        {!showAuthCodeInput
+                            ? UI_MESSAGE_MAPPING[
+                                  'my-account/have-authorization-code'
+                              ]
+                            : !formSubmitting ||
+                              formMethods.getValues('auth_code').length === 0
                             ? UI_MESSAGE_MAPPING[
                                   'my-account/submit-forgot-password'
                               ]

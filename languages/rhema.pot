@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-09-16T11:51:41+00:00\n"
+"POT-Creation-Date: 2023-09-19T02:13:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 
@@ -786,69 +786,73 @@ msgid "my-account/sent-forgot-password"
 msgstr ""
 
 #: assets/src/js/constants.js:117
-msgid "my-account/submit-forgot-password"
+msgid "my-account/have-authorization-code"
 msgstr ""
 
 #: assets/src/js/constants.js:121
-msgid "my-account/submitting-forgot-password"
+msgid "my-account/submit-forgot-password"
 msgstr ""
 
 #: assets/src/js/constants.js:125
-msgid "Welcome to Logos. You can check your information related to Logos here after logging in."
+msgid "my-account/submitting-forgot-password"
 msgstr ""
 
 #: assets/src/js/constants.js:129
-msgid "Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care."
+msgid "Welcome to Logos. You can check your information related to Logos here after logging in."
 msgstr ""
 
 #: assets/src/js/constants.js:133
-msgid "If you are willing to support our ministry, please consider making a donation to us."
+msgid "Rhema is a WordPress plugin developed and operated by Muchshar on behalf of EON Center. Its purpose is to provide digital Bible services to churches, increasing the exposure of church websites when searching for Bible-related content. It offers church members the ability to search for and access teachings and sermons related to specific Bible verses, serving as a tool for spreading the gospel and providing pastoral care."
 msgstr ""
 
 #: assets/src/js/constants.js:137
-msgid "Service Policy"
+msgid "If you are willing to support our ministry, please consider making a donation to us."
 msgstr ""
 
 #: assets/src/js/constants.js:141
-msgid "Feature Updates and Maintenance: We will regularly update and maintain the plugin to ensure its compatibility with the latest version of WordPress and continue to improve and add new features. We strive to address known issues and vulnerabilities promptly by providing patches and fixes. If you encounter any problems or discover any vulnerabilities, please visit %s to report your issues."
+msgid "Service Policy"
 msgstr ""
 
 #: assets/src/js/constants.js:145
-msgid "Rights Reserved: Muchshar Ltd. reserves the right to determine whether you are allowed to use this plugin."
+msgid "Feature Updates and Maintenance: We will regularly update and maintain the plugin to ensure its compatibility with the latest version of WordPress and continue to improve and add new features. We strive to address known issues and vulnerabilities promptly by providing patches and fixes. If you encounter any problems or discover any vulnerabilities, please visit %s to report your issues."
 msgstr ""
 
 #: assets/src/js/constants.js:149
-msgid "Taiwan Donation Link"
+msgid "Rights Reserved: Muchshar Ltd. reserves the right to determine whether you are allowed to use this plugin."
 msgstr ""
 
 #: assets/src/js/constants.js:153
+msgid "Taiwan Donation Link"
+msgstr ""
+
+#: assets/src/js/constants.js:157
 msgid "Overseas Donation Link"
 msgstr ""
 
-#: assets/src/js/constants.js:158
+#: assets/src/js/constants.js:162
 msgid "bible-directory"
 msgstr ""
 
-#: assets/src/js/constants.js:159
+#: assets/src/js/constants.js:163
 msgid "bible-directory/old-testament"
 msgstr ""
 
-#: assets/src/js/constants.js:163
+#: assets/src/js/constants.js:167
 msgid "bible-directory/new-testament"
 msgstr ""
 
-#: assets/src/js/constants.js:167
+#: assets/src/js/constants.js:171
 msgid "bible-directory/book"
 msgstr ""
 
-#: assets/src/js/constants.js:171
+#: assets/src/js/constants.js:175
 msgid "bible-directory/chapter"
 msgstr ""
 
-#: assets/src/js/constants.js:175
+#: assets/src/js/constants.js:179
 msgid "bible-directory/verse"
 msgstr ""
 
-#: assets/src/js/constants.js:179
+#: assets/src/js/constants.js:183
 msgid "Selected Verses"
 msgstr ""

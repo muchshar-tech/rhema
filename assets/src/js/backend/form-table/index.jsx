@@ -25,9 +25,10 @@ const FieldWrap = ({ children }) => {
     return <td>{children}</td>
 }
 
-const ModalForm = ({ className, onSubmit, children }) => {
+const ModalForm = ({ id, className, onSubmit, children }) => {
     const formProps = {
         onSubmit,
+        ...(id?.length && { id }),
     }
     return (
         <form className={className} {...formProps}>
@@ -39,10 +40,9 @@ const ModalForm = ({ className, onSubmit, children }) => {
 ModalForm.FieldRow = ({ className, label, children }) => {
     return (
         <div
-            className={[
-                'flex items-center mb-2 empty:hidden',
-                className,
-            ].join(' ')}
+            className={['flex items-center mb-2 empty:hidden', className].join(
+                ' '
+            )}
         >
             <div className="flex-grow self-start mr-2 mt-1 min-w-100px empty:hidden">
                 {label}

@@ -114,6 +114,10 @@ export const UI_MESSAGE_MAPPING = {
         `my-account/sent-forgot-password`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
+    'my-account/have-authorization-code': __(
+        `my-account/have-authorization-code`,
+        RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
+    ),
     'my-account/submit-forgot-password': __(
         `my-account/submit-forgot-password`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT

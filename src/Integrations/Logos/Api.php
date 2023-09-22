@@ -437,9 +437,9 @@ final class Api extends Base {
 	 * @param string $email
 	 * @param string $auth_code
 	 * @param string $password
-	 * @return array|WP_Error
+	 * @return string|WP_Error
 	 */
-	public function forgot( string $email, string $auth_code = '', string $password = '' ): array|WP_Error {
+	public function forgot( string $email, string $auth_code = '', string $password = '' ): string|WP_Error {
 		if ( empty( $email ) ) {
 			return new WP_Error( 400, Constants::init()->error_message['system/integrations/logos/api/email_required'] );
 		}
@@ -449,15 +449,16 @@ final class Api extends Base {
 			v::optional( v::stringType() )->validate( $password );
 			$remote_host = $this->remote();
 			$remote = "$remote_host/users/pwd/forgot";
+			$body = [
+				'email' => $email,
+			];
 			if ( ! empty( $auth_code ) ) {
 				$remote = "$remote_host/users/pwd/reset";
+				$body['auth_code'] = $auth_code;
+				$body['password'] = $password;
 			}
 			$response = wp_remote_post( $remote, [
-				'body'        => [
-					'email' => $email,
-					'auth_code' => $auth_code,
-					'password' => $password,
-				],
+				'body'        => $body,
 			] );
 			if ( is_wp_error( $response ) ) {
 				return $response;

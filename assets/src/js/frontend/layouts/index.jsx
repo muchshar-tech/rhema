@@ -205,7 +205,6 @@ const Content = ({
         'items-start',
         'relative',
         'flex',
-        'py-10',
         'overflow-hidden',
         'h-full',
     ].join(' ')
@@ -218,6 +217,7 @@ const Content = ({
         'h-full',
         'overflow-y-auto',
         'px-10',
+        'py-10'
     ]
 
     useEffect(() => {

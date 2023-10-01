@@ -7,10 +7,6 @@ npm-debug.log
 package-lock.json
 yarn.lock
 
-# Composer
-vendor
-composer.lock
-
 # PHP
 phpunit.xml
 phpcs.xml

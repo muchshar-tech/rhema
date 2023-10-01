@@ -25,6 +25,7 @@ use Rhema\Common\Utils\Errors;
  * @since 1.0.0
  */
 final class Requirements extends Base {
+	public $requirements;
 	/**
 	 * Specifications for the requirements
 	 *

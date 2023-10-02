@@ -17,6 +17,7 @@ use Exception;
 
 use Rhema\Common\Abstracts\Base;
 use Rhema\Integrations\Logos;
+use Rhema\Common\Constants;
 use Rhema\Common\Traits\RestCommons;
 /**
  * Class Example
@@ -194,8 +195,12 @@ class Account extends Base {
 		$email = $body['email'];
 		$auth_code = isset( $body['auth_code'] ) ? $body['auth_code'] : '';
 		$password = isset( $body['password'] ) ? $body['password'] : '';
+		$confirm_password = isset( $body['confirm_password'] ) ? $body['confirm_password'] : '';
 
 		try {
+			if ( $confirm_password !== $password ) {
+				throw new Exception( Constants::init()->error_message['system/app/rest/account/forgot/password_not_confirm'], 400 );
+			}
 			/** @var Logos\Api */
 			$integration_logos_api = Logos\Api::init();
 			$sent = $integration_logos_api->forgot( $email, $auth_code, $password );

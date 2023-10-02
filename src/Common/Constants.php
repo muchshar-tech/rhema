@@ -620,6 +620,7 @@ final class Constants extends Base {
 			'system/app/rest/options/option_saved' => __( 'Rhema options saved.', 'rhema' ),
 			'system/app/rest/bible/response_wrong' => __( 'Response wrong.', 'rhema' ),
 			'system/app/rest/account/verify/email_required' => __( 'Email is required.', 'rhema' ),
+			'system/app/rest/account/forgot/password_not_confirm' => __( 'Password and confirm password are not the same.', 'rhema' ),
 			'system/app/rest/permission_denied' => __( 'Permission denied.', 'rhema' ),
 		];
 	}

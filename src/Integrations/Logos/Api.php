@@ -454,7 +454,7 @@ final class Api extends Base {
 			];
 			if ( ! empty( $auth_code ) ) {
 				$remote = "$remote_host/users/pwd/reset";
-				$body['auth_code'] = $auth_code;
+				$body['active'] = $auth_code;
 				$body['password'] = $password;
 			}
 			$response = wp_remote_post( $remote, [

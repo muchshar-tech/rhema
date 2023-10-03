@@ -91,7 +91,7 @@ final class Bible extends Base {
 	 * @return string
 	 */
 	public function remote(): string {
-		return ! empty( $_ENV['BIBLE_REMOTE'] ) ? $_ENV['BIBLE_REMOTE'] : 'https://logos.muchshar.com/bible';
+		return ! empty( $_ENV['BIBLE_REMOTE'] ) ? $_ENV['BIBLE_REMOTE'] : Constants::init()->BIBLE_REMOTE;
 	}
 	/**
 	 * Get bible rest namespace by using rhema()->bible()->restNamespace()
@@ -99,7 +99,7 @@ final class Bible extends Base {
 	 * @return string
 	 */
 	public function restNamespace(): string {
-		return ! empty( $_ENV['RHEMA_REST_NAMESPACE'] ) ? $_ENV['RHEMA_REST_NAMESPACE'] : 'rhema/v1';
+		return ! empty( $_ENV['RHEMA_REST_NAMESPACE'] ) ? $_ENV['RHEMA_REST_NAMESPACE'] : Constants::init()->RHEMA_REST_NAMESPACE;
 	}
 	/**
 	 * Get bible rest endpoint url by using rhema()->bible()->restEndpoint()

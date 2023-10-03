@@ -27,6 +27,12 @@ final class Constants extends Base {
 	 */
 	use Singleton;
 	/**
+	 * Production environment
+	 */
+	public const LOGOS_REMOTE = 'https://logos.muchshar.com';
+	public const BIBLE_REMOTE = 'https://logos.muchshar.com/bible';
+	public const RHEMA_REST_NAMESPACE = 'rhema/v1';
+	/**
 	 * Rewrite rules
 	 */
 	public const REWRITE_RULES = [

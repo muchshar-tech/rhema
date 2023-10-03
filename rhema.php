@@ -17,7 +17,7 @@
  * Author URI:       https://txipartners.com
  * Text Domain:      rhema
  * Domain Path:      /languages
- * Requires PHP:     7.1
+ * Requires PHP:     8.0
  * Requires WP:      5.5.0
  * Namespace:        Rhema
  */

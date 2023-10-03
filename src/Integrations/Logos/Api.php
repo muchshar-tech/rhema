@@ -205,7 +205,7 @@ final class Api extends Base {
 	 * @return string
 	 */
 	private function remote( $path = '' ): string {
-		$host = ! empty( $_ENV['LOGOS_REMOTE'] ) ? $_ENV['LOGOS_REMOTE'] : 'https://logos.muchshar.com';
+		$host = ! empty( $_ENV['LOGOS_REMOTE'] ) ? $_ENV['LOGOS_REMOTE'] : Constants::init()->LOGOS_REMOTE;
 		if ( empty( $path ) ) {
 			return $host;
 		}

@@ -735,6 +735,10 @@
         padding-left: 2.5rem;
         padding-right: 2.5rem;
 }
+    .tailwind .py-10 {
+        padding-top: 2.5rem;
+        padding-bottom: 2.5rem;
+}
     .tailwind .px-6 {
         padding-left: 1.5rem;
         padding-right: 1.5rem;
@@ -746,10 +750,6 @@
     .tailwind .py-2px {
         padding-top: 2px;;
         padding-bottom: 2px;;
-}
-    .tailwind .py-10 {
-        padding-top: 2.5rem;
-        padding-bottom: 2.5rem;
 }
     .tailwind .pb-3 {
         padding-bottom: 0.75rem;

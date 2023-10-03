@@ -32,6 +32,7 @@ final class Constants extends Base {
 	public const LOGOS_REMOTE = 'https://logos.muchshar.com';
 	public const BIBLE_REMOTE = 'https://logos.muchshar.com/bible';
 	public const RHEMA_REST_NAMESPACE = 'rhema/v1';
+	public const LOGOS_REMOTE_TIMEOUT = 3;
 	/**
 	 * Rewrite rules
 	 */

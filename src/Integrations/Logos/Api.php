@@ -224,7 +224,7 @@ final class Api extends Base {
 		}
 		$remote_query = $this->remote( 'bible/translates' );
 		$translation_list_res = wp_remote_get( $remote_query, [
-			'timeout' => 2,
+			'timeout' => Constants::init()->LOGOS_REMOTE_TIMEOUT,
 		] );
 		if ( is_wp_error( $translation_list_res ) ) {
 			return new WP_Error( $translation_list_res->get_error_code(), $translation_list_res->get_error_message(), json_decode( Defaults::init()->translates, true ) );

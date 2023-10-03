@@ -3,18 +3,18 @@
  * Rhema
  *
  * @package   rhema
- * @author    TXIpartners <jive.cheng@txipartners.com>
+ * @author    Muchshar <jive.cheng@txipartners.com>
  * @copyright 2022 Rhema
  * @license   GNU General Public License v2.0 or later
- * @link      https://txipartners.com
+ * @link      https://rhema.muchshar.com
  *
  * Plugin Name:      Rhema
- * Plugin URI:       https://txipartners.com
+ * Plugin URI:       https://rhema.muchshar.com
  * Description:      Rhema
  * Version:          1.0.0
  * DataBase Version: 1.0.0
  * Author:           TXIpartners
- * Author URI:       https://txipartners.com
+ * Author URI:       https://rhema.muchshar.com
  * Text Domain:      rhema
  * Domain Path:      /languages
  * Requires PHP:     8.0

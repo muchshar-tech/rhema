@@ -31,3 +31,4 @@ cache
 
 #ENV
 .env
+.vscode

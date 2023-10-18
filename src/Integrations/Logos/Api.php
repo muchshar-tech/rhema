@@ -205,7 +205,7 @@ final class Api extends Base {
 	 * @return string
 	 */
 	private function remote( $path = '' ): string {
-		$host = ! empty( $_ENV['LOGOS_REMOTE'] ) ? $_ENV['LOGOS_REMOTE'] : 'https://logos.muchshar.com';
+		$host = ! empty( $_ENV['LOGOS_REMOTE'] ) ? $_ENV['LOGOS_REMOTE'] : Constants::init()->LOGOS_REMOTE;
 		if ( empty( $path ) ) {
 			return $host;
 		}
@@ -224,7 +224,7 @@ final class Api extends Base {
 		}
 		$remote_query = $this->remote( 'bible/translates' );
 		$translation_list_res = wp_remote_get( $remote_query, [
-			'timeout' => 2,
+			'timeout' => Constants::init()->LOGOS_REMOTE_TIMEOUT,
 		] );
 		if ( is_wp_error( $translation_list_res ) ) {
 			return new WP_Error( $translation_list_res->get_error_code(), $translation_list_res->get_error_message(), json_decode( Defaults::init()->translates, true ) );
@@ -454,7 +454,7 @@ final class Api extends Base {
 			];
 			if ( ! empty( $auth_code ) ) {
 				$remote = "$remote_host/users/pwd/reset";
-				$body['auth_code'] = $auth_code;
+				$body['active'] = $auth_code;
 				$body['password'] = $password;
 			}
 			$response = wp_remote_post( $remote, [

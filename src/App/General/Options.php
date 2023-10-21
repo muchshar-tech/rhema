@@ -87,10 +87,13 @@ final class Options extends Base {
 			'general' => $params,
 		] ) );
 	}
-
+	/**
+	 * Check rewrite rules is empty
+	 *
+	 * @param string $bible_entry_path
+	 * @return bool|WP_Error
+	 */
 	public function checkRewriteIsEmpty( string $bible_entry_path ): bool | WP_Error {
-		global $wp_rewrite;
-
 		$new_rule = Constants::REWRITE_RULES;
 
 		$rewrite_rules = get_option( 'rewrite_rules' );

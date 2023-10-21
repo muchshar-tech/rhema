@@ -13,7 +13,6 @@ declare( strict_types = 1 );
 namespace Rhema\App\Rest;
 
 use WP_REST_Request;
-use WP_Error;
 use Exception;
 
 use Rhema\Common\Abstracts\Base;

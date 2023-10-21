@@ -103,7 +103,6 @@ const PageWrapper = ({
         }
 
         return () => {
-            console.log('run return useEffect', handlerOnTransitionEnd)
             element.removeEventListener('transitionend', handlerOnTransitionEnd)
         }
     }, [pagePos])
@@ -127,7 +126,6 @@ const Content = ({
     onCompletedMove,
     children,
 }) => {
-    console.log('Content render')
     const dispatch = useDispatch()
     const initialPos =
         pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 1
@@ -142,8 +140,6 @@ const Content = ({
     )
     const [movePercentage, setMovePercentage] = useState(0)
     const onSwipeStart = (event) => {
-        console.groupCollapsed('Start swiping...')
-        console.log('Start swiping...', event)
     }
 
     const onSwipeMove = (position, event) => {
@@ -166,9 +162,6 @@ const Content = ({
     }
 
     const onSwipeEnd = (event) => {
-        console.groupEnd('Start swiping...')
-        console.groupCollapsed('End swiping...')
-        console.log(event, movePercentage)
         const moveAbsPercentage = Math.abs(movePercentage)
         if (moveAbsPercentage > 30) {
             const nextPagePos = clamp(
@@ -185,7 +178,6 @@ const Content = ({
             dispatch(updatePageSwipper({ pagePos: nextPagePos }))
         }
         setMovePercentage(0)
-        console.groupEnd('End swiping...')
     }
 
     const handlerOnTransitionEnd = () => {
@@ -252,8 +244,6 @@ const Content = ({
             ) : (
                 <div className="px-6">{children}</div>
             )}
-            {console.groupEnd()}
-            {console.groupEnd()}
         </Swipe>
     )
 }
@@ -275,7 +265,6 @@ const BbileRaws = ({
     currentChapter,
     selectedRaws,
 }) => {
-    console.groupCollapsed('Container')
     console.log(
         'run Container start ========================>',
         readingQuerys,
@@ -334,7 +323,6 @@ const BbileRaws = ({
             (raws) => Number(raws.chapter) === chapterPaged
         )
         return returnChapters.sort((a) => {
-            console.log(a)
             const chapterNumber = Array.isArray(a)
                 ? a[0]?.chapter
                 : a.chapterNumber
@@ -342,7 +330,6 @@ const BbileRaws = ({
         })
     }, [bookRaws, chapterPaged])
 
-    console.log(renderChapters)
 
     const onMoveFirstPage = () => {
         console.log('run onMoveFirstPage')
@@ -365,7 +352,6 @@ const BbileRaws = ({
     }
 
     const onCompletedMove = (offest, pagePos, onTransition) => {
-        console.log('run onCompletedMove', chapterPaged, offest)
         const newChapterPaged = chapterPaged + offest
         const newReadingQuerys = [
             {
@@ -440,40 +426,21 @@ const BbileRaws = ({
     )
 }
 const RawsContent = React.memo(BbileRaws, (prev, next) => {
-    console.groupCollapsed('MemoContainer')
     if (!isEqual(prev.chapterVerseInfo, next.chapterVerseInfo)) {
-        console.log(
-            'chapterVerseInfo',
-            !isEqual(prev.chapterVerseInfo, next.chapterVerseInfo)
-        )
         return false
     }
     if (!isEqual(prev.currentChapter, next.currentChapter)) {
-        console.log(
-            'currentChapter',
-            !isEqual(prev.currentChapter, next.currentChapter)
-        )
         return false
     }
     if (!isEqual(prev.readingQuerys, next.readingQuerys)) {
-        console.log(
-            'readingQuerys',
-            !isEqual(prev.readingQuerys, next.readingQuerys)
-        )
         return false
     }
     if (!isEqual(prev.bookRaws, next.bookRaws)) {
-        console.log('bookRaws', !isEqual(prev.bookRaws, next.bookRaws))
         return false
     }
     if (!isEqual(prev.selectedRaws, next.selectedRaws)) {
-        console.log(
-            'selectedRaws',
-            !isEqual(prev.selectedRaws, next.selectedRaws)
-        )
         return false
     }
-    console.groupEnd('MemoContainer')
     return true
 })
 

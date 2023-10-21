@@ -17,7 +17,6 @@ import {
 } from '@assets/js/frontend/states/generalSlice'
 
 export const Results = () => {
-    console.log('Results')
     const dispatch = useDispatch()
     const paged = useSelector((state) => state.general.search.paged)
     const history = useSelector(
@@ -48,11 +47,11 @@ export const Results = () => {
     ].join(' ')
 
     const {
-        hits,
-        total: { value: total },
-    } = data?.data?.hits || {
-        hits: [],
-        total: { value: 0 },
+        results: hits,
+        total,
+    } = data?.data || {
+        results: [],
+        total: 0,
     }
     const loadingLine =
         (isLoading
@@ -90,7 +89,7 @@ export const Results = () => {
                 <>
                     {hasError ? error.data.message : null}
                     {currentData
-                        ? hits.map(({ _source: raw }) => (
+                        ? hits.map((raw) => (
                               <Line
                                   block={true}
                                   id={raw.id}

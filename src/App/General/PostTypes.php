@@ -13,7 +13,6 @@ declare( strict_types = 1 );
 namespace Rhema\App\General;
 
 use Rhema\Common\Abstracts\Base;
-use Rhema\Common\Constants;
 
 /**
  * Class PostTypes
@@ -43,8 +42,9 @@ class PostTypes extends Base {
 	 * @since 1.0.0
 	 */
 	public function register() {
-		$plugin_domain = $this->plugin->textDomain();
 		/*
+		$plugin_domain = $this->plugin->textDomain();
+
 		register_post_type( Constants::BIBLE_QUESTION_TYPE['id'],
 			[
 				'labels'             => [

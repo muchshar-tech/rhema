@@ -9,6 +9,7 @@ yarn.lock
 
 # Composer
 composer.lock
+vendor
 
 # PHP
 phpunit.xml

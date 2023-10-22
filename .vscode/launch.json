@@ -17,6 +17,7 @@
             "name": "VVV Listen Wordpress for Xdebug",
             "type": "php",
             "request": "launch",
+            "hostname": "192.168.115.186",
             "port": 9003,
             "pathMappings": {
                 "/srv/www/rhema/public_html/": "C:\\Users\\jivec\\Projects\\rhema\\public_html\\"

@@ -57,5 +57,15 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
+    },
+    "extra": {
+        "installer-paths": {
+            "lib/{$name}": [
+                "micropackage/requirements",
+                "vlucas/phpdotenv",
+                "firebase/php-jwt",
+                "respect/validation"
+            ]
+        }
     }
 }

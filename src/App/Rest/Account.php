@@ -225,6 +225,9 @@ class Account extends Base {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		try {
+			if ( empty( $token ) ) {
+				throw new Exception( Constants::init()->error_message['system/integrations/logos/api/jwt_wrong'], 400 );
+			}
 			$orders = $integration_logos_api->orders( $token );
 			if ( is_wp_error( $orders ) ) {
 				throw new Exception( $orders->get_error_message(), $orders->get_error_code() );

@@ -89,13 +89,7 @@ export const Account = () => {
     ] = useSendForgotMutation()
 
     const hasToken = useSelector((state) => {
-        if (!state?.account?.token) {
-            return false
-        }
-        if (typeof state?.account?.token !== 'string') {
-            return false
-        }
-        if (state?.account?.token.length <= 0) {
+        if (!state?.account?.token || typeof state?.account?.token !== 'string' || state?.account?.token.length <= 0) {
             return false
         }
         return true

@@ -10894,13 +10894,7 @@ var Account = function Account() {
     isSendingForgot = _useSendForgotMutatio3.isLoading;
   var hasToken = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(function (state) {
     var _state$account, _state$account2, _state$account3;
-    if (!(state !== null && state !== void 0 && (_state$account = state.account) !== null && _state$account !== void 0 && _state$account.token)) {
-      return false;
-    }
-    if (typeof (state === null || state === void 0 || (_state$account2 = state.account) === null || _state$account2 === void 0 ? void 0 : _state$account2.token) !== 'string') {
-      return false;
-    }
-    if ((state === null || state === void 0 || (_state$account3 = state.account) === null || _state$account3 === void 0 ? void 0 : _state$account3.token.length) <= 0) {
+    if (!(state !== null && state !== void 0 && (_state$account = state.account) !== null && _state$account !== void 0 && _state$account.token) || typeof (state === null || state === void 0 || (_state$account2 = state.account) === null || _state$account2 === void 0 ? void 0 : _state$account2.token) !== 'string' || (state === null || state === void 0 || (_state$account3 = state.account) === null || _state$account3 === void 0 ? void 0 : _state$account3.token.length) <= 0) {
       return false;
     }
     return true;

@@ -17,12 +17,7 @@ const Container = ({}) => {
             <Layout.Body>
                 <Books.List />
                 <Search.Results />
-                <Layout.Content>
-                    <Layout.Page>
-                        <Paragraph.Block></Paragraph.Block>
-                    </Layout.Page>
-                    <Layout.Page></Layout.Page>
-                </Layout.Content>
+                HOME
             </Layout.Body>
         </Layout.AppContainer>
     )

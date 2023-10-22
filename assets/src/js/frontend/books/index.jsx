@@ -26,18 +26,16 @@ const Block = ({
     }
     const Title = hasTitle ? (
         <span
-            className={`block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600 ${
-                selected ? 'text-rose-600' : ''
-            }`}
+            className={`block w-full px-3 font-medium text-gray-900 group-hover:text-rose-600 ${selected ? 'text-rose-600' : ''
+                }`}
         >
             {title}
         </span>
     ) : null
     const Desc = hasDesc ? (
         <small
-            className={`px-3 text-gray-600 group-hover:text-rose-600 group-selected:text-rose-600 ${
-                selected ? 'text-rose-600' : ''
-            }`}
+            className={`px-3 text-gray-600 group-hover:text-rose-600 group-selected:text-rose-600 ${selected ? 'text-rose-600' : ''
+                }`}
         >
             {desc}
         </small>
@@ -50,29 +48,29 @@ const Block = ({
         'items-center',
         ...(size === 'small'
             ? [
-                  'w-1/6',
-                  'xs:w-1/8',
-                  'md:w-1/12',
-                  'lg:w-1/24',
-                  'every-6:border-r-0',
-                  'xs:every-6:border-r',
-                  'only-xs:every-8:border-r',
-                  'only-md:every-12:border-r',
-                  'only-lg:every-24:border-r',
-              ]
+                'w-1/6',
+                'xs:w-1/8',
+                'md:w-1/12',
+                'lg:w-1/24',
+                'every-6:border-r-0',
+                'xs:every-6:border-r',
+                'only-xs:every-8:border-r',
+                'only-md:every-12:border-r',
+                'only-lg:every-24:border-r',
+            ]
             : []),
         ...(size === 'medium'
             ? [
-                  'w-1/4',
-                  'xs:w-1/6',
-                  'md:w-1/8',
-                  'lg:w-1/12',
-                  'every-4:border-r-0',
-                  'xs:every-4:border-r',
-                  'only-xs:every-6:border-r',
-                  'only-md:every-8:border-r',
-                  'only-lg:every-12:border-r',
-              ]
+                'w-1/4',
+                'xs:w-1/6',
+                'md:w-1/8',
+                'lg:w-1/12',
+                'every-4:border-r-0',
+                'xs:every-4:border-r',
+                'only-xs:every-6:border-r',
+                'only-md:every-8:border-r',
+                'only-lg:every-12:border-r',
+            ]
             : []),
         'border-t-0',
         'border-l-0',
@@ -294,13 +292,13 @@ const Chapters = () => {
                                 currentQueryString.filter((query) =>
                                     currentSelectionBookIndex
                                         ? Number(query.book.index) ===
-                                              Number(
-                                                  currentSelectionBookIndex
-                                              ) &&
-                                          Number(query.chapter) ===
-                                              Number(number)
+                                        Number(
+                                            currentSelectionBookIndex
+                                        ) &&
+                                        Number(query.chapter) ===
+                                        Number(number)
                                         : Number(query.chapter) ===
-                                          Number(number)
+                                        Number(number)
                                 )[0] || false
                             const isCurrentSelection =
                                 currentSelectionChapter === Number(number)
@@ -356,39 +354,39 @@ const Verses = () => {
         currentQueryString.length > 0
             ? isSameQueryBookChapter
                 ? {
-                      [currentQueryString[0]?.chapter]:
-                          chapterVerseInfo[currentQueryString[0]?.book.index][
-                              currentQueryString[0]?.chapter
-                          ],
-                  }
+                    [currentQueryString[0]?.chapter]:
+                        chapterVerseInfo[currentQueryString[0]?.book.index][
+                        currentQueryString[0]?.chapter
+                        ],
+                }
                 : currentQueryString.reduce(
-                      (accumulator, query, currentIndex, currentArray) => {
-                          const currentQueryBook = currentArray[0].book
-                          const currentQueryChapter = query.chapter
-                          const chapterMaxVerse =
-                              chapterVerseInfo[currentQueryBook.index][
-                                  query.chapter
-                              ]
-                          accumulator[currentQueryChapter] = chapterMaxVerse
-                          return accumulator
-                      },
-                      {}
-                  )
+                    (accumulator, query, currentIndex, currentArray) => {
+                        const currentQueryBook = currentArray[0].book
+                        const currentQueryChapter = query.chapter
+                        const chapterMaxVerse =
+                            chapterVerseInfo[currentQueryBook.index][
+                            query.chapter
+                            ]
+                        accumulator[currentQueryChapter] = chapterMaxVerse
+                        return accumulator
+                    },
+                    {}
+                )
             : {}
     const displayBooksIndex = currentSelectionBookIndex
         ? currentSelectionBookIndex
         : currentQueryString.length > 0
-        ? currentQueryString[0].book.index
-        : 0
+            ? currentQueryString[0].book.index
+            : 0
     const displayChapterVerseInfo = currentSelectionChapter
         ? {
-              [currentSelectionChapter]:
-                  chapterVerseInfo[
-                      currentSelectionBookIndex
-                          ? currentSelectionBookIndex
-                          : currentQueryString[0].book.index
-                  ][currentSelectionChapter],
-          }
+            [currentSelectionChapter]:
+                chapterVerseInfo[
+                currentSelectionBookIndex
+                    ? currentSelectionBookIndex
+                    : currentQueryString[0].book.index
+                ][currentSelectionChapter],
+        }
         : currentQueryChapterVerseInfo
     const isQueryAndSelectionSame = currentQueryString.some(
         (query) =>
@@ -401,12 +399,12 @@ const Verses = () => {
             { book, chapter, verse: 1 },
             { book, chapter, verse: maxVerseNumber },
         ]
+        await dispatch(updateReadingQuerys(prepareQueryString))
         await dispatch(
             clickBookSelector({
                 verses: Number(verse),
             })
         )
-        await dispatch(updateReadingQuerys(prepareQueryString))
     }
     return (
         <Container className="w-full" toggle={toggleVerses}>
@@ -426,20 +424,23 @@ const Verses = () => {
                             ) : null}
                             <BlockWrap className="items-start content-start">
                                 {verses.map((number, idx) => {
-                                    const literalIntegral =
-                                        Number(chapter) * 100 + number
-                                    const fromIntegral =
-                                        Number(currentQueryString[0].chapter) *
+                                    let isSomeInCurrentQuery = false
+                                    if (Array.isArray(currentQueryString) && currentQueryString.length > 0) {
+                                        const literalIntegral =
+                                            Number(chapter) * 100 + number
+                                        const fromIntegral =
+                                            Number(currentQueryString[0].chapter) *
                                             100 +
-                                        Number(currentQueryString[0].verse)
-                                    const toIntegral =
-                                        Number(currentQueryString[1].chapter) *
+                                            Number(currentQueryString[0].verse)
+                                        const toIntegral =
+                                            Number(currentQueryString[1].chapter) *
                                             100 +
-                                        Number(currentQueryString[1].verse)
-                                    const isSomeInCurrentQuery =
-                                        isQueryAndSelectionSame &&
-                                        literalIntegral >= fromIntegral &&
-                                        literalIntegral <= toIntegral
+                                            Number(currentQueryString[1].verse)
+                                        isSomeInCurrentQuery =
+                                            isQueryAndSelectionSame &&
+                                            literalIntegral >= fromIntegral &&
+                                            literalIntegral <= toIntegral
+                                    }
                                     const classNames = ['text-center']
                                     if (isSomeInCurrentQuery) {
                                         classNames.push('bg-gray-100')

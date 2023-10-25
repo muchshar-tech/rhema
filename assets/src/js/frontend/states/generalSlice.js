@@ -116,33 +116,36 @@ export const generalSlice = createSlice({
                 payloadKeys.indexOf('verses') !== -1
                     ? 'verses'
                     : payloadKeys.indexOf('chapters') !== -1
-                    ? 'chapters'
-                    : payloadKeys.indexOf('books') !== -1
-                    ? 'books'
-                    : false
-            if (typeof currentClickBookChapterVerses === 'string') {
-                switch (currentClickBookChapterVerses) {
-                    case 'books':
-                        state.booksSelector.chapters =
-                            !state.booksSelector.chapters
-                        state.booksSelector.verses = false
-                        state.booksSelector.books = false
-                        state.currentSelection.chapters = ''
-                        break
-                    case 'chapters':
-                        state.booksSelector.chapters = false
-                        state.booksSelector.verses = !state.booksSelector.verses
-                        state.booksSelector.books = false
-                        break
-                    case 'verses':
-                        state.headersSwitch.main = true
-                        state.headersSwitch.books = false
-                        state.booksSelector.chapters = false
-                        state.booksSelector.verses = false
-                        state.booksSelector.books = true
-                        break
-                }
+                        ? 'chapters'
+                        : payloadKeys.indexOf('books') !== -1
+                            ? 'books'
+                            : false
+            if (!currentClickBookChapterVerses) {
+                return state
             }
+            switch (currentClickBookChapterVerses) {
+                case 'books':
+                    state.booksSelector.chapters =
+                        !state.booksSelector.chapters
+                    state.booksSelector.verses = false
+                    state.booksSelector.books = false
+                    state.currentSelection.chapters = ''
+                    break
+                case 'chapters':
+                    state.booksSelector.chapters = false
+                    state.booksSelector.verses = !state.booksSelector.verses
+                    state.booksSelector.books = false
+                    break
+                case 'verses':
+                    state.headersSwitch.main = true
+                    state.headersSwitch.books = false
+                    state.booksSelector.chapters = false
+                    state.booksSelector.verses = false
+                    state.booksSelector.books = true
+                    state.headersSwitch.search = false
+                    break
+            }
+
             state.isAfterReload = false
             state.currentSelection = { ...state.currentSelection, ...payload }
         },

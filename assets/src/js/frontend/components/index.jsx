@@ -98,7 +98,7 @@ export const Line = ({
         'before:content-[attr(data-book-abbr)_"_"attr(data-chapter-num)":"_attr(data-verse-num)]',
         'before:text-12px',
         'before:inline-flex',
-        'before:items-start	',
+        'before:items-start',
         'before:justify-center',
         'before:text-center',
         'before:align-text-top',

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { max, isEqual, clamp } from 'lodash'
 import { useSelector, useDispatch } from 'react-redux'
+import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiMinusSquare } from 'react-icons/fi'
 import Swipe from 'react-easy-swipe'
@@ -12,6 +13,7 @@ import * as Tools from '@components/frontend/tools'
 import { usePrefetch } from '@components/services'
 import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
 import { updatePageSwipper } from '@assets/js/frontend/states/generalSlice'
+import { retrieveBookIndexBySlug } from '@components/frontend/utilities'
 
 const AppContainer = ({ children }) => {
     const showSelection = useSelector(
@@ -265,13 +267,13 @@ const BbileRaws = ({
     currentChapter,
     selectedRaws,
 }) => {
-    console.log(
-        'run Container start ========================>',
-        readingQuerys,
-        currentChapter
-    )
     const dispatch = useDispatch()
     const chapterPaged = currentChapter
+    let currentBookIndex = readingQuerys[0]?.book?.index
+    if (!currentBookIndex) {
+        const {books1: bookSlugOfParam} = useParams()
+        currentBookIndex = retrieveBookIndexBySlug(bookSlugOfParam)
+    }
 
     if (!chapterVerseInfo) {
         return null
@@ -279,13 +281,13 @@ const BbileRaws = ({
 
     const prefetchRaw = usePrefetch('getBibleRaw')
 
-    const currentBookChaptersNumber = max(
-        Object.keys(chapterVerseInfo[readingQuerys[0].book.index]).map((num) =>
+    const maxChapterNumberOfCurrentBook = max(
+        Object.keys(chapterVerseInfo[currentBookIndex]).map((num) =>
             Number(num)
         )
     )
 
-    const prepareChaptersSlot = new Array(currentBookChaptersNumber)
+    const prepareChaptersSlot = new Array(maxChapterNumberOfCurrentBook)
         .fill(null)
         .map((item, slotIdx) => {
             const slotChapterNumber = slotIdx + 1
@@ -297,7 +299,7 @@ const BbileRaws = ({
             }
             return {
                 maxVerseNumber:
-                    chapterVerseInfo[readingQuerys[0].book.index][
+                    chapterVerseInfo[currentBookIndex][
                         slotChapterNumber
                     ],
                 chapterNumber: slotChapterNumber,
@@ -362,7 +364,7 @@ const BbileRaws = ({
             {
                 book: { ...readingQuerys[1].book },
                 chapter: newChapterPaged,
-                verse: chapterVerseInfo[readingQuerys[0].book.index][
+                verse: chapterVerseInfo[currentBookIndex][
                     newChapterPaged
                 ],
             },
@@ -383,7 +385,7 @@ const BbileRaws = ({
                 chapterPaged === 1
                     ? 'left'
                     : chapterPaged > 1 &&
-                      chapterPaged < currentBookChaptersNumber
+                      chapterPaged < maxChapterNumberOfCurrentBook
                     ? 'middle'
                     : 'right'
             }

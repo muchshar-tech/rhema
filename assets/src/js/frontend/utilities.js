@@ -1,5 +1,10 @@
 import isempty from 'lodash/isEmpty'
 import { generatePath } from 'react-router-dom'
+import { max } from 'lodash'
+
+import { store } from '@assets/js/frontend/store'
+import { clickBookSelector } from '@assets/js/frontend/states/generalSlice'
+import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
 
 /**
  * 將相同的書、章的字串縮短
@@ -21,9 +26,8 @@ export const queryStringModifier = (queryString = []) => {
         `${rangeFrom.book.name} ${rangeFrom.chapter}:${rangeFrom.verse}`,
     ]
     if (!!rangeTo && !!rangeTo.book && rangeTo.chapter && rangeTo.verse) {
-        returnQueryString[0] += `-${isSameBook ? '' : rangeTo.book.name + ' '}${
-            isSameChapter ? '' : rangeTo.chapter + ':'
-        }${rangeTo.verse}`
+        returnQueryString[0] += `-${isSameBook ? '' : rangeTo.book.name + ' '}${isSameChapter ? '' : rangeTo.chapter + ':'
+            }${rangeTo.verse}`
     }
     return returnQueryString
 }
@@ -46,6 +50,18 @@ export const generateRestRangeParam = ({ books1, verse1, books2, verse2 }) => {
 export const retrieveChapterByParamString = (paramString) => {
     const matched = paramString.match(/[0-9]?[a-z]+(\d{0,3}):?(\d{0,3})/i)
     return Number(matched[1])
+}
+
+export const retrieveBookIndexBySlug = (slug) => {
+    const { getState } = store
+    const { data } = getState()
+    const bookData = [...data.books.old, ...data.books.new]
+    const bookFiltered = bookData.filter((book) => book.slug === slug)
+    if (bookFiltered.length === 0) {
+        return new Error(`Can not find book by slug: ${slug}`)
+    }
+    const bookIndex = bookFiltered[0].index
+    return bookIndex
 }
 
 export const validIsQueryWholeChapter = (querys, chapterVerseInfo) => {
@@ -76,4 +92,54 @@ export const validIsQueryWholeChapter = (querys, chapterVerseInfo) => {
         return false
     }
     return true
+}
+
+export const generateRandomlyChapter = (assignSchema) => {
+    const { getState } = store
+    const { data } = getState()
+    let schema = assignSchema
+    if (!Array.isArray(schema) || schema.length === 0) {
+        schema = ['book', 'chapter', 'verse']
+    }
+    const { chapterVerseInfo } = data.translation.info
+    const bookData = [...data.books.old, ...data.books.new]
+    const bookIndexRandomly = Math.floor(Math.random() * bookData.length) + 1
+    const maxChapterNumberOfCurrentBook = max(
+        Object.keys(chapterVerseInfo[bookIndexRandomly]).map((num) =>
+            Number(num)
+        )
+    )
+    const chapterIndexRandomly = Math.floor(Math.random() * maxChapterNumberOfCurrentBook) + 1 
+    return {
+        book: bookData[bookIndexRandomly],
+        chapter: chapterIndexRandomly,
+        verse: 1,
+    }
+}
+
+export const onClickVerse = async function ({
+    book: bookIndex,
+    chapter,
+    verse,
+    maxVerseNumberOfChapter,
+}) {
+    const { dispatch, getState } = store
+    const { data } = getState()
+    let maxVerseNumber = maxVerseNumberOfChapter
+    if (!maxVerseNumber) {
+        const { chapterVerseInfo } = data.translation.info
+        maxVerseNumber = chapterVerseInfo[bookIndex][chapter]
+    }
+    const bookData = [...data.books.old, ...data.books.new]
+    const book = bookData[bookIndex - 1]
+    const prepareQueryString = [
+        { book, chapter, verse: 1 },
+        { book, chapter, verse: maxVerseNumber },
+    ]
+    await dispatch(updateReadingQuerys(prepareQueryString))
+    await dispatch(
+        clickBookSelector({
+            verses: Number(verse),
+        })
+    )
 }

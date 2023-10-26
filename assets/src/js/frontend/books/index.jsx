@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { UI_MESSAGE_MAPPING } from '@components/constants'
 import { LinkVerse } from '@assets/js/frontend/components'
 import { clickBookSelector } from '@assets/js/frontend/states/generalSlice'
-import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
+import { onClickVerse } from '@assets/js/frontend/utilities'
 
 const Block = ({
     onClick,
@@ -329,7 +329,6 @@ const Chapters = () => {
 }
 
 const Verses = () => {
-    const dispatch = useDispatch()
     const toggleVerses = useSelector(
         (state) => state.general.booksSelector.verses
     )
@@ -395,19 +394,6 @@ const Verses = () => {
             query.book.index === currentSelectionBookIndex &&
             Number(query.chapter) === currentSelectionChapter
     )
-    const onClickBlock = async function ({ book, chapter, verse }) {
-        const maxVerseNumber = chapterVerseInfo[displayBooksIndex][chapter]
-        const prepareQueryString = [
-            { book, chapter, verse: 1 },
-            { book, chapter, verse: maxVerseNumber },
-        ]
-        await dispatch(
-            clickBookSelector({
-                verses: Number(verse),
-            })
-        )
-        await dispatch(updateReadingQuerys(prepareQueryString))
-    }
     return (
         <Container className="w-full" toggle={toggleVerses}>
             {Object.keys(displayChapterVerseInfo).map(
@@ -426,20 +412,30 @@ const Verses = () => {
                             ) : null}
                             <BlockWrap className="items-start content-start">
                                 {verses.map((number, idx) => {
-                                    const literalIntegral =
-                                        Number(chapter) * 100 + number
-                                    const fromIntegral =
-                                        Number(currentQueryString[0].chapter) *
-                                            100 +
-                                        Number(currentQueryString[0].verse)
-                                    const toIntegral =
-                                        Number(currentQueryString[1].chapter) *
-                                            100 +
-                                        Number(currentQueryString[1].verse)
-                                    const isSomeInCurrentQuery =
-                                        isQueryAndSelectionSame &&
-                                        literalIntegral >= fromIntegral &&
-                                        literalIntegral <= toIntegral
+                                    let isSomeInCurrentQuery = false
+                                    if (
+                                        Array.isArray(currentQueryString) &&
+                                        currentQueryString.length > 0
+                                    ) {
+                                        const literalIntegral =
+                                            Number(chapter) * 100 + number
+                                        const fromIntegral =
+                                            Number(
+                                                currentQueryString[0].chapter
+                                            ) *
+                                                100 +
+                                            Number(currentQueryString[0].verse)
+                                        const toIntegral =
+                                            Number(
+                                                currentQueryString[1].chapter
+                                            ) *
+                                                100 +
+                                            Number(currentQueryString[1].verse)
+                                        isSomeInCurrentQuery =
+                                            isQueryAndSelectionSame &&
+                                            literalIntegral >= fromIntegral &&
+                                            literalIntegral <= toIntegral
+                                    }
                                     const classNames = ['text-center']
                                     if (isSomeInCurrentQuery) {
                                         classNames.push('bg-gray-100')
@@ -452,13 +448,15 @@ const Verses = () => {
                                             {...{ title: number.toString() }}
                                         >
                                             <LinkVerse
-                                                onClick={onClickBlock.bind(
+                                                onClick={onClickVerse.bind(
                                                     this,
                                                     {
-                                                        book: currentSelectionBooks,
+                                                        book: currentSelectionBookIndex,
                                                         chapter:
                                                             currentSelectionChapter,
                                                         verse: number,
+                                                        maxVerseNumberOfChapter:
+                                                            maxVerse,
                                                     }
                                                 )}
                                                 book={displayBooksIndex}
@@ -477,4 +475,4 @@ const Verses = () => {
     )
 }
 
-export { List }
+export { List, onClickVerse }

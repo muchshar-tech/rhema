@@ -15,16 +15,29 @@ import {
     generateRestRangeParam,
     retrieveChapterByParamString,
     validIsQueryWholeChapter,
+    retrieveBookIndexBySlug,
 } from '@assets/js/frontend/utilities'
 import { loadRaws } from '@assets/js/frontend/states/dataSlice'
 
 export const Verses = () => {
     const dispatch = useDispatch()
     const stateData = useSelector((state) => state.data)
-    const { isAfterReload, readingQuerys } = stateData
+    const isAfterReload = useSelector((state) => state.general.isAfterReload)
+    const params = useParams()
+    console.log(
+        params,
+        generateRestRangeParam(params),
+        retrieveChapterByParamString(generateRestRangeParam(params)[0])
+    )
+    const { readingQuerys } = stateData
     const { chapterVerseInfo } = stateData.translation?.info
+    let currentBookIndex = readingQuerys[0]?.book?.index
+    if (!currentBookIndex) {
+        const { books1: bookSlugOfParam } = useParams()
+        currentBookIndex = retrieveBookIndexBySlug(bookSlugOfParam)
+    }
     const bookRaws = stateData.raws.filter((raw) => {
-        return raw.book === Number(readingQuerys[0].book.index)
+        return raw.book === Number(currentBookIndex)
     })
     const selectedRaws = useSelector((state) => state.selected.raws)
 
@@ -33,11 +46,13 @@ export const Verses = () => {
         chapterVerseInfo
     )
 
-    const urlParams = isAfterReload
-        ? generateRestRangeParam(useParams())
-        : [
-              `${readingQuerys[0].book.slug}${readingQuerys[0].chapter}:${readingQuerys[0].verse}`,
-          ]
+    let urlParams = generateRestRangeParam(params)
+    if (isAfterReload && readingQuerys.length > 0) {
+        urlParams = [
+            `${readingQuerys[0].book.slug}${readingQuerys[0].chapter}:${readingQuerys[0].verse}`,
+        ]
+    }
+
     const currentChapter = retrieveChapterByParamString(urlParams[0])
 
     const { data, error, isFetching } = useGetBibleRawQuery({

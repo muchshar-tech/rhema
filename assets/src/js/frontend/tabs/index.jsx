@@ -35,11 +35,7 @@ const Tab = ({ isActive, onClick, children }) => {
 }
 
 const BookTab = ({ classname: extraClassName = '' }) => {
-    const triggerTabs = useSelector((state) => ({
-        books: state.general.booksSelector.books,
-        chapters: state.general.booksSelector.chapters,
-        verses: state.general.booksSelector.verses,
-    }))
+    const triggerTabs = useSelector((state) => state.general.booksSelector)
     const classNames = [
         'border-t',
         'justify-around',

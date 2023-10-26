@@ -103,13 +103,13 @@ export const generateRandomlyChapter = (assignSchema) => {
     }
     const { chapterVerseInfo } = data.translation.info
     const bookData = [...data.books.old, ...data.books.new]
-    const bookIndexRandomly = Math.floor(Math.random() * bookData.length)
+    const bookIndexRandomly = Math.floor(Math.random() * bookData.length) + 1
     const maxChapterNumberOfCurrentBook = max(
         Object.keys(chapterVerseInfo[bookIndexRandomly]).map((num) =>
             Number(num)
         )
     )
-    const chapterIndexRandomly = Math.floor(Math.random() * maxChapterNumberOfCurrentBook)
+    const chapterIndexRandomly = Math.floor(Math.random() * maxChapterNumberOfCurrentBook) + 1 
     return {
         book: bookData[bookIndexRandomly],
         chapter: chapterIndexRandomly,

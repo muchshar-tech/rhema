@@ -67,6 +67,14 @@ const Top = ({ children }) => {
     )
 }
 
+const Bottom = ({ children }) => {
+    return (
+        <div className="flex flex-wrap items-center text-gray-800 bg-white border-t text-12px md:text-14px drop-shadow-sm">
+            {children}
+        </div>
+    )
+}
+
 const Body = ({ children }) => {
     const showScroll = useSelector((state) => {
         const someDrawerOpend = Object.keys(state.general.drawer).some(
@@ -141,8 +149,7 @@ const Content = ({
         (state) => state.general.pageSwipper
     )
     const [movePercentage, setMovePercentage] = useState(0)
-    const onSwipeStart = (event) => {
-    }
+    const onSwipeStart = (event) => {}
 
     const onSwipeMove = (position, event) => {
         const movePercentageX = Number(
@@ -211,7 +218,7 @@ const Content = ({
         'h-full',
         'overflow-y-auto',
         'px-10',
-        'py-10'
+        'py-10',
     ]
 
     useEffect(() => {
@@ -271,7 +278,7 @@ const BbileRaws = ({
     const chapterPaged = currentChapter
     let currentBookIndex = readingQuerys[0]?.book?.index
     if (!currentBookIndex) {
-        const {books1: bookSlugOfParam} = useParams()
+        const { books1: bookSlugOfParam } = useParams()
         currentBookIndex = retrieveBookIndexBySlug(bookSlugOfParam)
     }
 
@@ -299,9 +306,7 @@ const BbileRaws = ({
             }
             return {
                 maxVerseNumber:
-                    chapterVerseInfo[currentBookIndex][
-                        slotChapterNumber
-                    ],
+                    chapterVerseInfo[currentBookIndex][slotChapterNumber],
                 chapterNumber: slotChapterNumber,
             }
         })
@@ -331,7 +336,6 @@ const BbileRaws = ({
             return chapterNumber >= middleChapterIndex ? 1 : -1
         })
     }, [bookRaws, chapterPaged])
-
 
     const onMoveFirstPage = () => {
         console.log('run onMoveFirstPage')
@@ -364,9 +368,7 @@ const BbileRaws = ({
             {
                 book: { ...readingQuerys[1].book },
                 chapter: newChapterPaged,
-                verse: chapterVerseInfo[currentBookIndex][
-                    newChapterPaged
-                ],
+                verse: chapterVerseInfo[currentBookIndex][newChapterPaged],
             },
         ]
         // setChapterPaged(newChapterPaged)
@@ -569,4 +571,4 @@ Drawer.SelectedRaw = function SelectedRaw() {
     )
 }
 
-export { AppContainer, Body, Content, RawsContent, Drawer, Page, Top }
+export { AppContainer, Body, Content, RawsContent, Drawer, Page, Top, Bottom }

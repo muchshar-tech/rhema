@@ -20,7 +20,12 @@
         "generate:functional": "vendor/bin/codecept generate:cept functional",
         "generate:acceptance": "vendor/bin/codecept generate:test acceptance",
         "phpcs": "./vendor/bin/phpcs",
-        "phpcsi": "./vendor/bin/phpcs -i"
+        "phpcsi": "./vendor/bin/phpcs -i",
+        "production": [
+            "yarn prod",
+            "composer install --no-dev --optimize-autoloader",
+            "php production_copy.php"
+        ]
     },
     "require": {
         "php": ">=7.1",

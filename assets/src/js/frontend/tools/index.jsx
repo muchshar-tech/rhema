@@ -1,5 +1,4 @@
 import React, { forwardRef } from 'react'
-import intersection from 'lodash/intersection'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { HiOutlineSearch } from 'react-icons/hi'

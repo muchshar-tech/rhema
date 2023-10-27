@@ -33,3 +33,6 @@ cache
 #ENV
 .env
 .vscode
+
+#Production
+publish

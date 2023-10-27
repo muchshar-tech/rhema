@@ -57,7 +57,14 @@ class Enqueue extends Base {
 		];
 		$enqueue_scripts = [
 			[
-				'deps'      => [ 'wp-i18n' ],
+				'deps'      => [],
+				'handle'    => 'vendors',
+				'in_footer' => true,
+				'source'    => plugins_url( '/assets/public/js/vendors.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
+				'version'   => $this->plugin->version(),
+			],
+			[
+				'deps'      => [ 'wp-i18n', 'vendors' ],
 				'handle'    => '6c578e31e43e3a17dea38f6a319e105d',
 				'in_footer' => true,
 				'source'    => plugins_url( '/assets/public/js/frontend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
@@ -114,7 +121,7 @@ class Enqueue extends Base {
 		wp_localize_script( '6c578e31e43e3a17dea38f6a319e105d', 'LOCALIZE_SCRIPT_VARIABLES',
 			[
 				'RHEMA_SITE_ROOT'  => get_site_url( null, '', 'relative' ),
-				'RHEMA_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver={$this->plugin->version()}", RHEMA_PLUGIN_FILE ),
+				'RHEMA_FRONTEND_CSS_URL'  => plugins_url( "/assets/public/css/frontend.css?ver=1.0.112", RHEMA_PLUGIN_FILE ),
 				'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
 				'RHEMA_WP_QUERY_VARS' => $wp_query->query_vars,
 				'RHEMA_DOMAIN_TEXT' => $this->plugin->textDomain(),

@@ -58,12 +58,16 @@ if ( ! class_exists( '\Rhema\Bootstrap' ) ) {
 add_action(
 	'plugins_loaded',
 	static function () use ( $rhema_autoloader ) {
+		try {
+			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
+			$dotenv->load();
+		} catch ( Exception $e ) {
+			do_action( 'qm/debug', $e->getMessage() );
+		}
 		/**
 		 * @see \Rhema\Bootstrap
 		 */
 		try {
-			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
-			$dotenv->load();
 			new \Rhema\Bootstrap( $rhema_autoloader );
 		} catch ( Exception $e ) {
 			wp_die( __( 'Rhema is unable to run the Bootstrap class.', 'rhema' ) );

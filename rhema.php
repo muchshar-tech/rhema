@@ -62,7 +62,9 @@ add_action(
 			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
 			$dotenv->load();
 		} catch ( Exception $e ) {
-			do_action( 'qm/debug', $e->getMessage() );
+			if ( defined( 'WP_DEBUG' ) || WP_DEBUG ) {
+				do_action( 'qm/debug', $e->getMessage() );
+			}
 		}
 		/**
 		 * @see \Rhema\Bootstrap

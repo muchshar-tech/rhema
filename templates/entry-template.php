@@ -11,11 +11,11 @@
 ?>
 
 <?php
+get_template_part( 'header' );
 /**
  * @see \Rhema\App\Frontend\Templates
  * @var $args
  */
-get_header();
 $rhema_bible_title = rhema()->bible()->generateQueryText();
 $rhema_bible_body = rhema()->bible()->getInitialRaw();
 if ( is_wp_error( $rhema_bible_body ) ) {
@@ -39,5 +39,5 @@ if ( is_wp_error( $rhema_bible_body ) ) {
 	<!-- /wp:group -->
 <!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
 <?php
-get_footer();
+get_template_part( 'footer' );
 ?>

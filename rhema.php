@@ -11,7 +11,7 @@
  * Plugin Name:      Rhema
  * Plugin URI:       https://rhema.muchshar.com
  * Description:      Rhema
- * Version:          1.0.0.002
+ * Version:          1.0.0.003
  * DataBase Version: 1.0.0
  * Author:           TXIpartners
  * Author URI:       https://rhema.muchshar.com
@@ -59,7 +59,7 @@ add_action(
 	'plugins_loaded',
 	static function () use ( $rhema_autoloader ) {
 		try {
-			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
+			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__, null, false );
 			$dotenv->load();
 		} catch ( Exception $e ) {}
 		/**

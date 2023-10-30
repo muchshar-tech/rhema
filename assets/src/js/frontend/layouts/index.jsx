@@ -155,9 +155,9 @@ const Content = ({
         const movePercentageX = Number(
             ((position.x / Number(screen.width)) * 100).toFixed(1)
         )
-        const movePercentageY = Number(
-            ((position.y / Number(screen.width)) * 100).toFixed(1)
-        )
+        // const movePercentageY = Number(
+        //     ((position.y / Number(screen.width)) * 100).toFixed(1)
+        // )
         // console.log(`Moved ${position.y} pixels vertically`, event)
         // console.log(`Moved ${movePercentageY} percentage vertically`, event)
         setMovePercentage(
@@ -172,7 +172,7 @@ const Content = ({
 
     const onSwipeEnd = (event) => {
         const moveAbsPercentage = Math.abs(movePercentage)
-        if (moveAbsPercentage > 30) {
+        if (moveAbsPercentage > 25) {
             const nextPagePos = clamp(
                 movePercentage < 0 ? pagePos + 1 : pagePos - 1,
                 0,
@@ -211,7 +211,7 @@ const Content = ({
     ].join(' ')
 
     const pageClassNames = [
-        ...(movePercentage > 0 || onTransition
+        ...(onTransition
             ? ['transition-transform', 'ease-out', 'duration-500']
             : []),
         'min-w-full',
@@ -227,7 +227,8 @@ const Content = ({
 
     return (
         <Swipe
-            onSwipeStart={onSwipeStart}
+            onSwipeLeft={onSwipeStart}
+            onSwipeRight={onSwipeStart}
             onSwipeMove={onSwipeMove}
             onSwipeEnd={onSwipeEnd}
             className={classNames}

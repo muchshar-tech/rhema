@@ -1325,11 +1325,16 @@ var PageWrapper = function PageWrapper(_ref5) {
 var Content = function Content(_ref6) {
   var _ref6$pagePosition = _ref6.pagePosition,
       pagePosition = _ref6$pagePosition === void 0 ? 'middle' : _ref6$pagePosition,
+      currentBookMaxChapter = _ref6.currentBookMaxChapter,
+      currentChapter = _ref6.currentChapter,
       onMoveFirstPage = _ref6.onMoveFirstPage,
       onMoveLastPage = _ref6.onMoveLastPage,
       onCompletedMove = _ref6.onCompletedMove,
       children = _ref6.children;
   var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_2__.useDispatch)();
+  var changePageMovePercentageThreshold = 6;
+  var maxChapterNumberOfCurrentBook = parseInt(currentBookMaxChapter) || 1;
+  var currentChapterNumber = parseInt(currentChapter) || 1;
   var initialPos = pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 1;
   var showMain = (0,react_redux__WEBPACK_IMPORTED_MODULE_2__.useSelector)(function (state) {
     return state.general.headersSwitch.main || state.general.headersSwitch.selection;
@@ -1344,18 +1349,18 @@ var Content = function Content(_ref6) {
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
       _useState2 = _slicedToArray(_useState, 2),
       movePercentage = _useState2[0],
-      setMovePercentage = _useState2[1];
+      setMovePercentage = _useState2[1]; // const onSwipeStart = (event) => {}
 
-  var onSwipeStart = function onSwipeStart(event) {};
 
   var onSwipeMove = function onSwipeMove(position, event) {
+    event.preventDefault();
     var movePercentageX = Number((position.x / Number(screen.width) * 100).toFixed(1)); // const movePercentageY = Number(
     //     ((position.y / Number(screen.width)) * 100).toFixed(1)
     // )
     // console.log(`Moved ${position.y} pixels vertically`, event)
     // console.log(`Moved ${movePercentageY} percentage vertically`, event)
 
-    setMovePercentage((0,lodash__WEBPACK_IMPORTED_MODULE_1__.clamp)(movePercentageX, pagePosition !== 'right' ? -99 : -20, pagePosition !== 'left' ? 99 : 20));
+    setMovePercentage((0,lodash__WEBPACK_IMPORTED_MODULE_1__.clamp)(movePercentageX, pagePosition !== 'right' ? -99 : -changePageMovePercentageThreshold, pagePosition !== 'left' ? 99 : changePageMovePercentageThreshold));
     dispatch((0,_assets_js_frontend_states_generalSlice__WEBPACK_IMPORTED_MODULE_8__.updatePageSwipper)({
       onTransition: true
     }));
@@ -1364,7 +1369,7 @@ var Content = function Content(_ref6) {
   var onSwipeEnd = function onSwipeEnd(event) {
     var moveAbsPercentage = Math.abs(movePercentage);
 
-    if (moveAbsPercentage > 25) {
+    if (moveAbsPercentage > changePageMovePercentageThreshold) {
       var nextPagePos = (0,lodash__WEBPACK_IMPORTED_MODULE_1__.clamp)(movePercentage < 0 ? pagePos + 1 : pagePos - 1, 0, 2);
 
       if (nextPagePos === 0 || initialPos === 2 && nextPagePos === 1) {
@@ -1390,7 +1395,18 @@ var Content = function Content(_ref6) {
       return;
     }
 
-    onCompletedMove(initialPos > pagePos ? -1 : initialPos < pagePos ? 1 : 0, initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos, false);
+    var offsetNext = 0;
+    var pagePosNext = pagePos;
+
+    if (initialPos > pagePos && currentChapterNumber - 1 > 0) {
+      offsetNext = -1;
+    }
+
+    if (initialPos < pagePos && currentChapterNumber + 1 <= maxChapterNumberOfCurrentBook) {
+      offsetNext = 1;
+    }
+
+    onCompletedMove(offsetNext, initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos, false);
   };
 
   var classNames = [].concat(_toConsumableArray(showMain ? ['flex'] : ['hidden']), ['items-start', 'relative', 'flex', 'overflow-hidden', 'h-full']).join(' ');
@@ -1401,8 +1417,6 @@ var Content = function Content(_ref6) {
     }));
   }, [initialPos]);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react_easy_swipe__WEBPACK_IMPORTED_MODULE_3___default()), {
-    onSwipeLeft: onSwipeStart,
-    onSwipeRight: onSwipeStart,
     onSwipeMove: onSwipeMove,
     onSwipeEnd: onSwipeEnd,
     className: classNames
@@ -1433,10 +1447,10 @@ var BbileRaws = function BbileRaws(_ref7) {
   var readingQuerys = _ref7.readingQuerys,
       bookRaws = _ref7.bookRaws,
       chapterVerseInfo = _ref7.chapterVerseInfo,
-      currentChapter = _ref7.currentChapter,
       selectedRaws = _ref7.selectedRaws;
   var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_2__.useDispatch)();
-  var chapterPaged = currentChapter;
+  var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_11__.useNavigate)();
+  var chapterPaged = parseInt(readingQuerys[0].chapter);
   var currentBookIndex = (_readingQuerys$ = readingQuerys[0]) === null || _readingQuerys$ === void 0 ? void 0 : (_readingQuerys$$book = _readingQuerys$.book) === null || _readingQuerys$$book === void 0 ? void 0 : _readingQuerys$$book.index;
 
   if (!currentBookIndex) {
@@ -1523,10 +1537,14 @@ var BbileRaws = function BbileRaws(_ref7) {
       pagePos: pagePos,
       onTransition: onTransition
     }));
+    navigate((0,_components_frontend_utilities__WEBPACK_IMPORTED_MODULE_9__.generateVerseUrl)(newReadingQuerys[0].book.slug, newChapterPaged, 1));
   };
 
+  console.log('renderChapters', renderChapters);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Content, {
     pagePosition: chapterPaged === 1 ? 'left' : chapterPaged > 1 && chapterPaged < maxChapterNumberOfCurrentBook ? 'middle' : 'right',
+    currentBookMaxChapter: maxChapterNumberOfCurrentBook,
+    currentChapter: chapterPaged,
     onMoveFirstPage: onMoveFirstPage,
     onMoveLastPage: onMoveLastPage,
     onCompletedMove: onCompletedMove
@@ -1553,10 +1571,6 @@ var BbileRaws = function BbileRaws(_ref7) {
 
 var RawsContent = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().memo(BbileRaws, function (prev, next) {
   if (!(0,lodash__WEBPACK_IMPORTED_MODULE_1__.isEqual)(prev.chapterVerseInfo, next.chapterVerseInfo)) {
-    return false;
-  }
-
-  if (!(0,lodash__WEBPACK_IMPORTED_MODULE_1__.isEqual)(prev.currentChapter, next.currentChapter)) {
     return false;
   }
 

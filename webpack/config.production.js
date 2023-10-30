@@ -55,6 +55,11 @@ module.exports = (projectOptions) => {
         ...Base.optimizations,
         minimizer: [new TerserPlugin({
             extractComments: true,
+            terserOptions: {
+                compress: {
+                    drop_console: true
+                }
+            }
         })],
     }
 

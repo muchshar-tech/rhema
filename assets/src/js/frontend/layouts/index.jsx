@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { max, isEqual, clamp } from 'lodash'
 import { useSelector, useDispatch } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiMinusSquare } from 'react-icons/fi'
 import Swipe from 'react-easy-swipe'
@@ -13,7 +13,10 @@ import * as Tools from '@components/frontend/tools'
 import { usePrefetch } from '@components/services'
 import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
 import { updatePageSwipper } from '@assets/js/frontend/states/generalSlice'
-import { retrieveBookIndexBySlug } from '@components/frontend/utilities'
+import {
+    generateVerseUrl,
+    retrieveBookIndexBySlug,
+} from '@components/frontend/utilities'
 
 const AppContainer = ({ children }) => {
     const showSelection = useSelector(
@@ -131,12 +134,17 @@ const PageWrapper = ({
 
 const Content = ({
     pagePosition = 'middle',
+    currentBookMaxChapter,
+    currentChapter,
     onMoveFirstPage,
     onMoveLastPage,
     onCompletedMove,
     children,
 }) => {
     const dispatch = useDispatch()
+    const changePageMovePercentageThreshold = 6
+    const maxChapterNumberOfCurrentBook = parseInt(currentBookMaxChapter) || 1
+    const currentChapterNumber = parseInt(currentChapter) || 1
     const initialPos =
         pagePosition === 'middle' ? 1 : pagePosition === 'left' ? 0 : 1
 
@@ -149,9 +157,10 @@ const Content = ({
         (state) => state.general.pageSwipper
     )
     const [movePercentage, setMovePercentage] = useState(0)
-    const onSwipeStart = (event) => {}
+    // const onSwipeStart = (event) => {}
 
     const onSwipeMove = (position, event) => {
+        event.preventDefault()
         const movePercentageX = Number(
             ((position.x / Number(screen.width)) * 100).toFixed(1)
         )
@@ -163,8 +172,10 @@ const Content = ({
         setMovePercentage(
             clamp(
                 movePercentageX,
-                pagePosition !== 'right' ? -99 : -20,
-                pagePosition !== 'left' ? 99 : 20
+                pagePosition !== 'right'
+                    ? -99
+                    : -changePageMovePercentageThreshold,
+                pagePosition !== 'left' ? 99 : changePageMovePercentageThreshold
             )
         )
         dispatch(updatePageSwipper({ onTransition: true }))
@@ -172,7 +183,7 @@ const Content = ({
 
     const onSwipeEnd = (event) => {
         const moveAbsPercentage = Math.abs(movePercentage)
-        if (moveAbsPercentage > 25) {
+        if (moveAbsPercentage > changePageMovePercentageThreshold) {
             const nextPagePos = clamp(
                 movePercentage < 0 ? pagePos + 1 : pagePos - 1,
                 0,
@@ -194,8 +205,19 @@ const Content = ({
         if (pagePos === initialPos) {
             return
         }
+        let offsetNext = 0
+        let pagePosNext = pagePos
+        if (initialPos > pagePos && currentChapterNumber - 1 > 0) {
+            offsetNext = -1
+        }
+        if (
+            initialPos < pagePos &&
+            currentChapterNumber + 1 <= maxChapterNumberOfCurrentBook
+        ) {
+            offsetNext = 1
+        }
         onCompletedMove(
-            initialPos > pagePos ? -1 : initialPos < pagePos ? 1 : 0,
+            offsetNext,
             initialPos === 0 ? 1 : initialPos === 2 ? 1 : initialPos,
             false
         )
@@ -227,8 +249,6 @@ const Content = ({
 
     return (
         <Swipe
-            onSwipeLeft={onSwipeStart}
-            onSwipeRight={onSwipeStart}
             onSwipeMove={onSwipeMove}
             onSwipeEnd={onSwipeEnd}
             className={classNames}
@@ -272,11 +292,11 @@ const BbileRaws = ({
     readingQuerys,
     bookRaws,
     chapterVerseInfo,
-    currentChapter,
     selectedRaws,
 }) => {
     const dispatch = useDispatch()
-    const chapterPaged = currentChapter
+    const navigate = useNavigate()
+    const chapterPaged = parseInt(readingQuerys[0].chapter)
     let currentBookIndex = readingQuerys[0]?.book?.index
     if (!currentBookIndex) {
         const { books1: bookSlugOfParam } = useParams()
@@ -341,6 +361,7 @@ const BbileRaws = ({
     const onMoveFirstPage = () => {
         console.log('run onMoveFirstPage')
         const newChapterPaged = chapterPaged - 1
+
         prefetchRaw({
             ranges: [`${readingQuerys[0].book.slug}${newChapterPaged}:1`],
             withPrevChapter: true,
@@ -380,8 +401,11 @@ const BbileRaws = ({
                 onTransition,
             })
         )
+        navigate(
+            generateVerseUrl(newReadingQuerys[0].book.slug, newChapterPaged, 1)
+        )
     }
-
+    console.log('renderChapters', renderChapters)
     return (
         <Content
             pagePosition={
@@ -392,6 +416,8 @@ const BbileRaws = ({
                     ? 'middle'
                     : 'right'
             }
+            currentBookMaxChapter={maxChapterNumberOfCurrentBook}
+            currentChapter={chapterPaged}
             onMoveFirstPage={onMoveFirstPage}
             onMoveLastPage={onMoveLastPage}
             onCompletedMove={onCompletedMove}
@@ -432,9 +458,6 @@ const BbileRaws = ({
 }
 const RawsContent = React.memo(BbileRaws, (prev, next) => {
     if (!isEqual(prev.chapterVerseInfo, next.chapterVerseInfo)) {
-        return false
-    }
-    if (!isEqual(prev.currentChapter, next.currentChapter)) {
         return false
     }
     if (!isEqual(prev.readingQuerys, next.readingQuerys)) {

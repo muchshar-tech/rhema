@@ -11,7 +11,7 @@
  * Plugin Name:      Rhema
  * Plugin URI:       https://rhema.muchshar.com
  * Description:      Rhema
- * Version:          1.0.0.003
+ * Version:          1.0.0.005
  * DataBase Version: 1.0.0
  * Author:           TXIpartners
  * Author URI:       https://rhema.muchshar.com

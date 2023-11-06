@@ -160,10 +160,15 @@ const Content = ({
     // const onSwipeStart = (event) => {}
 
     const onSwipeMove = (position, event) => {
-        event.preventDefault()
         const movePercentageX = Number(
             ((position.x / Number(screen.width)) * 100).toFixed(1)
         )
+        if (
+            movePercentageX > changePageMovePercentageThreshold &&
+            movePercentageX < -changePageMovePercentageThreshold
+        ) {
+            event.preventDefault()
+        }
         // const movePercentageY = Number(
         //     ((position.y / Number(screen.width)) * 100).toFixed(1)
         // )

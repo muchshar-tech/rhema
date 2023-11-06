@@ -22,7 +22,7 @@ if ( is_wp_error( $rhema_bible_body ) ) {
 	$rhema_bible_body = [];
 }
 ?>
-<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+<!-- wp:template-part {"slug":"header","tagName":"header","className":"site-header"} /-->
 	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 		<!-- wp:post-template {"align":"wide"} -->
 <bible-app id="bible-app">
@@ -37,7 +37,7 @@ if ( is_wp_error( $rhema_bible_body ) ) {
 </bible-app>
 		<!-- /wp:post-template -->
 	<!-- /wp:group -->
-<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
+<!-- wp:template-part {"slug":"footer","tagName":"footer","className":"site-footer"} /-->
 <?php
 get_template_part( 'footer' );
 ?>

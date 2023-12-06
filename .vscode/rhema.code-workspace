@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"php.stubs": [
+			"*",
+			"../../../wp-includes",
+        	"../../../wp-admin"
+		]
+	}
+}

@@ -8,8 +8,8 @@ package-lock.json
 yarn.lock
 
 # Composer
-vendor
 composer.lock
+vendor
 
 # PHP
 phpunit.xml
@@ -30,4 +30,9 @@ phpcs.xml
 *.lock
 cache
 
-# Wordpress Dev Tool
+#ENV
+.env
+.vscode
+
+#Production
+publish

@@ -1,0 +1,935 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Rhema 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rhema\n"
+"POT-Creation-Date: 2023-06-13T08:29:51+00:00\n"
+"PO-Revision-Date: 2023-06-13 16:33+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.3.1\n"
+
+#. Plugin Name of the plugin
+#. Description of the plugin
+msgid "Rhema"
+msgstr "Rhema"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://txipartners.com"
+msgstr "https://txipartners.com"
+
+#. Author of the plugin
+msgid "TXIpartners"
+msgstr "TXIpartners"
+
+#: src/Common/Constants.php:142
+msgid "abbr/gen"
+msgstr "Gen."
+
+#: src/Common/Constants.php:144
+msgid "Genesis"
+msgstr "Genesis"
+
+#: src/Common/Constants.php:149
+msgid "abbr/ex"
+msgstr "Exo."
+
+#: src/Common/Constants.php:151
+msgid "Exodus"
+msgstr "Exodus"
+
+#: src/Common/Constants.php:156
+msgid "abbr/lev"
+msgstr "Lev."
+
+#: src/Common/Constants.php:158
+msgid "Leviticus"
+msgstr "Leviticus"
+
+#: src/Common/Constants.php:163
+msgid "abbr/num"
+msgstr "Num."
+
+#: src/Common/Constants.php:165
+msgid "Numbers"
+msgstr "Numbers"
+
+#: src/Common/Constants.php:170
+msgid "abbr/deut"
+msgstr "Deu."
+
+#: src/Common/Constants.php:172
+msgid "Deuteronomy"
+msgstr "Deuteronomy"
+
+#: src/Common/Constants.php:177
+msgid "abbr/josh"
+msgstr "Jos."
+
+#: src/Common/Constants.php:179
+msgid "Joshua"
+msgstr "Joshua"
+
+#: src/Common/Constants.php:184
+msgid "abbr/judg"
+msgstr "Jug."
+
+#: src/Common/Constants.php:186
+msgid "Judges"
+msgstr "Judges"
+
+#: src/Common/Constants.php:191
+msgid "abbr/rut"
+msgstr "Rut."
+
+#: src/Common/Constants.php:193
+msgid "Ruth"
+msgstr "Ruth"
+
+#: src/Common/Constants.php:198
+msgid "abbr/1sam"
+msgstr "1Sa."
+
+#: src/Common/Constants.php:200
+msgid "1 Samuel"
+msgstr "1 Samuel"
+
+#: src/Common/Constants.php:205
+msgid "abbr/2sam"
+msgstr "2Sa."
+
+#: src/Common/Constants.php:207
+msgid "2 Samuel"
+msgstr "2 Samuel"
+
+#: src/Common/Constants.php:212
+msgid "abbr/1ki"
+msgstr "1Ki."
+
+#: src/Common/Constants.php:214
+msgid "1 Kings"
+msgstr "1 Kings"
+
+#: src/Common/Constants.php:219
+msgid "abbr/2ki"
+msgstr "2Ki."
+
+#: src/Common/Constants.php:221
+msgid "2 Kings"
+msgstr "2 Kings"
+
+#: src/Common/Constants.php:226
+msgid "abbr/1chron"
+msgstr "1Ch."
+
+#: src/Common/Constants.php:228
+msgid "1 Chronicles"
+msgstr "1 Chronicles"
+
+#: src/Common/Constants.php:233
+msgid "abbr/2chron"
+msgstr "2Ch."
+
+#: src/Common/Constants.php:235
+msgid "2 Chronicles"
+msgstr "2 Chronicles"
+
+#: src/Common/Constants.php:240
+msgid "abbr/ezr"
+msgstr "Ezr."
+
+#: src/Common/Constants.php:242
+msgid "Ezra"
+msgstr "Ezra"
+
+#: src/Common/Constants.php:247
+msgid "abbr/neh"
+msgstr "Neh."
+
+#: src/Common/Constants.php:249
+msgid "Nehemiah"
+msgstr "Nehemiah"
+
+#: src/Common/Constants.php:254
+msgid "abbr/est"
+msgstr "Est."
+
+#: src/Common/Constants.php:256
+msgid "Esther"
+msgstr "Esther"
+
+#: src/Common/Constants.php:261
+msgid "abbr/job"
+msgstr "Job"
+
+#: src/Common/Constants.php:263
+msgid "Job"
+msgstr "Job"
+
+#: src/Common/Constants.php:268
+msgid "abbr/ps"
+msgstr "Psm."
+
+#: src/Common/Constants.php:270
+msgid "Psalms"
+msgstr "Psalms"
+
+#: src/Common/Constants.php:275
+msgid "abbr/prov"
+msgstr "Pro."
+
+#: src/Common/Constants.php:277
+msgid "Proverbs"
+msgstr "Proverbs"
+
+#: src/Common/Constants.php:282
+msgid "abbr/eccles"
+msgstr "Ecc."
+
+#: src/Common/Constants.php:284
+msgid "Ecclesiastes"
+msgstr "Ecclesiastes"
+
+#: src/Common/Constants.php:289
+msgid "abbr/song"
+msgstr "Son."
+
+#: src/Common/Constants.php:291
+msgid "Song of Solomon"
+msgstr "Song of Solomon"
+
+#: src/Common/Constants.php:296
+msgid "abbr/isa"
+msgstr "Isa."
+
+#: src/Common/Constants.php:298
+msgid "Isaiah"
+msgstr "Isaiah"
+
+#: src/Common/Constants.php:303
+msgid "abbr/jer"
+msgstr "Jer."
+
+#: src/Common/Constants.php:305
+msgid "Jeremiah"
+msgstr "Jeremiah"
+
+#: src/Common/Constants.php:310
+msgid "abbr/lam"
+msgstr "Lam."
+
+#: src/Common/Constants.php:312
+msgid "Lamentations"
+msgstr "Lamentations"
+
+#: src/Common/Constants.php:317
+msgid "abbr/ezek"
+msgstr "Eze."
+
+#: src/Common/Constants.php:319
+msgid "Ezekiel"
+msgstr "Ezekiel"
+
+#: src/Common/Constants.php:324
+msgid "abbr/dan"
+msgstr "Dan."
+
+#: src/Common/Constants.php:326
+msgid "Daniel"
+msgstr "Daniel"
+
+#: src/Common/Constants.php:331
+msgid "abbr/hos"
+msgstr "Hos."
+
+#: src/Common/Constants.php:333
+msgid "Hosea"
+msgstr "Hosea"
+
+#: src/Common/Constants.php:338
+msgid "abbr/joel"
+msgstr "Joe."
+
+#: src/Common/Constants.php:340
+msgid "Joel"
+msgstr "Joel"
+
+#: src/Common/Constants.php:345
+msgid "abbr/amos"
+msgstr "Amo."
+
+#: src/Common/Constants.php:347
+msgid "Amos"
+msgstr "Amos"
+
+#: src/Common/Constants.php:352
+msgid "abbr/obad"
+msgstr "Oba."
+
+#: src/Common/Constants.php:354
+msgid "Obadiah"
+msgstr "Obadiah"
+
+#: src/Common/Constants.php:359
+msgid "abbr/jonah"
+msgstr "Jon."
+
+#: src/Common/Constants.php:361
+msgid "Jonah"
+msgstr "Jonah"
+
+#: src/Common/Constants.php:366
+msgid "abbr/mic"
+msgstr "Mic."
+
+#: src/Common/Constants.php:368
+msgid "Micah"
+msgstr "Micah"
+
+#: src/Common/Constants.php:373
+msgid "abbr/nah"
+msgstr "Nah."
+
+#: src/Common/Constants.php:375
+msgid "Nahum"
+msgstr "Nahum"
+
+#: src/Common/Constants.php:380
+msgid "abbr/hab"
+msgstr "Hab."
+
+#: src/Common/Constants.php:382
+msgid "Habakkuk"
+msgstr "Habakkuk"
+
+#: src/Common/Constants.php:387
+msgid "abbr/zeph"
+msgstr "Zep."
+
+#: src/Common/Constants.php:389
+msgid "Zephaniah"
+msgstr "Zephaniah"
+
+#: src/Common/Constants.php:394
+msgid "abbr/hag"
+msgstr "Hag."
+
+#: src/Common/Constants.php:396
+msgid "Haggai"
+msgstr "Haggai"
+
+#: src/Common/Constants.php:401
+msgid "abbr/zech"
+msgstr "Zec."
+
+#: src/Common/Constants.php:403
+msgid "Zechariah"
+msgstr "Zechariah"
+
+#: src/Common/Constants.php:408
+msgid "abbr/mal"
+msgstr "Mal."
+
+#: src/Common/Constants.php:410
+msgid "Malachi"
+msgstr "Malachi"
+
+#: src/Common/Constants.php:416
+msgid "abbr/matt"
+msgstr "Mat."
+
+#: src/Common/Constants.php:418
+msgid "Matthew"
+msgstr "Matthew"
+
+#: src/Common/Constants.php:423
+msgid "abbr/mark"
+msgstr "Mak."
+
+#: src/Common/Constants.php:425
+msgid "Mark"
+msgstr "Mark"
+
+#: src/Common/Constants.php:430
+msgid "abbr/luke"
+msgstr "Luk."
+
+#: src/Common/Constants.php:432
+msgid "Luke"
+msgstr "Luke"
+
+#: src/Common/Constants.php:437
+msgid "abbr/john"
+msgstr "Jhn."
+
+#: src/Common/Constants.php:439
+msgid "John"
+msgstr "John"
+
+#: src/Common/Constants.php:444
+msgid "abbr/acts"
+msgstr "Act."
+
+#: src/Common/Constants.php:446
+msgid "Acts"
+msgstr "Acts"
+
+#: src/Common/Constants.php:451
+msgid "abbr/rom"
+msgstr "Rom."
+
+#: src/Common/Constants.php:453
+msgid "Romans"
+msgstr "Romans"
+
+#: src/Common/Constants.php:458
+msgid "abbr/1cor"
+msgstr "1Co."
+
+#: src/Common/Constants.php:460
+msgid "1 Corinthians"
+msgstr "1 Corinthians"
+
+#: src/Common/Constants.php:465
+msgid "abbr/2cor"
+msgstr "2Co."
+
+#: src/Common/Constants.php:467
+msgid "2 Corinthians"
+msgstr "2 Corinthians"
+
+#: src/Common/Constants.php:472
+msgid "abbr/gal"
+msgstr "Gal."
+
+#: src/Common/Constants.php:474
+msgid "Galatians"
+msgstr "Galatians"
+
+#: src/Common/Constants.php:479
+msgid "abbr/eph"
+msgstr "Eph."
+
+#: src/Common/Constants.php:481
+msgid "Ephesians"
+msgstr "Ephesians"
+
+#: src/Common/Constants.php:486
+msgid "abbr/phil"
+msgstr "Phl."
+
+#: src/Common/Constants.php:488
+msgid "Philippians"
+msgstr "Philippians"
+
+#: src/Common/Constants.php:493
+msgid "abbr/col"
+msgstr "Col."
+
+#: src/Common/Constants.php:495
+msgid "Colossians"
+msgstr "Colossians"
+
+#: src/Common/Constants.php:500
+msgid "abbr/1thess"
+msgstr "1Ts."
+
+#: src/Common/Constants.php:502
+msgid "1 Thessalonians"
+msgstr "1 Thessalonians"
+
+#: src/Common/Constants.php:507
+msgid "abbr/2thess"
+msgstr "2Ts."
+
+#: src/Common/Constants.php:509
+msgid "2 Thessalonians"
+msgstr "2 Thessalonians"
+
+#: src/Common/Constants.php:514
+msgid "abbr/1tim"
+msgstr "1Ti."
+
+#: src/Common/Constants.php:516
+msgid "1 Timothy"
+msgstr "1 Timothy"
+
+#: src/Common/Constants.php:521
+msgid "abbr/2tim"
+msgstr "2Ti."
+
+#: src/Common/Constants.php:523
+msgid "2 Timothy"
+msgstr "2 Timothy"
+
+#: src/Common/Constants.php:528
+msgid "abbr/titus"
+msgstr "Tit."
+
+#: src/Common/Constants.php:530
+msgid "Titus"
+msgstr "Titus"
+
+#: src/Common/Constants.php:535
+msgid "abbr/philem"
+msgstr "Phm."
+
+#: src/Common/Constants.php:537
+msgid "Philemon"
+msgstr "Philemon"
+
+#: src/Common/Constants.php:542
+msgid "abbr/heb"
+msgstr "Heb."
+
+#: src/Common/Constants.php:544
+msgid "Hebrews"
+msgstr "Hebrews"
+
+#: src/Common/Constants.php:549
+msgid "abbr/james"
+msgstr "Jas."
+
+#: src/Common/Constants.php:551
+msgid "James"
+msgstr "James"
+
+#: src/Common/Constants.php:556
+msgid "abbr/1pet"
+msgstr "1Pe."
+
+#: src/Common/Constants.php:558
+msgid "1 Peter"
+msgstr "1 Peter"
+
+#: src/Common/Constants.php:563
+msgid "abbr/2pet"
+msgstr "2Pe."
+
+#: src/Common/Constants.php:565
+msgid "2 Peter"
+msgstr "2 Peter"
+
+#: src/Common/Constants.php:570
+msgid "abbr/1john"
+msgstr "1Jn."
+
+#: src/Common/Constants.php:572
+msgid "1 John"
+msgstr "1 John"
+
+#: src/Common/Constants.php:577
+msgid "abbr/2john"
+msgstr "2Jn."
+
+#: src/Common/Constants.php:579
+msgid "2 John"
+msgstr "2 John"
+
+#: src/Common/Constants.php:584
+msgid "abbr/3john"
+msgstr "3Jn."
+
+#: src/Common/Constants.php:586
+msgid "3 John"
+msgstr "3 John"
+
+#: src/Common/Constants.php:591
+msgid "abbr/jude"
+msgstr "Jud."
+
+#: src/Common/Constants.php:593
+msgid "Jude"
+msgstr "Jude"
+
+#: src/Common/Constants.php:598
+msgid "abbr/rev"
+msgstr "Rev."
+
+#: src/Common/Constants.php:600
+msgid "Revelation"
+msgstr "Revelation"
+
+#: src/Common/Constants.php:606 src/Common/Constants.php:609
+msgid "Please activate plugin `Rhema`."
+msgstr "Please activate plugin `Rhema`."
+
+#: src/Common/Constants.php:607
+msgid "Please setup \"Permalinks\" first."
+msgstr "Please setup \"Permalinks\" first."
+
+#: src/Common/Constants.php:608
+msgid ""
+"The remote server connection of Rhema has timed out. Please try again later."
+msgstr ""
+"The remote server connection of Rhema has timed out. Please try again later."
+
+#: src/Common/Constants.php:610
+msgid "Logos service authorization failed"
+msgstr "Logos service authorization failed"
+
+#: src/Common/Constants.php:611
+msgid "Unknown error."
+msgstr "Unknown error."
+
+#: src/Common/Constants.php:612
+#, fuzzy
+#| msgid ""
+#| "The remote server connection of Rhema has timed out. Please try again "
+#| "later."
+msgid "Bible server maintenance, Please try again later."
+msgstr ""
+"The remote server connection of Rhema has timed out. Please try again later."
+
+#: src/Common/Constants.php:613
+msgid "Sorry, you are not allowed to do that."
+msgstr "Sorry, you are not allowed to do that."
+
+#: src/Common/Constants.php:614
+msgid "Sorry, no found."
+msgstr "Sorry, no found."
+
+#: src/Common/Constants.php:615
+msgid "JWT token wrong."
+msgstr "JWT token wrong."
+
+#: src/Common/Constants.php:616
+msgid "Must have parameters."
+msgstr "Must have parameters."
+
+#: src/Common/Constants.php:617
+msgid "Entry path cant use."
+msgstr "Entry path cant use."
+
+#: src/Common/Constants.php:618
+msgid "Your request field is wrong."
+msgstr "Your request field is wrong."
+
+#: src/Common/Constants.php:619
+msgid "Rhema options nothing to save."
+msgstr "Rhema options nothing to save."
+
+#: src/Common/Constants.php:620
+msgid "Rhema options saved."
+msgstr "Rhema options saved."
+
+#: src/Common/Constants.php:621
+msgid "Response wrong."
+msgstr "Response wrong."
+
+#: src/Common/Constants.php:622
+msgid "Permission denied."
+msgstr "Permission denied."
+
+#: src/Common/Functions.php:81
+msgid "Catalog"
+msgstr "Catalog"
+
+#. translators: %s: request function
+#: src/Common/Traits/Requester.php:53
+msgid "Unknown request type: %s"
+msgstr "Unknown request type: %s"
+
+#: src/Common/Traits/Requester.php:56
+msgid "Classes are not being correctly requested"
+msgstr "Classes are not being correctly requested"
+
+#. translators: %s: file path
+#: src/Common/Utils/Errors.php:61 src/Common/Utils/Errors.php:97
+msgid "Error source: %s"
+msgstr "Error source: %s"
+
+#: src/Config/Requirements.php:92
+msgid "Invalid PHP version"
+msgstr "Invalid PHP version"
+
+#. translators: %1$1s: required php version, %2$2s: current php version
+#: src/Config/Requirements.php:94
+msgid ""
+"You must be using PHP %1$1s or greater. You are currently using PHP %2$2s."
+msgstr ""
+"You must be using PHP %1$1s or greater. You are currently using PHP %2$2s."
+
+#: src/Config/Requirements.php:103
+msgid "Invalid WordPress version"
+msgstr "Invalid WordPress version"
+
+#. translators: %1$1s: required wordpress version, %2$2s: current wordpress version
+#: src/Config/Requirements.php:105
+msgid ""
+"You must be using WordPress %1$1s or greater. You are currently using "
+"WordPress %2$2s."
+msgstr ""
+"You must be using WordPress %1$1s or greater. You are currently using "
+"WordPress %2$2s."
+
+#: src/Database/Operator.php:52
+msgid "Failed to install database."
+msgstr "Failed to install database."
+
+#: src/Integrations/Widget/HTML_Widget.php:129
+msgid "Content:"
+msgstr "Content:"
+
+#: assets/src/js/constants.js:18
+msgid "error/page-is-expired"
+msgstr "Page is expired, Please refresh"
+
+#: assets/src/js/constants.js:24
+msgid "bible-entry-path"
+msgstr "Bible Entry Path"
+
+#: assets/src/js/constants.js:28
+msgid "default-translation"
+msgstr "Default Translation"
+
+#: assets/src/js/constants.js:32
+msgid "default-translation/default"
+msgstr "Default"
+
+#: assets/src/js/constants.js:36
+msgid "features/status"
+msgstr "Status"
+
+#: assets/src/js/constants.js:37
+msgid "features/comming-soon"
+msgstr "Comming soon..."
+
+#: assets/src/js/constants.js:41
+msgid "features/active"
+msgstr "Active"
+
+#: assets/src/js/constants.js:42
+msgid "features/license"
+msgstr "License"
+
+#: assets/src/js/constants.js:46
+msgid "my-account/signin-logos"
+msgstr "Signin Logos"
+
+#: assets/src/js/constants.js:50
+msgid ""
+"If you have lost your License Key, you can log in here to check all the "
+"License Keys you have obtained in the past."
+msgstr ""
+"If you have lost your License Key, you can log in here to check all the "
+"License Keys you have obtained in the past."
+
+#: assets/src/js/constants.js:54
+msgid "my-account/forgot-password"
+msgstr "Forgot password"
+
+#: assets/src/js/constants.js:58
+msgid "my-account/signin"
+msgstr "Signin"
+
+#: assets/src/js/constants.js:62
+msgid "my-account/signing"
+msgstr "Signing..."
+
+#: assets/src/js/constants.js:66
+msgid ""
+"Welcome to Logos. You can check your information related to Logos here after "
+"logging in."
+msgstr ""
+"Welcome to Logos. You can check your information related to Logos here after "
+"logging in."
+
+#: assets/src/js/constants.js:70
+msgid ""
+"Rhema is a WordPress plugin developed and operated by Muchshar on behalf of "
+"EON Center. Its purpose is to provide digital Bible services to churches, "
+"increasing the exposure of church websites when searching for Bible-related "
+"content. It offers church members the ability to search for and access "
+"teachings and sermons related to specific Bible verses, serving as a tool "
+"for spreading the gospel and providing pastoral care."
+msgstr ""
+"Rhema is a WordPress plugin developed and operated by Muchshar Ltd. It is "
+"designed to provide a digital Bible service for church websites around the "
+"world and increase the exposure of church websites in search engine results "
+"when users search for Bible verses online. In the future, additional "
+"features will be developed for the purpose of evangelism and pastoral care."
+
+#: assets/src/js/constants.js:74
+msgid ""
+"If you are willing to support our ministry, please consider making a "
+"donation to us."
+msgstr ""
+"If you are willing to support our ministry, please consider making a "
+"donation to us."
+
+#: assets/src/js/constants.js:78
+msgid "bible-directory"
+msgstr "Bible Directory"
+
+#: assets/src/js/constants.js:79
+msgid "bible-directory/old-testament"
+msgstr "Old Testament"
+
+#: assets/src/js/constants.js:83
+msgid "bible-directory/new-testament"
+msgstr "New Testament"
+
+#: assets/src/js/constants.js:87
+msgid "bible-directory/book"
+msgstr "Book"
+
+#: assets/src/js/constants.js:91
+msgid "bible-directory/chapter"
+msgstr "Chapter"
+
+#: assets/src/js/constants.js:95
+msgid "bible-directory/verse"
+msgstr "Verse"
+
+#: assets/src/js/constants.js:99
+msgid "Selected Verses"
+msgstr "Selected Verses"
+
+#~ msgid "Gen."
+#~ msgstr "Gen."
+
+#~ msgid "Ex."
+#~ msgstr "Ex."
+
+#~ msgid "Lev."
+#~ msgstr "Lev."
+
+#~ msgid "Num."
+#~ msgstr "Num."
+
+#~ msgid "Deut."
+#~ msgstr "Deut."
+
+#~ msgid "Josh."
+#~ msgstr "Josh."
+
+#~ msgid "Judg."
+#~ msgstr "Judg."
+
+#~ msgid "1 Sam."
+#~ msgstr "1 Sam."
+
+#~ msgid "2 Sam."
+#~ msgstr "2 Sam."
+
+#~ msgid "1 Chron."
+#~ msgstr "1 Chron."
+
+#~ msgid "2 Chron."
+#~ msgstr "2 Chron."
+
+#~ msgid "Neh."
+#~ msgstr "Neh."
+
+#~ msgid "Est."
+#~ msgstr "Est."
+
+#~ msgid "Ps."
+#~ msgstr "Ps."
+
+#~ msgid "Prov."
+#~ msgstr "Prov."
+
+#~ msgid "Eccles."
+#~ msgstr "Eccles."
+
+#~ msgid "Song"
+#~ msgstr "Song"
+
+#~ msgid "Isa."
+#~ msgstr "Isa."
+
+#~ msgid "Jer."
+#~ msgstr "Jer."
+
+#~ msgid "Lam."
+#~ msgstr "Lam."
+
+#~ msgid "Ezek."
+#~ msgstr "Ezek."
+
+#~ msgid "Dan."
+#~ msgstr "Dan."
+
+#~ msgid "Hos."
+#~ msgstr "Hos."
+
+#~ msgid "Obad."
+#~ msgstr "Obad."
+
+#~ msgid "Mic."
+#~ msgstr "Mic."
+
+#~ msgid "Nah."
+#~ msgstr "Nah."
+
+#~ msgid "Hab."
+#~ msgstr "Hab."
+
+#~ msgid "Zeph."
+#~ msgstr "Zeph."
+
+#~ msgid "Hag."
+#~ msgstr "Hag."
+
+#~ msgid "Zech."
+#~ msgstr "Zech."
+
+#~ msgid "Mal."
+#~ msgstr "Mal."
+
+#~ msgid "Matt."
+#~ msgstr "Matt."
+
+#~ msgid "Rom."
+#~ msgstr "Rom."
+
+#~ msgid "1 Cor."
+#~ msgstr "1 Cor."
+
+#~ msgid "2 Cor."
+#~ msgstr "2 Cor."
+
+#~ msgid "Gal."
+#~ msgstr "Gal."
+
+#~ msgid "Eph."
+#~ msgstr "Eph."
+
+#~ msgid "Phil."
+#~ msgstr "Phil."
+
+#~ msgid "Col."
+#~ msgstr "Col."
+
+#~ msgid "1 Thess."
+#~ msgstr "1 Thess."
+
+#~ msgid "2 Thess."
+#~ msgstr "2 Thess."
+
+#~ msgid "1 Tim."
+#~ msgstr "1 Tim."
+
+#~ msgid "2 Tim."
+#~ msgstr "2 Tim."
+
+#~ msgid "Philem."
+#~ msgstr "Philem."
+
+#~ msgid "Heb."
+#~ msgstr "Heb."
+
+#~ msgid "1 Pet."
+#~ msgstr "1 Pet."
+
+#~ msgid "2 Pet."
+#~ msgstr "2 Pet."
+
+#~ msgid "Rev."
+#~ msgstr "Rev."

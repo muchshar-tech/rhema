@@ -1,0 +1,20 @@
+{
+    "intelephense.environment.includePaths": [
+        "../../../wp-includes",
+        "../../../wp-admin",
+        "C:\\xampp\\htdocs\\sample\\wp-admin",
+        "C:\\xampp\\htdocs\\sample\\wp-includes"
+    ],
+    "phpsab.allowedAutoRulesets": [
+        ".phpcs.xml",
+        ".phpcs.xml.dist",
+        "phpcs.xml",
+        "phpcs.xml.dist",
+        "phpcs.ruleset.xml",
+        "ruleset.xml"
+    ],
+    "phpsab.executablePathCS": "./vendor/bin/phpcs",
+    "phpsab.executablePathCBF": "./vendor/bin/phpcbf",
+    "phpsab.snifferEnable": true,
+    "phpSniffer.autoDetect": true,
+}

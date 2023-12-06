@@ -16,7 +16,7 @@ use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 use Rhema\Common\Constants;
 use Rhema\Integrations\Logos;
-use WP_CLI\Iterators\Exception;
+use Exception;
 use WP_Error;
 
 /**

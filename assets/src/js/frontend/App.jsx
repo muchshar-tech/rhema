@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 import * as Pages from './pages'
-import { generateVerseUrl, generateRandomlyChapter } from './utilities'
 
 const App = () => {
     const style = `:host, :root {display:block;margin: 24px auto; font-size: 16px;}`

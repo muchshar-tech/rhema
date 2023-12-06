@@ -21,7 +21,6 @@ use Rhema\Common\Constants;
 use Rhema\Common\Defaults;
 use WP_Error;
 use Exception;
-use PHPUnit\TextUI\XmlConfiguration\Constant;
 
 /**
  * Class Api
@@ -296,7 +295,8 @@ final class Api extends Base {
 		if ( ! $is_valid ) {
 			return new WP_Error( 403, Constants::init()->error_message['logos_authorization_failed'] );
 		}
-		$cache_tag = base64_encode( $query_string );
+		$cache_tag = md5( $query_string );
+		$cached_raws_of_query = wp_cache_get( "fetched_bible_$cache_tag", $this->plugin->name() );
 		if ( ! empty( $cached_raws_of_query ) ) {
 			return $cached_raws_of_query;
 		}

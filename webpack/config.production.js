@@ -7,6 +7,8 @@
  */
 const glob = require('glob-all')
 const PurgecssPlugin = require('purgecss-webpack-plugin') // A tool to remove unused CSS
+const TerserPlugin = require('terser-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = (projectOptions) => {
     process.env.NODE_ENV = 'production' // Set environment level to 'production'
@@ -51,20 +53,14 @@ module.exports = (projectOptions) => {
      */
     const optimizations = {
         ...Base.optimizations,
-        ...{
-            splitChunks: {
-                cacheGroups: {
-                    styles: {
-                        // Configured for PurgeCSS
-                        name: 'styles',
-                        test: /\.css$/,
-                        chunks: 'all',
-                        enforce: true,
-                    },
-                },
-            },
-            // add optimizations rules for production here
-        },
+        minimizer: [new TerserPlugin({
+            extractComments: true,
+            terserOptions: {
+                compress: {
+                    drop_console: true
+                }
+            }
+        })],
     }
 
     /**
@@ -73,12 +69,16 @@ module.exports = (projectOptions) => {
     const plugins = [
         ...Base.plugins,
         ...[
-            new PurgecssPlugin({
-                // Scans files and removes unused CSS
-                paths: glob.sync(projectOptions.projectCss.purgeCss.paths, {
-                    nodir: true,
-                }),
-            }),
+            // new PurgecssPlugin({
+            //     // Scans files and removes unused CSS
+            //     paths: glob.sync(projectOptions.projectCss.purgeCss.paths, {
+            //         nodir: true,
+            //     }),
+            // }),
+            new BundleAnalyzerPlugin({
+                analyzerMode: 'static',
+                reportFilename: 'bundle-analyzer-report.html',
+            })
             // add plugins for production here
         ],
     ]

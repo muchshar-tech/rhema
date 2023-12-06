@@ -11,6 +11,8 @@ const BrowserSyncPlugin = require('browser-sync-webpack-plugin') // Synchronisin
 const WebpackBar = require('webpackbar') // Display elegant progress bar while building or watch
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin') // To optimize (compress) all images using
 const CopyPlugin = require('copy-webpack-plugin') // For WordPress we need to copy images from src to public to optimize them
+const { CleanWebpackPlugin } = require('clean-webpack-plugin') // Cleans the public folder
+const MomentLocalesPlugin = require('moment-locales-webpack-plugin'); // To remove unused locales from moment.js
 
 module.exports = (projectOptions) => {
     /**
@@ -71,12 +73,29 @@ module.exports = (projectOptions) => {
     /**
      * Optimization rules
      */
-    const optimizations = {}
+    const optimizations = {
+        ...{
+            splitChunks: {
+                cacheGroups: {
+                    vendors: {
+                        test: /[\\/]node_modules[\\/]/,
+                        name: 'vendors',
+                        chunks: 'all',
+                    }
+                },
+            },
+            // add optimizations rules for production here
+        },
+
+    }
 
     /**
      * Plugins
      */
     const plugins = [
+        new CleanWebpackPlugin({
+            cleanAfterEveryBuildPatterns: ['./js/*.txt']
+        }), // Cleans the public folder
         new WebpackBar(), // Adds loading bar during builds
         // Uncomment this to enable profiler https://github.com/nuxt-contrib/webpackbar#options
         // { reporters: [ 'profile' ], profile: true }
@@ -97,6 +116,7 @@ module.exports = (projectOptions) => {
             // Optimizes images
             minimizerOptions: projectOptions.projectImages.minimizerOptions,
         }),
+        new MomentLocalesPlugin(),
     ]
     // Add browserSync to plugins if enabled
     if (projectOptions.browserSync.enable === true) {
@@ -137,7 +157,7 @@ module.exports = (projectOptions) => {
      */
     const externals = {
         RHEMA_LOCALIZE: 'LOCALIZE_SCRIPT_VARIABLES',
-        '@wordpress/i18n': [ 'window wp', 'i18n' ],
+        '@wordpress/i18n': ['window wp', 'i18n'],
     }
 
     return {

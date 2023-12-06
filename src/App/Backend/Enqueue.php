@@ -70,7 +70,14 @@ class Enqueue extends Base {
 		foreach (
 			[
 				[
-					'deps'      => [ 'wp-i18n' ],
+					'deps'      => [],
+					'handle'    => 'vendors',
+					'in_footer' => true,
+					'source'    => plugins_url( '/assets/public/js/vendors.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global
+					'version'   => $this->plugin->version(),
+				],
+				[
+					'deps'      => [ 'wp-i18n', 'vendors' ],
 					'handle'    => '6c578e31e43e3a17dea38f6a319e105d',
 					'in_footer' => true,
 					'source'    => plugins_url( '/assets/public/js/backend.js', RHEMA_PLUGIN_FILE ), // phpcs:disable ImportDetection.Imports.RequireImports.Symbol -- this constant is global

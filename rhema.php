@@ -11,7 +11,7 @@
  * Plugin Name:      Rhema
  * Plugin URI:       https://rhema.muchshar.com
  * Description:      Rhema
- * Version:          1.0.0
+ * Version:          1.0.0.005
  * DataBase Version: 1.0.0
  * Author:           TXIpartners
  * Author URI:       https://rhema.muchshar.com
@@ -58,12 +58,14 @@ if ( ! class_exists( '\Rhema\Bootstrap' ) ) {
 add_action(
 	'plugins_loaded',
 	static function () use ( $rhema_autoloader ) {
+		try {
+			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__, null, false );
+			$dotenv->load();
+		} catch ( Exception $e ) {}
 		/**
 		 * @see \Rhema\Bootstrap
 		 */
 		try {
-			$dotenv = \Dotenv\Dotenv::createImmutable( __DIR__ );
-			$dotenv->load();
 			new \Rhema\Bootstrap( $rhema_autoloader );
 		} catch ( Exception $e ) {
 			wp_die( __( 'Rhema is unable to run the Bootstrap class.', 'rhema' ) );

@@ -1,0 +1,66 @@
+{
+    "description": "Bible for WordPress",
+    "version": "1.0.0",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://rhema.muchshar.com",
+    "autoload": {
+        "psr-4": {
+            "Rhema\\": "src/"
+        }
+    },
+    "scripts": {
+        "codecept": "vendor/bin/codecept",
+        "run:wpunit": "vendor/bin/codecept run wpunit",
+        "run:functional": "vendor/bin/codecept run functional",
+        "run:acceptance": "vendor/bin/codecept run acceptance",
+        "generate:wpunit": "vendor/bin/codecept generate:wpunit wpunit",
+        "generate:functional": "vendor/bin/codecept generate:cept functional",
+        "generate:acceptance": "vendor/bin/codecept generate:test acceptance",
+        "phpcs": "./vendor/bin/phpcs",
+        "phpcsi": "./vendor/bin/phpcs -i",
+        "production": [
+            "yarn prod",
+            "composer install --no-dev --optimize-autoloader",
+            "php production_copy.php"
+        ]
+    },
+    "require": {
+        "php": ">=7.1",
+        "micropackage/requirements": "^1.0",
+        "vlucas/phpdotenv": "^5.4",
+        "firebase/php-jwt": "^6.3",
+        "respect/validation": "^2.2"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+        "wp-coding-standards/wpcs": "*",
+        "automattic/phpcs-neutron-ruleset": "^3.3",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "lucatume/function-mocker": "~1.0",
+        "lucatume/wp-browser": "^3.0",
+        "codeception/lib-innerbrowser": "^1.0",
+        "codeception/module-asserts": "^1.0",
+        "codeception/module-phpbrowser": "^1.0",
+        "codeception/module-webdriver": "^1.0",
+        "codeception/module-db": "^1.0",
+        "codeception/module-filesystem": "^1.0",
+        "codeception/module-cli": "^1.0",
+        "codeception/module-rest": "^1.2",
+        "codeception/util-universalframework": "^1.0",
+        "codeception/codeception-progress-reporter": "^4.0.2"
+    },
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "bible",
+        "rhema"
+    ],
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

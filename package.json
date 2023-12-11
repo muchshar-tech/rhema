@@ -26,7 +26,8 @@
         "prettier": "prettier assets/src/js/**/*.js",
         "prettier:fix": "prettier --write assets/src/js/**/*.js",
         "make-pot": "wp i18n make-pot . languages/rhema.pot --domain=\"rhema\" --include=\"src/**/**/*.php,src/**/*.php,assets/src/js/*.js,assets/src/js/**/*.js,assets/src/js/**/*.jsx,assets/src/js/**/**/*.jsx\" --ignore-domain",
-        "translate:make-json": "wp i18n make-json ./languages languages --no-purge"
+        "translate:make-json": "wp i18n make-json ./languages languages --no-purge",
+        "wp-env": "wp-env"
     },
     "babel": {
         "extends": "./webpack/babel.config.js"

@@ -37,32 +37,39 @@ class MetaBox extends Base {
 		 *
 		 * Add plugin code here for admin notices specific functions
 		 */
-		add_action( 'add_meta_boxes', [ $this, 'bible_question_anwser_meta_box' ] );
+		// add_action( 'add_meta_boxes', [ $this, 'bible_question_anwser_meta_box' ] );
+		add_action( 'add_meta_boxes', [ $this, 'bible_relations_meta_box' ] );
 	}
 	/**
 	 * Anwser meta box
 	 *
 	 * @since 1.0.0
 	 */
-	public function bible_question_anwser_meta_box() {
-		$screens = [ Constants::BIBLE_QUESTION_TYPE['id'] ];
-		foreach ( $screens as $screen ) {
-			add_meta_box(
-				Constants::BIBLE_QUESTION_TYPE['id'] . '-anwser',
-				'Anwsers',
-				[ $this, 'bible_question_anwser_meta_box_html' ],
-				$screen
-			);
-		}
+	public function bible_relations_meta_box() {
+		add_meta_box(
+			Constants::BIBLE_QUESTION_TYPE['id'] . '-anwser',
+			'Bible Relations',
+			[ $this, 'bible_relations_meta_box_html' ],
+			null,
+			'side',
+			'high'
+		);
 	}
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $post
+	 * @return void
+	 */
 	/**
 	 * Anwser meta box html
 	 *
 	 * @since 1.0.0
 	 */
-	public function bible_question_anwser_meta_box_html( $post ) {
+	public function bible_relations_meta_box_html( $post ) {
 		?>
-		<div id="bible-question-anwser-meta-box" class="tailwind">
+		<div id="bible-relations-meta-box" class="tailwind">
+			Relations
         </div>
 		<?php
 	}

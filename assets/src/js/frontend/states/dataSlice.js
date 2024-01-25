@@ -1,9 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
+import merge from 'deepmerge'
+
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 const initialQuery = RHEMA_LOCALIZE.RHEMA_INITAIL_DATA?.QUERYS
 
-const initialState = {
+const defaultState = {
     raws: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA?.RAW || [],
     books: RHEMA_LOCALIZE.RHEMA_INITAIL_DATA?.BOOKS || [],
     readingQuerys: initialQuery,
@@ -13,9 +15,13 @@ const initialState = {
     },
 }
 
+export const initialState = (state = {}) => {
+    return merge(defaultState, state)
+}
+
 export const dataSlice = createSlice({
     name: 'data',
-    initialState,
+    initialState: initialState(),
     reducers: {
         loadRaws: (state, action) => {
             const { payload } = action

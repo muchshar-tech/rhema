@@ -14,6 +14,7 @@ namespace Rhema\Common;
 
 use Rhema\Common\Constants;
 use Rhema\App\General\Bible;
+use Rhema\App\General\Features;
 use Rhema\App\General\Options;
 use Rhema\App\Frontend\Templates;
 use Rhema\Common\Abstracts\Base;
@@ -51,6 +52,15 @@ class Functions extends Base {
 	 */
 	public function bible(): Bible {
 		return Bible::init();
+	}
+	/**
+	 * Get the features instantiated class using rhema()->features()
+	 *
+	 * @return Features
+	 * @since 1.0.0
+	 */
+	public function features(): Features {
+		return Features::init();
 	}
 	/**
 	 * Get the bible instantiated class using rhema()->bible()

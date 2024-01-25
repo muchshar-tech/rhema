@@ -1,6 +1,6 @@
 import Joi from 'joi'
 
-import { IDENTITY_TYPE } from '@components/constants'
+import { PRODUCT_SLUGS, IDENTITY_TYPE } from '@components/constants'
 
 const fields = {
     email: Joi.string().email({
@@ -8,13 +8,7 @@ const fields = {
         tlds: { allow: ['com', 'net', 'tw', 'org', 'io', 'app', 'test'] },
     }),
     identity_type: Joi.string().valid(IDENTITY_TYPE),
-    product_slug: Joi.string().valid(
-        'donate-for-txipartners',
-        'wp-rhema-core-feature',
-        'wp-rehema-rlation-feature',
-        'wp-rehema-q-and-a-feature',
-        'wp-rehema-offline-reading'
-    ),
+    product_slug: Joi.string().valid(...PRODUCT_SLUGS),
     username: Joi.string().min(5).max(30),
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9!@#$%]{3,30}$')),
     license: Joi.string(),

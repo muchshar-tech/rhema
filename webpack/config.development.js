@@ -8,6 +8,7 @@
 
 const ESLintPlugin = require('eslint-webpack-plugin') //  Find and fix problems in your JavaScript code
 const StylelintPlugin = require('stylelint-webpack-plugin') // Helps you avoid errors and enforce conventions in your styles
+const wpScriptConfig = require('@wordpress/scripts/config/webpack.config');
 
 module.exports = (projectOptions) => {
     process.env.NODE_ENV = 'development' // Set environment level to 'development'
@@ -97,11 +98,22 @@ module.exports = (projectOptions) => {
             path: projectOptions.projectOutput,
             filename: projectOptions.projectJs.filename,
         },
+        target: wpScriptConfig.target,
         devtool: sourceMap.devtool,
-        optimization: optimizations,
+        optimization: { ...wpScriptConfig.optimization, ...optimizations },
         module: { rules: [cssRules, jsRules, imageRules] },
-        plugins: plugins,
-        resolve: { ...Base.resolve },
+        plugins: [...plugins],
+        resolve: {
+            alias: {
+                ...Base.resolve.alias,
+                ...wpScriptConfig.resolve.alias,
+            },
+            extensions: [...Base.resolve.extensions]
+        },
         externals: { ...Base.externals },
+        stats: {
+            children: true,
+            errorDetails: true,
+        }
     }
 }

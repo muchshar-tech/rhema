@@ -27,44 +27,16 @@ const Main = () => {
         <>
             <h1 className="">Rhema</h1>
             <Tab.TabWrap>
-                <NavLink
-                    className={({ isActive }) =>
-                        isActive
-                            ? ['nav-tab', 'nav-tab-active'].join(' ')
-                            : 'nav-tab'
-                    }
-                    to="/settings"
-                >
+                <NavLink className={({ isActive }) => (isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab')} to="/settings">
                     Settings
                 </NavLink>
-                <NavLink
-                    className={({ isActive }) =>
-                        isActive
-                            ? ['nav-tab', 'nav-tab-active'].join(' ')
-                            : 'nav-tab'
-                    }
-                    to="/features"
-                >
+                <NavLink className={({ isActive }) => (isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab')} to="/features">
                     Features
                 </NavLink>
-                <NavLink
-                    className={({ isActive }) =>
-                        isActive
-                            ? ['nav-tab', 'nav-tab-active'].join(' ')
-                            : 'nav-tab'
-                    }
-                    to="/about"
-                >
+                <NavLink className={({ isActive }) => (isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab')} to="/about">
                     About
                 </NavLink>
-                <NavLink
-                    className={({ isActive }) =>
-                        isActive
-                            ? ['nav-tab', 'nav-tab-active'].join(' ')
-                            : 'nav-tab'
-                    }
-                    to="/account"
-                >
+                <NavLink className={({ isActive }) => (isActive ? ['nav-tab', 'nav-tab-active'].join(' ') : 'nav-tab')} to="/account">
                     My Account
                 </NavLink>
             </Tab.TabWrap>
@@ -73,14 +45,8 @@ const Main = () => {
                     <Routes>
                         <Route path={`/settings`} element={<Settings />} />
                         <Route path={`/features`} element={<Features />} />
-                        <Route
-                            path={`/about`}
-                            element={<TabContents.About />}
-                        />
-                        <Route
-                            path={`/account`}
-                            element={<TabContents.Account />}
-                        />
+                        <Route path={`/about`} element={<TabContents.About />} />
+                        <Route path={`/account`} element={<TabContents.Account />} />
                         <Route index element={<Settings />} />
                     </Routes>
                 </Tab.ContentWrap>
@@ -99,39 +65,23 @@ const Settings = () => {
     const { register, handleSubmit, formState } = formMethods
     const { isSubmitting } = formState
 
-    const [
-        updateOptions,
-        {
-            data: updateOptionsResponse,
-            error: updateOptionsError,
-            isLoading: isRTKMutation,
-        },
-    ] = useUpdateOptionsMutation()
+    const [updateOptions, { data: updateOptionsResponse, error: updateOptionsError, isLoading: isRTKMutation }] = useUpdateOptionsMutation()
 
     const isUpdating = isRTKMutation || isSubmitting
 
-    const showExceptionMessage =
-        (!!updateOptionsResponse &&
-            !/2[0-9][0-9]/.test(updateOptionsResponse?.response?.code)) ||
-        !!updateOptionsError
+    const showExceptionMessage = (!!updateOptionsResponse && !/2[0-9][0-9]/.test(updateOptionsResponse?.response?.code)) || !!updateOptionsError
 
-    const showOptionsSaved =
-        updateOptionsResponse?.success === true ? true : false
+    const showOptionsSaved = updateOptionsResponse?.success === true ? true : false
 
     const exceptionMessage = {
         code: updateOptionsError?.status,
         label: '',
-        message:
-            updateOptionsError?.data?.message ||
-            'There has been a critical error.',
+        message: updateOptionsError?.data?.message || 'There has been a critical error.',
     }
     const successMessage = {
         code: updateOptionsResponse?.response?.code || 200,
         label: 'Success',
-        message:
-            updateOptionsError?.data?.data?.message ||
-            updateOptionsResponse?.data?.message ||
-            'Rhema options saved.',
+        message: updateOptionsError?.data?.data?.message || updateOptionsResponse?.data?.message || 'Rhema options saved.',
     }
 
     const onSubmit = async (data) => {
@@ -141,9 +91,7 @@ const Settings = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
             <FormTable.Table>
                 <FormTable.Row>
-                    <FormTable.Label htmlFor="bible_entry">
-                        {UI_MESSAGE_MAPPING['bible-entry-path']}
-                    </FormTable.Label>
+                    <FormTable.Label htmlFor="bible_entry">{UI_MESSAGE_MAPPING['bible-entry-path']}</FormTable.Label>
                     <FormTable.FieldWrap>
                         {RHEMA_LOCALIZE.RHEMA_SITE_ROOT + '/'}
                         <input
@@ -157,57 +105,29 @@ const Settings = () => {
                     </FormTable.FieldWrap>
                 </FormTable.Row>
                 <FormTable.Row>
-                    <FormTable.Label htmlFor="bible_default_translation">
-                        {UI_MESSAGE_MAPPING['default-translation']}
-                    </FormTable.Label>
+                    <FormTable.Label htmlFor="bible_default_translation">{UI_MESSAGE_MAPPING['default-translation']}</FormTable.Label>
                     <FormTable.FieldWrap>
-                        <select
-                            id="bible_default_translation"
-                            {...register('bible_default_translation')}
-                        >
-                            <option value="">
-                                {UI_MESSAGE_MAPPING['default-translation/default']}
-                            </option>
-                            {RHEMA_LOCALIZE.RHEMA_BACKEND.DATA.AVAILABLE_TRANSLATIONS.map(
-                                (translation) => {
-                                    return (
-                                        <option
-                                            value={translation.abbr.toLowerCase()}
-                                            key={translation.id}
-                                        >
-                                            {translation.name}
-                                        </option>
-                                    )
-                                }
-                            )}
+                        <select id="bible_default_translation" {...register('bible_default_translation')}>
+                            <option value="">{UI_MESSAGE_MAPPING['default-translation/default']}</option>
+                            {RHEMA_LOCALIZE.RHEMA_BACKEND.DATA.AVAILABLE_TRANSLATIONS.map((translation) => {
+                                return (
+                                    <option value={translation.abbr.toLowerCase()} key={translation.id}>
+                                        {translation.name}
+                                    </option>
+                                )
+                            })}
                         </select>
                     </FormTable.FieldWrap>
                 </FormTable.Row>
             </FormTable.Table>
             <div className="flex">
-                <button
-                    type="submit"
-                    className="button button-primary m-0 flex items-center"
-                    {...(isUpdating && { disabled: true })}
-                >
-                    {isUpdating ? (
-                        <Components.ButtonSpinner />
-                    ) : (
-                        'Save Settings'
-                    )}
+                <button type="submit" className="button button-primary m-0 flex items-center" {...(isUpdating && { disabled: true })}>
+                    {isUpdating ? <Components.ButtonSpinner /> : 'Save Settings'}
                 </button>
-                {showOptionsSaved ? (
-                    <FormTable.ResponseSuccessMsg label={successMessage.label}>
-                        {successMessage.message}
-                    </FormTable.ResponseSuccessMsg>
-                ) : null}
+                {showOptionsSaved ? <FormTable.ResponseSuccessMsg label={successMessage.label}>{successMessage.message}</FormTable.ResponseSuccessMsg> : null}
                 {showExceptionMessage && (
-                    <FormTable.ResponseErrorMsg
-                        code={exceptionMessage.code}
-                        label={exceptionMessage.label}
-                    >
-                        {exceptionMessage.message ||
-                            'There has been a critical error.'}
+                    <FormTable.ResponseErrorMsg code={exceptionMessage.code} label={exceptionMessage.label}>
+                        {exceptionMessage.message || 'There has been a critical error.'}
                     </FormTable.ResponseErrorMsg>
                 )}
             </div>
@@ -216,9 +136,15 @@ const Settings = () => {
 }
 
 const Features = () => {
-    const [displayActiveCoreModal, setDisplayActiveCoreModal] = useState(false)
+    const [displayActiveModal, setDisplayActiveModal] = useState(false)
     const [displayLicensModal, setDisplayLicenseModal] = useState([false, ''])
 
+    const closeActiveModal = () => {
+        setDisplayActiveModal(false)
+    }
+    const closeLicenseModal = () => {
+        setDisplayLicenseModal(false)
+    }
     return (
         <div>
             Features
@@ -226,28 +152,39 @@ const Features = () => {
                 <FeatureCards.Core
                     onClickActive={(e) => {
                         e.preventDefault()
-                        setDisplayActiveCoreModal(true)
+                        setDisplayActiveModal('core')
                     }}
                     onClickLicense={(e) => {
                         e.preventDefault()
                         setDisplayLicenseModal([true, 'core'])
                     }}
                 />
-                <FeatureCards.Relation />
+                <FeatureCards.Download2Host
+                    onClickActive={(e) => {
+                        e.preventDefault()
+                        setDisplayActiveModal('download2host')
+                    }}
+                    onClickLicense={(e) => {
+                        e.preventDefault()
+                        setDisplayLicenseModal([true, 'download2host'])
+                    }}
+                />
+                <FeatureCards.Relation
+                    onClickActive={(e) => {
+                        e.preventDefault()
+                        setDisplayActiveModal('relation')
+                    }}
+                    onClickLicense={(e) => {
+                        e.preventDefault()
+                        setDisplayLicenseModal([true, 'relation'])
+                    }}
+                />
                 <FeatureCards.OfflineReading />
             </div>
-            <Activates.Core
-                show={displayActiveCoreModal}
-                onClickClose={() => {
-                    setDisplayActiveCoreModal(false)
-                }}
-            />
-            <Activates.License
-                show={displayLicensModal}
-                onClickClose={() => {
-                    setDisplayLicenseModal(false)
-                }}
-            />
+            <Activates.Core show={displayActiveModal === 'core'} onClickClose={closeActiveModal} />
+            <Activates.Download2Host show={displayActiveModal === 'download2host'} onClickClose={closeActiveModal} />
+            <Activates.Relation show={displayActiveModal === 'relation'} onClickClose={closeActiveModal} />
+            <Activates.License show={displayLicensModal} onClickClose={closeLicenseModal} />
         </div>
     )
 }

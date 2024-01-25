@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 import { UI_MESSAGE_MAPPING } from '@components/constants'
 import * as Layout from '@components/frontend/layouts'
 import * as Headers from '@components/frontend/headers'
+import * as Footers from '@components/frontend/footers'
 
 import * as Books from '@components/frontend/books'
 import * as Search from '@components/frontend/search'
@@ -16,19 +17,18 @@ import {
     retrieveChapterByParamString,
     validIsQueryWholeChapter,
     retrieveBookIndexBySlug,
+    goToVerse,
 } from '@assets/js/frontend/utilities'
 import { loadRaws } from '@assets/js/frontend/states/dataSlice'
 
 export const Verses = () => {
     const dispatch = useDispatch()
     const stateData = useSelector((state) => state.data)
+    const stateGeneral = useSelector((state) => state.general)
     const isAfterReload = useSelector((state) => state.general.isAfterReload)
     const params = useParams()
-    console.log(
-        params,
-        generateRestRangeParam(params),
-        retrieveChapterByParamString(generateRestRangeParam(params)[0])
-    )
+
+    const { currentSelection } = stateGeneral
     const { readingQuerys } = stateData
     const { chapterVerseInfo } = stateData.translation?.info
     let currentBookIndex = readingQuerys[0]?.book?.index
@@ -36,6 +36,7 @@ export const Verses = () => {
         const { books1: bookSlugOfParam } = useParams()
         currentBookIndex = retrieveBookIndexBySlug(bookSlugOfParam)
     }
+
     const bookRaws = stateData.raws.filter((raw) => {
         return raw.book === Number(currentBookIndex)
     })
@@ -73,6 +74,16 @@ export const Verses = () => {
         }
     }, [error])
 
+    useEffect(() => {
+        const { books1: bookSlugOfUrlParam, verse1: chapterVerseOfUrlParam } =
+            params
+        const urlBookIndex = retrieveBookIndexBySlug(bookSlugOfUrlParam)
+        const urlChapter =
+            chapterVerseOfUrlParam.match(/(\d{0,3}):?(\d{0,3})/i)[1]
+
+        goToVerse(urlBookIndex, urlChapter)
+    }, [params])
+
     return (
         <Layout.AppContainer>
             <Layout.Top>
@@ -80,11 +91,12 @@ export const Verses = () => {
                 <Headers.Books />
                 <Headers.Selection />
             </Layout.Top>
-            <Layout.Body>
+            <Layout.Body className="-mb-8">
                 <Books.List />
                 <Search.Results />
                 <Layout.RawsContent
                     {...{
+                        currentSelection,
                         readingQuerys,
                         bookRaws,
                         chapterVerseInfo,
@@ -108,6 +120,9 @@ export const Verses = () => {
                     <Layout.Drawer.SelectedRaw />
                 </Layout.Drawer>
             </Layout.Body>
+            <Layout.Bottom>
+                <Footers.Main />
+            </Layout.Bottom>
         </Layout.AppContainer>
     )
 }

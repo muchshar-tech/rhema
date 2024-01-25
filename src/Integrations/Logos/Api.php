@@ -19,6 +19,7 @@ use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 use Rhema\Common\Constants;
 use Rhema\Common\Defaults;
+use Rhema\App\General\Features;
 use WP_Error;
 use Exception;
 
@@ -518,9 +519,10 @@ final class Api extends Base {
 	 * @param string $prefix
 	 * @return mixed
 	 */
-	public function getLogosCoreTransient( $attr_name, $prefix = 'rhema.bible.integrations.logos.core' ): mixed {
+	public function getLogosCoreTransient( $attr_name, $prefix = 'rhema.integrations.logos.core' ): mixed {
+		$features_instance = Features::init();
 		$transient_label = "$prefix.$attr_name";
-		return get_transient( $transient_label );
+		return $features_instance->getTransient( $transient_label );
 	}
 	/**
 	 * Set core transient
@@ -531,9 +533,10 @@ final class Api extends Base {
 	 * @param string $prefix
 	 * @return boolean
 	 */
-	public function setLogosCoreTransient( $attr_name, $value, $expiration = 0, $prefix = 'rhema.bible.integrations.logos.core' ): bool {
+	public function setLogosCoreTransient( $attr_name, $value, $expiration = 0, $prefix = 'rhema.integrations.logos.core' ): bool {
+		$features_instance = Features::init();
 		$transient_label = "$prefix.$attr_name";
-		$transient_seted = set_transient( $transient_label, $value, $expiration );
+		$transient_seted = $features_instance->setTransient( $transient_label, $value, '', $expiration );
 		self::$require_data[ $attr_name ] = $value;
 		return $transient_seted;
 	}
@@ -545,8 +548,9 @@ final class Api extends Base {
 	 * @return boolean
 	 */
 	public function deleteLogosCoreTransient( $attr_name, $prefix = 'rhema.bible.integrations.logos.core' ): bool {
+		$features_instance = Features::init();
 		$transient_label = "$prefix.$attr_name";
-		$transient_deleted = delete_transient( $transient_label );
+		$transient_deleted = $features_instance->deleteTransient( $transient_label );
 		return $transient_deleted;
 	}
 }

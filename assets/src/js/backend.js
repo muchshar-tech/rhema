@@ -12,7 +12,6 @@ import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './backend/App'
-import AnwsersMetaBox from './backend/AnwsersMetaBox'
 
 import { store } from './backend/store'
 
@@ -41,14 +40,4 @@ if (!!container && container instanceof HTMLElement) {
             </ErrorBoundary>
         </Provider>
     )
-}
-const bibleQuestionAnwserMetaBoxContainer = document.getElementById(
-    'bible-question-anwser-meta-box'
-)
-if (
-    !!bibleQuestionAnwserMetaBoxContainer &&
-    bibleQuestionAnwserMetaBoxContainer instanceof HTMLElement
-) {
-    const root = createRoot(bibleQuestionAnwserMetaBoxContainer)
-    root.render(<AnwsersMetaBox />)
 }

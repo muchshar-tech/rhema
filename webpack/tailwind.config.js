@@ -15,6 +15,7 @@ module.exports = {
     content: [
         './assets/src/**/*.{js,jsx,ts,tsx}',
         './assets/src/**/**/*.{js,jsx,ts,tsx}',
+        './assets/src/js/blockeditor/!BibleSelector.jsx'
     ],
     theme: {
         screens: {
@@ -24,8 +25,14 @@ module.exports = {
             'only-sm': { min: '576px', max: '767px' },
             'only-md': { min: '768px', max: '991px' },
             'only-lg': { min: '992px', max: '1199px' },
+            'wp-xs': { max: '600px' },
+            'wp-sm': { max: '782px' }
         },
         extend: {
+            minWidth: {
+                ...generateWidth(8),
+                ...generateWidth(24),
+            },
             width: {
                 ...generateWidth(8),
                 ...generateWidth(24),

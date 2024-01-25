@@ -12,6 +12,7 @@ declare( strict_types = 1 );
 
 namespace Rhema\Common;
 
+use Rhema\Common\Constants;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 
@@ -38,6 +39,19 @@ final class Defaults extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
+	}
+
+	public function localizeScriptData() {
+		return [
+			'RHEMA_SITE_ROOT'  => get_site_url( null, '', 'relative' ),
+			'RHEMA_REST_ENDPOINTS'  => rhema()->bible()->restEndpoints(),
+			'RHEMA_DOMAIN_TEXT' => $this->plugin->textDomain(),
+			'RHEMA_CONSTANTS' => [
+				'FEATURE_NAMES' => Constants::FEATURE_NAMES,
+				'FEATURE_SLUG_NAMES' => Constants::FEATURE_SLUG_NAMES,
+			],
+			'RHEMA_ACTIVE_FEATURES' => rhema()->features()->getActiveInfo(),
+		];
 	}
 }
 

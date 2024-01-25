@@ -38,21 +38,25 @@ class MetaBox extends Base {
 		 * Add plugin code here for admin notices specific functions
 		 */
 		// add_action( 'add_meta_boxes', [ $this, 'bible_question_anwser_meta_box' ] );
-		add_action( 'add_meta_boxes', [ $this, 'bible_relations_meta_box' ] );
+		add_action( 'add_meta_boxes', [ $this, 'bibleRelationsMetaBox' ] );
 	}
 	/**
 	 * Anwser meta box
 	 *
 	 * @since 1.0.0
 	 */
-	public function bible_relations_meta_box() {
+	public function bibleRelationsMetaBox() {
 		add_meta_box(
-			Constants::BIBLE_QUESTION_TYPE['id'] . '-anwser',
+			$this->plugin->textDomain(),
 			'Bible Relations',
 			[ $this, 'bible_relations_meta_box_html' ],
-			null,
-			'side',
-			'high'
+			[ 'post', 'page', 'attachment' ],
+			'advanced',
+			'default',
+			[
+				'__block_editor_compatible_meta_box' => false,
+				'__back_compat_meta_box'             => true,
+			]
 		);
 	}
 	/**
@@ -70,7 +74,7 @@ class MetaBox extends Base {
 		?>
 		<div id="bible-relations-meta-box" class="tailwind">
 			Relations
-        </div>
+		</div>
 		<?php
 	}
 }

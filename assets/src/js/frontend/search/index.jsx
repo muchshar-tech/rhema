@@ -41,7 +41,7 @@ export const Results = () => {
                 paged,
             },
             {
-                skip: currentKeywords.length === 0,
+                skip: currentKeywords?.length === 0,
             }
         )
     const classNames = [

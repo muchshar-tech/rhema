@@ -4,16 +4,20 @@ import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
 export const ACTIVATING_COUNT_DOWN_TIME = 4000
 export const IDENTITY_TYPE = 'domain'
-export const PRODUCT_SLUG_REST_NAME_MAP = {
-    'wp-rhema-core-feature': 'core',
+export const { RHEMA_CONSTANTS } = RHEMA_LOCALIZE
+export const PRODUCT_SLUG_NAMES = {
+    DONATE: 'donate-for-txipartners', ...RHEMA_CONSTANTS.FEATURE_SLUG_NAMES
 }
-export const PRODUCT_SLUGS = [
-    'donate-for-txipartners',
-    'wp-rhema-core-feature',
-    'wp-rehema-rlation-feature',
-    'wp-rehema-q-and-a-feature',
-    'wp-rehema-offline-reading',
-]
+export const PRODUCT_SLUG_2_REST_NAME_MAP = Object.keys(RHEMA_CONSTANTS.FEATURE_SLUG_NAMES).reduce((obj, key) => {
+    if (obj.hasOwnProperty(key)) {
+        return obj
+    }
+    const slug = RHEMA_CONSTANTS.FEATURE_SLUG_NAMES[key]
+    const restName = RHEMA_CONSTANTS.FEATURE_NAMES[key]
+    obj[slug] = restName
+    return obj
+}, {})
+export const PRODUCT_SLUGS = Object.values(PRODUCT_SLUG_NAMES)
 export const ERROR_MESSAGE_MAPPING = {
     rest_cookie_invalid_nonce: __(
         `error/page-is-expired`,
@@ -34,6 +38,7 @@ export const UI_MESSAGE_MAPPING = {
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
     ),
     'features/description/core': __(`Rhema core function: read and query the whole Bible`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
+    'features/description/download2host': __(`Download the bible to your own host, no need to obtain data from a third-party server to increase the speed of Bible query`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'features/description/relation': __(`Automatically correlate related posts with verses, bible verse insertion tool`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'features/description/offline': __(`Support PWA, so that the Bible of the website can be read offline on mobile phones`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
     'features/status': __(`features/status`, RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT),
@@ -69,7 +74,7 @@ export const UI_MESSAGE_MAPPING = {
     'my-account/verify-email-description': __(
         `Send the verification letter to your mailbox, copy the startup code and paste it to the field below`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT
-    ),    
+    ),
     'my-account/back-to-signin': __(
         `my-account/back-to-signin`,
         RHEMA_LOCALIZE.RHEMA_DOMAIN_TEXT

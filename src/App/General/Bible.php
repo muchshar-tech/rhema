@@ -15,6 +15,7 @@ namespace Rhema\App\General;
 use Rhema\Common\Abstracts\Base;
 use Rhema\Common\Traits\Singleton;
 use Rhema\Common\Constants;
+use Rhema\App\General\Features;
 use Rhema\Integrations\Logos;
 use Exception;
 use WP_Error;
@@ -37,53 +38,6 @@ final class Bible extends Base {
 	 */
 	public function __construct() {
 		parent::__construct();
-	}
-	/**
-	 * Check url query should fetch whole chapter verse.
-	 *
-	 * @param array $query_schema
-	 * @return boolean
-	 */
-	public function isQueryWholeChapter( array $query_schema ): bool {
-		if ( empty( $query_schema ) ) {
-			return false;
-		}
-		if ( ! isset( $query_schema[0] ) ) {
-			return false;
-		}
-		$range_from = $query_schema[0];
-		$range_to = isset( $query_schema[1] ) ? $query_schema[1] : null;
-
-		if ( ! empty( $range_from['book'] ) && ! empty( $range_to['book'] ) && $range_from['book'] !== $range_to['book'] ) {
-			return false;
-		}
-
-		if ( ! empty( $range_from['chapter'] ) && ! empty( $range_to['chapter'] ) && $range_from['chapter'] !== $range_to['chapter'] ) {
-			return false;
-		}
-		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
-		$translation_info = $this->getTranslationInfo( $bible_default_translation );
-		if ( is_wp_error( $translation_info ) ) {
-			throw new Exception( $translation_info->get_error_message() );
-		}
-		$chapter_verse_info = $translation_info['chapterVerseInfo'];
-
-		if ( is_string( $range_from['book'] ) ) {
-			$book_index = (int) $this->getBookIndexBySlug( $range_from['book'] ) + 1;
-		}
-		if ( is_array( $range_from['book'] ) && $range_from['book']['index'] ) {
-			$book_index = (int) $range_from['book']['index'];
-		}
-		if ( empty( $book_index ) ) {
-			throw new Exception( 'book index is empty.' );
-		}
-		$max_verse_number = $chapter_verse_info[ $book_index ][ $range_from['chapter'] ];
-
-		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) && $max_verse_number > $range_to['verse'] ) {
-			return false;
-		}
-
-		return true;
 	}
 	/**
 	 * Get bible source remote host url by using rhema()->bible()->remote()
@@ -117,21 +71,98 @@ final class Bible extends Base {
 			'account' => "{$rest_url}{$this->restNamespace()}/account",
 		];
 	}
+		/**
+	 * Check url query should fetch whole chapter verse.
+	 *
+	 * @param array $query_schema
+	 * @return boolean
+	 */
+	public function isQueryWholeChapter( array $query_schema ): bool {
+		if ( empty( $query_schema ) ) {
+			return false;
+		}
+		if ( ! isset( $query_schema[0] ) ) {
+			return false;
+		}
+		$range_from = $query_schema[0];
+		$range_to = isset( $query_schema[1] ) ? $query_schema[1] : null;
+
+		if ( ! empty( $range_from['book'] ) && ! empty( $range_to['book'] ) && $range_from['book'] !== $range_to['book'] ) {
+			return false;
+		}
+
+		if ( ! empty( $range_from['chapter'] ) && ! empty( $range_to['chapter'] ) && $range_from['chapter'] !== $range_to['chapter'] ) {
+			return false;
+		}
+
+		$chapter_verse_info = $this->getChapterVerseInfo();
+
+		if ( is_string( $range_from['book'] ) ) {
+			$book_index = (int) $this->getBookIndexBySlug( $range_from['book'], $range_from['chapter'] ) + 1;
+		}
+		if ( is_array( $range_from['book'] ) && $range_from['book']['index'] ) {
+			$book_index = (int) $range_from['book']['index'];
+		}
+		if ( empty( $book_index ) ) {
+			throw new Exception( 'book index is empty.' );
+		}
+		$max_verse_number = $chapter_verse_info[ $book_index ][ $range_from['chapter'] ];
+
+		if ( ! empty( $range_to ) && ! empty( $range_to['verse'] ) && $max_verse_number > $range_to['verse'] ) {
+			return false;
+		}
+
+		return true;
+	}
+	/**
+	 * Get chapterVerseInfo data
+	 *
+	 * @return array
+	 */
+	public function getChapterVerseInfo() {
+		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
+		$translation_info = $this->getTranslationInfo( $bible_default_translation );
+		if ( is_wp_error( $translation_info ) ) {
+			throw new Exception( $translation_info->get_error_message() );
+		}
+		if ( empty( $translation_info ) ) {
+			throw new Exception( 'No Found.' );
+		}
+		$chapter_verse_info = $translation_info['chapterVerseInfo'];
+		return $chapter_verse_info;
+	}
 	/**
 	 * Get book index by slug.
 	 *
 	 * @param string $slug
 	 * @return integer
 	 */
-	public function getBookIndexBySlug( string $slug ): int {
+	public function getBookIndexBySlug( string $slug, $chapter = 1 ): int {
 		$slug_in_regexes = array_filter( Constants::ABBR_REGEX_INDEX, function( $abbr_regex_index ) use ( $slug ) {
 			return preg_match( $abbr_regex_index, $slug );
 		} );
-		return (int) array_keys( $slug_in_regexes )[0];
+		if ( 1 === count( $slug_in_regexes ) ) {
+			return (int) array_keys( $slug_in_regexes )[0];
+		}
+
+		$chapter_verse_info = $this->getChapterVerseInfo();
+
+		$book_index = array_filter( $slug_in_regexes, function( $idx ) use ( $chapter_verse_info, $chapter ) {
+			$chapters_of_book = $chapter_verse_info[ $idx + 1 ];
+			if ( empty( $chapters_of_book ) ) {
+				return false;
+			}
+			if ( empty( $chapters_of_book[ $chapter ] ) ) {
+				return false;
+			}
+			return $chapters_of_book[ $chapter ] > 0;
+		}, ARRAY_FILTER_USE_KEY );
+
+		return $book_index ? (int) array_keys( $book_index )[0] : 0;
 	}
 
-	public function getBookTransBySlug( string $slug ): array {
-		$book_index = $this->getBookIndexBySlug( $slug );
+	public function getBookTransBySlug( string $slug, $chapter = 1 ): array {
+		$book_index = $this->getBookIndexBySlug( $slug, $chapter );
 		$books = Constants::init()->books[ $book_index ];
 		return $books;
 	}
@@ -190,7 +221,7 @@ final class Bible extends Base {
 			}
 
 			return [
-				'book' => $book_slug_to_trans ? $this->getBookTransBySlug( $current_matches[1] ) : $current_matches[1],
+				'book' => $book_slug_to_trans ? $this->getBookTransBySlug( $current_matches[1], $current_matches[2] ) : $current_matches[1],
 				'chapter' => $current_matches[2],
 				'verse' => $current_matches[3],
 			];
@@ -200,16 +231,10 @@ final class Bible extends Base {
 		if ( ! $is_whole_chapter ) {
 			return $query_schema;
 		}
-		$bible_default_translation = rhema()->options()->get( 'general.bible_default_translation' );
-		$translation_info = $this->getTranslationInfo( $bible_default_translation );
-		if ( is_wp_error( $translation_info ) ) {
-			throw new Exception( $translation_info->get_error_message() );
-		}
-		if ( empty( $translation_info ) ) {
-			throw new Exception( 'No Found.' );
-		}
-		$chapter_verse_info = $translation_info['chapterVerseInfo'];
-		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'] ) + 1;
+
+		$chapter_verse_info = $this->getChapterVerseInfo();
+
+		$book_index = $book_slug_to_trans ? $query_schema[0]['book']['index'] : $this->getBookIndexBySlug( $query_schema[0]['book'], $query_schema[0]['chapter'] ) + 1;
 
 		if ( ! empty( $query_schema[0] ) ) {
 			$query_schema[0]['verse'] = '1';
@@ -350,11 +375,12 @@ final class Bible extends Base {
 	 */
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$bible_remote = $this->remote();
+		$features_instance = Features::init();
 		if ( empty( $translate_abbr ) ) {
 			$translate_abbr = 'kjv';
 		}
 		$remote_query_string = "{$bible_remote}/{$translate_abbr}";
-		$transient_translate_res = $this->getTransient( 'rhema.bible.translate.info', $remote_query_string );
+		$transient_translate_res = $features_instance->getTransient( 'rhema.translate.info', $remote_query_string );
 		if ( ! empty( $transient_translate_res ) ) {
 			return $transient_translate_res;
 		}
@@ -362,7 +388,7 @@ final class Bible extends Base {
 		if ( is_wp_error( $translate_res ) ) {
 			return $translate_res;
 		}
-		$this->setTransient( 'rhema.bible.translate.info', $remote_query_string, $translate_res, MONTH_IN_SECONDS );
+		$features_instance->setTransient( 'rhema.translate.info', $translate_res, $remote_query_string, MONTH_IN_SECONDS );
 		return $translate_res;
 	}
 	/**
@@ -374,31 +400,5 @@ final class Bible extends Base {
 		/** @var Logos\Api */
 		$integration_logos_api = Logos\Api::init();
 		return $integration_logos_api->getSavedData();
-	}
-	/**
-	 * Get transient data
-	 *
-	 * @param string $prefix
-	 * @param string $query_string
-	 * @return mixed
-	 */
-	public function getTransient( string $prefix, string $query_string ): mixed {
-		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
-		$transient_label = "$prefix.$remote_query_string_base64";
-		return get_transient( $transient_label );
-	}
-	/**
-	 * Set transient data
-	 *
-	 * @param string $prefix
-	 * @param string $query_string
-	 * @param mixed $value
-	 * @param integer $expiration
-	 * @return boolean
-	 */
-	public function setTransient( string $prefix, string $query_string, mixed $value, $expiration = 0 ): bool {
-		$remote_query_string_base64 = urlencode( base64_encode( $query_string ) );
-		$transient_label = "$prefix.$remote_query_string_base64";
-		return set_transient( $transient_label, $value, $expiration );
 	}
 }

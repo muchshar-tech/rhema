@@ -1,8 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
+import merge from 'deepmerge'
 
-const initialState = {
+const defaultState = {
     fullscreen: false,
     isAfterReload: true,
+    routerMode: 'history',
+    layoutAllocationMode: 'float', // float, split
     pageSwipper: {
         pagePos: 1,
         onTransition: true,
@@ -10,11 +13,18 @@ const initialState = {
     displaySetting: {
         fontSize: 'md',
     },
+    selected:{},
     headersSwitch: {
         main: true,
         books: false,
         selection: false,
         search: false,
+    },
+    footerSwitch: {
+        main: {
+            pagenation: true,
+            confirmSelection: false,
+        },
     },
     booksSelector: {
         books: true,
@@ -36,6 +46,10 @@ const initialState = {
     drawer: {},
 }
 
+export const initialState = (state = {}) => {
+    return merge(defaultState, state)
+}
+
 const disableAllHeader = (headersSwitch) => {
     Object.keys(headersSwitch).forEach((key) => {
         headersSwitch[key] = false
@@ -44,10 +58,13 @@ const disableAllHeader = (headersSwitch) => {
 
 export const generalSlice = createSlice({
     name: 'general',
-    initialState,
+    initialState: initialState(),
     reducers: {
         toggleScreen: (state) => {
-            state.fullscreen = !state.fullscreen
+            const body = document.getElementsByTagName('body')[0]
+            const newValue = !state.fullscreen
+            body.style.overflow = newValue ? 'hidden' : null
+            state.fullscreen = newValue
         },
         toggleDrawer: (state, action) => {
             const { name: drawerName } = action.payload

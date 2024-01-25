@@ -1,12 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
+import merge from 'deepmerge'
 
-const initialState = {
+const defaultState = {
     raws: [],
+}
+
+export const initialState = (state = {}) => {
+    return merge(defaultState, state)
 }
 
 export const selectedSlice = createSlice({
     name: 'selected',
-    initialState,
+    initialState: initialState(),
     reducers: {
         putRaw: (state, action) => {
             const { payload } = action

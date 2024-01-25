@@ -1,3 +1,29 @@
+/**
+ * 將相同的書、章的字串縮短
+ * @param array queryString
+ * @returns string
+ */
+export const queryStringModifier = (queryString = []) => {
+    if (!queryString || !Array.isArray(queryString) || queryString.length === 0) {
+        return ['聖經目錄']
+    }
+    if (queryString.length < 2) {
+        return ['']
+    }
+    const rangeFrom = queryString[0]
+    const rangeTo = queryString[1] ? queryString[1] : queryString[0]
+    const isSameBook = rangeFrom.book.name === rangeTo.book.name
+    const isSameChapter = rangeFrom.chapter === rangeTo.chapter
+    let returnQueryString = [
+        `${rangeFrom.book.name} ${rangeFrom.chapter}:${rangeFrom.verse}`,
+    ]
+    if (!!rangeTo && !!rangeTo.book && rangeTo.chapter && rangeTo.verse) {
+        returnQueryString[0] += `-${isSameBook ? '' : rangeTo.book.name + ' '}${isSameChapter ? '' : rangeTo.chapter + ':'
+            }${rangeTo.verse}`
+    }
+    return returnQueryString
+}
+
 export const retrieveLogosSignedToken = (sessionStorageApi) => {
     try {
         return sessionStorageApi.getItem('logos.token')
@@ -51,7 +77,7 @@ export const retrieveFontSize = (size) => {
     return sizeMap[size]
 }
 export const retrieveResponseFromRTK = (response) => {
-    let code =''
+    let code = ''
     let label = ''
     let message = 'There has been a critical error.'
     if (response) {

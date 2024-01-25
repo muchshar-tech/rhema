@@ -5,14 +5,7 @@ import { useSelect, useMultipleSelection } from 'downshift'
 import Ripples from 'react-ripples'
 
 import { toggleDrawer } from '@assets/js/frontend/states/generalSlice'
-
-export const Form = ({ onSubmit, children }) => {
-    return (
-        <form onSubmit={onSubmit} className="w-full flex flex-col">
-            {children}
-        </form>
-    )
-}
+import Form from '@components/frontend/forms/Form'
 
 const FieldRow = ({ className: extraClassname = '', children }) => {
     const classNames = [
@@ -155,7 +148,9 @@ const Posts = () => {
                 <Ripples>
                     <button
                         className="p-12px"
-                        onClick={() => dispatch(toggleDrawer({name: 'new-post'}))}
+                        onClick={() =>
+                            dispatch(toggleDrawer({ name: 'new-post' }))
+                        }
                     >
                         取消
                     </button>
@@ -168,4 +163,4 @@ const Posts = () => {
     )
 }
 
-export { Posts }
+export { Posts, Form }

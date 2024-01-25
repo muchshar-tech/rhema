@@ -218,7 +218,7 @@ ScreenOverlay.propTypes = {
 export const FeatureCard = ({
     title,
     isActive,
-    version = '0.0.0',
+    version = '',
     commingSoon,
     onClickActive = () => false,
     onClickLicense = () => false,

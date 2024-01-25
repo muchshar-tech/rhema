@@ -13,7 +13,6 @@ const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin') // To opt
 const CopyPlugin = require('copy-webpack-plugin') // For WordPress we need to copy images from src to public to optimize them
 const { CleanWebpackPlugin } = require('clean-webpack-plugin') // Cleans the public folder
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin'); // To remove unused locales from moment.js
-
 module.exports = (projectOptions) => {
     /**
      * CSS Rules
@@ -156,8 +155,15 @@ module.exports = (projectOptions) => {
      * Externals
      */
     const externals = {
-        RHEMA_LOCALIZE: 'LOCALIZE_SCRIPT_VARIABLES',
+        'react': 'React',
+        'react-dom/client': 'ReactDOM',
+        'lodash': '_',
+        'RHEMA_LOCALIZE': 'LOCALIZE_SCRIPT_VARIABLES',
         '@wordpress/i18n': ['window wp', 'i18n'],
+        '@wordpress/core-data': ['window wp', 'coreData'],
+        '@wordpress/plugins': ['window wp', 'plugins'],
+        '@wordpress/edit-post': ['window wp', 'editPost'],
+        '@wordpress/data': ['window wp', 'data'],
     }
 
     return {

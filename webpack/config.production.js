@@ -9,6 +9,8 @@ const glob = require('glob-all')
 const PurgecssPlugin = require('purgecss-webpack-plugin') // A tool to remove unused CSS
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const wpScriptConfig = require('@wordpress/scripts/config/webpack.config');
+
 
 module.exports = (projectOptions) => {
     process.env.NODE_ENV = 'production' // Set environment level to 'production'
@@ -67,6 +69,7 @@ module.exports = (projectOptions) => {
      * Plugins
      */
     const plugins = [
+        ...wpScriptConfig.plugins,
         ...Base.plugins,
         ...[
             // new PurgecssPlugin({
@@ -106,10 +109,16 @@ module.exports = (projectOptions) => {
             filename: projectOptions.projectJs.filename,
         },
         devtool: sourceMap.devtool,
-        optimization: optimizations,
+        optimization: { ...wpScriptConfig.optimization, ...optimizations },
         module: { rules: [cssRules, jsRules, imageRules] },
-        plugins: plugins,
-        resolve: { ...Base.resolve },
+        plugins: [...wpScriptConfig.plugins, ...plugins],
+        resolve: {
+            alias: {
+                ...Base.resolve.alias,
+                ...wpScriptConfig.resolve.alias,
+            },
+            extensions: [...Base.resolve.extensions]
+        },
         externals: { ...Base.externals },
     }
 }

@@ -1,0 +1,286 @@
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import PropTypes from 'prop-types'
+import Countdown from 'react-countdown'
+import { useForm } from 'react-hook-form'
+import moment from 'moment/moment'
+import { joiResolver } from '@hookform/resolvers/joi'
+
+import { isJsonStr } from '@components/common'
+import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
+import { PRODUCT_SLUG_NAMES, ACTIVATING_COUNT_DOWN_TIME, IDENTITY_TYPE } from '@components/constants'
+import * as FormTable from '@components/backend/form-table'
+import * as Components from '@components/backend/components'
+import * as FieldSchama from '@components/schema'
+import { useActivateByLicenseMutation, useDeactivateMutation } from '@components/services'
+import { addLicense, deleteLicense } from '@components/backend/states/generalSlice'
+
+const License = ({ show, onClickClose }) => {
+    const dispatch = useDispatch()
+    const licenseData = useSelector((state) => {
+        const timeZone = RHEMA_LOCALIZE.WP_OPTIONS.TIME_ZONE || '0'
+        const license = state.general.licenses.bible
+        const licenseData = isJsonStr(license.data) ? JSON.parse(license.data) : license.data
+        const renewDate = moment(license.renew_date).utcOffset(timeZone)
+        const nowDate = moment()
+        if (typeof license.key !== 'string' || license.key.length <= 0) {
+            return null
+        }
+        if (nowDate.isAfter(renewDate)) {
+            return null
+        }
+        if (typeof licenseData.email !== 'string' || licenseData.email.length <= 0) {
+            return null
+        }
+        if (typeof licenseData.username !== 'string' || licenseData.username.length <= 0) {
+            return null
+        }
+        return {
+            key: license.key,
+            renew_date: license.renew_date,
+            ...licenseData,
+        }
+    })
+
+    const activeFormMethods = useForm({
+        defaultValues: {
+            email: licenseData?.email || RHEMA_LOCALIZE.WP_OPTIONS.ADMIN_EMAIL,
+            identity_type: licenseData?.identity_type || IDENTITY_TYPE,
+            product_slug: licenseData?.product_slug || PRODUCT_SLUG_NAMES.CORE,
+            username: licenseData?.username || RHEMA_LOCALIZE.WP_OPTIONS.HOST_DOMAIN,
+            license: licenseData?.key || '',
+        },
+        resolver: joiResolver(FieldSchama.activateRhemeaByLicense),
+    })
+
+    const { register, formState, handleSubmit } = activeFormMethods
+    const { isSubmitting, errors } = formState
+    const [activate, { data: activateResponse, error: activateError, isLoading: isActivating }] = useActivateByLicenseMutation()
+    const [deactivate, { data: deactivateResponse, error: deactivateError, isLoading: isDeactivating }] = useDeactivateMutation()
+
+    const isActived =
+        typeof licenseData === 'object' &&
+        licenseData !== null &&
+        licenseData.hasOwnProperty('key') &&
+        typeof licenseData?.key === 'string' &&
+        licenseData.key.length > 0
+    const isDeactivated = deactivateResponse?.success
+
+    const showExceptionMessage = !!activateError || !!deactivateError
+    const responseMessage = ((activateResponse, deactivateResponse, activateError, deactivateError) => {
+        const code = activateResponse?.success ? 200 : false || activateError?.status || deactivateResponse?.success ? 200 : false || deactivateError?.status
+        const label = activateResponse?.success
+            ? 'seccess'
+            : false || activateError?.data.code || deactivateResponse?.success
+            ? 200
+            : false || deactivateError?.data?.code || deactivateError?.data[0]?.code || ''
+        const message = /5[0-9][0-9]/.test(code)
+            ? 'There has been a critical error.'
+            : activateResponse?.body || activateError?.data?.message || deactivateError?.data?.message
+        return {
+            code,
+            label,
+            message,
+        }
+    })(activateResponse, deactivateResponse, activateError, deactivateError)
+    const showActivatingPrepare = activateResponse?.success
+
+    const [showDeactivated, setShowDeactivated] = useState(isDeactivated)
+    const [showActivating, setShowActivating] = useState(showActivatingPrepare)
+
+    const onSubmit = async (data) => {
+        if (!isActived) {
+            const payload = await activate(data)
+        } else {
+            const payload = await deactivate(data)
+            dispatch(
+                deleteLicense({
+                    bible: {
+                        key: payload.data.body,
+                        renew_date: null,
+                        data: null,
+                    },
+                })
+            )
+        }
+    }
+
+    const triggerClose = () => {
+        onClickClose()
+        setShowActivating(false)
+    }
+
+    const onActivatingCompleted = (response) => {
+        triggerClose()
+        const { license_key: key, renew_date, license_data: data } = response
+        dispatch(addLicense({ bible: { key, renew_date, data } }))
+    }
+
+    const onDeactivated = (response) => {
+        const { license_key: key } = response
+        dispatch(deleteLicense({ bible: { key } }))
+        setShowDeactivated(false)
+    }
+
+    useEffect(() => {
+        if (showActivatingPrepare) {
+            setShowActivating(true)
+        }
+    }, [showActivatingPrepare])
+
+    useEffect(() => {
+        if (isDeactivated && !showDeactivated) {
+            setShowDeactivated(true)
+        }
+    }, [isDeactivated])
+
+    useEffect(() => {
+        if (showDeactivated) {
+            onDeactivated(deactivateResponse.data)
+        }
+    }, [showDeactivated])
+
+    useEffect(() => {
+        if (!show) {
+            setShowDeactivated(false)
+        }
+    }, [show])
+
+    return (
+        <Components.ScreenOverlay
+            show={show[0]}
+            className={{
+                root: 'z-10',
+                modal: 'max-w-xs',
+            }}
+            title="Enter license to active"
+            onClickClose={onClickClose}
+        >
+            <div className="flex mb-3">
+                <div className="w-full p-2 border-t border-b border-l-0 border-r-0 border-[#c3c4c7] border-solid">
+                    <div className="mb-1">
+                        If you already have a license key, you can fill in the following fields, and your information will be verified after sending it out. If
+                        it is correct, it will be activated.
+                    </div>
+                    <div className="mb-1">
+                        <span className="inline-block bg-gray-300 p-4px mr-1 rounded font-medium">Status</span>
+                        {isActived ? 'Activated' : 'Not Activated'}
+                    </div>
+                    <div className="mb-1">
+                        <span className="inline-block bg-gray-300 p-4px mr-1 rounded font-medium">Renew Date</span>
+                        {isActived
+                            ? moment(licenseData.renew_date)
+                                  .utcOffset(RHEMA_LOCALIZE.WP_OPTIONS.TIME_ZONE || 0)
+                                  .format('YYYY/MM/DD hh:mm:ss')
+                            : ''}
+                    </div>
+                </div>
+            </div>
+
+            <FormTable.ModalForm onSubmit={handleSubmit(onSubmit)}>
+                <FormTable.ModalForm.FieldRow label="License">
+                    <input
+                        className="w-full"
+                        type="text"
+                        {...register('license', {
+                            required: true,
+                        })}
+                        {...(isActived && { readOnly: true })}
+                    />
+                    <FormTable.FieldErrorMsg message={errors.license?.message} />
+                </FormTable.ModalForm.FieldRow>
+                <FormTable.ModalForm.FieldRow label="Email">
+                    <input
+                        className="w-full"
+                        type="text"
+                        {...register('email', {
+                            required: true,
+                        })}
+                        {...(isActived && { readOnly: true })}
+                    />
+                    <FormTable.FieldErrorMsg message={errors.email?.message} />
+                </FormTable.ModalForm.FieldRow>
+                <FormTable.ModalForm.FieldRow label="Domain">
+                    <input
+                        type="text"
+                        className="w-full"
+                        {...register('username', {
+                            required: true,
+                        })}
+                        readOnly
+                    />
+                    <FormTable.FieldErrorMsg message={errors.username?.message} />
+                </FormTable.ModalForm.FieldRow>
+                <FormTable.ModalForm.FieldRow>
+                    <input type="hidden" {...register('identity_type')} />
+                    <FormTable.FieldErrorMsg message={errors.identity_type?.message} />
+                </FormTable.ModalForm.FieldRow>
+                <FormTable.ModalForm.FieldRow>
+                    <input type="hidden" {...register('product_slug')} />
+                    <FormTable.FieldErrorMsg message={errors.product_slug?.message} />
+                </FormTable.ModalForm.FieldRow>
+                <div className="flex">
+                    {!isActived ? (
+                        <button
+                            type="submit"
+                            className="button button-primary flex items-center"
+                            {...((isSubmitting || isActivating || showActivating) && {
+                                disabled: 'disabled',
+                            })}
+                        >
+                            {isSubmitting || isActivating ? (
+                                <>
+                                    <Components.ButtonSpinner className="mr-1" />
+                                    Verifying...
+                                </>
+                            ) : showActivating ? (
+                                <>
+                                    <Components.ButtonSpinner className="mr-1" />
+                                    Activating...
+                                    <Countdown
+                                        date={Date.now() + ACTIVATING_COUNT_DOWN_TIME}
+                                        renderer={({ seconds, completed }) => {
+                                            if (completed) {
+                                                return null
+                                            } else {
+                                                return <span>({seconds})</span>
+                                            }
+                                        }}
+                                        onComplete={() => {
+                                            onActivatingCompleted(activateResponse.data)
+                                        }}
+                                    />
+                                </>
+                            ) : (
+                                'Confirm'
+                            )}
+                        </button>
+                    ) : null}
+                    {isActived ? (
+                        <button type="submit" className="button flex items-center">
+                            {isDeactivating ? 'Deactivating...' : 'Deactivate'}
+                        </button>
+                    ) : null}
+                    {showDeactivated ? (
+                        <FormTable.ResponseSuccessMsg label="Success">You have deactivated the feature of Core</FormTable.ResponseSuccessMsg>
+                    ) : null}
+                    {showActivating ? (
+                        <FormTable.ResponseSuccessMsg label="Success">Your application has been approved, activating the feature</FormTable.ResponseSuccessMsg>
+                    ) : null}
+                    {showExceptionMessage ? (
+                        <FormTable.ResponseErrorMsg code={responseMessage.code} label={responseMessage.label}>
+                            {responseMessage?.message || 'There has been a critical error.'}
+                        </FormTable.ResponseErrorMsg>
+                    ) : null}
+                </div>
+            </FormTable.ModalForm>
+        </Components.ScreenOverlay>
+    )
+}
+
+License.propTypes = {
+    show: PropTypes.oneOfType([PropTypes.bool, PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.bool, PropTypes.string]))]),
+    onClickClose: PropTypes.func,
+}
+
+export default License

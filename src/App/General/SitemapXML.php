@@ -50,6 +50,7 @@ class SitemapXML extends Base {
 				}
 				$bible_entry_url = home_url() . "/$bible_entry_path";
 				$books = Constants::init()->books;
+				$books_urls = [];
 
 				foreach ( $books as $book ) {
 					$books_urls[] = [

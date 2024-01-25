@@ -12,9 +12,7 @@ export const Core = ({ onClickActive, onClickLicense }) => {
     const isActive = useSelector((state) => {
         const timeZone = RHEMA_LOCALIZE.WP_OPTIONS.TIME_ZONE || '0'
         const key = state.general.licenses.bible.key
-        const renewDate = moment(
-            state.general.licenses.bible.renew_date
-        ).utcOffset(timeZone)
+        const renewDate = moment(state.general.licenses.bible.renew_date).utcOffset(timeZone)
         const nowDate = moment()
         if (typeof key !== 'string' || key.length <= 0) {
             return false
@@ -25,30 +23,24 @@ export const Core = ({ onClickActive, onClickLicense }) => {
         return true
     })
     return (
-        <FeatureCard
-            title="Core"
-            isActive={isActive}
-            onClickActive={onClickActive}
-            onClickLicense={onClickLicense}
-            version='1.0.0'
-        >
+        <FeatureCard title="Core" isActive={isActive} onClickActive={onClickActive} onClickLicense={onClickLicense}>
             {UI_MESSAGE_MAPPING['features/description/core']}
         </FeatureCard>
     )
 }
 
-export const Relation = () => {
+export const Download2Host = ({ onClickActive, onClickLicense }) => {
     return (
-        <FeatureCard title="Relation" commingSoon={true}>
-            {UI_MESSAGE_MAPPING['features/description/relation']}
+        <FeatureCard title="Download to Host" onClickActive={onClickActive} onClickLicense={onClickLicense}>
+            {UI_MESSAGE_MAPPING['features/description/download2host']}
         </FeatureCard>
     )
 }
 
-export const QandA = () => {
+export const Relation = ({ onClickActive, onClickLicense }) => {
     return (
-        <FeatureCard title="Q&A" commingSoon={true}>
-            聖經經文問與答功能
+        <FeatureCard title="Relation" onClickActive={onClickActive} onClickLicense={onClickLicense}>
+            {UI_MESSAGE_MAPPING['features/description/relation']}
         </FeatureCard>
     )
 }

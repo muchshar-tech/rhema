@@ -6,13 +6,7 @@ import { BiChevronLeft, BiFontSize } from 'react-icons/bi'
 
 import { UI_MESSAGE_MAPPING } from '@components/constants'
 import * as FieldSchama from '@components/schema'
-import {
-    switchHeadersMain,
-    changeFontSize,
-    switchHeadersSearch,
-    changeSearchPaged,
-    inputSearchKeywords,
-} from '@assets/js/frontend/states/generalSlice'
+import { switchHeadersMain, changeFontSize, switchHeadersSearch, changeSearchPaged, inputSearchKeywords } from '@assets/js/frontend/states/generalSlice'
 
 import { queryStringModifier } from '@assets/js/frontend/utilities'
 import * as Layout from '@components/frontend/layouts'
@@ -20,14 +14,10 @@ import * as Tools from '@components/frontend/tools'
 import * as Tabs from '@components/frontend/tabs'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 
-const Main = () => {
+const Main = ({ hideReadingTool = false }) => {
     const dispatch = useDispatch()
-    const showMainHeader = useSelector(
-        (state) => state.general.headersSwitch.main
-    )
-    const showSearchHeader = useSelector(
-        (state) => state.general.headersSwitch.search
-    )
+    const showMainHeader = useSelector((state) => state.general.headersSwitch.main)
+    const showSearchHeader = useSelector((state) => state.general.headersSwitch.search)
     const queryString = useSelector((state) => state.data.readingQuerys)
     const classNames = [
         ...(showMainHeader || showSearchHeader ? ['flex'] : ['hidden']),
@@ -63,13 +53,9 @@ const Main = () => {
         <Layout.Top.Row className={classNames}>
             <Layout.Top.LeftSide>
                 {showMainHeader ? (
-                    <Tools.BooksSelectorButton
-                        range={queryStringModifier(queryString)}
-                    />
+                    <Tools.BooksSelectorButton range={queryStringModifier(queryString)} />
                 ) : (
-                    <Tools.Borderless
-                        onClick={() => dispatch(switchHeadersMain())}
-                    >
+                    <Tools.Borderless onClick={() => dispatch(switchHeadersMain())}>
                         <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                     </Tools.Borderless>
                 )}
@@ -82,22 +68,15 @@ const Main = () => {
                         required: true,
                     })}
                 />
-
-                {!showSearchHeader ? (
+                {hideReadingTool ? null : !showSearchHeader ? (
                     <>
                         <Tools.FullScreenToggle />
                         <Tools.Borderless onClick={onClickFontSize}>
                             <BiFontSize className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                         </Tools.Borderless>
-                        {/* <Tools.Borderless
-                            onClick={() =>
-                                dispatch(
-                                    toggleDrawer({ name: 'relative-posts' })
-                                )
-                            }
-                        >
+                        <Tools.Borderless onClick={() => dispatch(toggleDrawer({ name: 'relative-posts' }))}>
                             <BsLayoutTextSidebarReverse className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
-                        </Tools.Borderless> */}
+                        </Tools.Borderless>
                     </>
                 ) : null}
             </Layout.Top.RightSide>
@@ -105,29 +84,18 @@ const Main = () => {
     )
 }
 const Books = () => {
-    const showBooksHeader = useSelector(
-        (state) => state.general.headersSwitch.books
-    )
-    const classNames = [
-        ...(showBooksHeader ? ['flex'] : ['hidden']),
-        'w-full',
-        'items-center',
-        'flex-wrap',
-    ].join(' ')
+    const showBooksHeader = useSelector((state) => state.general.headersSwitch.books)
+    const classNames = [...(showBooksHeader ? ['flex'] : ['hidden']), 'w-full', 'items-center', 'flex-wrap'].join(' ')
     const dispatch = useDispatch()
     return (
         <div className={classNames}>
             <Layout.Top.Row className="items-center w-full py-11px px-12px md:py-10px justify-between">
                 <Layout.Top.LeftSide>
-                    <Tools.Borderless
-                        onClick={() => dispatch(switchHeadersMain())}
-                    >
+                    <Tools.Borderless onClick={() => dispatch(switchHeadersMain())}>
                         <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>
-                <Layout.Top.MiddleSide className="text-16px">
-                    {UI_MESSAGE_MAPPING['bible-directory']}
-                </Layout.Top.MiddleSide>
+                <Layout.Top.MiddleSide className="text-16px">{UI_MESSAGE_MAPPING['bible-directory']}</Layout.Top.MiddleSide>
                 <Layout.Top.RightSide>
                     <Tools.Bordered>和合本</Tools.Bordered>
                 </Layout.Top.RightSide>
@@ -138,22 +106,13 @@ const Books = () => {
 }
 const Selection = () => {
     const dispatch = useDispatch()
-    const showSelectionHeader = useSelector(
-        (state) => state.general.headersSwitch.selection
-    )
-    const classNames = [
-        ...(showSelectionHeader ? ['flex'] : ['hidden']),
-        'w-full',
-        'items-center',
-        'flex-wrap',
-    ].join(' ')
+    const showSelectionHeader = useSelector((state) => state.general.headersSwitch.selection)
+    const classNames = [...(showSelectionHeader ? ['flex'] : ['hidden']), 'w-full', 'items-center', 'flex-wrap'].join(' ')
     return (
         <div className={classNames}>
             <Layout.Top.Row className="items-center w-full py-11px px-12px md:py-10px justify-between">
                 <Layout.Top.LeftSide>
-                    <Tools.Borderless
-                        onClick={() => dispatch(switchHeadersMain())}
-                    >
+                    <Tools.Borderless onClick={() => dispatch(switchHeadersMain())}>
                         <BiChevronLeft className="h-20px w-20px right-4px md:right-10px text-neutral-700" />
                     </Tools.Borderless>
                 </Layout.Top.LeftSide>

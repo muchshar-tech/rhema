@@ -14,7 +14,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import ReactShadowRoot from 'react-shadow-root'
 
 import App from './frontend/App'
-import { store } from './frontend/store'
+import { Store } from './frontend/store'
 import * as Pages from './frontend/pages'
 
 /**
@@ -26,7 +26,16 @@ if (!!container && container instanceof HTMLElement) {
     const root = createRoot(container)
     root.render(
         <ReactShadowRoot>
-            <Provider store={store}>
+            <Provider store={new Store({
+                general: {
+                    footerSwitch: {
+                        main: {
+                            pagenation: true,
+                            confirmSelection: false,
+                        }
+                    }
+                },
+            })}>
                 <ErrorBoundary FallbackComponent={Pages.Error}>
                     <App className="bible_app" />
                 </ErrorBoundary>

@@ -65,13 +65,13 @@ class Activate extends Base {
 	public function addActivateRoute() {
 		register_rest_route(
 			'rhema/v1',
-			'/activate/core',
+			'/activate/' . Constants::FEATURE_NAMES['CORE'],
 			[
 				'methods'  => \WP_REST_Server::CREATABLE,
 				'callback' => [ $this, 'activateFeature' ],
 				'args'     => [
 					'proudct_slug'  => [
-						'default' => 'wp-rhema-core-feature',
+						'default' => Constants::FEATURE_SLUG_NAMES['CORE'],
 					],
 					'email'  => [
 						'default' => false,
@@ -97,7 +97,7 @@ class Activate extends Base {
 				'callback' => [ $this, 'activateByLicense' ],
 				'args'     => [
 					'proudct_slug'  => [
-						'default' => 'wp-rhema-core-feature',
+						'default' => Constants::FEATURE_SLUG_NAMES['CORE'],
 						'required' => true,
 					],
 					'email'  => [

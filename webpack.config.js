@@ -4,6 +4,7 @@
  * @since 1.0.0
  */
 const path = require('path')
+const { getWebpackEntryPoints } = require( '@wordpress/scripts/utils/config' );
 
 // Paths to find our files and provide BrowserSync functionality.
 const projectPaths = {
@@ -34,11 +35,13 @@ const projectFiles = {
     },
     // JS configurations for development and production
     projectJs: {
-        eslint: true, // enable or disable eslint  | this is only enabled in development env.
+        eslint: false, // enable or disable eslint  | this is only enabled in development env.
         filename: 'js/[name].js',
         entry: {
+            ...getWebpackEntryPoints(),
             frontend: projectPaths.projectJsPath + '/frontend.js',
             backend: projectPaths.projectJsPath + '/backend.js',
+            blockeditor: projectPaths.projectJsPath + '/blockeditor.js',
         },
         rules: {
             test: /\.m?jsx?$/,

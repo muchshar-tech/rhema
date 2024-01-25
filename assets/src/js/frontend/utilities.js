@@ -1,36 +1,13 @@
-import isempty from 'lodash/isEmpty'
 import { generatePath } from 'react-router-dom'
-import { max } from 'lodash'
+import { createBrowserHistory } from "history";
 
-import { store } from '@assets/js/frontend/store'
-import { clickBookSelector } from '@assets/js/frontend/states/generalSlice'
+import { Store } from '@assets/js/frontend/store'
+import { bibleApi } from '@components/services'
+import { clickBookSelector, updatePageSwipper } from '@assets/js/frontend/states/generalSlice'
 import { updateReadingQuerys } from '@assets/js/frontend/states/dataSlice'
+import { queryStringModifier } from '@components/common'
 
-/**
- * 將相同的書、章的字串縮短
- * @param array queryString
- * @returns string
- */
-export const queryStringModifier = (queryString = []) => {
-    if (isempty(queryString)) {
-        return ['聖經目錄']
-    }
-    if (queryString.length < 2) {
-        return ['']
-    }
-    const rangeFrom = queryString[0]
-    const rangeTo = queryString[1] ? queryString[1] : queryString[0]
-    const isSameBook = rangeFrom.book.name === rangeTo.book.name
-    const isSameChapter = rangeFrom.chapter === rangeTo.chapter
-    let returnQueryString = [
-        `${rangeFrom.book.name} ${rangeFrom.chapter}:${rangeFrom.verse}`,
-    ]
-    if (!!rangeTo && !!rangeTo.book && rangeTo.chapter && rangeTo.verse) {
-        returnQueryString[0] += `-${isSameBook ? '' : rangeTo.book.name + ' '}${isSameChapter ? '' : rangeTo.chapter + ':'
-            }${rangeTo.verse}`
-    }
-    return returnQueryString
-}
+export { queryStringModifier }
 
 export const generateVerseUrl = (bookAbbr, chapter, number) => {
     return generatePath('/bible/:books/:verse', {
@@ -53,7 +30,7 @@ export const retrieveChapterByParamString = (paramString) => {
 }
 
 export const retrieveBookIndexBySlug = (slug) => {
-    const { getState } = store
+    const { getState } = new Store()
     const { data } = getState()
     const bookData = [...data.books.old, ...data.books.new]
     const bookFiltered = bookData.filter((book) => book.slug === slug)
@@ -95,7 +72,7 @@ export const validIsQueryWholeChapter = (querys, chapterVerseInfo) => {
 }
 
 export const generateRandomlyChapter = (assignSchema) => {
-    const { getState } = store
+    const { getState } = new Store()
     const { data } = getState()
     let schema = assignSchema
     if (!Array.isArray(schema) || schema.length === 0) {
@@ -104,7 +81,7 @@ export const generateRandomlyChapter = (assignSchema) => {
     const bookData = [...data.books.old, ...data.books.new]
     const bookIndexRandomly = Math.round(Math.random() * bookData.length)
     const maxChapterNumberOfCurrentBook = bookData[bookIndexRandomly].chapters
-    const chapterIndexRandomly = Math.floor(Math.random() * maxChapterNumberOfCurrentBook) + 1 
+    const chapterIndexRandomly = Math.floor(Math.random() * maxChapterNumberOfCurrentBook) + 1
     console.log(bookData, bookIndexRandomly, maxChapterNumberOfCurrentBook, chapterIndexRandomly)
     return {
         book: bookData[bookIndexRandomly],
@@ -113,13 +90,8 @@ export const generateRandomlyChapter = (assignSchema) => {
     }
 }
 
-export const onClickVerse = async function ({
-    book: bookIndex,
-    chapter,
-    verse,
-    maxVerseNumberOfChapter,
-}) {
-    const { dispatch, getState } = store
+export const goToVerse = async function (bookIndex, chapter, maxVerseNumberOfChapter) {
+    const { dispatch, getState } = new Store()
     const { data } = getState()
     let maxVerseNumber = maxVerseNumberOfChapter
     if (!maxVerseNumber) {
@@ -132,10 +104,73 @@ export const onClickVerse = async function ({
         { book, chapter, verse: 1 },
         { book, chapter, verse: maxVerseNumber },
     ]
+
     await dispatch(updateReadingQuerys(prepareQueryString))
+}
+
+export const onClickVerse = async function ({
+    book: bookIndex,
+    chapter,
+    verse,
+    maxVerseNumberOfChapter,
+}) {
+    const { dispatch } = new Store()
+    goToVerse(bookIndex, chapter, maxVerseNumberOfChapter)
     await dispatch(
         clickBookSelector({
             verses: Number(verse),
         })
     )
+}
+
+export const onSwipMoveChapterPage = (chapterPaged, offest) => {
+    const { dispatch, getState } = new Store()
+    const { data } = getState()
+    const { readingQuerys } = data
+
+    const newChapterPaged = chapterPaged + offest
+
+    dispatch(
+        bibleApi.util.prefetch('getBibleRaw', {
+            ranges: [`${readingQuerys[0].book.slug}${newChapterPaged}:1`],
+            withPrevChapter: true,
+            withNextChapter: true,
+        }, { force: false, ifOlderThan: 10 })
+    )
+}
+
+export const onCompletedSwipMoveChapter = ({ currentBookIndex, chapterPaged, readingQuerys }, offest, pagePos, onTransition) => {
+    const history = createBrowserHistory();
+    const { dispatch, getState } = new Store()
+    const { data, general } = getState()
+
+    const { chapterVerseInfo } = data.translation.info
+    const { routerMode } = general
+
+    const newChapterPaged = chapterPaged + offest
+
+    const newReadingQuerys = [
+        {
+            book: { ...readingQuerys[0].book },
+            chapter: newChapterPaged,
+            verse: 1,
+        },
+        {
+            book: { ...readingQuerys[1].book },
+            chapter: newChapterPaged,
+            verse: chapterVerseInfo[currentBookIndex][newChapterPaged],
+        },
+    ]
+    // setChapterPaged(newChapterPaged)
+    dispatch(updateReadingQuerys(newReadingQuerys))
+    dispatch(
+        updatePageSwipper({
+            pagePos,
+            onTransition,
+        })
+    )
+
+    if (routerMode === 'history') {
+        history.push(generateVerseUrl(newReadingQuerys[0].book.slug, newChapterPaged, 1))
+    }
 }

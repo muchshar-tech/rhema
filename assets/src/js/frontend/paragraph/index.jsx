@@ -26,7 +26,7 @@ Title.propTypes = {
 
 const Block = ({ children }) => {
     return (
-        <p className="line-break-anywhere leading-12 mb-10px last:mb-0px">
+        <p className="line-break-anywhere leading-12 mb-10px only:mb-0 last:mb-0">
             {children}
         </p>
     )
@@ -40,6 +40,7 @@ Block.propTypes = {
 }
 
 const Line = ({
+    picked = false,
     active = false,
     block = false,
     id = '0000000',
@@ -52,35 +53,29 @@ const Line = ({
         (state) => state.general.headersSwitch.selection
     )
     const dispatch = useDispatch()
-    const { raws } = useSelector(
-        (state) => state.data
-    )
-    const {
-        fontSize,
-    } = useSelector((state) => state.general.displaySetting)
+    const { raws } = useSelector((state) => state.data)
+    const { fontSize } = useSelector((state) => state.general.displaySetting)
     const selectedRaws = useSelector((state) => state.selected.raws)
     const bind = useLongPress(
         !isSelectionMode
             ? () => {
-                  console.log('Long pressed!')
                   dispatch(switchHeadersSelection())
+              }
+            : () => {
                   if (active) {
                       return
                   }
-                  const rawIndex = raws.findIndex(
-                      (raw) => raw.id === id
-                  )
+                  const rawIndex = raws.findIndex((raw) => raw.id === id)
                   dispatch(putRaw(raws[rawIndex]))
-              }
-            : null,
+              },
         {
             threshold: 500,
             cancelOnMovement: true,
+            cancelOutsideElement: false,
         }
     )
 
     const onClickVerse = (id, e) => {
-        console.log('onClickVerse')
         e.preventDefault()
         if (!isSelectionMode) {
             return
@@ -116,6 +111,7 @@ const Line = ({
         'before:align-text-top',
         'before:mt-5px',
         'before:text-gray-400',
+        ...(picked ? ['font-bold'] : []),
         ...(active
             ? [
                   'underline',

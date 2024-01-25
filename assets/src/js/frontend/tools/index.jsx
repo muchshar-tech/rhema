@@ -1,7 +1,6 @@
 import React, { forwardRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
-import { HiOutlineSearch } from 'react-icons/hi'
 import { AiOutlineExpand, AiOutlineCompress } from 'react-icons/ai'
 import { BsPlus } from 'react-icons/bs'
 import { MdHistoryToggleOff } from 'react-icons/md'
@@ -12,57 +11,56 @@ import {
     toggleDrawer,
     switchHeadersBooks,
 } from '@assets/js/frontend/states/generalSlice'
-import { Form } from '@components/frontend/forms'
-
-const Bordered = ({ children }) => {
-    return (
-        <Ripples>
-            <div className="flex items-center leading-18px md:leading-22px justify-center overflow-hidden bg-white border border-gray-300 rounded-sm w-72px md:w-80px py-5px md:py-8px">
-                {children}
-            </div>
-        </Ripples>
-    )
-}
-
-const Borderless = ({ onClick, children }) => {
-    return (
-        <Ripples>
-            <div
-                className="relative flex items-center justify-center overflow-hidden h-30px w-30px md:h-40px md:w-40px cursor-pointer"
-                onClick={onClick}
-            >
-                {children}
-            </div>
-        </Ripples>
-    )
-}
+import SearchBarInput from '@components/frontend/tools/SearchBarInput'
+import BibleSelector from '@components/frontend/tools/BooksSelector'
+import BorderlessBlock from '@components/frontend/tools/Borderless'
+import BorderedBlock from '@components/frontend/tools/Bordered'
 
 const SearchBar = forwardRef(({ expand, onSubmit, ...otherprops }, ref) => {
-    const inputClassNames = [
-        'w-0',
-        'h-24px',
-        'outline-0',
-        'group-hover:w-auto',
-        ...(expand ? ['w-auto'] : []),
-    ].join(' ')
     return (
         <Ripples>
-            <Form onSubmit={onSubmit}>
-                <div className="relative flex items-center justify-center overflow-hidden bg-white border border-gray-300 rounded-sm py-2px pl-5px pr-23px md:pl-9px md:pr-29px md:py-7px group">
-                    <input
-                        placeholder="輸入關鍵字進行搜尋"
-                        type="text"
-                        autoComplete="off"
-                        className={inputClassNames}
-                        {...(!!ref ? { ref } : {})}
-                        {...(!!otherprops ? otherprops : {})}
-                    />
-                    <HiOutlineSearch className="absolute h-20px w-20px right-4px md:right-10px text-neutral-600" />
-                </div>
-            </Form>
+            <SearchBarInput
+                expand={expand}
+                onSubmit={onSubmit}
+                forwardRef={ref}
+                {...otherprops}
+            />
         </Ripples>
     )
 })
+
+const Borderless = ({ label, className, disabled, onClick, children }) => {
+    const classNames = [className].join(' ')
+    return (
+        <Ripples
+            onClick={(e) => {
+                if (disabled) return
+                onClick(e)
+            }}
+            className={classNames}
+        >
+            <BorderlessBlock>{children}</BorderlessBlock>
+            {typeof label === 'string' && label.length > 0 ? (
+                <div
+                    className={[
+                        'flex items-center md:leading-22px p-5px md:p-8px md:pl-0 cursor-pointer',
+                        disabled ? 'text-gray-400' : '',
+                    ].join(' ')}
+                >
+                    {label}
+                </div>
+            ) : null}
+        </Ripples>
+    )
+}
+
+const Bordered = ({ onClick, children }) => {
+    return (
+        <Ripples onClick={onClick}>
+            <BorderedBlock>{children}</BorderedBlock>
+        </Ripples>
+    )
+}
 
 const FullScreenToggle = () => {
     const fullscreen = useSelector((state) => state.general.fullscreen)
@@ -82,27 +80,12 @@ const FullScreenToggle = () => {
 }
 
 const BooksSelectorButton = ({ range = [] }) => {
-    const toggleRange =
-        Array.isArray(range) && range.length === 2 ? (
-            <>
-                <div className="h-px mx-1 bg-gray-400 w-8px"></div>
-                <div className="text-center leading-18px md:leading-22px w-96px md:w-144px py-5px md:py-8px">
-                    <span>{range.pop()}</span>
-                </div>
-            </>
-        ) : null
     const dispatch = useDispatch()
-    console.log(range)
     return (
-        <div
-            className="flex items-center overflow-hidden bg-white border border-dashed border-gray-300 rounded-sm cursor-pointer"
+        <BibleSelector
             onClick={() => dispatch(switchHeadersBooks())}
-        >
-            <div className="text-center leading-18px md:leading-22px min-w-96px md:min-w-144px p-5px md:p-8px">
-                <span>{range.shift()}</span>
-            </div>
-            {toggleRange}
-        </div>
+            range={range}
+        />
     )
 }
 
@@ -112,8 +95,8 @@ const AddNewPostButton = ({
 }) => {
     const classNames = [
         'absolute',
-        'right-18px',
-        'bottom-18px',
+        'right-35px',
+        'bottom-35px',
         'rounded-full',
         'overflow-hidden',
         'bg-gray-100',

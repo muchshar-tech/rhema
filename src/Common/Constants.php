@@ -33,6 +33,19 @@ final class Constants extends Base {
 	public const BIBLE_REMOTE = 'https://logos.muchshar.com/bible';
 	public const RHEMA_REST_NAMESPACE = 'rhema/v1';
 	public const LOGOS_REMOTE_TIMEOUT = 3;
+	/** Feature name */
+	public const FEATURE_NAMES = [
+		'CORE' => 'core',
+		'DOWNLOAD2HOST' => 'download2host',
+		'RELATION' => 'relation',
+		'OFFLINE' => 'offline-reading',
+	];
+	public const FEATURE_SLUG_NAMES = [
+		'CORE' => 'wp-rhema-core-feature',
+		'DOWNLOAD2HOST' => 'wp-rhema-download2host-feature',
+		'RELATION' => 'wp-rhema-rlation-feature',
+		'OFFLINE' => 'wp-rhema-offline-reading',
+	];
 	/**
 	 * Rewrite rules
 	 */
@@ -66,7 +79,7 @@ final class Constants extends Base {
 		'/^josh|^jos|^jsh/',
 		'/judg|jdg|jg|jdgs/',
 		'/rth|^ru/',
-		'/^1sam|^1sa|^1samuel|^1s|^isa|^1sm|^1sa|^isam|^1sam|^isamuel|^1stsamuel|^firstsamuel/',
+		'/^1sam|^1sa|^1samuel|^1s|^1sm|^1sa|^isam|^1sam|^isamuel|^1stsamuel|^firstsamuel/',
 		'/^2sam|^2sa|^2s|^iisa|^2sm|^2sa|^iisam|^2sam|^iisamuel|^2samuel|^2ndsamuel|^secondsamuel/',
 		'/^1kgs|^1ki|^1k|^ikgs|^1kgs|^iki|^1ki|^ikings|^1kings|^1stkgs|^1stkings|^firstkings|^firstkgs|^1kin/',
 		'/^2kgs|^2ki|^2k|^iikgs|^2kgs|^iiki|^2ki|^iikings|^2kings|^2ndkgs|^2ndkings|^secondkings|^secondkgs|^2kin/',

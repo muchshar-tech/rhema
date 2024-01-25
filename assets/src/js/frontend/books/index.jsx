@@ -51,8 +51,12 @@ const Block = ({
         ...(size === 'small'
             ? [
                   'w-1/6',
+                  'xs:min-w-1/8',
                   'xs:w-1/8',
+                  'md:min-w-1/12',
                   'md:w-1/12',
+                  'lg:min-w-[40px]',
+                  'lg:min-w-1/24',
                   'lg:w-1/24',
                   'every-6:border-r-0',
                   'xs:every-6:border-r',
@@ -64,8 +68,11 @@ const Block = ({
         ...(size === 'medium'
             ? [
                   'w-1/4',
+                  'xs:min-w-1/6',
                   'xs:w-1/6',
+                  'md:min-w-1/8',
                   'md:w-1/8',
+                  'lg:min-w-1/12',
                   'lg:w-1/12',
                   'every-4:border-r-0',
                   'xs:every-4:border-r',

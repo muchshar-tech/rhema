@@ -4,7 +4,7 @@ import shortHash from 'shorthash2'
 import RHEMA_LOCALIZE from 'RHEMA_LOCALIZE'
 import { retrieveLogosSignedToken } from '@components/common'
 import {
-    PRODUCT_SLUG_REST_NAME_MAP,
+    PRODUCT_SLUG_2_REST_NAME_MAP,
     PRODUCT_SLUGS,
 } from '@components/constants'
 
@@ -149,13 +149,34 @@ export const activateApi = createApi({
         activateCore: builder.mutation({
             query: (body) => {
                 const { product_slug: productSlug } = body
-                const restName = PRODUCT_SLUG_REST_NAME_MAP[productSlug]
+                const restName = PRODUCT_SLUG_2_REST_NAME_MAP[productSlug]
                 if (typeof restName === 'undefined' || !restName) {
                     throw new Error('Error in mutation.query')
                 }
 
                 return {
-                    url: PRODUCT_SLUG_REST_NAME_MAP[productSlug],
+                    url: PRODUCT_SLUG_2_REST_NAME_MAP[productSlug],
+                    method: 'POST',
+                    body,
+                }
+            },
+            transformResponse: (response) => {
+                return response
+            },
+            transformErrorResponse: (response) => {
+                return response
+            },
+        }),
+        activateFeatures: builder.mutation({
+            query: (body) => {
+                const { product_slug: productSlug } = body
+                const restName = PRODUCT_SLUG_2_REST_NAME_MAP[productSlug]
+                if (typeof restName === 'undefined' || !restName) {
+                    throw new Error('Error in mutation.query')
+                }
+
+                return {
+                    url: PRODUCT_SLUG_2_REST_NAME_MAP[productSlug],
                     method: 'POST',
                     body,
                 }
@@ -186,7 +207,7 @@ export const activateApi = createApi({
     }),
 })
 
-export const { useActivateCoreMutation, useActivateByLicenseMutation } =
+export const { useActivateCoreMutation, useActivateFeaturesMutation, useActivateByLicenseMutation } =
     activateApi
 
 export const deactivateApi = createApi({

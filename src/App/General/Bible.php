@@ -350,7 +350,7 @@ final class Bible extends Base {
 	 */
 	public function getTranslationInfo( $translate_abbr = 'kjv' ): array | WP_Error {
 		$bible_remote = $this->remote();
-		if ( empty( $translate_abbr ) ) {
+		if ( empty( $translate_abbr ) || ! is_string( $translate_abbr ) ) {
 			$translate_abbr = 'kjv';
 		}
 		$remote_query_string = "{$bible_remote}/{$translate_abbr}";

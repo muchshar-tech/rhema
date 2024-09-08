@@ -621,6 +621,7 @@ final class Constants extends Base {
 			'system/integrations/logos/api/jwt_wrong' => __( 'JWT token wrong.', 'rhema' ),
 			'system/integrations/logos/api/param_wrong' => __( 'Must have parameters.', 'rhema' ),
 			'system/app/general/options/rewrite_rules_exsited' => __( 'Entry path cant use.', 'rhema' ),
+			'system/app/general/options/invalid_key' => __( 'Invalid option key.', 'rhema' ),
 			'system/app/rest/bad_request' => __( 'Bad request.', 'rhema' ),
 			'system/app/rest/options/field_is_wrong' => __( 'Your request field is wrong.', 'rhema' ),
 			'system/app/rest/options/noting_to_save' => __( 'Rhema options nothing to save.', 'rhema' ),

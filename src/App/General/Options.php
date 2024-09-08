@@ -31,6 +31,19 @@ final class Options extends Base {
 	 */
 	use Singleton;
 	/**
+	 * Available options keys
+	 */
+	public $available_options_keys = [
+		'general' => [
+			'bible_entry',
+			'bible_default_translation',
+		],
+	];
+	public $default_options = [
+		'general.bible_entry' => 'bible',
+		'general.bible_default_translation' => 'kjv',
+	];
+	/**
 	 * Base constructor.
 	 *
 	 * @since 1.0.0
@@ -47,7 +60,9 @@ final class Options extends Base {
 	 */
 	public function get( $keys = '' ): array|string {
 		$plugin_domain = $this->plugin->textDomain();
-		// TODO: 拿到 option 後要做一次 valid，要跟前台的 schema validator 一致
+		if ( ! $this->checkKeyIsValid( $keys ) ) {
+			return '';
+		}
 		$options = get_option( $plugin_domain );
 		if ( empty( $options ) || ! $options ) {
 			$options = '{}';
@@ -57,22 +72,18 @@ final class Options extends Base {
 			return $options;
 		}
 		$keys = explode( '.', $keys );
-		$option = 'kjv';
+		$option = null;
 		$options = $options_decoded;
 		foreach ( $keys as $key ) {
-			if ( isset( $options[ $key ] ) && ! empty( $options[ $key ] ) ) {
-				$options = $options[ $key ];
-			} else {
-				break;
+			if ( ! isset( $options[ $key ] ) ) {
+				return null;
 			}
+			$options = $options[ $key ];
 		}
 
 		$option = $options;
 
-		if ( empty( $option ) ) {
-			return 'kjv';
-		}
-		return $option;
+		return $this->isNeedConvert2DefaultOption($keys, $option);
 	}
 	/**
 	 * Update options
@@ -86,6 +97,41 @@ final class Options extends Base {
 		return update_option( $plugin_domain, json_encode( [
 			'general' => $params,
 		] ) );
+	}
+	/**
+	 * Check key is valid
+	 * @param string $keys
+	 * @return bool
+	 */
+	public function checkKeyIsValid ( string $keys ): bool {
+		$result = true;
+		$keys = explode( '.', $keys );
+		$available_options_keys = $this->available_options_keys;
+		foreach ( $keys as $key ) {
+			if ( count(array_filter(array_keys($available_options_keys), 'is_string')) > 0 ) {
+				if ( ! isset ( $available_options_keys[$key] ) ) {
+					$result = false;
+					break;
+				}
+				$available_options_keys = $available_options_keys[$key];
+			} else {
+				if ( ! in_array( $key, $available_options_keys ) ) {
+					$result = false;
+					break;
+				}
+			}
+		}
+		return $result;
+	}
+	public function isNeedConvert2DefaultOption( $keys, $retrieved_option ) {
+		if ( null !== $retrieved_option || (! empty( $retrieved_option ) || in_array( $retrieved_option, [ 0, '0', false ] ) ) ) {
+			return $retrieved_option;
+		}
+		$default_options = $this->default_options;
+		if ( ! in_array($keys, $default_options) ) {
+			return null;
+		}
+		return $default_options[$keys];
 	}
 	/**
 	 * Check rewrite rules is empty

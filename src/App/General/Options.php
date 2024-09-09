@@ -60,13 +60,17 @@ final class Options extends Base {
 	 */
 	public function get( $keys = '' ): array|string {
 		$plugin_domain = $this->plugin->textDomain();
-		if ( ! $this->checkKeyIsValid( $keys ) ) {
-			return '';
-		}
 		$options = get_option( $plugin_domain );
 		if ( empty( $options ) || ! $options ) {
 			$options = '{}';
 		}
+		if ( empty( $keys ) && ! empty( $options ) ) {
+			return $options;
+		}
+		if ( ! $this->checkKeyIsValid( $keys ) ) {
+			return '';
+		}
+
 		$options_decoded = json_decode( $options, true );
 		if ( empty( $keys ) ) {
 			return $options;
@@ -83,7 +87,7 @@ final class Options extends Base {
 
 		$option = $options;
 
-		return $this->isNeedConvert2DefaultOption($keys, $option);
+		return $this->isNeedConvert2DefaultOption( $keys, $option );
 	}
 	/**
 	 * Update options
@@ -103,19 +107,19 @@ final class Options extends Base {
 	 * @param string $keys
 	 * @return bool
 	 */
-	public function checkKeyIsValid ( string $keys ): bool {
+	public function checkKeyIsValid( string $keys ): bool {
 		$result = true;
 		$keys = explode( '.', $keys );
 		$available_options_keys = $this->available_options_keys;
 		foreach ( $keys as $key ) {
-			if ( count(array_filter(array_keys($available_options_keys), 'is_string')) > 0 ) {
-				if ( ! isset ( $available_options_keys[$key] ) ) {
+			if ( count( array_filter( array_keys( $available_options_keys ), 'is_string' ) ) > 0 ) {
+				if ( ! isset( $available_options_keys[ $key ] ) ) {
 					$result = false;
 					break;
 				}
-				$available_options_keys = $available_options_keys[$key];
+				$available_options_keys = $available_options_keys[ $key ];
 			} else {
-				if ( ! in_array( $key, $available_options_keys ) ) {
+				if ( ! in_array( $key, $available_options_keys, true ) ) {
 					$result = false;
 					break;
 				}
@@ -123,15 +127,16 @@ final class Options extends Base {
 		}
 		return $result;
 	}
+
 	public function isNeedConvert2DefaultOption( $keys, $retrieved_option ) {
-		if ( null !== $retrieved_option || (! empty( $retrieved_option ) || in_array( $retrieved_option, [ 0, '0', false ] ) ) ) {
+		if ( null !== $retrieved_option || ( ! empty( $retrieved_option ) || in_array( $retrieved_option, [ 0, '0', false ] ) ) ) {
 			return $retrieved_option;
 		}
 		$default_options = $this->default_options;
-		if ( ! in_array($keys, $default_options) ) {
+		if ( ! in_array( $keys, $default_options ) ) {
 			return null;
 		}
-		return $default_options[$keys];
+		return $default_options[ $keys ];
 	}
 	/**
 	 * Check rewrite rules is empty

@@ -64,7 +64,7 @@ const AppContainer = ({ children }) => {
 
 const Top = ({ children }) => {
     return (
-        <div className="flex flex-wrap items-center text-gray-800 bg-white border-b text-12px md:text-14px drop-shadow-sm">
+        <div className="sticky flex flex-wrap items-center text-gray-800 bg-white border-b text-12px md:text-14px drop-shadow-sm">
             {children}
         </div>
     )

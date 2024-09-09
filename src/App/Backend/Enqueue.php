@@ -99,6 +99,7 @@ class Enqueue extends Base {
 
 		try {
 			$options = $functions_options->get();
+			do_action( 'qm/debug', ['rhema/backend/options' => $options] );
 			$core_license_data = rhema()->bible()->getLicenseData();
 			if ( is_wp_error( $core_license_data ) ) {
 				/** @var WP_Error $core_license_data */

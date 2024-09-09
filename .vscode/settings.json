@@ -1,9 +1,7 @@
 {
     "intelephense.environment.includePaths": [
         "../../../wp-includes",
-        "../../../wp-admin",
-        "C:\\xampp\\htdocs\\sample\\wp-admin",
-        "C:\\xampp\\htdocs\\sample\\wp-includes"
+        "../../../wp-admin"
     ],
     "phpsab.allowedAutoRulesets": [
         ".phpcs.xml",

@@ -124,7 +124,7 @@ final class Bible extends Base {
 	 * @return integer
 	 */
 	public function getBookIndexBySlug( string $slug ): int {
-		$slug_in_regexes = array_filter( Constants::ABBR_REGEX_INDEX, function( $abbr_regex_index ) use ( $slug ) {
+		$slug_in_regexes = array_filter( Constants::ABBR_REGEX_INDEX, function( $abbr_regex_index ) use ( $slug ): int|bool {
 			return preg_match( $abbr_regex_index, $slug );
 		} );
 		return (int) array_keys( $slug_in_regexes )[0];
@@ -164,7 +164,7 @@ final class Bible extends Base {
 		if ( empty( $query_var ) ) {
 			return [];
 		}
-		$query_schema = array_map( function( int $index, string $query ) use ( $query_var, $book_slug_to_trans ) {
+		$query_schema = array_map( function( int $index, string $query ) use ( $query_var, $book_slug_to_trans ): array|null {
 			$current_matches = [];
 			$current_matched = preg_match( Constants::RANGE_QUERY_REGEX, $query, $current_matches );
 			$prev_matches = [];

@@ -1,6 +1,5 @@
 import isempty from 'lodash/isEmpty'
 import { generatePath } from 'react-router-dom'
-import { max } from 'lodash'
 
 import { store } from '@assets/js/frontend/store'
 import { clickBookSelector } from '@assets/js/frontend/states/generalSlice'

@@ -149,7 +149,7 @@ final class Api extends Base {
 	 * @param array $args
 	 * @return array|WP_Error
 	 */
-	public function getBibleLicense( array $args = [] ) {
+	public function getBibleLicense( array $args = [] ): array | bool | WP_Error {
 		if ( empty( $args ) ) {
 			return false;
 		}
@@ -182,7 +182,7 @@ final class Api extends Base {
 	 *
 	 * @return boolean|WP_Error
 	 */
-	public function authenticated() {
+	public function authenticated(): bool|WP_Error {
 		if ( empty( self::$require_data ) ) {
 			return new WP_Error( 401, Constants::init()->error_message['should_activate'] );
 		}

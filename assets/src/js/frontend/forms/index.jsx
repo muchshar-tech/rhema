@@ -8,7 +8,7 @@ import { toggleDrawer } from '@assets/js/frontend/states/generalSlice'
 
 export const Form = ({ onSubmit, children }) => {
     return (
-        <form onSubmit={onSubmit} className="w-full flex flex-col">
+        <form onSubmit={onSubmit} className="w-full flex flex-col m-0">
             {children}
         </form>
     )
